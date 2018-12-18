@@ -1,7 +1,8 @@
-# metasheet.csv- This sheet groups your analysis into "runs" aka experiments.
-# each run requires a RunName and at least one Treatment (Treat1) and an 
-# optional Control sample (Cont1).  Use the sample names defined in config.yaml
-# for Treatment and Control columns (they must match exactly).
+# metasheet.csv- This sheet groups your samples into matched pairs, i.e. "runs"
+# each run requires a RunName and at least one Normal (Cont) and an 
+# optional Tumor sample (Treat).  Use the sample names defined in config.yaml
+# for Normal and Tumor columns (they must match the SampleName defined in
+# config.yaml)
 #
 # You can define up to 1 replicate-using Treat2 and Cont2. 
 # ALL CONTROLS ARE optional (but missing treatments will throw an error!)

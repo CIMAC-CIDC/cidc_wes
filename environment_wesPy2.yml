@@ -1,4 +1,4 @@
-name: chips_py2
+name: wes_py2
 channels:
 - r
 - bioconda
@@ -9,4 +9,4 @@ dependencies:
 - numpy
 - cython
 - jinja2
-- macs2
+#- macs2

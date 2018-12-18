@@ -78,7 +78,7 @@ rule sample_bam:
     message: "FASTQC: sampling 100k reads from bam"
     log:_logfile
     shell:
-        "chips/modules/scripts/sampleBam.sh -i {input} -n {params.n} -o {output}"
+        "cidc_wes/modules/scripts/sampleBam.sh -i {input} -n {params.n} -o {output}"
 
 rule convertBamToFastq:
     """USED only when the sample-input is a bam file."""
@@ -120,7 +120,7 @@ rule get_PerSequenceQual:
     message: "FASTQC: get_PerSequenceQual"
     log:_logfile
     shell:
-        "chips/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
+        "cidc_wes/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
 
 rule get_PerSequenceGC:
     """extract per sequence GC contentfrom fastqc_data.txt"""
@@ -134,7 +134,7 @@ rule get_PerSequenceGC:
     message: "FASTQC: get_PerSequenceGC"
     log:_logfile
     shell:
-        "chips/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
+        "cidc_wes/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
 
 rule extract_FastQCStats:
     """extract per sequence GC content, and seq qual stats from fastqc run"""
@@ -146,7 +146,7 @@ rule extract_FastQCStats:
     message: "FASTQC: extract_FastQCStats"
     log:_logfile
     shell:
-        "chips/modules/scripts/fastqc_stats.py -a {input.qual} -b {input.gc} > {output} 2>>{log}"
+        "cidc_wes/modules/scripts/fastqc_stats.py -a {input.qual} -b {input.gc} > {output} 2>>{log}"
 
 rule collect_fastQCStats:
     """Collect and parse out the fastqc stats for the ALL of the samples"""
@@ -158,7 +158,7 @@ rule collect_fastQCStats:
     log: _logfile
     run:
         files = " -f ".join(input)
-        shell("chips/modules/scripts/fastqc_getFastQCStats.py -f {files} > {output} 2>>{log}")
+        shell("cidc_wes/modules/scripts/fastqc_getFastQCStats.py -f {files} > {output} 2>>{log}")
 
 rule plot_fastQC_GC:
     """Plots the GC distribution of the sample according to data in
@@ -174,4 +174,4 @@ rule plot_fastQC_GC:
         "FASTQC: generating GC content distrib. plots"
     log: _logfile
     shell:
-        "Rscript chips/modules/scripts/fastqc_plotGC.R {input.gc} {output.png} {output.thumb}"
+        "Rscript cidc_wes/modules/scripts/fastqc_plotGC.R {input.gc} {output.png} {output.thumb}"

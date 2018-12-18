@@ -82,7 +82,7 @@ rule collect_map_stats:
     log: _logfile
     run:
         files = " -f ".join(input)
-        shell("chips/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
+        shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
 
 rule sortBams:
     """General sort rule--take a bam {filename}.bam and 
@@ -201,6 +201,6 @@ rule readsPerChromStat:
     message: "ALIGN: collecting the number of reads per chrom"
     log: _logfile
     shell:
-        "chips/modules/scripts/align_readsPerChrom.sh -a {input.bam} > {output} 2>> {log}"
+        "cidc_wes/modules/scripts/align_readsPerChrom.sh -a {input.bam} > {output} 2>> {log}"
 
     
