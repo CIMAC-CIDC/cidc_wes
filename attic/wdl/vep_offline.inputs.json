@@ -1,0 +1,8 @@
+{
+  "run_vep.inputFile": "/cluster/cidc/WDLExampleData/TESTREF20180313/PD_025.filtered.sorted.vcf.gz",
+  "run_vep.vep_cacheDir": "/cluster/cidc/Reference/Human/hg38/Resources/vep_cache.tar",
+  "run_vep.use_synonyms": true,
+  "run_vep.filter_vcf": "/cluster/cidc/Reference/Human/hg38/Resources/vcf2maf/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
+  "run_vep.ref_fasta": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.canonical.fa",
+  "run_vep.prefix": "PD_025"
+}

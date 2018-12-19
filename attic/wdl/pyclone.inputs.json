@@ -1,0 +1,8 @@
+{
+  "PyClone.pyclone_tsv": ["aroth85-pyclone-0.13.1/examples/mixing/tsv/SRR385938.tsv",
+	                      "aroth85-pyclone-0.13.1/examples/mixing/tsv/SRR385939.tsv",
+					      "aroth85-pyclone-0.13.1/examples/mixing/tsv/SRR385940.tsv",
+					      "aroth85-pyclone-0.13.1/examples/mixing/tsv/SRR385941.tsv"],
+  "PyClone.prefix": "test",
+  "PyClone.memory": "8"
+}

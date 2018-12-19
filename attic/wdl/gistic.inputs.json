@@ -1,0 +1,21 @@
+{
+    "Gistic.seq_to_gistic.seq_files": ["/cluster/cidc/Reference/Human/hg38/Resources/gistic_examplefiles/sample_segments.txt"],
+    "Gistic.seq_to_gistic.refgene_file": "/cluster/cidc/Reference/Human/hg38/Resources/gistic_examplefiles/hg38.UCSC.add_miR.160920.refgene.mat",
+    "Gistic.run_gistic2.seg_file": "/cluster/cidc/Reference/Human/hg38/Resources/gistic_examplefiles/segmentationfile.txt",
+    "Gistic.run_gistic2.markers_file": "/cluster/cidc/Reference/Human/hg38/Resources/gistic_examplefiles/markersfile.txt",
+    "Gistic.run_gistic2.refgene_file": "/cluster/cidc/Reference/Human/hg38/Resources/gistic_examplefiles/hg19.mat",
+    "Gistic.run_gistic2.memoryGB": 2,
+    "Gistic.run_gistic2.do_gene_gistic": "1",
+    "Gistic.run_gistic2.remove_X": "0",
+    "Gistic.run_gistic2.amp_thresh": "0.1",
+    "Gistic.run_gistic2.arm_peel": "1",
+    "Gistic.run_gistic2.cap": "1.5",
+    "Gistic.run_gistic2.join_segment_size": "4",
+    "Gistic.run_gistic2.max_sample_segs": "2000",
+    "Gistic.run_gistic2.del_thresh": "0.1",
+    "Gistic.run_gistic2.qv_thresh": "0.1",
+    "Gistic.run_gistic2.conf_level": "0.99",
+    "Gistic.run_gistic2.broad_length_cutoff": "0.7",
+    "Gistic.run_gistic2.gene_collapse_method": "extreme",
+    "Gistic.run_gistic2.preemptible": "0"
+}

@@ -1,0 +1,10 @@
+{
+  "run_polysolver.memory": "4",
+  "run_polysolver.num_preempt": "0",
+  "run_polysolver.tumor_bam": "/cluster/cidc/WDLExampleData/TESTREF20180214/HLA-bam/PD_025T.recalibrate.bam",
+  "run_polysolver.num_cpu": "8",
+  "run_polysolver.disk_space": "30",
+  "run_polysolver.boot_disk_gb": "10",
+  "run_polysolver.build": "hg38",
+  "run_polysolver.normal_bam": "/cluster/cidc/WDLExampleData/TESTREF20180214/HLA-bam/PD_025N.recalibrate.bam"
+}

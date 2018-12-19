@@ -1,0 +1,22 @@
+{
+  "run_alignment.bwa_num_cpu": "16",
+  "run_alignment.bwa_disk_space": "50",
+  "run_alignment.bwa_boot_disk_gb": "10",
+  "run_alignment.bwa_memory": "8",
+  "run_alignment.bwa_num_preempt": "0",
+  "run_alignment.prefix": "PD_025N",
+  "run_alignment.fastq1": "/cluster/cidc/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_1.fq.gz",
+  "run_alignment.fastq2": "/cluster/cidc/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_2.fq.gz",
+  "run_alignment.bwa_index": ["/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.amb",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.ann",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.bwt",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.pac",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.sa"],
+  "run_alignment.KnownSites_indels": "/cluster/cidc/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz",
+  "run_alignment.KnownSites_indels_index": "/cluster/cidc/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_alignment.KnownSites_dbsnp": "/cluster/cidc/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz",
+  "run_alignment.KnownSites_dbsnp_index": "/cluster/cidc/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_alignment.genome_fasta": "/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa",
+  "run_alignment.genome_fasta_index": "/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa.fai",
+  "run_alignment.genome_fasta_dictionary": "/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.dict"
+}

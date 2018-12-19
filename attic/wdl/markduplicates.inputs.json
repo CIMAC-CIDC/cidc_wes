@@ -1,0 +1,9 @@
+{
+  "run_markduplicates.markduplicates.memory": "Int",
+  "run_markduplicates.markduplicates.prefix": "String",
+  "run_markduplicates.markduplicates.disk_space": "Int",
+  "run_markduplicates.markduplicates.num_cpu": "Int",
+  "run_markduplicates.markduplicates.boot_disk_gb": "Int",
+  "run_markduplicates.markduplicates.input_bam": "File",
+  "run_markduplicates.markduplicates.num_preempt": "Int"
+}

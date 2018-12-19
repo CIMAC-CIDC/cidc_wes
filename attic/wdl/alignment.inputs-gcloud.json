@@ -1,0 +1,22 @@
+{
+  "run_alignment.num_cpu": "8",
+  "run_alignment.disk_space": "50",
+  "run_alignment.boot_disk_gb": "10",
+  "run_alignment.memory": "8",
+  "run_alignment.num_preempt": "0",
+  "run_alignment.prefix": "PD_025N",
+  "run_alignment.fastq1": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_1.fq.gz",
+  "run_alignment.fastq2": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_2.fq.gz",
+  "run_alignment.index": ["gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.amb",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.ann",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.bwt",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.pac",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.sa"],
+  "run_alignment.baserecalibrator.KnownSites_indels": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz",
+  "run_alignment.baserecalibrator.KnownSites_indels_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_alignment.baserecalibrator.KnownSites_dbsnp": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz",
+  "run_alignment.baserecalibrator.KnownSites_dbsnp_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_alignment.baserecalibrator.genome_fasta": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa",
+  "run_alignment.baserecalibrator.genome_fasta_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa.fai",
+  "run_alignment.baserecalibrator.genome_fasta_dictionary": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.dict"
+}

@@ -1,0 +1,14 @@
+{
+  "Oncotator.disk_space": "100",
+  "Oncotator.memory": "12",
+  "Oncotator.num_cpu": "1",
+  "Oncotator.boot_disk_gb": "10",
+  "Oncotator.prefix": "output",
+  "Oncotator.input_vcf": "gs://sherlock-test-pipeline/PD_011/PD_011.sorted.vcf.gz",
+  "Oncotator.hg38_hg19_chain": "gs://cidc-native-regional/Reference/Human/hg19/Genome/hg38ToHg19.over.chain",
+  "Oncotator.hg19_fasta": "gs://cidc-native-regional/Reference/Human/hg19/Genome/hg19_ucsc.fa", 
+  "Oncotator.hg19_dict": "gs://cidc-native-regional/Reference/Human/hg19/Genome/hg19_ucsc.dict", 
+  "Oncotator.onco_ds_tar_gz": "gs://cidc-native-regional/Reference/Human/hg19/Resources/oncotator_v1_ds_April052016.tar.gz",
+  "Oncotator.default_config_file": "gs://cidc-native-regional/Reference/Human/hg19/Resources/onco_config.txt",
+  "Oncotator.num_preempt": "0"
+}

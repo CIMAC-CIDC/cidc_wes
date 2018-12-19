@@ -1,0 +1,15 @@
+{
+  "run_bwamem.num_cpu": "8",
+  "run_bwamem.boot_disk_gb": "20",
+  "run_bwamem.num_preempt": "0",
+  "run_bwamem.memory": "8",
+  "run_bwamem.prefix": "PD_025N",
+  "run_bwamem.bwamem.fastq2": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_2.fq.gz",
+  "run_bwamem.disk_space": "400",
+  "run_bwamem.bwamem.fastq1": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_1.fq.gz",
+  "run_bwamem.bwamem.index": ["gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.amb",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.ann",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.bwt",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.pac",
+"gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.sa"]
+}

@@ -1,0 +1,10 @@
+{
+  "run_funcotator.input_vcf_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180421/test.vcf.idx",
+  "run_funcotator.genome_fasta": "gs://cidc-native-regional/Reference/Human/hg38/Genome/hg38.canonical.fa",
+  "run_funcotator.genome_fasta_index": "gs://cidc-native-regional/Reference/Human/hg38/Genome/hg38.canonical.fa.fai",
+  "run_funcotator.genome_fasta_dict": "gs://cidc-native-regional/Reference/Human/hg38/Genome/hg38.canonical.dict",
+  "run_funcotator.input_vcf": "gs://cidc-native-regional/WDLExampleData/TESTREF20180421/test.vcf",
+  "run_funcotator.funcotator_data_tgz": "gs://cidc-native-regional/Reference/Human/hg38/Resources/funcotator/funcotator_dataSources.v1.2.20180329.tar.gz",
+  "run_funcotator.prefix": "MYTEST",
+  "run_funcotator.reference_version": "hg38"
+}

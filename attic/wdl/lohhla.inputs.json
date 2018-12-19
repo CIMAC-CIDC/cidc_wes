@@ -1,0 +1,8 @@
+{
+ "run_lohhla.lohhla.normalBam":"gs://temp_folder_for_testing_only/LOHHLA/bam/example_BS_GL_sorted.bam",
+ "run_lohhla.lohhla.allBAM": "gs://temp_folder_for_testing_only/LOHHLA/bam.tar",
+  "run_lohhla.lohhla.HLAfastaLoc": "gs://temp_folder_for_testing_only/LOHHLA/example.patient.hlaFasta.fa",
+  "run_lohhla.lohhla.hla": "gs://temp_folder_for_testing_only/LOHHLA/hlas",
+  "run_lohhla.lohhla.patientID": "example",
+  "run_lohhla.lohhla.CopyNumLoc": "gs://temp_folder_for_testing_only/LOHHLA/solutions.txt"
+}

@@ -1,0 +1,4 @@
+{
+  "vep.variant_effect_predictor.inputFile": "gs://cidc-native-regional/Development/WES/vep/homo_sapiens_GRCh38.vcf",
+  "vep.variant_effect_predictor.outputFileName": "homo_sapiens_GRCh38_output.txt"
+}

@@ -1,0 +1,6 @@
+{
+  "run_vcf2maf.ref_fasta": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.canonical.fa",
+  "run_vcf2maf.input_vcf": "/cluster/cidc/WDLExampleData/TESTREF20180421/example.fromvep.vcf",
+  "run_vcf2maf.filter_vcf": "/cluster/cidc/Reference/Human/hg38/Resources/vcf2maf/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz",
+  "run_vcf2maf.tumor_label": "MYTUMOR"
+}

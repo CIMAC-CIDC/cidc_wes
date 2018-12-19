@@ -1,0 +1,12 @@
+{
+  "run_gatk_preprocessing.prefix": "testoutput",
+  "run_gatk_preprocessing.input_bam": "gs://cidc-native-regional/WDLExampleData/TESTREF20180308/PD_025N.chr20chr21chrYchrM.sorted.bam",
+  "run_gatk_preprocessing.input_bam_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180308/PD_025N.chr20chr21chrYchrM.sorted.bam.bai",
+  "run_gatk_preprocessing.KnownSites_indels": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz",
+  "run_gatk_preprocessing.KnownSites_indels_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_gatk_preprocessing.KnownSites_dbsnp": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz",
+  "run_gatk_preprocessing.KnownSites_dbsnp_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.dbsnp138.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_gatk_preprocessing.genome_fasta_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa.fai",
+  "run_gatk_preprocessing.genome_fasta_dictionary": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.dict",
+  "run_gatk_preprocessing.genome_fasta": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa"
+}

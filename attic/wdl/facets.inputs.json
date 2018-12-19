@@ -1,0 +1,10 @@
+{
+  "Facets.facets.pairName": "PD_025",
+  "Facets.facets.tumorBam": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/SingleAligned/PD_025T.recalibrate.bam",
+  "Facets.facets.tumorBamIndex": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/SingleAligned/PD_025T.recalibrate.bai",
+  "Facets.facets.normalBam": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/SingleAligned/PD_025N.recalibrate.bam",
+  "Facets.facets.normalBamIndex": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/SingleAligned/PD_025N.recalibrate.bai",
+  "Facets.facets.vcftar": "gs://cidc-native-regional/Reference/Human/hg38/Resources/NCBI-human_9606_b150_GRCh38p7/00-common_all.vcf.gz",
+  "Facets.facets.diskSpaceGb": "10",
+  "Facets.facets.memoryGb": "4"
+}

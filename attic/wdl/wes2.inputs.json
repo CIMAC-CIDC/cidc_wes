@@ -1,0 +1,19 @@
+{
+    "run_wes2.KnownSites_dbsnp": "/cluster/cidc/Reference/Human/hg38/Resources/broad_2016_v0/Homo_sapiens_assembly38.dbsnp138.vcf", 
+    "run_wes2.KnownSites_indels": "/cluster/cidc/Reference/Human/hg38/Resources/broad_2016_v0/Homo_sapiens_assembly38.known_indels.vcf", 
+    "run_wes2.facets_vcftar": "/cluster/cidc/Reference/Human/hg38/Resources/NCBI-human_9606_b150_GRCh38p7/00-common_all.vcf.gz", 
+    "run_wes2.liftover_hg19_dict": "/cluster/cidc/Reference/Human/hg19/Genome/hg19_ucsc.dict", 
+    "run_wes2.liftover_hg19_fasta": "/cluster/cidc/Reference/Human/hg19/Genome/hg19_ucsc.fa", 
+    "run_wes2.liftover_hg38_hg19_chain": "/cluster/cidc/Reference/Human/hg19/Genome/hg38ToHg19.over.chain", 
+    "run_wes2.neoantigen_hg19DBTarBall": "/cluster/cidc/Reference/Human/hg19/Genome/db.ucsc.hg19.tar.gz", 
+    "run_wes2.normal_align_recalibrated_bam": "/cluster/xhu/wes2/PD_011/PD_011.normal.recalibrated.sorted.bam", 
+    "run_wes2.normal_align_recalibrated_bam_index": "/cluster/xhu/wes2/PD_011/PD_011.normal.recalibrated.sorted.bam.bai", 
+    "run_wes2.oncotate_config_file": "/cluster/cidc/Reference/Human/hg19/Resources/onco_config.txt", 
+    "run_wes2.oncotate_ds_tar_gz": "/cluster/cidc/Reference/Human/hg19/Resources/oncotator_v1_ds_April052016.tar.gz", 
+    "run_wes2.prefix": "PD_011", 
+    "run_wes2.reference_fasta": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.bgzip.fa.gz", 
+    "run_wes2.reference_gc_wiggle": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.gc50Base.wig.gz", 
+    "run_wes2.run_mutect2_unfiltered_vcf": "/cluster/xhu/wes2/PD_011/PD_011.sorted.vcf.gz", 
+    "run_wes2.tumor_align_recalibrated_bam": "/cluster/xhu/wes2/PD_011/PD_011.tumor.recalibrated.sorted.bam", 
+    "run_wes2.tumor_align_recalibrated_bam_index": "/cluster/xhu/wes2/PD_011/PD_011.tumor.recalibrated.sorted.bam.bai"
+}

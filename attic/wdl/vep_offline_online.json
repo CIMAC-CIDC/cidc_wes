@@ -1,0 +1,8 @@
+{
+  "vep.variant_effect_predictor.outputFileName": "homo_sapiens_GRCh38_output.txt",
+  "vep.variant_effect_predictor.inputFile": "gs://cidc-native-regional/Development/WES/vep/homo_sapiens_GRCh38.vcf",
+  "vep.variant_effect_predictor.vep_cacheDir": "gs://cidc-native-regional/Development/WES/vep/cachedir/vep_cache.tar",
+  "vep.variant_effect_predictor.disk_space": "50",
+  "vep.variant_effect_predictor.boot_disk_gb": "50",
+  "vep.variant_effect_predictor.use_online": "0"
+}

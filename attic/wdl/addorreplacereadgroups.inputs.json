@@ -1,0 +1,9 @@
+{
+  "run_addorreplacereadgroups.addorreplacereadgroups.memory": "Int",
+  "run_addorreplacereadgroups.addorreplacereadgroups.boot_disk_gb": "Int",
+  "run_addorreplacereadgroups.addorreplacereadgroups.prefix": "String",
+  "run_addorreplacereadgroups.addorreplacereadgroups.num_cpu": "Int",
+  "run_addorreplacereadgroups.addorreplacereadgroups.num_preempt": "Int",
+  "run_addorreplacereadgroups.addorreplacereadgroups.input_bam": "File",
+  "run_addorreplacereadgroups.addorreplacereadgroups.disk_space": "Int"
+}

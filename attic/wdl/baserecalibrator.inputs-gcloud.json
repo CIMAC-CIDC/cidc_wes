@@ -1,0 +1,16 @@
+{
+  "run_baserecalibrator.baserecalibrator.prefix": "String",
+  "run_baserecalibrator.baserecalibrator.input_bam": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/SingleAligned/PD_025N.readgroups.bam",
+  "run_baserecalibrator.baserecalibrator.KnownSites_dbsnp": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz",
+  "run_baserecalibrator.baserecalibrator.KnownSites_indels_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_baserecalibrator.baserecalibrator.num_cpu": "8",
+  "run_baserecalibrator.baserecalibrator.boot_disk_gb": "10",
+  "run_baserecalibrator.baserecalibrator.genome_fasta": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa",
+  "run_baserecalibrator.baserecalibrator.genome_fasta_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.fa.fai",
+  "run_baserecalibrator.baserecalibrator.disk_space": "100",
+  "run_baserecalibrator.baserecalibrator.memory": "4",
+  "run_baserecalibrator.baserecalibrator.genome_fasta_dictionary": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.dict",
+  "run_baserecalibrator.baserecalibrator.KnownSites_dbsnp_index": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz.tbi",
+  "run_baserecalibrator.baserecalibrator.KnownSites_indels": "gs://cidc-native-regional/WDLExampleData/TESTREF20180211/Resources/Homo_sapiens_assembly38.known_indels.chr20chr21chrMchrY.vcf.gz",
+  "run_baserecalibrator.baserecalibrator.num_preempt": "0"
+}

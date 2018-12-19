@@ -1,0 +1,7 @@
+{
+  "Sequenza.normalBam": "/cluster/cidc/WDLExampleData/TESTREF20180211/SingleAligned/PD_025N.recalibrate.bam",
+  "Sequenza.tumorBam": "/cluster/cidc/WDLExampleData/TESTREF20180211/SingleAligned/PD_025T.recalibrate.bam",
+  "Sequenza.ReferenceFasta": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.bgzip.fa.gz",
+  "Sequenza.ReferenceGcWig": "/cluster/cidc/Reference/Human/hg38/Genome/hg38.gc50Base.wig.gz",
+  "Sequenza.sampleName": "PD_011"
+}

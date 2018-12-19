@@ -1,0 +1,15 @@
+{
+  "run_bwamem.bwamem.num_cpu": "16",
+  "run_bwamem.bwamem.boot_disk_gb": "20",
+  "run_bwamem.bwamem.memory": "8",
+  "run_bwamem.prefix": "PD_025N",
+  "run_bwamem.complevel": 1,
+  "run_bwamem.bwamem.fastq2": "/cluster/cidc/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_2.fq.gz",
+  "run_bwamem.bwamem.disk_space": "400",
+  "run_bwamem.bwamem.fastq1": "/cluster/cidc/WDLExampleData/TESTREF20180211/WES/PD_025N.sorted.SNV_1.fq.gz",
+  "run_bwamem.bwamem.index": ["/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.amb",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.ann",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.bwt",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.pac",
+"/cluster/cidc/WDLExampleData/TESTREF20180211/chr20chr21chrYchrM.bwa/chr20chr21chrYchrM.fa.sa"]
+}

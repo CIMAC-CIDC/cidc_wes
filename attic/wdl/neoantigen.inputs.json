@@ -1,0 +1,11 @@
+{
+  "Neoantigen.mutFile": "gs://sherlock-test-pipeline/PD_011/output.maf.annotated",
+  "Neoantigen.indelFile": "gs://sherlock-test-pipeline/PD_011/output.maf.annotated",
+  "Neoantigen.hlaFile": "gs://sherlock-test-pipeline/PD_011/winners.hla.txt",
+  "Neoantigen.hg19DBTarBall": "gs://cidc-native-regional/Reference/Human/hg19/Genome/db.ucsc.hg19.tar.gz",
+  "Neoantigen.rankVersion": "2",
+  "Neoantigen.hlaCStatus": "1",
+  "Neoantigen.binderThreshold": "all",
+  "Neoantigen.preemptible": "0",
+  "Neoantigen.id": "test"
+}
