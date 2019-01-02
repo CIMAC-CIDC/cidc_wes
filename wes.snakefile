@@ -8,6 +8,23 @@ import yaml
 
 from string import Template
 
+def getRuns(config):
+    """parse metasheet for Run groupings"""
+    ret = {}
+
+    #LEN: Weird, but using pandas to handle the comments in the file
+    #KEY: need skipinitialspace to make it fault tolerant to spaces!
+    metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
+    f = metadata.to_csv().split() #make it resemble an actual file with lines
+    #SKIP the hdr
+    for l in f[1:]:
+        tmp = l.strip().split(",")
+        #print(tmp)
+        ret[tmp[0]] = tmp[1:]
+
+    #print(ret)
+    config['runs'] = ret
+    return config
 
 def addPy2Paths_Config(config):
     """ADDS the python2 paths to config"""
@@ -39,7 +56,7 @@ def loadRef(config):
 
 #---------  CONFIG set up  ---------------
 configfile: "config.yaml"   # This makes snakemake load up yaml into config 
-#config = getRuns(config)
+config = getRuns(config)
 addPy2Paths_Config(config)
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
@@ -56,6 +73,8 @@ def all_targets(wildcards):
     #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
     ls.extend(fastqc_targets(wildcards))
+
+    #ls.extend(targets(wildcards)) #delete
         
     #ls.extend(report_targets(wildcards))
     return ls
@@ -69,4 +88,6 @@ rule target:
 include: "./modules/align_bwa.snakefile"     # rules specific to BWA
 include: "./modules/align_common.snakefile"  # common align rules
 include: "./modules/fastqc.snakefile"        # fastqc (sequence qual) rules
+
+#include: "./modules/runs_example.snakefile"   # DELETE this
 #include: "./modules/report.snakefile"        # report module
