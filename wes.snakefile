@@ -73,9 +73,10 @@ def all_targets(wildcards):
     #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
     ls.extend(fastqc_targets(wildcards))
-
-    ls.extend(targets(wildcards)) #delete
-        
+    ls.extend(metrics_targets(wildcards))
+    ls.extend(recalibration_targets(wildcards))
+    
+    #ls.extend(targets(wildcards)) #delete       
     #ls.extend(report_targets(wildcards))
     return ls
 
@@ -85,9 +86,11 @@ rule target:
 
     message: "Compiling all output"
     
-include: "./modules/align_bwa.snakefile"     # rules specific to BWA
-include: "./modules/align_common.snakefile"  # common align rules
-include: "./modules/fastqc.snakefile"        # fastqc (sequence qual) rules
+include: "./modules/align_bwa.snakefile"        # rules specific to BWA
+include: "./modules/align_common.snakefile"     # common align rules
+include: "./modules/fastqc.snakefile"           # fastqc (sequence qual) rules
+include: "./modules/metrics_sentieon.snakefile" # ...
+include: "./modules/Recalibration.snakefile"    # ...
 
-include: "./modules/runs_example.snakefile"   # DELETE this
-#include: "./modules/report.snakefile"        # report module
+#include: "./modules/runs_example.snakefile"    # DELETE this
+#include: "./modules/report.snakefile"          # report module

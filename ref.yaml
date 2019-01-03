@@ -8,8 +8,9 @@
 
 hg38:
   bwa_index: ./ref_files/hg38/bwa_indices/hg38/hg38.fa
+  genome_fasta: ./path/to/hg38.fasta #TODO
 
 hg19:
   bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
-
+  genome_fasta: ./path/to/hg19.fasta #TODO
 
