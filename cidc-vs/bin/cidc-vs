@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+""" Visualization of WES harmonization 2
+Usage: cidc-vs /path/to/files /path/to/output
+
+Input:
+
+    Path of folder for all files
+
+    Path of folder for output figures
+
+Files nomenclature:
+
+    Center_source_sampleID_tools_feature
+    Options:
+        Center: Broad, MDACC
+        tools: Sentieon, GISTIC, Pyclone, Facets
+        source: FFPE, Frozen
+        feature: Mutation.Germline, Mutation.Somatic, Clonality, Purity, CNV
+
+"""
+
+from cidcvs import main
+import sys 
+import multiprocessing as mp
+
+if __name__ == "__main__":
+    input_dir = sys.argv[1]
+    out_dir = sys.argv[2]
+    ref_fasta = sys.argv[3]
+    cancer=['TCGA-LUAD','TCGA-LUSC']
+        
+
+    comparing = main.Compare(
+                purity_dir='{}/purity'.format(input_dir),
+                clonality_dir='{}/clonality'.format(input_dir),
+                cnv_dir='{}/cnv'.format(input_dir),
+                somatic_mutation_maf_dir='{}/somatic_mutation/maf'.format(input_dir),
+                somatic_mutation_vcf_dir='{}/somatic_mutation/vcf'.format(input_dir),
+                indel_mutation_maf_dir='{}/somatic_mutation/tnscope_maf'.format(
+                    input_dir),
+                sv_mutation_maf_dir='{}/somatic_mutation/sv_maf'.format(
+                    input_dir),
+                cancer = cancer,
+                ref_fasta=ref_fasta,
+                out_dir=out_dir
+                 )
+    processes = [ mp.Process(target=x) 
+                  for x in [
+                            comparing.purity(),
+                            comparing.clonality(),
+                            comparing.cnv(),
+                            comparing.somatic_mutation(),
+                            comparing.indel_mutation(),
+                            ]
+                ]
+
+    # run process
+    for p in processes:
+        p.start()
+
+    # exit the completed process
+    for p in processes:
+        p.join()
+    
+    
+    
