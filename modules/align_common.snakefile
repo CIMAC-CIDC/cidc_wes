@@ -12,7 +12,7 @@ def align_targets(wildcards):
         ls.append("analysis/align/%s/%s_unique.sorted.bam.bai"%(sample,sample))
         ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam.bai" % (sample,sample))
-        ls.append("analysis/align/%s/%s.unmapped.fq.gz" % (sample,sample))
+        #ls.append("analysis/align/%s/%s.unmapped.fq.gz" % (sample,sample))
         ls.append("analysis/align/%s/%s_readsPerChrom.txt" % (sample,sample))
     ls.append("analysis/align/mapping.csv")
     return ls
@@ -138,51 +138,52 @@ rule indexBam:
     shell:
         "sambamba index {input} {output}"
 
-rule extractUnmapped:
-    """Extract the unmapped reads and save as {sample}.unmapped.bam"""
-    input:
-        #"analysis/align/{sample}/{sample}.bam"
-        getBam
-    output:
-        temp("analysis/align/{sample}/{sample}.unmapped.bam")
-    message: "ALIGN: extract unmapped reads"
-    log: _logfile
-    threads: _align_threads
-    shell:
-        #THIS extracts all unmapped reads
-        #"samtools view -b -f 4 --threads {threads} {input} >{output} 2>>{log}"
-        #THIS extracts all READ (pairs) where at least one in unmapped
-        #ref: https://www.biostars.org/p/56246/ search "rgiannico"
-        #NOTE: -@ = --threads
-        "samtools view -b -F 2 -@ {threads} {input} > {output} 2>>{log}"
+#SKIP- DEPRECATED
+# rule extractUnmapped:
+#     """Extract the unmapped reads and save as {sample}.unmapped.bam"""
+#     input:
+#         #"analysis/align/{sample}/{sample}.bam"
+#         getBam
+#     output:
+#         temp("analysis/align/{sample}/{sample}.unmapped.bam")
+#     message: "ALIGN: extract unmapped reads"
+#     log: _logfile
+#     threads: _align_threads
+#     shell:
+#         #THIS extracts all unmapped reads
+#         #"samtools view -b -f 4 --threads {threads} {input} >{output} 2>>{log}"
+#         #THIS extracts all READ (pairs) where at least one in unmapped
+#         #ref: https://www.biostars.org/p/56246/ search "rgiannico"
+#         #NOTE: -@ = --threads
+#         "samtools view -b -F 2 -@ {threads} {input} > {output} 2>>{log}"
 
-rule bamToFastq:
-    """Convert the unmapped.bam to fastq"""
-    input:
-        "analysis/align/{sample}/{sample}.unmapped.bam"
-    output:
-        "analysis/align/{sample}/{sample}.unmapped.fq"
-    params:
-        #handle PE alignments!
-        mate2 = lambda wildcards: "-fq2 analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
-    message: "ALIGN: convert unmapped bam to fastq"
-    log: _logfile
-    shell:
-        "bamToFastq -i {input} -fq {output} {params.mate2}"
+# rule bamToFastq:
+#     """Convert the unmapped.bam to fastq"""
+#     input:
+#         "analysis/align/{sample}/{sample}.unmapped.bam"
+#     output:
+#         "analysis/align/{sample}/{sample}.unmapped.fq"
+#     params:
+#         #handle PE alignments!
+#         mate2 = lambda wildcards: "-fq2 analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
+#     message: "ALIGN: convert unmapped bam to fastq"
+#     log: _logfile
+#     shell:
+#         "bamToFastq -i {input} -fq {output} {params.mate2}"
 
-rule gzipUnmappedFq:
-    """gzip unmapped fq(s)"""
-    input:
-        "analysis/align/{sample}/{sample}.unmapped.fq"
-    output:
-        "analysis/align/{sample}/{sample}.unmapped.fq.gz"
-    params:
-        #handle PE alignments!
-        mate2 = lambda wildcards: "analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
-    message: "ALIGN: gzip unmapped fq files"
-    log: _logfile
-    shell:
-        "gzip {input} {params} 2>>{log}"
+# rule gzipUnmappedFq:
+#     """gzip unmapped fq(s)"""
+#     input:
+#         "analysis/align/{sample}/{sample}.unmapped.fq"
+#     output:
+#         "analysis/align/{sample}/{sample}.unmapped.fq.gz"
+#     params:
+#         #handle PE alignments!
+#         mate2 = lambda wildcards: "analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
+#     message: "ALIGN: gzip unmapped fq files"
+#     log: _logfile
+#     shell:
+#         "gzip {input} {params} 2>>{log}"
 
 rule readsPerChromStat:
     """For each sample, generates a _readsPerChrom.txt file, which is:
