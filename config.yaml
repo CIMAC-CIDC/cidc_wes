@@ -5,7 +5,7 @@ ref: "cidc_wes/ref.yaml"
 sentieon_path: "/path/to/sentieon"
 
 #Tell us what assembly to use (!! MUST be defined in chips/ref.yaml !!)
-assembly: hg19
+assembly: hg38
 
 #NOTE: CNV analysis using QDNAseq R pkg- {true, false}
 #cnv_analysis: true
