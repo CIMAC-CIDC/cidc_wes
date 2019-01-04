@@ -144,7 +144,7 @@ rule corealignment:
         norm_recal = getNormal_recal,
         tumor_recal = getTumor_recal
     output:
-        "analysis/runs/{run}/{run}_tn_corealigned.bam"
+        "analysis/corealignments/{run}/{run}_tn_corealigned.bam"
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
