@@ -8,6 +8,15 @@ _metrics_threads=8
 def metrics_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
+    for sample in config["samples"]:
+    	ls.append("analysis/metrics/%s/%s_mq_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_qd_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_gc_summary.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_gc_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_aln_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_is_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_metrics.pdf" % (sample,sample))
+	
     #TODO- fill this in
     return ls
 
