@@ -72,7 +72,8 @@ def all_targets(wildcards):
     ls = []
     #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
-    ls.extend(fastqc_targets(wildcards))
+    #Commenting out for now b/c I believe metrics_sentieon does the same job
+    #ls.extend(fastqc_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
     
