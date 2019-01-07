@@ -51,7 +51,7 @@ rule somatic_calling_TNsnv:
     input:
         norm=getNormal,
         tumor=getTumor,
-        corealignedbam="analysis/somaticVariants/{run}/{run}_tn_corealigned.bam"
+        corealignedbam="analysis/corealignments//{run}/{run}_tn_corealigned.bam"
     output:
         statscall="analysis/somaticVariants/{run}/{run}_call.output.stats"
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
@@ -70,7 +70,7 @@ rule somatic_calling_TNhaplotyper:
     input:
         norm=getNormaL,
         tumor=getTumor,
-        corealignedbam="analysis/somaticVariants/{run}/{run}_tn_corealigned.bam"
+        corealignedbam="analysis/corealignments//{run}/{run}_tn_corealigned.bam"
    output:
         tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
    params:
@@ -88,7 +88,7 @@ rule somatic_calling_TNscope:
     input:
         norm=getNormaL,
         tumor=getTumor,
-        corealignedbam="analysis/somaticVariants/{run}/{run}_tn_corealigned.bam"
+        corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
    output:
         tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
    params:
