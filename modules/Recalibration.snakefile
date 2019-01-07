@@ -43,7 +43,15 @@ def getTumor_recal(wildcards):
 def recalibration_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    #TODO- fill this in
+    for sample in config["samples"]:
+    	ls.append("analysis/align/%s/%s.realigned.bam" % (sample,sample))
+    	ls.append("analysis/align/%s/%s_prerecal_data.table" % (sample,sample))
+    	ls.append("analysis/align/%s/%s_recalibrated.bam" % (sample,sample))
+        ls.append("analysis/align/%s/%s_postrecal_data.table" % (sample,sample))
+        ls.append("analysis/align/%s/%s_recal.csv" % (sample,sample))
+        ls.append("analysis/align/%s/%s_recal_plots.pdf" % (sample,sample))
+    for run in config['runs']:
+        ls.append("analysis/corealignments/%s/%s_tn_corealigned.bam" % (run,run))
     return ls
 
 rule recalibration_all:
@@ -53,7 +61,7 @@ rule recalibration_all:
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}.unique.dedup.sorted.bam"
+         bam="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam"
     output:
          realignbam="analysis/align/{sample}/{sample}.realigned.bam"
     message:
@@ -93,7 +101,7 @@ rule Base_recalibration_postcal_sentieon:
         recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
         prerecaltable="analysis/align/{sample}/{sample}_prerecal_data.table"
     output:
-        postrecaltable="analysis/align/{sample}/{sample}_recal_data.table"
+        postrecaltable="analysis/align/{sample}/{sample}_postrecal_data.table"
     message:
         "POST BASE RECALIBRATION: post base recalibration for  realigned files"
     params:
@@ -109,7 +117,7 @@ rule Base_recalibration_postcal_sentieon:
 rule Base_recalibration_sentieon:
     """ recalibration for realigned files"""
     input:
-        postrecaltable="analysis/align/{sample}/{sample}_recal_data.table",
+        postrecaltable="analysis/align/{sample}/{sample}_postrecal_data.table",
         prerecaltable="analysis/align/{sample}/{sample}_prerecal_data.table"
     output:
         recalfile="analysis/align/{sample}/{sample}_recal.csv"
@@ -139,7 +147,7 @@ rule Base_recalibration_plot:
 
 rule corealignment:
     input:
-        norm = getNormal, 
+        normal = getNormal, 
         tumor = getTumor,
         norm_recal = getNormal_recal,
         tumor_recal = getTumor_recal

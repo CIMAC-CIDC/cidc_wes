@@ -64,4 +64,4 @@ rule Metrics_sentieon_plots:
         index1=config['sentieon_path'],
     threads: _metrics_threads
     shell:
-        """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  {input.gcmetrics} {input.qd} {input.mq}  {input.insertsize}"""
+        """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  gc={input.gcmetrics} qd={input.qd} mq={input.mq}  isize={input.insertsize}"""
