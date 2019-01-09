@@ -64,7 +64,8 @@ rule somatic_calling_TNsnv:
     threads:_somaticcall_threads
     shell:
        ##min tumor allele fraction needs to be changed based on different value cutoffs##
-       """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.005 {output.tnsvvcf}"""
+       ##Values={0.05,0.1,0.2,0.3,0.4,0.5}
+       """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsvvcf}"""
 
 
 rule somatic_calling_TNhaplotyper:
