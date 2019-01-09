@@ -135,8 +135,9 @@ rule indexBam:
         "analysis/align/{sample}/{prefix}.bam.bai"
     message: "ALIGN: indexing bam file {input}"
     log: _logfile
+    threads: _align_threads
     shell:
-        "sambamba index {input} {output}"
+        "sambamba index -t {threads} {input} {output}"
 
 #SKIP- DEPRECATED
 # rule extractUnmapped:

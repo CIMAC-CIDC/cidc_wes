@@ -2,10 +2,7 @@
 #import os
 #from string import Template
 
-_somaticcall_threads=8
-_dbsnp="/cluster/asahu/mutation_calling/MDAnderson/ref/Homo_sapiens_assembly38.dbsnp138.vcf"
-_Mills_indels="/cluster/asahu/mutation_calling/MDAnderson/ref/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
-_G1000_indels="/cluster/asahu/mutation_calling/script/ref/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+_somaticcall_threads=16
 
 
 def runsHelper(wildcards, iindex):
@@ -58,9 +55,9 @@ rule somatic_calling_TNsnv:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-        dbsnp=_dbsnp,
-        mills=_Mills_indels,
-        g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads:_somaticcall_threads
     shell:
        ##min tumor allele fraction needs to be changed based on different value cutoffs##
@@ -78,9 +75,9 @@ rule somatic_calling_TNhaplotyper:
    params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-        dbsnp=_dbsnp,
-        mills=_Mills_indels,
-        g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads:_somaticcall_threads
     shell:
        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
@@ -96,9 +93,9 @@ rule somatic_calling_TNscope:
    params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-        dbsnp=_dbsnp,
-        mills=_Mills_indels,
-        g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads:_somaticcall_threads
     shell:
        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""

@@ -2,10 +2,7 @@
 #import os
 #from string import Template
 
-_realigner_threads=8
-_dbsnp="/cluster/asahu/mutation_calling/MDAnderson/ref/Homo_sapiens_assembly38.dbsnp138.vcf"
-_Mills_indels="/cluster/asahu/mutation_calling/MDAnderson/ref/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
-_G1000_indels="/cluster/asahu/mutation_calling/script/ref/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+_realigner_threads=16
 
 
 def runsHelper(wildcards, iindex, input_template):
@@ -61,7 +58,8 @@ rule recalibration_all:
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam"
+         bam="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam",
+         bai="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam.bai",
     output:
          realignbam="analysis/align/{sample}/{sample}.realigned.bam"
     message:
@@ -69,9 +67,9 @@ rule Indel_realigner_sentieon:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-        dbsnp=_dbsnp,
-        mills=_Mills_indels,
-        g1000=_G1000_indels,
+        dbsnp=config['dbsnp'],
+        mills=config['Mills_indels'],
+        g1000=config['G1000_indels'],
     threads: _realigner_threads
     shell:
         """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.bam} --algo Realigner -k {params.mills} -k {params.g1000} {output.realignbam}"""
@@ -88,12 +86,12 @@ rule Base_recalibration_precal_sentieon:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-	dbsnp=_dbsnp,
-	mills=_Mills_indels,
-	g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.realignbam} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.prerecaltable} --algo Readwriter {output.recalibratedbam}"""
+        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.realignbam} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.prerecaltable} --algo ReadWriter {output.recalibratedbam}"""
 
 rule Base_recalibration_postcal_sentieon:
     """post recalibration for realigned files"""
@@ -107,9 +105,9 @@ rule Base_recalibration_postcal_sentieon:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-	dbsnp=_dbsnp,
-	mills=_Mills_indels,
-	g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
         """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.recalibratedbam} -q {input.prerecaltable} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.postrecaltable}"""
@@ -128,7 +126,7 @@ rule Base_recalibration_sentieon:
         index1=config['sentieon_path'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
+        """{params.index1}/sentieon driver -t {threads} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
 
 rule Base_recalibration_plot:
     """base realigner plotter for recalibrated files"""
@@ -156,9 +154,9 @@ rule corealignment:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
-        dbsnp=_dbsnp,
-        mills=_Mills_indels,
-        g1000=_G1000_indels,
+        dbsnp= config['dbsnp'],
+        mills= config['Mills_indels'],
+        g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
         """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
