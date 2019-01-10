@@ -114,18 +114,50 @@ rule sortUniqueBams:
     shell:
         "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
 
-rule dedupSortedUniqueBams:
-    """Dedup sorted unique bams using PICARD
-    output {sample}_unique.sorted.dedup.bam"""
+#REPLACING picard with sentieon - next two rules
+# rule dedupSortedUniqueBams:
+#     """Dedup sorted unique bams using PICARD
+#     output {sample}_unique.sorted.dedup.bam"""
+#     input:
+#         "analysis/align/{sample}/{sample}_unique.sorted.bam"
+#     output:
+#         "analysis/align/{sample}/{sample}_unique.sorted.dedup.bam"
+#     message: "ALIGN: dedup sorted unique bam file"
+#     log: _logfile
+#     threads: _align_threads
+#     shell:
+#         "picard MarkDuplicates I={input} O={output} REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT METRICS_FILE={log} 2>> {log}"
+rule scoreSample:
+    "Calls sentieon driver  --fun score_info on the sample"
     input:
         "analysis/align/{sample}/{sample}_unique.sorted.bam"
     output:
-        "analysis/align/{sample}/{sample}_unique.sorted.dedup.bam"
+        "analysis/align/{sample}/{sample}_unique.sorted.score.txt"
+    message: "ALIGN: score sample"
+    log: _logfile
+    threads: _align_threads
+    params:
+        index1=config['sentieon_path'],
+    shell:
+        """{params.index1}/sentieon driver -t {threads} -i {input} --algo LocusCollector --fun score_info {output}"""
+
+rule dedupSortedUniqueBam:
+    """Dedup sorted unique bams using sentieon
+     output {sample}_unique.sorted.dedup.bam"""
+    input:
+        bam="analysis/align/{sample}/{sample}_unique.sorted.bam",
+        score="analysis/align/{sample}/{sample}_unique.sorted.score.txt"
+    output:
+        bamm="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam",
+        met="analysis/align/{sample}/{sample}_unique.sorted.dedup.metric.txt",
     message: "ALIGN: dedup sorted unique bam file"
     log: _logfile
     threads: _align_threads
+    params:
+        index1=config['sentieon_path'],
     shell:
-        "picard MarkDuplicates I={input} O={output} REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT METRICS_FILE={log} 2>> {log}"
+        """{params.index1}/sentieon driver -t {threads} -i {input} --algo Dedup --score_info {input.score} --metrics {output.met} {output.bamm}"""
+
 
 rule indexBam:
     """Index bam file"""
