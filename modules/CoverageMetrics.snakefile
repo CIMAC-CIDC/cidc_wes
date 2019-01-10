@@ -1,6 +1,6 @@
 #MODULE: Coverage Metrics by Sentieon
 #import os
-_coveragemetrics_threads=8
+_coveragemetrics_threads=16
 
 
 def coveragemetrics_targets(wildcards):
@@ -8,11 +8,9 @@ def coveragemetrics_targets(wildcards):
     ls = []
     for sample in config["samples"]:
     	ls.append("analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample))
-
-    #TODO- fill this in
     return ls
 
-rule metrics_all:
+rule coveragemetrics_all:
     input:
         coveragemetrics_targets
 
@@ -27,6 +25,8 @@ rule CoverageMetrics_sentieon:
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
+        cov_thresh=50, #LT: put this in config.yaml
     threads: _coveragemetrics_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index}  -t  {threads} -i {input.bam} --algo CoverageMetrics --cov_thresh 50 {output.coveragemetrics}"""
+        #change cov_thresh as an user input config
+        """{params.index1}/sentieon driver -r {params.index}  -t  {threads} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.coveragemetrics}"""

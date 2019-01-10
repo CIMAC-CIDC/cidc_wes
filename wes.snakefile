@@ -77,7 +77,8 @@ def all_targets(wildcards):
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
     ls.extend(somaticall_targets(wildcards))
-    
+
+    ls.extend(coveragemetrics_targets(wildcards))
     #ls.extend(targets(wildcards)) #delete       
     #ls.extend(report_targets(wildcards))
     return ls
@@ -94,6 +95,7 @@ include: "./modules/fastqc.snakefile"           # fastqc (sequence qual) rules
 include: "./modules/metrics_sentieon.snakefile"   # ...
 include: "./modules/Recalibration.snakefile"      # ...
 include: "./modules/SomaticVariantcall.snakefile" # ...
+include: "./modules/CoverageMetrics.snakefile" # ...
 
 #include: "./modules/runs_example.snakefile"    # DELETE this
 #include: "./modules/report.snakefile"          # report module
