@@ -4,11 +4,11 @@
 
 _somaticcall_threads=16
 
-
-def runsHelper(wildcards, iindex):
+#NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
+#called by any one!
+def somatic_runsHelper(wildcards, iindex):
     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
-    and a Python format string (ref: https://www.programiz.com/python-programming/methods/string/format)
-    returns the template string with the run name"""
+    returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
     tmp = []
     r = config['runs'][wildcards.run]
     #print(r)
@@ -16,9 +16,7 @@ def runsHelper(wildcards, iindex):
     #check that we have a valid pair
     if len(r) >=2:
         sample_name = r[iindex]
-	#config['samples'][sample_name] = the fastq file paths defined in config.yaml
-	tmp.extend(config['samples'][sample_name]) #NOTE: this does not check whether it's SE of PE--if you want to do that you'll have to handle it here.
-        #tmp.append(input_template.format(sample=sample_name))
+        tmp.append(sample_name) 
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
@@ -26,18 +24,23 @@ def runsHelper(wildcards, iindex):
     return tmp
 
 
-def getNormal_fastq(wildcards):
-    return runsHelper(wildcards, 0)
+def getNormal_sample(wildcards):
+    return somatic_runsHelper(wildcards, 0)
 
-def getTumor_fastq(wildcards):
-    return runsHelper(wildcards, 1)
-
-
+def getTumor_sample(wildcards):
+    return somatic_runsHelper(wildcards, 1)
 
 def somaticall_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    #TODO- fill this in
+    for run in config['runs']:
+        ls.append("analysis/somaticVariants/%s/%s_call.output.stats" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.vcf.gz" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.vcf.gz" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.vcf.gz" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.vcf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.vcf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.vcf" % (run,run))
     return ls
 
 rule somaticcalls_all:
@@ -46,11 +49,9 @@ rule somaticcalls_all:
 
 rule somatic_calling_TNsnv:
     input:
-        norm=getNormal,
-        tumor=getTumor,
         corealignedbam="analysis/corealignments//{run}/{run}_tn_corealigned.bam"
     output:
-        statscall="analysis/somaticVariants/{run}/{run}_call.output.stats"
+        statscall="analysis/somaticVariants/{run}/{run}_call.output.stats",
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
     params:
         index=config['genome_fasta'],
@@ -58,47 +59,57 @@ rule somatic_calling_TNsnv:
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
+        #JUST sample names - can also use the helper fns, e.g.
+        #normal = lambda wildcards: getNormal_sample(wildcards)
+        normal = lambda wildcards: config['runs'][wildcards.run][0],
+        tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-       ##min tumor allele fraction needs to be changed based on different value cutoffs##
-       ##Values={0.05,0.1,0.2,0.3,0.4,0.5}
-       """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsvvcf}"""
+        ##min tumor allele fraction needs to be changed based on different value cutoffs##
+        #LT: will need to iterate over this list of values and run shell each time
+        ##Values={0.05,0.1,0.2,0.3,0.4,0.5}
+        #LT: will need to iterate over this list of values and run shell each time
+        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
 
 
 rule somatic_calling_TNhaplotyper:
     input:
-        norm=getNormaL,
-        tumor=getTumor,
-        corealignedbam="analysis/corealignments//{run}/{run}_tn_corealigned.bam"
-   output:
+        corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
+    output:
         tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
-   params:
+    params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
+        #JUST sample names - can also use the helper fns, e.g.
+        #normal = lambda wildcards: getNormal_sample(wildcards)
+        normal = lambda wildcards: config['runs'][wildcards.run][0],
+        tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-       """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
+        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
 
 
 rule somatic_calling_TNscope:
     input:
-        norm=getNormaL,
-        tumor=getTumor,
         corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
-   output:
+    output:
         tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
-   params:
+    params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
+        #JUST sample names - can also use the helper fns, e.g.
+        #normal = lambda wildcards: getNormal_sample(wildcards)
+        normal = lambda wildcards: config['runs'][wildcards.run][0],
+        tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-       """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {input.tumor} --normal_sample {input.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
+        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
 rule tnsnv_vcftoolsfilter:
     input:
