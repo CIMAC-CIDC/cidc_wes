@@ -17,7 +17,8 @@ rule coveragemetrics_all:
 rule CoverageMetrics_sentieon:
     """Get the metrics calculations from  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}.sorted.bam"
+         bam="analysis/align/{sample}/{sample}.sorted.bam",
+         bai="analysis/align/{sample}/{sample}.sorted.bam.bai"
     output:
          coveragemetrics="analysis/metrics/{sample}/{sample}_coverage_metrics.txt",
     message:

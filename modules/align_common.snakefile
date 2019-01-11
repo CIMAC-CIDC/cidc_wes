@@ -130,7 +130,8 @@ rule sortUniqueBams:
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
     input:
-        "analysis/align/{sample}/{sample}_unique.sorted.bam"
+        bam="analysis/align/{sample}/{sample}_unique.sorted.bam",
+        bai="analysis/align/{sample}/{sample}_unique.sorted.bam.bai",
     output:
         "analysis/align/{sample}/{sample}_unique.sorted.score.txt"
     message: "ALIGN: score sample"
@@ -139,13 +140,14 @@ rule scoreSample:
     params:
         index1=config['sentieon_path'],
     shell:
-        """{params.index1}/sentieon driver -t {threads} -i {input} --algo LocusCollector --fun score_info {output}"""
+        """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output}"""
 
 rule dedupSortedUniqueBam:
     """Dedup sorted unique bams using sentieon
      output {sample}_unique.sorted.dedup.bam"""
     input:
         bam="analysis/align/{sample}/{sample}_unique.sorted.bam",
+        bai="analysis/align/{sample}/{sample}_unique.sorted.bam.bai",
         score="analysis/align/{sample}/{sample}_unique.sorted.score.txt"
     output:
         bamm="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam",
@@ -156,7 +158,7 @@ rule dedupSortedUniqueBam:
     params:
         index1=config['sentieon_path'],
     shell:
-        """{params.index1}/sentieon driver -t {threads} -i {input} --algo Dedup --score_info {input.score} --metrics {output.met} {output.bamm}"""
+        """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
 
 
 rule indexBam:

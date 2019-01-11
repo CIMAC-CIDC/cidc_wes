@@ -27,7 +27,8 @@ rule metrics_all:
 rule Metrics_sentieon:
     """Get the metrics calculations from  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}.sorted.bam"
+         bam="analysis/align/{sample}/{sample}.sorted.bam",
+         bai="analysis/align/{sample}/{sample}.sorted.bam.bai"
     output:
          mq="analysis/metrics/{sample}/{sample}_mq_metrics.txt",
          qd="analysis/metrics/{sample}/{sample}_qd_metrics.txt",

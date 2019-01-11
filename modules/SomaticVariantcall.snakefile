@@ -49,7 +49,7 @@ rule somaticcalls_all:
 
 rule somatic_calling_TNsnv:
     input:
-        corealignedbam="analysis/corealignments//{run}/{run}_tn_corealigned.bam"
+        corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
     output:
         statscall="analysis/somaticVariants/{run}/{run}_call.output.stats",
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
