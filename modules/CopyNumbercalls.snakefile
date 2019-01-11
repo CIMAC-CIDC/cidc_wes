@@ -4,17 +4,17 @@
 _cnvcall_threads=16
 
 
-def cnvcall_runsHelper(wildcards,iindex):
-    """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
-    returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
+def cnvcall_runsHelper(wildcards,pairs):
+    """Given a snakemake wildcards,  pairs - 0 for Normals, 1 for Tumors,
+    returns the replicate of Normal (if pairs=0) else replicate of Tmr"""
     tmp = []
     r = config['runs'][wildcards.run]
     #print(r)
 
     #check that we have a valid pair
     if len(r) >=2:
-        sample_name = r[iindex]
-        tmp.append(sample_name)
+        replicates_name = r[pairs]
+        tmp.append(replicates_name)
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
