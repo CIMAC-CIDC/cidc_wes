@@ -3,6 +3,7 @@
 
 # vscode
 .vscode/
+.vscode/*
 # macos system file
 .DS_Store
 */.DS_Store
