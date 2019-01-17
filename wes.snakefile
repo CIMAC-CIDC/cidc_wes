@@ -72,11 +72,13 @@ def all_targets(wildcards):
     ls = []
     #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
-    ls.extend(fastqc_targets(wildcards))
+    #Commenting out for now b/c I believe metrics_sentieon does the same job
+    #ls.extend(fastqc_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
-    
-    #ls.extend(targets(wildcards)) #delete       
+    ls.extend(somaticall_targets(wildcards))
+    ls.extend(germlinecalls_targets(wildcards))
+    ls.extend(coveragemetrics_targets(wildcards))
     #ls.extend(report_targets(wildcards))
     return ls
 
@@ -89,8 +91,10 @@ rule target:
 include: "./modules/align_bwa.snakefile"        # rules specific to BWA
 include: "./modules/align_common.snakefile"     # common align rules
 include: "./modules/fastqc.snakefile"           # fastqc (sequence qual) rules
-include: "./modules/metrics_sentieon.snakefile" # ...
-include: "./modules/Recalibration.snakefile"    # ...
+include: "./modules/metrics_sentieon.snakefile"   # ...
+include: "./modules/Recalibration.snakefile"      # ...
+include: "./modules/SomaticVariantcall.snakefile" # ...
+include: "./modules/GermlineVariantcall.snakefile" # ...
+include: "./modules/CoverageMetrics.snakefile" # ...
 
-#include: "./modules/runs_example.snakefile"    # DELETE this
 #include: "./modules/report.snakefile"          # report module

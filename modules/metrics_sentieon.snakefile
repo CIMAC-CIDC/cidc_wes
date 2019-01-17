@@ -8,6 +8,15 @@ _metrics_threads=8
 def metrics_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
+    for sample in config["samples"]:
+    	ls.append("analysis/metrics/%s/%s_mq_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_qd_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_gc_summary.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_gc_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_aln_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_is_metrics.txt" % (sample,sample))
+	ls.append("analysis/metrics/%s/%s_metrics.pdf" % (sample,sample))
+	
     #TODO- fill this in
     return ls
 
@@ -18,7 +27,8 @@ rule metrics_all:
 rule Metrics_sentieon:
     """Get the metrics calculations from  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}.sorted.bam"
+         bam="analysis/align/{sample}/{sample}.sorted.bam",
+         bai="analysis/align/{sample}/{sample}.sorted.bam.bai"
     output:
          mq="analysis/metrics/{sample}/{sample}_mq_metrics.txt",
          qd="analysis/metrics/{sample}/{sample}_qd_metrics.txt",
@@ -55,4 +65,4 @@ rule Metrics_sentieon_plots:
         index1=config['sentieon_path'],
     threads: _metrics_threads
     shell:
-        """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  {input.gcmetrics} {input.qd} {input.mq}  {input.insertsize}"""
+        """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  gc={input.gcmetrics} qd={input.qd} mq={input.mq}  isize={input.insertsize}"""
