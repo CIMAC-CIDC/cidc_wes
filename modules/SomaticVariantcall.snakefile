@@ -140,3 +140,35 @@ rule tnscope_vcftoolsfilter:
         index=config['genome_fasta'],
     shell:
        """vcftools --gzvcf {input.tnscopevcf} --remove-filtered-all --recode --stdout > {output.tnscopefilteredvcf}"""
+
+rule tnsnv_vcf2maf:
+    input:
+	tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
+    output:
+        tnsnvmaf="analysis/somaticVariants/{run}/{run}_tnsnv.output.maf"
+    params:
+	index=config['genome_fasta']
+    shell:
+        """ zcat {input.tnsnvvcf}; perl vcf2maf.pl --input-vcf analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf --output-maf {output.tnsnvmaf} --ref-fasta {params.index}"""  
+
+rule tnhaplotyper_vcf2maf:
+    input:
+        tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
+    output:
+        tnhaplotypermaf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.maf"
+    params:
+        index=config['genome_fasta']
+    shell:
+        """ zcat {input.tnhaplotypervcf}; perl vcf2maf.pl --input-vcf analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf --output-maf {output.tnhaplotyper} --ref-fasta {params.index}"""
+
+rule tnscope_vcf2maf:
+    input:
+        tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
+    output:
+        tnscopemaf="analysis/somaticVariants/{run}/{run}_tnscope.output.maf"
+    params:
+        index=config['genome_fasta']
+    shell:
+        """ zcat {input.tnscopevcf}; perl vcf2maf.pl --input-vcf analysis/somaticVariants/{run}/{run}_tnscope.output.vcf --output-maf {output.tnscope} --ref-fasta {params.index}"""
+
+
