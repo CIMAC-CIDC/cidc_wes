@@ -88,8 +88,7 @@ rule target:
 
     message: "Compiling all output"
     
-include: "./modules/align_bwa.snakefile"        # rules specific to BWA
-include: "./modules/align_common.snakefile"     # common align rules
+include: "./modules/align.snakefile"     # common align rules
 include: "./modules/fastqc.snakefile"           # fastqc (sequence qual) rules
 include: "./modules/metrics_sentieon.snakefile"   # ...
 include: "./modules/Recalibration.snakefile"      # ...

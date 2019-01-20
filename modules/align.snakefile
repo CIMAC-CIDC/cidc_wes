@@ -1,6 +1,8 @@
 #MODULE: Align fastq files to genome - common rules
 #import os
+_logfile="analysis/logs/align.log"
 _align_threads=8
+_bwa_threads=16
 
 def align_targets(wildcards):
     """Generates the targets for this module"""
@@ -17,7 +19,10 @@ def align_targets(wildcards):
     ls.append("analysis/align/mapping.csv")
     return ls
 
+def getFastq(wildcards):
+    return config["samples"][wildcards.sample]
 
+#DERPRECATE?
 def getBam(wildcards):
     """This input fn will check to see if the user specified a .fastq or a .bam
     for the sample.  IF the former (.fastq), will simply return the canonical
@@ -35,13 +40,44 @@ rule align_all:
     input:
         align_targets
 
+rule sentieon_bwa:
+    input:
+        getFastq
+    output:
+        "analysis/align/{sample}/{sample}.sorted.bam" 
+    params:
+        sentieon_path=config['sentieon_path'],
+        bwa_index=config['bwa_index'],
+        read_group= lambda wildcards: "@RG\\tID:%s\\tSM:%s\\tPL:ILLUMINA" % (wildcards.sample, wildcards.sample),        
+        input_bases="10000000",
+        #need to adjust threads for the other process
+        tthreads=lambda wildcards, input, output, threads, resources: threads-1
+    threads: _bwa_threads
+    message: "ALIGN: Running sentieon BWA mem for alignment"
+    log: _logfile
+    shell:
+        """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output} --sam2bam -i -"""
+
+#rule sortBams:
+#    """General sort rule--take a bam {filename}.bam and 
+#    output {filename}.sorted.bam"""
+#    input:
+#        "analysis/align/{sample}/{filename}.bam"
+#        #getBam
+#    output:
+#        "analysis/align/{sample}/{filename}.sorted.bam",
+#    message: "ALIGN: sort bam file"
+#    log: _logfile
+#    threads: _align_threads
+#    shell:
+#        "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
+
 rule uniquely_mapped_reads:
     """Get the uniquely mapped reads"""
     input:
-        #"analysis/align/{sample}/{sample}.bam"
-        getBam
+        "analysis/align/{sample}/{sample}.sorted.bam"
     output:
-        temp("analysis/align/{sample}/{sample}_unique.bam")
+        "analysis/align/{sample}/{sample}_unique.sorted.bam"
     message: "ALIGN: Filtering for uniquely mapped reads"
     log: _logfile
     threads: _align_threads
@@ -54,9 +90,8 @@ rule uniquely_mapped_reads:
 rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
-        #bam="analysis/align/{sample}/{sample}.bam",
-        bam=getBam,
-        uniq_bam="analysis/align/{sample}/{sample}_unique.bam"
+        bam="analysis/align/{sample}/{sample}.sorted.bam",
+        uniq_bam="analysis/align/{sample}/{sample}_unique.sorted.bam"
     output:
         #temp("analysis/align/{sample}/{sample}_mapping.txt")
         "analysis/align/{sample}/{sample}_mapping.txt"
@@ -83,21 +118,6 @@ rule collect_map_stats:
     run:
         files = " -f ".join(input)
         shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
-
-rule sortBams:
-    """General sort rule--take a bam {filename}.bam and 
-    output {filename}.sorted.bam"""
-    input:
-        #"analysis/align/{sample}/{filename}.bam"
-        getBam
-    output:
-        "analysis/align/{sample}/{sample}.sorted.bam",
-        #"analysis/align/{sample}/{sample}.sorted.bam.bai"
-    message: "ALIGN: sort bam file"
-    log: _logfile
-    threads: _align_threads
-    shell:
-        "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
 
 rule sortUniqueBams:
     """General sort rule--take a bam {filename}.bam and 
@@ -127,6 +147,7 @@ rule sortUniqueBams:
 #     threads: _align_threads
 #     shell:
 #         "picard MarkDuplicates I={input} O={output} REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT METRICS_FILE={log} 2>> {log}"
+
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
     input:
@@ -160,7 +181,6 @@ rule dedupSortedUniqueBam:
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
 
-
 rule indexBam:
     """Index bam file"""
     input:
@@ -173,53 +193,7 @@ rule indexBam:
     shell:
         "sambamba index -t {threads} {input} {output}"
 
-#SKIP- DEPRECATED
-# rule extractUnmapped:
-#     """Extract the unmapped reads and save as {sample}.unmapped.bam"""
-#     input:
-#         #"analysis/align/{sample}/{sample}.bam"
-#         getBam
-#     output:
-#         temp("analysis/align/{sample}/{sample}.unmapped.bam")
-#     message: "ALIGN: extract unmapped reads"
-#     log: _logfile
-#     threads: _align_threads
-#     shell:
-#         #THIS extracts all unmapped reads
-#         #"samtools view -b -f 4 --threads {threads} {input} >{output} 2>>{log}"
-#         #THIS extracts all READ (pairs) where at least one in unmapped
-#         #ref: https://www.biostars.org/p/56246/ search "rgiannico"
-#         #NOTE: -@ = --threads
-#         "samtools view -b -F 2 -@ {threads} {input} > {output} 2>>{log}"
-
-# rule bamToFastq:
-#     """Convert the unmapped.bam to fastq"""
-#     input:
-#         "analysis/align/{sample}/{sample}.unmapped.bam"
-#     output:
-#         "analysis/align/{sample}/{sample}.unmapped.fq"
-#     params:
-#         #handle PE alignments!
-#         mate2 = lambda wildcards: "-fq2 analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
-#     message: "ALIGN: convert unmapped bam to fastq"
-#     log: _logfile
-#     shell:
-#         "bamToFastq -i {input} -fq {output} {params.mate2}"
-
-# rule gzipUnmappedFq:
-#     """gzip unmapped fq(s)"""
-#     input:
-#         "analysis/align/{sample}/{sample}.unmapped.fq"
-#     output:
-#         "analysis/align/{sample}/{sample}.unmapped.fq.gz"
-#     params:
-#         #handle PE alignments!
-#         mate2 = lambda wildcards: "analysis/align/{sample}/{sample}.unmapped.fq2" if len(config["samples"][wildcards.sample]) == 2 else ""
-#     message: "ALIGN: gzip unmapped fq files"
-#     log: _logfile
-#     shell:
-#         "gzip {input} {params} 2>>{log}"
-
+#DEPRECATE?
 rule readsPerChromStat:
     """For each sample, generates a _readsPerChrom.txt file, which is:
     chr1   #readsOnChr1

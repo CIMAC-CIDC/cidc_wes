@@ -8,20 +8,20 @@ dependencies:
 - snakemake=4.8.1
 - samtools>=1.8
 - python>=3.5.2
-- r>=3.4.1
+#- r>=3.4.1
 - numpy
 
 #align_*.snakefile
 - bwa>=0.7.15
 - sambamba
-- picard>=2.18.4
-- bedtools>=2.25.0 #for bamToFastq
+#- picard>=2.18.4
+#- bedtools>=2.25.0 #for bamToFastq
 
 #fastqc.snakefile
 - seqtk
-- fastqc>=0.11.5
-- r-ggplot2>=2.2.0
-- r-reshape2>=1.4.2
+#- fastqc>=0.11.5
+#- r-ggplot2>=2.2.0
+#- r-reshape2>=1.4.2
 
 #sentieon
 - vcftools
