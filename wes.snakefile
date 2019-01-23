@@ -26,20 +26,11 @@ def getRuns(config):
     config['runs'] = ret
     return config
 
-def addPy2Paths_Config(config):
+def addCondaPaths_Config(config):
     """ADDS the python2 paths to config"""
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
-    conda_path = os.path.join(conda_root, 'pkgs')
-    config["python2_pythonpath"] = os.path.join(conda_root, 'envs', 'chips_py2', 'lib', 'python2.7', 'site-packages')
-    
-    if not "python2" in config or not config["python2"]:
-        config["python2"] = os.path.join(conda_root, 'envs', 'chips_py2', 'bin', 'python2.7')
-
-    if not "mdseqpos_path" in config or not config["mdseqpos_path"]:
-        config["mdseqpos_path"] = os.path.join(conda_root, 'envs', 'chips_py2', 'bin', 'MDSeqPos.py')
-
-    if not "macs2_path" in config or not config["macs2_path"]:
-        config["macs2_path"] = os.path.join(conda_root, 'envs', 'chips_py2', 'bin', 'macs2')
+    config['conda_root'] = conda_root
+    config['wes_root'] = "%s/envs/wes" % conda_root
 
 def loadRef(config):
     """Adds the static reference paths found in config['ref']
@@ -57,7 +48,7 @@ def loadRef(config):
 #---------  CONFIG set up  ---------------
 configfile: "config.yaml"   # This makes snakemake load up yaml into config 
 config = getRuns(config)
-addPy2Paths_Config(config)
+addCondaPaths_Config(config)
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
 loadRef(config)
