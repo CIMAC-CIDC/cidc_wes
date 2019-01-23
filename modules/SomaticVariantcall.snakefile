@@ -3,6 +3,7 @@
 #from string import Template
 
 _somaticcall_threads=16
+_vcf2maf_threads=4
 
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
@@ -43,9 +44,9 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.vcf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.vcf" % (run,run))
         #MAF
-        #ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
-        #ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
-        #ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
     return ls
 
 rule somaticcalls_all:
@@ -151,9 +152,10 @@ rule tnsnv_vcf2maf:
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.vcf"
     output:
         tnsnvmaf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.maf"
+    threads: _vcf2maf_threads,
     params:
         index=config['genome_fasta'],
-        vep_path="%s/bin" % config['conda_root'],
+        vep_path="%s/bin" % config['wes_root'],
         vep_data=config['vep_data'],
         vep_assembly=config['vep_assembly'],
     shell:
@@ -165,9 +167,10 @@ rule tnhaplotyper_vcf2maf:
         tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.vcf"
     output:
         tnhaplotypermaf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.maf"
+    threads: _vcf2maf_threads,
     params:
         index=config['genome_fasta'],
-        vep_path="%s/bin" % config['conda_root'],
+        vep_path="%s/bin" % config['wes_root'],
         vep_data=config['vep_data'],
         vep_assembly=config['vep_assembly'],
     shell:
@@ -176,12 +179,13 @@ rule tnhaplotyper_vcf2maf:
 
 rule tnscope_vcf2maf:
     input:
-        tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter..vcf"
+        tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.vcf"
     output:
         tnscopemaf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.maf"
+    threads: _vcf2maf_threads,
     params:
         index=config['genome_fasta'],
-        vep_path="%s/bin" % config['conda_root'],
+        vep_path="%s/bin" % config['wes_root'],
         vep_data=config['vep_data'],
         vep_assembly=config['vep_assembly'],
     shell:

@@ -30,6 +30,7 @@ def addCondaPaths_Config(config):
     """ADDS the python2 paths to config"""
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
     config['conda_root'] = conda_root
+    config['wes_root'] = "%s/envs/wes" % conda_root
 
 def loadRef(config):
     """Adds the static reference paths found in config['ref']
