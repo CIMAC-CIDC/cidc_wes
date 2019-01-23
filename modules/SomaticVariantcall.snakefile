@@ -152,10 +152,13 @@ rule tnsnv_vcf2maf:
     output:
         tnsnvmaf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.maf"
     params:
-        index=config['genome_fasta']
+        index=config['genome_fasta'],
+        vep_path="%s/bin" % config['conda_root'],
+        vep_data=config['vep_data'],
+        vep_assembly=config['vep_assembly'],
     shell:
         #""" zcat {input.tnsnvvcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnsnvmaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnsnvvcf} --output-maf {output.tnsnvmaf} --ref-fasta {params.index}"""  
+        """vcf2maf.pl --input-vcf {input.tnsnvvcf} --output-maf {output.tnsnvmaf} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
 
 rule tnhaplotyper_vcf2maf:
     input:
@@ -163,10 +166,13 @@ rule tnhaplotyper_vcf2maf:
     output:
         tnhaplotypermaf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.maf"
     params:
-        index=config['genome_fasta']
+        index=config['genome_fasta'],
+        vep_path="%s/bin" % config['conda_root'],
+        vep_data=config['vep_data'],
+        vep_assembly=config['vep_assembly'],
     shell:
         #""" zcat {input.tnhaplotypervcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnhaplotypermaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnhaplotypervcf} --output-maf {output.tnhaplotypermaf} --ref-fasta {params.index}"""
+        """vcf2maf.pl --input-vcf {input.tnhaplotypervcf} --output-maf {output.tnhaplotypermaf} --ref-fasta {params.index}  --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""
 
 rule tnscope_vcf2maf:
     input:
@@ -174,9 +180,12 @@ rule tnscope_vcf2maf:
     output:
         tnscopemaf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.maf"
     params:
-        index=config['genome_fasta']
+        index=config['genome_fasta'],
+        vep_path="%s/bin" % config['conda_root'],
+        vep_data=config['vep_data'],
+        vep_assembly=config['vep_assembly'],
     shell:
         #""" zcat {input.tnscopevcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnscopemaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnscopevcf} --output-maf {output.tnscopemaf} --ref-fasta {params.index}"""
+        """vcf2maf.pl --input-vcf {input.tnscopevcf} --output-maf {output.tnscopemaf} --ref-fasta {params.index}  --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""
 
 
