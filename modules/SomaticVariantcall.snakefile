@@ -52,6 +52,11 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.pdf" % (run,run))
 
+        #alleleFrac cutoffs
+        for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
+            ls.append("analysis/somaticVariants/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
+            ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
+
     return ls
 
 rule somaticcalls_all:
@@ -237,3 +242,23 @@ rule tnscope_mutSignature:
         name = lambda wildcards: wildcards.run
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+
+rule alleleFrac_filter_tnscope:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
+    params:
+        threshold=lambda wildcards: wildcards.frac
+    output:
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.{frac}.vcf"
+    shell:
+        "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
+
+rule alleleFrac_filter_tnhaplotyper:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
+    params:
+        threshold=lambda wildcards: wildcards.frac
+    output:
+        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.{frac}.vcf"
+    shell:
+        "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
