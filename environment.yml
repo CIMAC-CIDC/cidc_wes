@@ -28,3 +28,7 @@ dependencies:
 - vcf2maf
 - ensembl-vep #required by vcf2maf
 - perl-bioperl>=1.7.2 #required by vcf2maf
+
+#cidc-vs
+- matplotlib
+- pybedtools

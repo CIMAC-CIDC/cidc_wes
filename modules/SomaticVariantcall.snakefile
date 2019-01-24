@@ -47,6 +47,11 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
+        #Mutation Signatures
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.pdf" % (run,run))
+
     return ls
 
 rule somaticcalls_all:
@@ -117,6 +122,7 @@ rule somatic_calling_TNscope:
     shell:
         """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
+#NOTE: the three filter rules a kind of redundant!
 rule tnsnv_vcftoolsfilter:
     input:
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
@@ -147,6 +153,7 @@ rule tnscope_vcftoolsfilter:
     shell:
        """vcftools --gzvcf {input.tnscopevcf} --remove-filtered-all --recode --stdout > {output.tnscopefilteredvcf}"""
 
+#NOTE: the three vcf2maf rules a kind of redundant!
 rule tnsnv_vcf2maf:
     input:
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.vcf"
@@ -192,4 +199,41 @@ rule tnscope_vcf2maf:
         #""" zcat {input.tnscopevcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnscopemaf} --ref-fasta {params.index}"""
         """vcf2maf.pl --input-vcf {input.tnscopevcf} --output-maf {output.tnscopemaf} --ref-fasta {params.index}  --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""
 
+rule tnsnv_mutSignature:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.maf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.pdf"
+    params:
+        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
+        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnsnv.output.filter" % (wildcards.run, wildcards.run),
+        name = lambda wildcards: wildcards.run
+    shell:
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
+rule tnhaplotyper_mutSignature:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.maf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.pdf"
+    params:
+        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
+        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter" % (wildcards.run, wildcards.run),
+        name = lambda wildcards: wildcards.run
+    shell:
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+
+rule tnscope_mutSignature:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.filter.maf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.filter.pdf"
+    params:
+        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
+        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnscope.output.filter" % (wildcards.run, wildcards.run),
+        name = lambda wildcards: wildcards.run
+    shell:
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
