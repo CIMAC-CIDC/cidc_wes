@@ -44,13 +44,13 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.vcf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.vcf" % (run,run))
         #MAF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
         #Mutation Signatures
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.pdf" % (run,run))
 
         #alleleFrac cutoffs
         for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
@@ -127,43 +127,36 @@ rule somatic_calling_TNscope:
     shell:
         """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
-#NOTE: the three filter rules a kind of redundant!
-rule tnsnv_vcftoolsfilter:
+rule vcftoolsfilter:
+    """General rule to filter the three different types of vcf.gz files"""
     input:
-        tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf.gz"
     output:
-        tnsnvfilteredvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.vcf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.vcf"
     params:
         index=config['genome_fasta'],
     shell:
-       """vcftools --gzvcf {input.tnsnvvcf} --remove-filtered-all --recode --stdout > {output.tnsnvfilteredvcf}"""
+       """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
 
-rule tnhaplotyper_vcftoolsfilter:
+
+rule gunzip_vcf:
+    """General rule to gunzip the three types of vcf.gz files-
+    tnscope_, tnsnv, and tnhaplotyper"""
     input:
-        tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf.gz"
     output:
-        tnhaplotyperfilteredvcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.vcf"
-    params:
-        index=config['genome_fasta'],
+        #Should we make this a temp?
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf"
     shell:
-       """vcftools --gzvcf {input.tnhaplotypervcf} --remove-filtered-all --recode --stdout > {output.tnhaplotyperfilteredvcf}"""
-
-rule tnscope_vcftoolsfilter:
+        #NOTE: we want to keep the original .gz vcf file
+        "gunzip -k {input}"
+        
+rule vcf2maf:
+    """General rule to convert the different vcf files into maf"""
     input:
-        tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf"
     output:
-        tnscopefilteredvcf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.vcf"
-    params:
-        index=config['genome_fasta'],
-    shell:
-       """vcftools --gzvcf {input.tnscopevcf} --remove-filtered-all --recode --stdout > {output.tnscopefilteredvcf}"""
-
-#NOTE: the three vcf2maf rules a kind of redundant!
-rule tnsnv_vcf2maf:
-    input:
-        tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.vcf"
-    output:
-        tnsnvmaf="analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.maf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
     threads: _vcf2maf_threads,
     params:
         index=config['genome_fasta'],
@@ -171,74 +164,18 @@ rule tnsnv_vcf2maf:
         vep_data=config['vep_data'],
         vep_assembly=config['vep_assembly'],
     shell:
-        #""" zcat {input.tnsnvvcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnsnvmaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnsnvvcf} --output-maf {output.tnsnvmaf} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
+        """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
 
-rule tnhaplotyper_vcf2maf:
+rule mutationSignature:
+    """General rule to do mutation signature analysis using mutProfiler.py"""
     input:
-        tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.vcf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
     output:
-        tnhaplotypermaf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.maf"
-    threads: _vcf2maf_threads,
-    params:
-        index=config['genome_fasta'],
-        vep_path="%s/bin" % config['wes_root'],
-        vep_data=config['vep_data'],
-        vep_assembly=config['vep_assembly'],
-    shell:
-        #""" zcat {input.tnhaplotypervcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnhaplotypermaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnhaplotypervcf} --output-maf {output.tnhaplotypermaf} --ref-fasta {params.index}  --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""
-
-rule tnscope_vcf2maf:
-    input:
-        tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.vcf"
-    output:
-        tnscopemaf="analysis/somaticVariants/{run}/{run}_tnscope.output.filter.maf"
-    threads: _vcf2maf_threads,
-    params:
-        index=config['genome_fasta'],
-        vep_path="%s/bin" % config['wes_root'],
-        vep_data=config['vep_data'],
-        vep_assembly=config['vep_assembly'],
-    shell:
-        #""" zcat {input.tnscopevcf}; perl vcf2maf.pl --input-vcf - --output-maf {output.tnscopemaf} --ref-fasta {params.index}"""
-        """vcf2maf.pl --input-vcf {input.tnscopevcf} --output-maf {output.tnscopemaf} --ref-fasta {params.index}  --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""
-
-rule tnsnv_mutSignature:
-    input:
-        "analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.maf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_tnsnv.output.filter.pdf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.pdf"
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
         matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnsnv.output.filter" % (wildcards.run, wildcards.run),
-        name = lambda wildcards: wildcards.run
-    shell:
-        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
-
-rule tnhaplotyper_mutSignature:
-    input:
-        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.maf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.filter.pdf"
-    params:
-        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
-        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter" % (wildcards.run, wildcards.run),
-        name = lambda wildcards: wildcards.run
-    shell:
-        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
-
-rule tnscope_mutSignature:
-    input:
-        "analysis/somaticVariants/{run}/{run}_tnscope.output.filter.maf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_tnscope.output.filter.pdf"
-    params:
-        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
-        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_tnscope.output.filter" % (wildcards.run, wildcards.run),
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.output" % (wildcards.run, wildcards.run, wildcards.caller),
         name = lambda wildcards: wildcards.run
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
@@ -249,7 +186,9 @@ rule alleleFrac_filter_tnscope:
     params:
         threshold=lambda wildcards: wildcards.frac
     output:
-        "analysis/somaticVariants/{run}/{run}_tnscope.output.{frac}.vcf"
+        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+        #with vcftoolsfilter
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.{frac,\d\.\d+}.vcf"
     shell:
         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
@@ -259,6 +198,8 @@ rule alleleFrac_filter_tnhaplotyper:
     params:
         threshold=lambda wildcards: wildcards.frac
     output:
-        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.{frac}.vcf"
+        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+        #with vcftoolsfilter
+        "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
     shell:
         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
