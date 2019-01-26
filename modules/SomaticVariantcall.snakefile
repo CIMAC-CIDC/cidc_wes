@@ -47,6 +47,11 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
+        #EXON mutations
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.exon.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.exon.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.exon.maf" % (run,run))
+
         #Mutation Signatures
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.pdf" % (run,run))
@@ -203,3 +208,12 @@ rule alleleFrac_filter_tnhaplotyper:
         "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
     shell:
         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
+
+rule maf_exon_filter:
+    """General rule to filter coding exon mutations"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.exon.maf"
+    shell:
+        "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
