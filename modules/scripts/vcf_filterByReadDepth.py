@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-vcf_filter.py- Given a VCF file (.vcf or vcf.gz), and an allele fraction threshold (double),
-will return a file with allele fractions (AF > threshold)
+vcf_filterByDepth.py- Given a VCF file (.vcf or vcf.gz), and an READ DEPTH/COVERAGE threshold (int),
+will return a file with READ DEPTH (DP > threshold)
 
-NOTE: key's in on the AF field int eh 8th and 9th cols
+NOTE: key's in on the DP field int eh 8th and 9th cols
 """
 
 import os
@@ -11,7 +11,7 @@ import sys
 from optparse import OptionParser
 import gzip
 
-def alleleFracFilter(infile, threshold=0.05,  outfile="Outputafter.vcf"):
+def readDepthFilter(infile, threshold, field, outfile):
     """infile - .vcf or .vcf.gz"""
     gzfile = infile.endswith(".gz")
     
@@ -39,23 +39,24 @@ def alleleFracFilter(infile, threshold=0.05,  outfile="Outputafter.vcf"):
         d = dict(zip(tags, vals))
 
         #filter
-        if ('AF' in d and float(d['AF']) <= float(threshold)):
+        if (field in d and int(d[field]) >= int(threshold)):
             #Write to out
             ofile.write("%s\n" % "\t".join(tmp))
 
 def main():
     usage = "USAGE: %prog -v [vcf_file.vcf] -t [threshold (double)] -o [output file.vcf]"
     optparser = OptionParser(usage=usage)
-    optparser.add_option("-v", "--vcf", help="vcf file to filter")
-    optparser.add_option("-t", "--threshold", help="% allele freq (double)", default=0.05)
-    optparser.add_option("-o", "--out", help="output file")
+    optparser.add_option("-v", "--vcf", help=".vcf/.vcf.gz file to filter")
+    optparser.add_option("-t", "--threshold", help="read depth/coverage threshold", default=50)
+    optparser.add_option("-f", "--field", help="the read depth field e.g. 'DP' (default) or 'AFDP'", default='DP')
+    optparser.add_option("-o", "--out", help="output file .vcf")
     (options, args) = optparser.parse_args(sys.argv)
 
     if not options.vcf or not options.threshold or not options.out:
         optparser.print_help()
         sys.exit(-1)
 
-    alleleFracFilter(options.vcf, options.threshold, options.out)
+    readDepthFilter(options.vcf, options.threshold, options.field, options.out)
 
 if __name__=='__main__':
     main()

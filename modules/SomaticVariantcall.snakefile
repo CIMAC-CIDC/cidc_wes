@@ -62,6 +62,11 @@ def somaticall_targets(wildcards):
             ls.append("analysis/somaticVariants/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
             ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
 
+        #read depth/coverage filter: 10x, 20x, 50x
+        for frac in [10, 20, 50]
+            ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
+            ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
+
     return ls
 
 rule somaticcalls_all:
@@ -217,3 +222,29 @@ rule maf_exon_filter:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.exon.maf"
     shell:
         "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
+
+rule coverage_filter_tnscope:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
+    params:
+        threshold=lambda wildcards: wildcards.frac,
+        field="AFDP" #NOTE this is the particular field tnscope vcf files
+    output:
+        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+        #with vcftoolsfilter; {frac} is int
+        "analysis/somaticVariants/{run}/{run}_tnscope.coverage.{frac,\d+}.vcf"
+    shell:
+        "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
+
+rule coverage_filter_tnsnv:
+    input:
+        "analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
+    params:
+        threshold=lambda wildcards: wildcards.frac,
+        field="DP" #NOTE this is the particular field tnsnv vcf files
+    output:
+        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+        #with vcftoolsfilter; {frac} is int
+        "analysis/somaticVariants/{run}/{run}_tnsnv.coverage.{frac,\d+}.vcf"
+    shell:
+        "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
