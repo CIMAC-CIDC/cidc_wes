@@ -91,11 +91,9 @@ rule somatic_calling_TNsnv:
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-        ##min tumor allele fraction needs to be changed based on different value cutoffs##
-        #LT: will need to iterate over this list of values and run shell each time
-        ##Values={0.05,0.1,0.2,0.3,0.4,0.5}
-        #LT: will need to iterate over this list of values and run shell each time
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
+        #"""{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
+        #REMOVING min_tumor_allele_frac param
+        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} {output.tnsnvvcf}"""
 
 
 rule somatic_calling_TNhaplotyper:
