@@ -15,8 +15,15 @@ def align_targets(wildcards):
         ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam.bai" % (sample,sample))
         #ls.append("analysis/align/%s/%s.unmapped.fq.gz" % (sample,sample))
-        ls.append("analysis/align/%s/%s_readsPerChrom.txt" % (sample,sample))
+        #ls.append("analysis/align/%s/%s_readsPerChrom.txt" % (sample,sample))
     ls.append("analysis/align/mapping.csv")
+    return ls
+
+def all_mapping_targets(wildcards):
+    """Generates just the mapping targets for rule map_all"""
+    ls = []
+    for sample in config["samples"]:
+        ls.append("analysis/align/%s/%s.sorted.bam" % (sample,sample))
     return ls
 
 def getFastq(wildcards):
@@ -39,6 +46,10 @@ def getBam(wildcards):
 rule align_all:
     input:
         align_targets
+
+rule map_all:
+    input:
+        all_mapping_targets
 
 rule sentieon_bwa:
     input:
