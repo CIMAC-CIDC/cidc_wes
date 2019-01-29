@@ -55,7 +55,8 @@ rule sentieon_bwa:
     input:
         getFastq
     output:
-        "analysis/align/{sample}/{sample}.sorted.bam" 
+        bam="analysis/align/{sample}/{sample}.sorted.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.bam.bai"
     params:
         sentieon_path=config['sentieon_path'],
         bwa_index=config['bwa_index'],
@@ -67,7 +68,7 @@ rule sentieon_bwa:
     message: "ALIGN: Running sentieon BWA mem for alignment"
     log: _logfile
     shell:
-        """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output} --sam2bam -i -"""
+        """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output.bam} --sam2bam -i -"""
 
 #rule sortBams:
 #    """General sort rule--take a bam {filename}.bam and 
@@ -87,6 +88,8 @@ rule uniquely_mapped_reads:
     """Get the uniquely mapped reads"""
     input:
         "analysis/align/{sample}/{sample}.sorted.bam"
+    params:
+        filter="\'mapping_quality >= 1\'"
     output:
         "analysis/align/{sample}/{sample}_unique.sorted.bam"
     message: "ALIGN: Filtering for uniquely mapped reads"
@@ -95,8 +98,8 @@ rule uniquely_mapped_reads:
     shell:
         #NOTE: this is the generally accepted way of doing this as multiply 
         #mapped reads have a Quality score of 0
-        #NOTE: -@ = --threads
-        "samtools view -bq 1 -@ {threads} {input} > {output}"
+        #"samtools view -bq 1 -@ {threads} {input} > {output}"
+        "sambamba view -f bam -F {params.filter} -t {threads} {input} > {output}"
 
 rule map_stats:
     """Get the mapping stats for each aligment run"""
@@ -114,8 +117,8 @@ rule map_stats:
     shell:
         #FLAGSTATS is the top of the file, and we append the uniquely mapped
         #reads to the end of the file
-        "samtools flagstat {input.bam} > {output} 2>>{log}"
-        " && samtools view -c {input.uniq_bam} >> {output} 2>> {log}"
+        "sambamba flagstat -t {threads} {input.bam} > {output} 2>>{log}"
+        " && sambamba view -c -t {threads} {input.uniq_bam} >> {output} 2>> {log}"
 
 rule collect_map_stats:
     """Collect and parse out the mapping stats for the ALL of the samples"""
@@ -146,18 +149,7 @@ rule sortUniqueBams:
         "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
 
 #REPLACING picard with sentieon - next two rules
-# rule dedupSortedUniqueBams:
-#     """Dedup sorted unique bams using PICARD
-#     output {sample}_unique.sorted.dedup.bam"""
-#     input:
-#         "analysis/align/{sample}/{sample}_unique.sorted.bam"
-#     output:
-#         "analysis/align/{sample}/{sample}_unique.sorted.dedup.bam"
-#     message: "ALIGN: dedup sorted unique bam file"
-#     log: _logfile
-#     threads: _align_threads
-#     shell:
-#         "picard MarkDuplicates I={input} O={output} REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT METRICS_FILE={log} 2>> {log}"
+#NOTE: if we don't have a sentieon license, then should use sambamba markdup!!
 
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
@@ -195,9 +187,9 @@ rule dedupSortedUniqueBam:
 rule indexBam:
     """Index bam file"""
     input:
-        "analysis/align/{sample}/{prefix}.bam"
+        "analysis/align/{sample}/{prefix}_unique.{suffix}.bam"
     output:
-        "analysis/align/{sample}/{prefix}.bam.bai"
+        "analysis/align/{sample}/{prefix}_unique.{suffix}.bam.bai"
     message: "ALIGN: indexing bam file {input}"
     log: _logfile
     threads: _align_threads
@@ -205,23 +197,23 @@ rule indexBam:
         "sambamba index -t {threads} {input} {output}"
 
 #DEPRECATE?
-rule readsPerChromStat:
-    """For each sample, generates a _readsPerChrom.txt file, which is:
-    chr1   #readsOnChr1
-    ...
-    chrX   #readsOnChrX
-    """
-    input:
-        bam = "analysis/align/{sample}/{sample}.sorted.bam",
-        #NOTE: even though we don't use the bai, we need to ensure bam sorted
-        bai = "analysis/align/{sample}/{sample}.sorted.bam.bai"
-    params:
-        awk_call = """awk '{print $1 \"\\t\" $3; s+=$3} END {print \"total reads = \" s}'"""
-    output:
-        "analysis/align/{sample}/{sample}_readsPerChrom.txt"
-    message: "ALIGN: collecting the number of reads per chrom"
-    log: _logfile
-    shell:
-        "cidc_wes/modules/scripts/align_readsPerChrom.sh -a {input.bam} > {output} 2>> {log}"
+# rule readsPerChromStat:
+#     """For each sample, generates a _readsPerChrom.txt file, which is:
+#     chr1   #readsOnChr1
+#     ...
+#     chrX   #readsOnChrX
+#     """
+#     input:
+#         bam = "analysis/align/{sample}/{sample}.sorted.bam",
+#         #NOTE: even though we don't use the bai, we need to ensure bam sorted
+#         bai = "analysis/align/{sample}/{sample}.sorted.bam.bai"
+#     params:
+#         awk_call = """awk '{print $1 \"\\t\" $3; s+=$3} END {print \"total reads = \" s}'"""
+#     output:
+#         "analysis/align/{sample}/{sample}_readsPerChrom.txt"
+#     message: "ALIGN: collecting the number of reads per chrom"
+#     log: _logfile
+#     shell:
+#         "cidc_wes/modules/scripts/align_readsPerChrom.sh -a {input.bam} > {output} 2>> {log}"
 
     
