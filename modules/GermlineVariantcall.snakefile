@@ -23,13 +23,13 @@ rule germline_calling_DNAscope:
         dnascopevcf="analysis/germlineVariants/{run}/{run}_dnascope.output.vcf.gz"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        mills= config['Mills_indels'],
-        g1000= config['G1000_indels'],
+        #mills= config['Mills_indels'], #not used
+        #g1000= config['G1000_indels'], #not used
     threads:_germlinecall_threads
     shell:
-       """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo DNAscope  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.dnascopevcf}"""
+       """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo DNAscope  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.dnascopevcf}"""
 
 rule germline_calling_Haplotyper:
     input:
@@ -38,11 +38,11 @@ rule germline_calling_Haplotyper:
         haplotypervcf="analysis/germlineVariants/{run}/{run}_haplotyper.output.vcf.gz"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        mills= config['Mills_indels'],
-        g1000= config['G1000_indels'],
+        #mills= config['Mills_indels'], #not used
+        #g1000= config['G1000_indels'], #not used
     threads:_germlinecall_threads
     shell:
-       """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo Haplotyper  --dbsnp {params.dbsnp} --emit_conf=30 --call_conf=30  {output.haplotypervcf}"""
+       """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo Haplotyper  --dbsnp {params.dbsnp} --emit_conf=30 --call_conf=30  {output.haplotypervcf}"""
 

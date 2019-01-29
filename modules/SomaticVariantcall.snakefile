@@ -81,19 +81,19 @@ rule somatic_calling_TNsnv:
         tnsnvvcf="analysis/somaticVariants/{run}/{run}_tnsnv.output.vcf.gz"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        mills= config['Mills_indels'],
-        g1000= config['G1000_indels'],
+        #mills= config['Mills_indels'], #not used
+        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-        #"""{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
+        #"""{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
         #REMOVING min_tumor_allele_frac param
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} {output.tnsnvvcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} {output.tnsnvvcf}"""
 
 
 rule somatic_calling_TNhaplotyper:
@@ -103,17 +103,17 @@ rule somatic_calling_TNhaplotyper:
         tnhaplotypervcf="analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.vcf.gz"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        mills= config['Mills_indels'],
-        g1000= config['G1000_indels'],
+        #mills= config['Mills_indels'], #not used
+        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
 
 
 rule somatic_calling_TNscope:
@@ -123,17 +123,17 @@ rule somatic_calling_TNscope:
         tnscopevcf="analysis/somaticVariants/{run}/{run}_tnscope.output.vcf.gz"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        mills= config['Mills_indels'],
-        g1000= config['G1000_indels'],
+        #mills= config['Mills_indels'], #not used
+        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
 rule vcftoolsfilter:
     """General rule to filter the three different types of vcf.gz files"""

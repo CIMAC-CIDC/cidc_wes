@@ -66,13 +66,13 @@ rule Indel_realigner_sentieon:
          "INDEL REALIGNER: indel realigner for  mapped reads"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
-        dbsnp=config['dbsnp'],
+        sentieon_path=config['sentieon_path'],
+        #dbsnp=config['dbsnp'], #not used!
         mills=config['Mills_indels'],
         g1000=config['G1000_indels'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.bam} --algo Realigner -k {params.mills} -k {params.g1000} {output.realignbam}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.bam} --algo Realigner -k {params.mills} -k {params.g1000} {output.realignbam}"""
 
 rule Base_recalibration_precal_sentieon:
     """base recalibration for realigned files"""
@@ -85,13 +85,13 @@ rule Base_recalibration_precal_sentieon:
         " PRE BASE RECALIBRATION: base recalibration for  realigned files"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.realignbam} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.prerecaltable} --algo ReadWriter {output.recalibratedbam}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.realignbam} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.prerecaltable} --algo ReadWriter {output.recalibratedbam}"""
 
 rule Base_recalibration_postcal_sentieon:
     """post recalibration for realigned files"""
@@ -104,13 +104,13 @@ rule Base_recalibration_postcal_sentieon:
         "POST BASE RECALIBRATION: post base recalibration for  realigned files"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.recalibratedbam} -q {input.prerecaltable} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.postrecaltable}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.recalibratedbam} -q {input.prerecaltable} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.postrecaltable}"""
 
 rule Base_recalibration_sentieon:
     """ recalibration for realigned files"""
@@ -123,10 +123,10 @@ rule Base_recalibration_sentieon:
         "DIFF BASE RECALIBRATION: Difference in pre and post processing of realigned files"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -t {threads} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
+        """{params.sentieon_path}/sentieon driver -t {threads} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
 
 rule Base_recalibration_plot:
     """base realigner plotter for recalibrated files"""
@@ -138,10 +138,10 @@ rule Base_recalibration_plot:
         "BASE RECALIBRATED PLOTS: base realigner plotting"
     params:
         #index=config['genome_fasta'],
-        index1=config['sentieon_path'],
+        sentieon_path=config['sentieon_path'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon plot bqsr -o {output.recalplot}  {input.recalfile}"""
+        """{params.sentieon_path}/sentieon plot bqsr -o {output.recalplot}  {input.recalfile}"""
 
 rule corealignment:
     input:
@@ -153,10 +153,10 @@ rule corealignment:
         "analysis/corealignments/{run}/{run}_tn_corealigned.bam"
     params:
         index=config['genome_fasta'],
-        index1=config['sentieon_path'],
-        dbsnp= config['dbsnp'],
+        sentieon_path=config['sentieon_path'],
+        #dbsnp= config['dbsnp'], #not used
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
