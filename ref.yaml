@@ -15,6 +15,10 @@ hg38:
 
   vep_data: ./ref_files/hg38/vep
   vep_assembly: GRCh38
+
+  #Panel of normals
+  PoNs: ./ref_files/hg38/pons/MDA_Broad_Miao
+  PoNs_target: ./ref_files/hg38/pons/MDA.liftover.hg38.bed
   
 hg19:
   bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
