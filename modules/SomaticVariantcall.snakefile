@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_somaticcall_threads=16
+_somaticcall_threads=32
 _vcf2maf_threads=4
 
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
@@ -35,6 +35,7 @@ def somaticall_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
+        #Consolidate these with an inner-for-loop?
         ls.append("analysis/somaticVariants/%s/%s_call.output.stats" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.vcf.gz" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.vcf.gz" % (run,run))
@@ -83,13 +84,12 @@ rule somatic_calling_TNsnv:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        #mills= config['Mills_indels'], #not used
-        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
-        #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.somatic_calling_TNsnv.txt"
     shell:
         #"""{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
         #REMOVING min_tumor_allele_frac param
@@ -105,13 +105,13 @@ rule somatic_calling_TNhaplotyper:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        #mills= config['Mills_indels'], #not used
-        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.somatic_calling_TNhaplotyper.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
 
@@ -125,13 +125,12 @@ rule somatic_calling_TNscope:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-        #mills= config['Mills_indels'], #not used
-        #g1000= config['G1000_indels'], #not used
         #JUST sample names - can also use the helper fns, e.g.
-        #normal = lambda wildcards: getNormal_sample(wildcards)
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_somaticcall_threads
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.somatic_calling_TNscope.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
@@ -143,6 +142,8 @@ rule vcftoolsfilter:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.vcf"
     params:
         index=config['genome_fasta'],
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcftoolsfilter.txt"
     shell:
        """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
 
@@ -155,6 +156,8 @@ rule gunzip_vcf:
     output:
         #Should we make this a temp?
         "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_gunzip_vcf.txt"
     shell:
         #NOTE: we want to keep the original .gz vcf file
         "gunzip -k {input}"
@@ -171,6 +174,8 @@ rule vcf2maf:
         vep_path="%s/bin" % config['wes_root'],
         vep_data=config['vep_data'],
         vep_assembly=config['vep_assembly'],
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcf2maf.txt"
     shell:
         """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
 
@@ -185,6 +190,8 @@ rule mutationSignature:
         matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
         outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.output" % (wildcards.run, wildcards.run, wildcards.caller),
         name = lambda wildcards: wildcards.run
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_mutationSignature.txt"
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
@@ -197,6 +204,8 @@ rule alleleFrac_filter_tnscope:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter
         "analysis/somaticVariants/{run}/{run}_tnscope.output.{frac,\d\.\d+}.vcf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.alleleFrac_filter_tnscope.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
@@ -209,6 +218,8 @@ rule alleleFrac_filter_tnhaplotyper:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter
         "analysis/somaticVariants/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.alleleFrac_filter_tnhaplotyper.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
@@ -218,6 +229,8 @@ rule maf_exon_filter:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
     output:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.exon.maf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_maf_exon_filter.txt"
     shell:
         "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
 
@@ -231,6 +244,8 @@ rule coverage_filter_tnscope:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter; {frac} is int
         "analysis/somaticVariants/{run}/{run}_tnscope.coverage.{frac,\d+}.vcf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.coverage_filter_tnscope.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
 
@@ -244,5 +259,7 @@ rule coverage_filter_tnsnv:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter; {frac} is int
         "analysis/somaticVariants/{run}/{run}_tnsnv.coverage.{frac,\d+}.vcf"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.coverage_filter_tnsnv.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
