@@ -28,6 +28,8 @@ rule CoverageMetrics_sentieon:
         index1=config['sentieon_path'],
         cov_thresh=50, #LT: put this in config.yaml
     threads: _coveragemetrics_threads
+    benchmark:
+        "benchmarks/coverage/{sample}/{sample}.CoverageMetrics.txt"
     shell:
         #change cov_thresh as an user input config
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.coveragemetrics}"""
