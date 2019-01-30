@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_realigner_threads=16
+_realigner_threads=32
 
 
 def runsHelper(wildcards, iindex, input_template):
@@ -71,6 +71,8 @@ rule Indel_realigner_sentieon:
         mills=config['Mills_indels'],
         g1000=config['G1000_indels'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{sample}/{sample}.Indel_realigner_sentieon.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.bam} --algo Realigner -k {params.mills} -k {params.g1000} {output.realignbam}"""
 
@@ -90,6 +92,8 @@ rule Base_recalibration_precal_sentieon:
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_precal_sentieon.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.realignbam} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.prerecaltable} --algo ReadWriter {output.recalibratedbam}"""
 
@@ -109,6 +113,8 @@ rule Base_recalibration_postcal_sentieon:
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_postcal_sentieon.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.recalibratedbam} -q {input.prerecaltable} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000}  {output.postrecaltable}"""
 
@@ -125,6 +131,8 @@ rule Base_recalibration_sentieon:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_sentieon.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -t {threads} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
 
@@ -140,6 +148,8 @@ rule Base_recalibration_plot:
         #index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_plot.txt"    
     shell:
         """{params.sentieon_path}/sentieon plot bqsr -o {output.recalplot}  {input.recalfile}"""
 
@@ -158,5 +168,7 @@ rule corealignment:
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
     threads: _realigner_threads
+    benchmark:
+        "benchmarks/recalibration/{run}/{run}.corealignment.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
