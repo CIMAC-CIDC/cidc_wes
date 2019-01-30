@@ -1,6 +1,6 @@
 #MODULE: Data Metrics by Sentieon
 #import os
-_metrics_threads=8
+_metrics_threads=32
 ##sentieon  config sentieon_path in the config file as below
 #sentieon_path="/cluster/jxfu/proj/CIDC/Sentieon/release/sentieon-genomics-201808.01/bin/"
 #export SENTIEON_LICENSE=172.24.216.24:8990
@@ -43,6 +43,8 @@ rule Metrics_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
     threads: _metrics_threads
+    benchmark:
+        "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon.txt"
     shell:
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} -i {input.bam} --algo MeanQualityByCycle {output.mq} --algo QualDistribution {output.qd}  --algo GCBias --summary {output.gcsummary}  {output.gcmetrics} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.insertsize}"""
 
@@ -64,5 +66,7 @@ rule Metrics_sentieon_plots:
     params:
         index1=config['sentieon_path'],
     threads: _metrics_threads
+    benchmark:
+        "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon_plots.txt"
     shell:
         """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  gc={input.gcmetrics} qd={input.qd} mq={input.mq}  isize={input.insertsize}"""
