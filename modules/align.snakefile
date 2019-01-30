@@ -1,7 +1,7 @@
 #MODULE: Align fastq files to genome - common rules
 #import os
 _logfile="analysis/logs/align.log"
-_align_threads=8
+_align_threads=32
 _bwa_threads=16
 
 def align_targets(wildcards):
