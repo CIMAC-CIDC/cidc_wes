@@ -58,8 +58,8 @@ rule recalibration_all:
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam",
-         bai="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam.bai",
+         bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+         bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
          realignbam="analysis/align/{sample}/{sample}.realigned.bam"
     message:

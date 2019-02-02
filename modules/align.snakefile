@@ -10,12 +10,12 @@ def align_targets(wildcards):
     for sample in config["samples"]:
         ls.append("analysis/align/%s/%s.sorted.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s.sorted.bam.bai" % (sample,sample))
-        ls.append("analysis/align/%s/%s_unique.sorted.bam" % (sample,sample))
-        ls.append("analysis/align/%s/%s_unique.sorted.bam.bai"%(sample,sample))
-        ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam" % (sample,sample))
-        ls.append("analysis/align/%s/%s_unique.sorted.dedup.bam.bai" % (sample,sample))
-        #ls.append("analysis/align/%s/%s.unmapped.fq.gz" % (sample,sample))
-        #ls.append("analysis/align/%s/%s_readsPerChrom.txt" % (sample,sample))
+        
+        #REMOVING THIS!
+        #ls.append("analysis/align/%s/%s_unique.sorted.bam" % (sample,sample))
+        #ls.append("analysis/align/%s/%s_unique.sorted.bam.bai"%(sample,sample))
+        ls.append("analysis/align/%s/%s.sorted.dedup.bam" % (sample,sample))
+        ls.append("analysis/align/%s/%s.sorted.dedup.bam.bai" % (sample,sample))
     ls.append("analysis/align/mapping.csv")
     return ls
 
@@ -28,20 +28,6 @@ def all_mapping_targets(wildcards):
 
 def getFastq(wildcards):
     return config["samples"][wildcards.sample]
-
-#DERPRECATE?
-def getBam(wildcards):
-    """This input fn will check to see if the user specified a .fastq or a .bam
-    for the sample.  IF the former (.fastq), will simply return the canonical
-    path, otherwise (.bam) will return the user-specified (bam) path"""
-    #CHECK first entry's file suffix
-    s = wildcards.sample
-    first_file = config["samples"][wildcards.sample][0]
-    ret = "analysis/align/%s/%s.bam" % (s,s)
-    if first_file.endswith('.bam'):
-        #CLEANER to check for .bam vs (.fastq, fq, fq.gz, etc)
-        ret = first_file
-    return [ret]
 
 rule align_all:
     input:
@@ -70,42 +56,30 @@ rule sentieon_bwa:
     shell:
         """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output.bam} --sam2bam -i -"""
 
-#rule sortBams:
-#    """General sort rule--take a bam {filename}.bam and 
-#    output {filename}.sorted.bam"""
-#    input:
-#        "analysis/align/{sample}/{filename}.bam"
-#        #getBam
-#    output:
-#        "analysis/align/{sample}/{filename}.sorted.bam",
-#    message: "ALIGN: sort bam file"
-#    log: _logfile
-#    threads: _align_threads
-#    shell:
-#        "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
+#REMOVING THIS
+# rule uniquely_mapped_reads:
+#     """Get the uniquely mapped reads"""
+#     input:
+#         "analysis/align/{sample}/{sample}.sorted.bam"
+#     params:
+#         filter="\'mapping_quality >= 1\'"
+#     output:
+#         "analysis/align/{sample}/{sample}_unique.sorted.bam"
+#     message: "ALIGN: Filtering for uniquely mapped reads"
+#     log: _logfile
+#     threads: _align_threads
+#     shell:
+#         #NOTE: this is the generally accepted way of doing this as multiply 
+#         #mapped reads have a Quality score of 0
+#         #"samtools view -bq 1 -@ {threads} {input} > {output}"
+#         "sambamba view -f bam -F {params.filter} -t {threads} {input} > {output}"
 
-rule uniquely_mapped_reads:
-    """Get the uniquely mapped reads"""
-    input:
-        "analysis/align/{sample}/{sample}.sorted.bam"
-    params:
-        filter="\'mapping_quality >= 1\'"
-    output:
-        "analysis/align/{sample}/{sample}_unique.sorted.bam"
-    message: "ALIGN: Filtering for uniquely mapped reads"
-    log: _logfile
-    threads: _align_threads
-    shell:
-        #NOTE: this is the generally accepted way of doing this as multiply 
-        #mapped reads have a Quality score of 0
-        #"samtools view -bq 1 -@ {threads} {input} > {output}"
-        "sambamba view -f bam -F {params.filter} -t {threads} {input} > {output}"
-
+#NOTE: dropping uniquely sorted.bam
 rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
-        uniq_bam="analysis/align/{sample}/{sample}_unique.sorted.bam"
+        #uniq_bam="analysis/align/{sample}/{sample}_unique.sorted.bam"
     output:
         #temp("analysis/align/{sample}/{sample}_mapping.txt")
         "analysis/align/{sample}/{sample}_mapping.txt"
@@ -118,7 +92,7 @@ rule map_stats:
         #FLAGSTATS is the top of the file, and we append the uniquely mapped
         #reads to the end of the file
         "sambamba flagstat -t {threads} {input.bam} > {output} 2>>{log}"
-        " && sambamba view -c -t {threads} {input.uniq_bam} >> {output} 2>> {log}"
+        #" && sambamba view -c -t {threads} {input.uniq_bam} >> {output} 2>> {log}"
 
 rule collect_map_stats:
     """Collect and parse out the mapping stats for the ALL of the samples"""
@@ -133,20 +107,21 @@ rule collect_map_stats:
         files = " -f ".join(input)
         shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
 
-rule sortUniqueBams:
-    """General sort rule--take a bam {filename}.bam and 
-    output {filename}.sorted.bam"""
-    input:
-        "analysis/align/{sample}/{sample}_unique.bam"
-    output:
-        #CANNOT temp this b/c it's used by qdnaseq!
-        "analysis/align/{sample}/{sample}_unique.sorted.bam",
-        #"analysis/align/{sample}/{sample}_unique.sorted.bam.bai"
-    message: "ALIGN: sort bam file"
-    log: _logfile
-    threads: _align_threads
-    shell:
-        "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
+#REMOVING THIS
+# rule sortUniqueBams:
+#     """General sort rule--take a bam {filename}.bam and 
+#     output {filename}.sorted.bam"""
+#     input:
+#         "analysis/align/{sample}/{sample}_unique.bam"
+#     output:
+#         #CANNOT temp this b/c it's used by qdnaseq!
+#         "analysis/align/{sample}/{sample}_unique.sorted.bam",
+#         #"analysis/align/{sample}/{sample}_unique.sorted.bam.bai"
+#     message: "ALIGN: sort bam file"
+#     log: _logfile
+#     threads: _align_threads
+#     shell:
+#         "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
 
 #REPLACING picard with sentieon - next two rules
 #NOTE: if we don't have a sentieon license, then should use sambamba markdup!!
@@ -154,10 +129,10 @@ rule sortUniqueBams:
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
     input:
-        bam="analysis/align/{sample}/{sample}_unique.sorted.bam",
-        bai="analysis/align/{sample}/{sample}_unique.sorted.bam.bai",
+        bam="analysis/align/{sample}/{sample}.sorted.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
     output:
-        "analysis/align/{sample}/{sample}_unique.sorted.score.txt"
+        "analysis/align/{sample}/{sample}.sorted.score.txt"
     message: "ALIGN: score sample"
     log: _logfile
     threads: _align_threads
@@ -170,12 +145,13 @@ rule dedupSortedUniqueBam:
     """Dedup sorted unique bams using sentieon
      output {sample}_unique.sorted.dedup.bam"""
     input:
-        bam="analysis/align/{sample}/{sample}_unique.sorted.bam",
-        bai="analysis/align/{sample}/{sample}_unique.sorted.bam.bai",
-        score="analysis/align/{sample}/{sample}_unique.sorted.score.txt"
+        bam="analysis/align/{sample}/{sample}.sorted.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
+        score="analysis/align/{sample}/{sample}.sorted.score.txt"
     output:
-        bamm="analysis/align/{sample}/{sample}_unique.sorted.dedup.bam",
-        met="analysis/align/{sample}/{sample}_unique.sorted.dedup.metric.txt",
+        bamm="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+        baii="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
+        met="analysis/align/{sample}/{sample}.sorted.dedup.metric.txt",
     message: "ALIGN: dedup sorted unique bam file"
     log: _logfile
     threads: _align_threads
@@ -184,36 +160,17 @@ rule dedupSortedUniqueBam:
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
 
-rule indexBam:
-    """Index bam file"""
-    input:
-        "analysis/align/{sample}/{prefix}_unique.{suffix}.bam"
-    output:
-        "analysis/align/{sample}/{prefix}_unique.{suffix}.bam.bai"
-    message: "ALIGN: indexing bam file {input}"
-    log: _logfile
-    threads: _align_threads
-    shell:
-        "sambamba index -t {threads} {input} {output}"
-
-#DEPRECATE?
-# rule readsPerChromStat:
-#     """For each sample, generates a _readsPerChrom.txt file, which is:
-#     chr1   #readsOnChr1
-#     ...
-#     chrX   #readsOnChrX
-#     """
+# REMOVING this
+# rule indexBam:
+#     """Index bam file"""
 #     input:
-#         bam = "analysis/align/{sample}/{sample}.sorted.bam",
-#         #NOTE: even though we don't use the bai, we need to ensure bam sorted
-#         bai = "analysis/align/{sample}/{sample}.sorted.bam.bai"
-#     params:
-#         awk_call = """awk '{print $1 \"\\t\" $3; s+=$3} END {print \"total reads = \" s}'"""
+#         "analysis/align/{sample}/{prefix}_unique.{suffix}.bam"
 #     output:
-#         "analysis/align/{sample}/{sample}_readsPerChrom.txt"
-#     message: "ALIGN: collecting the number of reads per chrom"
+#         "analysis/align/{sample}/{prefix}_unique.{suffix}.bam.bai"
+#     message: "ALIGN: indexing bam file {input}"
 #     log: _logfile
+#     threads: _align_threads
 #     shell:
-#         "cidc_wes/modules/scripts/align_readsPerChrom.sh -a {input.bam} > {output} 2>> {log}"
+#         "sambamba index -t {threads} {input} {output}"
 
     

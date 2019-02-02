@@ -48,22 +48,29 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
-        #EXON mutations
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.exon.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.exon.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.exon.maf" % (run,run))
-
+        #Filtered MAF
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
         #Mutation Signatures
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.pdf" % (run,run))
+        #Filtered Mutation Signatures
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.pdf" % (run,run))
 
-        #alleleFrac cutoffs
+        #EXON mutations- should this be on full or filtered?
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.exon.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.exon.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.exon.maf" % (run,run))
+        #alleleFrac cutoffs - should this be on full or filtered?
         for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
             ls.append("analysis/somaticVariants/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
             ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
 
-        #read depth/coverage filter: 10x, 20x, 50x
+        #read depth/coverage filter: 10x, 20x, 50x - should this be on full or filtered?
         for frac in [10, 20, 50]:
             ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
             ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
@@ -179,6 +186,23 @@ rule vcf2maf:
     shell:
         """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
 
+rule vcf2maf_filter:
+    """General rule to convert the different vcf files into maf"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.vcf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.maf"
+    threads: _vcf2maf_threads,
+    params:
+        index=config['genome_fasta'],
+        vep_path="%s/bin" % config['wes_root'],
+        vep_data=config['vep_data'],
+        vep_assembly=config['vep_assembly'],
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcf2maf_filter.txt"
+    shell:
+        """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
+
 rule mutationSignature:
     """General rule to do mutation signature analysis using mutProfiler.py"""
     input:
@@ -192,6 +216,22 @@ rule mutationSignature:
         name = lambda wildcards: wildcards.run
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run}.{caller}_mutationSignature.txt"
+    shell:
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+
+rule mutationSignature_filter:
+    """General rule to do mutation signature analysis using mutProfiler.py"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.maf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.pdf"
+    params:
+        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
+        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.output.filter" % (wildcards.run, wildcards.run, wildcards.caller),
+        name = lambda wildcards: wildcards.run
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_mutationSignature.filter.txt"
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 

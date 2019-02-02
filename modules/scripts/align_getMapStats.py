@@ -44,8 +44,9 @@ def main():
         l = f.readline()
         l = f.readline()
         l = f.readline()
-        uniq_mapped = int(f.readline().strip())
-        print(",".join([sampleID,str(total),str(mapped),str(uniq_mapped)]))#"%.2f" % (float(mapped)/total *100)]))
+        #uniq_mapped = int(f.readline().strip())
+        #print(",".join([sampleID,str(total),str(mapped),str(uniq_mapped)]))#"%.2f" % (float(mapped)/total *100)]))
+        print(",".join([sampleID,str(total),str(mapped)]))
 
 if __name__=='__main__':
     main()
