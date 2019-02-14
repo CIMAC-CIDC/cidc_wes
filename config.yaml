@@ -7,8 +7,7 @@ sentieon_path: "/path/to/sentieon"
 #Tell us what assembly to use (!! MUST be defined in chips/ref.yaml !!)
 assembly: hg38
 
-#NOTE: CNV analysis using QDNAseq R pkg- {true, false}
-#cnv_analysis: true
+vcf2maf_bufferSize: 1000 #for standard8 #50000 for highmem-64
 
 # DEFINE the samples- each sample should have a name, e.g. SAMPLE1
 # and a path to the input file, e.g. data/sample1.fastq.gz

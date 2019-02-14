@@ -3,7 +3,7 @@
 #from string import Template
 
 _somaticcall_threads=32
-_vcf2maf_threads=4
+#_vcf2maf_threads=4
 
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
@@ -41,25 +41,25 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.vcf.gz" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.vcf.gz" % (run,run))
         #FILTERED VCF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.vcf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.vcf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.vcf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.vcf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.vcf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.vcf" % (run,run))
         #MAF
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
         #Filtered MAF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.maf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.maf" % (run,run))
         #Mutation Signatures
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.pdf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.pdf" % (run,run))
         #Filtered Mutation Signatures
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.pdf" % (run,run))
+        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.pdf" % (run,run))
 
         #EXON mutations- should this be on full or filtered?
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.exon.maf" % (run,run))
@@ -146,14 +146,13 @@ rule vcftoolsfilter:
     input:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf.gz"
     output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.vcf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf"
     params:
         index=config['genome_fasta'],
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcftoolsfilter.txt"
     shell:
        """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
-
 
 rule gunzip_vcf:
     """General rule to gunzip the three types of vcf.gz files-
@@ -168,70 +167,56 @@ rule gunzip_vcf:
     shell:
         #NOTE: we want to keep the original .gz vcf file
         "gunzip -k {input}"
-        
+
+rule vcfVEP:
+    """Rule to annotate vcf files with vep"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.{type}.vcf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.{type}.vep.vcf"
+    params:
+        vep_data=config['vep_data'],
+        vep_synonyms=config['vep_synonyms'],
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}.{type}_vcfVEP.txt"
+    shell:
+        "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs"
+    
 rule vcf2maf:
     """General rule to convert the different vcf files into maf"""
     input:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.vcf"
+        vcf="analysis/somaticVariants/{run}/{run}_{caller}.{type}.vcf",
+        vep="analysis/somaticVariants/{run}/{run}_{caller}.{type}.vep.vcf",
     output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
-    threads: _vcf2maf_threads,
+        "analysis/somaticVariants/{run}/{run}_{caller}.{type}.maf"
     params:
-        index=config['genome_fasta'],
-        vep_path="%s/bin" % config['wes_root'],
-        vep_data=config['vep_data'],
+        vep_index=config['vep_fasta'],
+        vep_custom_enst= config['vep_custom_enst'],
         vep_assembly=config['vep_assembly'],
-    benchmark:
-        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcf2maf.txt"
-    shell:
-        """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
+        vep_filter= config['vep_filter'],
+        buffer_size=config['vcf2maf_bufferSize'],
 
-rule vcf2maf_filter:
-    """General rule to convert the different vcf files into maf"""
-    input:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.vcf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.maf"
-    threads: _vcf2maf_threads,
-    params:
-        index=config['genome_fasta'],
-        vep_path="%s/bin" % config['wes_root'],
-        vep_data=config['vep_data'],
-        vep_assembly=config['vep_assembly'],
+        tumor= lambda wildcards: getTumor_sample(wildcards),
+        normal= lambda wildcards: getNormal_sample(wildcards),
     benchmark:
-        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_vcf2maf_filter.txt"
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.txt"
     shell:
-        """vcf2maf.pl --input-vcf {input} --output-maf {output} --ref-fasta {params.index} --vep-path {params.vep_path} --vep-data {params.vep_data} --ncbi-build {params.vep_assembly}"""  
+        """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size}"""
+
 
 rule mutationSignature:
     """General rule to do mutation signature analysis using mutProfiler.py"""
     input:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.maf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.{type}.maf"
     output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.pdf"
+        "analysis/somaticVariants/{run}/{run}_{caller}.{type}.pdf"
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
         matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.output" % (wildcards.run, wildcards.run, wildcards.caller),
+        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.%s" % (wildcards.run, wildcards.run, wildcards.caller, wildcards.type),
         name = lambda wildcards: wildcards.run
     benchmark:
-        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_mutationSignature.txt"
-    shell:
-        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
-
-rule mutationSignature_filter:
-    """General rule to do mutation signature analysis using mutProfiler.py"""
-    input:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.maf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.filter.pdf"
-    params:
-        index= lambda wildcards: os.path.abspath(config['genome_fasta']),
-        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somaticVariants/%s/%s_%s.output.filter" % (wildcards.run, wildcards.run, wildcards.caller),
-        name = lambda wildcards: wildcards.run
-    benchmark:
-        "benchmarks/somaticvariantcall/{run}/{run}.{caller}_mutationSignature.filter.txt"
+        "benchmarks/somaticvariantcall/{run}/{run}.{caller}.{type}_mutationSignature.txt"
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 

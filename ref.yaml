@@ -14,6 +14,12 @@ hg38:
   G1000_indels: ./ref_files/hg38/snp/1000G_phase1.snps.high_confidence.hg38.vcf.gz
 
   vep_data: ./ref_files/hg38/vep
+  vep_synonyms: ./ref_files/hg38/vep/homo_sapiens/91_GRCh38/chr_synonyms.txt
+  vep_custom_enst: ./ref_files/hg38/vep/myc_isoform_overrides_uniprot
+  #NOTE: this should be deprecated once we have all of the results
+  #harmoized onto a single assembly
+  vep_fasta: ./ref_files/hg38/vep/hg38.canonical.fa
+  vep_filter: ./ref_files/hg38/vep/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz
   vep_assembly: GRCh38
 
   #Panel of normals
