@@ -3,6 +3,30 @@
 # Introduction to WES
 
 # Table of Contents
+
+### Panel of normal for CNV 
+
+We use the normal samples from Pilot 1(Broad and MDACC) and [Miao D, et al., Science, 2018](http://science.sciencemag.org/content/359/6377/801.abstract) . As Sentieon only accpets one target BED file to create the panel of normal, we intercept all BED files (only Broad and MDACC available) to generate the `target_bed`. The `target_padding` was 0 according to information from Broad. Following are cmd lines to generate the PoN:
+
+```shell
+#1. Create a panel of normal
+echo "1.0 ----------Generate overlapped region among input BED files----------"
+bedtools intersect -a $MDA_TARGET_BED -b $Broad_TARGET_BED | \
+awk '$1 ~ "[XY0-9]$" {print $1"\t"$2"\t"$3"\t"$1"_"$2"_"$3}' > $OUT_PON_Dir/overlap.bed
+
+echo "1.1 ----------Create a panel of normal for CNV----------"
+$release_dir/bin/sentieon driver -t $NUMBER_THREADS -r $REFERENCE \
+$( ls $Broad_normal_bams | while read s;do echo "-i ${s}";done ) \
+$( ls $MDA_normal_bams | while read s;do echo "-i ${s}";done ) \
+$( ls $Miao_normal_bams | while read s;do echo "-i ${s}";done ) \
+--algo CNV \
+--target $OUT_PON_Dir/overlap.bed \
+--target_padding 0 \
+--create_pon $OUT_PON_Dir/MDA_Broad_Miao_pad0
+```
+
+
+
 # Installing WES
 You will only need to install WES once, either for your own use, or if you are a system administrator, for the entire system (see **Appendix C**).  In other words, you will only need to perform the steps described in this section only once.  
 NOTE: this section ends with **Using WES** (below)
@@ -75,24 +99,24 @@ After a successful **WES** run, another 'analysis' folder is generated which con
     b. **setup config.yaml**:
         The config.yaml is where you define WES run parameters and the ChIP-seq samples for analysis.
         
+
     1. **Set the assembly**: typically hg38 or mm10 (default: hg38)            
     2. **samples**:
         __The most important part of the config file is to define the samples for WES analysis.__
         Each sample is given an arbitrary name, e.g. MCF7_ER, MCF7_input, etc.  **Sample names, however, can not start with a number, and cannot contain '.', '-' (dash--use underscores instead)** (POSSIBLY others).  For each sample, define the path to the raw data file (.fastq, .fastq.gz, .bam).  For paired-end samples, simply add another line to define the path to the second pair.
-    
+
     c. **setup metasheet.csv**:
     The metasheet.csv is where you group the **samples** into (defined in config.yaml) into Tunor/Normal pairs.  For WES, each of these groupings is called a **run**.
-    
+
     Open metasheet.csv in Excel or in a text-editor.You will notice the first (uncommented) line is:
     `RunName,Normal,Tumor
-    
+
     **RunName**- arbitraty name for the run, e.g. *MCF7_ER_run*
     **Normal**- The sample name that corresponds to Normal sample.  **It must exactly match the sample name used in config.yaml**
     **Tumor**- The tumor sample
-    
+
 4. editing cidc_wes/ref.yaml-
    Edit the cidc_wes/ref.yaml under the assembly for your run, i.e. hg38 or mm10.  And define the path the bwa_index file and the genome fasta file
-   
 ### Running WES
 1. source activate wes
 2. dry run:
@@ -119,6 +143,13 @@ After a successful **WES** run, another 'analysis' folder is generated which con
 ### Appendix D: Installing the mdseqpos motif finder for chips
 ### Appendix E: Generating static reference files for Chips
 - all of the required files
+
 - using your own files
+
 - supporting something new
+
 - adding to ref.yaml
+
+  
+
+  
