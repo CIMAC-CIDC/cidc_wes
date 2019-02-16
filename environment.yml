@@ -30,3 +30,6 @@ dependencies:
 #cidc-vs
 - matplotlib
 - pybedtools
+
+#tumor purity
+- snp-pileup
