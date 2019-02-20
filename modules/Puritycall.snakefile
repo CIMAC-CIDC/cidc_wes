@@ -55,7 +55,7 @@ def getTumor_bai_sample(wildcards):
 def puritycalls_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    for sample in config["samples"]:
+    for sample in config["run"]:
     	ls.append("analysis/purity/%s/%s_purity_results.txt" % (sample,sample))
     return ls
 
@@ -71,7 +71,7 @@ rule Puritycalls_Facets:
          Normalbai= getNormal_bai_sample,
          Tumorbai= getTumor_bai_sample
     output:
-         puritycalls="analysis/purity/{sample}/{sample}_purity_results.txt",
+         puritycalls="analysis/purity/{run}/{run}_purity_results.txt",
     message:
         "FACETS: purity calculations for bam file"
     params:
@@ -79,6 +79,6 @@ rule Puritycalls_Facets:
         index1=config['facets_vcftar']
     threads: _puritycalls_threads
     benchmark:
-        "benchmarks/puritycalls/{sample}/{sample}.purityresults.txt"
+        "benchmarks/puritycalls/{run}/{run}.purityresults.txt"
     shell:
         """./snp-pileup -q15 -Q20  {params.index1} {output} {input.normalBam} {input.tumorBam}"""
