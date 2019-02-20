@@ -62,12 +62,13 @@ rule CNVcall_sentieon:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-        ponfile=config['PoNs'],
-        target=config['PoNs_target'],
+        ponfile=config['pons'],
+        target=config['pons_target'],
     threads:_cnvcall_threads
     benchmark:
         "benchmarks/CNV/{sample}/{sample}.cnvcall.txt"
     shell:
         #NOTE: target_padding is being set to 0--following the broad's method
-        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
+        #"""{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
+        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV  --pon {params.ponfile} {output.cnvcalls}"""
     
