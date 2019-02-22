@@ -73,7 +73,7 @@ def all_targets(wildcards):
     ls.extend(cnvcall_targets(wildcards))
     ls.extend(puritycalls_targets(wildcards))
     #ls.extend(report_targets(wildcards))
-    return ls
+  return ls
 
 rule target:
     input: 
