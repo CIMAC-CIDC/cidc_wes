@@ -39,14 +39,11 @@ def puritybai_runsHelper(wildcards, iindex):
 def getNormal_bam_sample(wildcards):
     return puritybam_runsHelper(wildcards, 0)
 
-
 def getTumor_bam_sample(wildcards):
     return puritybam_runsHelper(wildcards, 1)
     
-
 def getNormal_bai_sample(wildcards):
     return puritybai_runsHelper(wildcards, 0)
-
 
 def getTumor_bai_sample(wildcards):
     return puritybai_runsHelper(wildcards, 1)
@@ -81,4 +78,4 @@ rule Puritycalls_Facets:
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purityresults.txt"
     shell:
-        """snp-pileup -q15 -Q20  {params.index1} {output} {input.NormalBam} {input.TumorBam}"""
+        "snp-pileup -q15 -Q20  {params.index1} {output} {input.NormalBam} {input.TumorBam}"
