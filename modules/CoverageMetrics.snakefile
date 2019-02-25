@@ -27,7 +27,7 @@ rule CoverageMetrics_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         cov_thresh=50, #LT: put this in config.yaml
-        index2=config['CDS_bed_input'],
+        index2=config['CDS_Bed_input'],
     threads: _coveragemetrics_threads
     benchmark:
         "benchmarks/coverage/{sample}/{sample}.CoverageMetrics.txt"
