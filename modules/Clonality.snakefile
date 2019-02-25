@@ -13,7 +13,7 @@ def clonality_runsHelper(wildcards, iindex):
     #check that we have a valid pair
     if len(r) >=2:
         sample_name = r[iindex]
-        tmp.append("analysis/somaticVariants/%s/%s_{caller}.output.vcf.gz" % (sample_name, sample_name))
+        tmp.append("analysis/somaticVariants/%s/%s_%s.output.vcf.gz" % (sample_name, sample_name, wildcards.caller))
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
@@ -52,7 +52,7 @@ rule vcftotab_conversion:
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
-         vcfperl="/mnt/ssd/wes/vcft/bin/vcf-to-tab"
+         vcfperl="/mnt/ssd/wes/vcft/bin/vcf-to-tab"  #LEN :change  this 
     benchmark:
         "benchmarks/clonality/{run}/{run}_{caller}_clonality.txt"
     shell:
@@ -73,9 +73,9 @@ rule pyclone_clonality:
        #normal = lambda wildcards: getNormal_sample(wildcards)
        #normal = lambda wildcards: config['runs'][wildcards.run][0],
        tumor = lambda wildcards: config['runs'][wildcards.run][1],
-       out_dir=lambda wildcards: "analysis/clonality/%s/%s_{caller} " % wildcards.run
+       out_dir=lambda wildcards: "analysis/clonality/%s/%s_%s " % (wildcards.run, wildcards.run, wildcards.caller)
 
   benchmark:
        "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
    shell:
-       """PyClone run_analysis_pipeline --in_files {input.dnascopevcf.tsv} --working_dir {params.out_dir}"""
+       """PyClone run_analysis_pipeline --in_files {input.intsv} --working_dir {params.out_dir}"""
