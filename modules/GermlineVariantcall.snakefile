@@ -1,4 +1,4 @@
-#module: germline calls by Sentieon
+module: germline calls by Sentieon
 #import os
 #from string import Template
 _germlinecalls_threads=8
@@ -59,7 +59,7 @@ rule germlinecalls_all:
 
 rule germline_calling_DNAscope:
     input:
-        normal_recalibratedbam=getNormal_sample
+        in_recalibratedbam="analysis/align/{run}/{run}_recalibrated.bam"
     output:
         dnascopevcf="analysis/germlineVariants/{run}/{run}_dnascope.output.vcf.gz"
     params:
@@ -73,12 +73,12 @@ rule germline_calling_DNAscope:
     benchmark:
         "benchmarks/germlineVariantscall/{run}/{run}.germline_calling_DNAscope.txt"
     shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.normal_recalibratedbam} --algo DNAscope --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.dnascopevcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo DNAscope --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.dnascopevcf}"""
 
 
 rule germline_calling_haplotyper:
    input:
-       normal_recalibratedbam=getNormal_sample
+       in_recalibratedbam="analysis/align/{run}/{run}_recalibrated.bam"
    output:
        haplotypervcf="analysis/germlineVariants/{run}/{run}_haplotyper.output.vcf.gz"
    params:
@@ -93,7 +93,7 @@ rule germline_calling_haplotyper:
    benchmark:
        "benchmarks/germlineVariantscall/{run}/{run}.germline_calling_haplotyper.txt"
    shell:
-       """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.normal_recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
+       """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
 
 
 rule germline_vcftoolsfilter:
