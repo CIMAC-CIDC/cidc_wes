@@ -1,4 +1,4 @@
-module: germline calls by Sentieon
+#module: germline calls by Sentieon
 #import os
 #from string import Template
 _germlinecalls_threads=8
