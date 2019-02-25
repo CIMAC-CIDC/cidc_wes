@@ -36,20 +36,20 @@ def germlinecalls_targets(wildcards):
     ls = []
     for run in config['runs']:
         #Consolidate these with an inner-for-loop?
-        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.vcf.gz" % (run,run))
-        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.vcf.gz" % (run,run))
+        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.vcf.gz" % (sample,sample))
+        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.vcf.gz" % (sample,sample))
 	#FILTERED VCF
-        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.filter.vcf" % (run,run))
-        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.filter.vcf" % (run,run))
+        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.filter.vcf" % (sample,sample))
+        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.filter.vcf" % (sample,sample))
 	#MAF
-        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.maf" % (run,run))
-        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.maf" % (run,run))
+        ls.append("analysis/germlineVariants/%s/%s_dnascope.output.maf" % (sample,sample))
+        ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.maf" % (sample,sample))
         #READ DEPTH/COVERAGE FILTER: 10x,30x
         for frac in [10, 30]:
-            ls.append("analysis/germlineVariants/%s/%s_dnascope.coverage.%s.vcf" % (run,run, str(frac)))
-            ls.append("analysis/germlineVariants/%s/%s_haplotyper.coverage.%s.vcf" % (run,run, str(frac)))
+            ls.append("analysis/germlineVariants/%s/%s_dnascope.coverage.%s.vcf" % (sample,sample, str(frac)))
+            ls.append("analysis/germlineVariants/%s/%s_haplotyper.coverage.%s.vcf" % (sample,sample, str(frac)))
 	#VCF-COMPARISON
-        ls.append("analysis/germlineVariants/%s/%s_comparedsamples.diff.discordance_matrix" % (run,run))
+        ls.append("analysis/germlineVariants/%s/%s_comparedsamples.diff.discordance_matrix" % (sample,sample))
     return ls
 
 rule germlinecalls_all:
@@ -59,9 +59,9 @@ rule germlinecalls_all:
 
 rule germline_calling_DNAscope:
     input:
-        in_recalibratedbam="analysis/align/{run}/{run}_recalibrated.bam"
+        in_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
     output:
-        dnascopevcf="analysis/germlineVariants/{run}/{run}_dnascope.output.vcf.gz"
+        dnascopevcf="analysis/germlineVariants/{sample}/{sample}_dnascope.output.vcf.gz"
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
@@ -78,9 +78,9 @@ rule germline_calling_DNAscope:
 
 rule germline_calling_haplotyper:
    input:
-       in_recalibratedbam="analysis/align/{run}/{run}_recalibrated.bam"
+       in_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
    output:
-       haplotypervcf="analysis/germlineVariants/{run}/{run}_haplotyper.output.vcf.gz"
+       haplotypervcf="analysis/germlineVariants/{sample}/{sample}_haplotyper.output.vcf.gz"
    params:
        index=config['genome_fasta'],
        sentieon_path=config['sentieon_path'],
@@ -142,14 +142,14 @@ rule germline_vcf2maf:
 
 rule coverage_filter_DNAscope:
     input:
-        "analysis/germlineVariants/{run}/{run}_dnascope.output.vcf.gz"
+        "analysis/germlineVariants/{sample}/{sample}_dnascope.output.vcf.gz"
     params:
         threshold=lambda wildcards: wildcards.frac,
         field="DP" #NOTE this is the particular field germline  vcf files
     output:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter; {frac} is int
-        "analysis/germlineVariants/{run}/{run}_dnascope.coverage.{frac,\d+}.vcf"
+        "analysis/germlineVariants/{sample}/{sample}_dnascope.coverage.{frac,\d+}.vcf"
     benchmark:
         "benchmarks/germlineVariantscall/{run}/{run}.coverage_filter_dnascope.txt"
     shell:
@@ -157,14 +157,14 @@ rule coverage_filter_DNAscope:
 
 rule coverage_filter_germlinehaplotyper:
     input:
-        "analysis/germlineVariants/{run}/{run}_haplotyper.output.vcf.gz"
+        "analysis/germlineVariants/{sample}/{sample}_haplotyper.output.vcf.gz"
     params:
         threshold=lambda wildcards: wildcards.frac,
         field="DP" #NOTE this is the particular field germline haplotyper vcf files
     output:
         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
         #with vcftoolsfilter; {frac} is int
-        "analysis/germlineVariants/{run}/{run}_haplotyper.coverage.{frac,\d+}.vcf"
+        "analysis/germlineVariants/{sample}/{sample}_haplotyper.coverage.{frac,\d+}.vcf"
     benchmark:
         "benchmarks/germlineVariantscall/{run}/{run}.coverage_filter_haplotyper.txt"
     shell:
@@ -197,12 +197,12 @@ rule filterOutRandomContigs:
 
 rule  vcfintersect_bedtools:
     input:
-        #dnascopevcf="analysis/germlineVariants/{run}/{run}_dnascope.output.vcf",
-        dnascopevcf="analysis/germlineVariants/{run}/{run}_dnascope.canonical.vcf",
-        #haplotypervcf="analysis/germlineVariants/{run}/{run}_haplotyper.output.vcf"
-        haplotypervcf="analysis/germlineVariants/{run}/{run}_haplotyper.canonical.vcf"
+        #dnascopevcf="analysis/germlineVariants/{sample}/{sample}_dnascope.output.vcf",
+        dnascopevcf="analysis/germlineVariants/{sample}/{sample}_dnascope.canonical.vcf",
+        #haplotypervcf="analysis/germlineVariants/{sample}/{sample}_haplotyper.output.vcf"
+        haplotypervcf="analysis/germlineVariants/{sample}/{sample}_haplotyper.canonical.vcf"
     output:
-        comparedfiles="analysis/germlineVariants/{run}/{run}_comparedsamples.diff.discordance_matrix"
+        comparedfiles="analysis/germlineVariants/{sample}/{sample}_comparedsamples.diff.discordance_matrix"
     params:
         outfile=lambda wildcards: "analysis/germlineVariants/%s/%s_comparedsamples" % (wildcards.run, wildcards.run)
     benchmark:
