@@ -34,6 +34,9 @@ hg38:
   pons_haplotyper: ./ref_files/hg38/pons/TNhaplotyper_PoN.vcf
   pons_tnsnv: ./ref_files/hg38/pons/TNsnv_PoN.vcf
   
+  #Tumor purity
+  facets_vcftar: ./ref_files/hg38/snp/00-common_all.vcf.gz
+
 hg19:
   bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
   genome_fasta: ./path/to/hg19.fasta #TODO

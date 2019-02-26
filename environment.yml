@@ -2,6 +2,7 @@ name: wes
 channels:
 - bioconda
 - biobuilds
+- aroth85
 - conda-forge
 - defaults
 dependencies:
@@ -30,3 +31,11 @@ dependencies:
 #cidc-vs
 - matplotlib
 - pybedtools
+
+#tumor purity
+- snp-pileup
+- r-pctgcdata
+- r-facets
+
+#tumor clonality
+- pyclone
