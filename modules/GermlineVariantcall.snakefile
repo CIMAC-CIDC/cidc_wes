@@ -34,7 +34,7 @@ def getTumor_sample(wildcards):
 def germlinecalls_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    for run in config['runs']:
+    for run in config['samples']:
         #Consolidate these with an inner-for-loop?
         ls.append("analysis/germlineVariants/%s/%s_dnascope.output.vcf.gz" % (sample,sample))
         ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.vcf.gz" % (sample,sample))
@@ -71,7 +71,7 @@ rule germline_calling_DNAscope:
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_germlinecalls_threads
     benchmark:
-        "benchmarks/germlineVariantscall/{run}/{run}.germline_calling_DNAscope.txt"
+        "benchmarks/germlineVariantscall/{sample}/{sample}.germline_calling_DNAscope.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo DNAscope --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.dnascopevcf}"""
 
@@ -91,7 +91,7 @@ rule germline_calling_haplotyper:
        #tumor = lambda wildcards: config['runs'][wildcards.run][1],
    threads:_germlinecalls_threads
    benchmark:
-       "benchmarks/germlineVariantscall/{run}/{run}.germline_calling_haplotyper.txt"
+       "benchmarks/germlineVariantscall/{sample}/{sample}.germline_calling_haplotyper.txt"
    shell:
        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
 
@@ -151,7 +151,7 @@ rule coverage_filter_DNAscope:
         #with vcftoolsfilter; {frac} is int
         "analysis/germlineVariants/{sample}/{sample}_dnascope.coverage.{frac,\d+}.vcf"
     benchmark:
-        "benchmarks/germlineVariantscall/{run}/{run}.coverage_filter_dnascope.txt"
+        "benchmarks/germlineVariantscall/{sample}/{sample}.coverage_filter_dnascope.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
 
@@ -166,7 +166,7 @@ rule coverage_filter_germlinehaplotyper:
         #with vcftoolsfilter; {frac} is int
         "analysis/germlineVariants/{sample}/{sample}_haplotyper.coverage.{frac,\d+}.vcf"
     benchmark:
-        "benchmarks/germlineVariantscall/{run}/{run}.coverage_filter_haplotyper.txt"
+        "benchmarks/germlineVariantscall/{sample}/{sample}.coverage_filter_haplotyper.txt"
     shell:
         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
 
@@ -206,7 +206,7 @@ rule  vcfintersect_bedtools:
     params:
         outfile=lambda wildcards: "analysis/germlineVariants/%s/%s_comparedsamples" % (wildcards.run, wildcards.run)
     benchmark:
-        "benchmarks/germlineVariantscall/{run}/{run}.vcfintersect_comparedsamples.txt"
+        "benchmarks/germlineVariantscall/{sample}/{sample}.vcfintersect_comparedsamples.txt"
     shell:
         #NOTE to aashna: the error with using --vcf instead of --diff for the
         #second input file
