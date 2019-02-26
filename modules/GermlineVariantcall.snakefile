@@ -34,29 +34,28 @@ def getTumor_sample(wildcards):
 def germlinecalls_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    for run in config['samples']:
+    for sample in config['samples']:
         #Consolidate these with an inner-for-loop?
         ls.append("analysis/germlineVariants/%s/%s_dnascope.output.vcf.gz" % (sample,sample))
         ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.vcf.gz" % (sample,sample))
 	#FILTERED VCF
         ls.append("analysis/germlineVariants/%s/%s_dnascope.output.filter.vcf" % (sample,sample))
         ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.filter.vcf" % (sample,sample))
-	#MAF
+        #MAF
         ls.append("analysis/germlineVariants/%s/%s_dnascope.output.maf" % (sample,sample))
         ls.append("analysis/germlineVariants/%s/%s_haplotyper.output.maf" % (sample,sample))
         #READ DEPTH/COVERAGE FILTER: 10x,30x
         for frac in [10, 30]:
             ls.append("analysis/germlineVariants/%s/%s_dnascope.coverage.%s.vcf" % (sample,sample, str(frac)))
             ls.append("analysis/germlineVariants/%s/%s_haplotyper.coverage.%s.vcf" % (sample,sample, str(frac)))
-	#VCF-COMPARISON
-        ls.append("analysis/germlineVariants/%s/%s_comparedsamples.diff.discordance_matrix" % (sample,sample))
-    return ls
+            #VCF-COMPARISON
+            ls.append("analysis/germlineVariants/%s/%s_comparedsamples.diff.discordance_matrix" % (sample,sample))
+            return ls
 
 rule germlinecalls_all:
     input:
         germlinecalls_targets
 	
-
 rule germline_calling_DNAscope:
     input:
         in_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
@@ -77,23 +76,23 @@ rule germline_calling_DNAscope:
 
 
 rule germline_calling_haplotyper:
-   input:
-       in_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
-   output:
-       haplotypervcf="analysis/germlineVariants/{sample}/{sample}_haplotyper.output.vcf.gz"
-   params:
-       index=config['genome_fasta'],
-       sentieon_path=config['sentieon_path'],
-       dbsnp= config['dbsnp'],
-       #JUST sample names - can also use the helper fns, e.g.
-       #normal = lambda wildcards: getNormal_sample(wildcards)
-       #normal = lambda wildcards: config['runs'][wildcards.run][0],
-       #tumor = lambda wildcards: config['runs'][wildcards.run][1],
-   threads:_germlinecalls_threads
-   benchmark:
-       "benchmarks/germlineVariantscall/{sample}/{sample}.germline_calling_haplotyper.txt"
-   shell:
-       """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
+    input:
+        in_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
+    output:
+        haplotypervcf="analysis/germlineVariants/{sample}/{sample}_haplotyper.output.vcf.gz"
+    params:
+        index=config['genome_fasta'],
+        sentieon_path=config['sentieon_path'],
+        dbsnp= config['dbsnp'],
+        #JUST sample names - can also use the helper fns, e.g.
+        #normal = lambda wildcards: getNormal_sample(wildcards)
+        #normal = lambda wildcards: config['runs'][wildcards.run][0],
+        #tumor = lambda wildcards: config['runs'][wildcards.run][1],
+    threads:_germlinecalls_threads
+    benchmark:
+        "benchmarks/germlineVariantscall/{sample}/{sample}.germline_calling_haplotyper.txt"
+    shell:
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.in_recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
 
 
 rule germline_vcftoolsfilter:
@@ -181,21 +180,20 @@ rule filterOutRandomContigs:
     NOTE: it recommends using --not-chr, but that requires listing out
     the chromosomes to EXCLUDE and in hg38 there are many randome ones!
 
-    It's easier to just filter out everything except chr1-23,X,Y,M
-    """
+    It's easier to just filter out everything except chr1-23,X,Y,M"""
     input:
-        "analysis/germlineVariants/{run}/{run}_{caller}.output.vcf"
+      "analysis/germlineVariants/{run}/{run}_{caller}.output.vcf"
     output:
-        "analysis/germlineVariants/{run}/{run}_{caller}.canonical.vcf"
+      "analysis/germlineVariants/{run}/{run}_{caller}.canonical.vcf"
     params:
-        #got this grep cmd from here-
-        #ref: https://www.biostars.org/p/201603/
-        grep_cmd = "\'^#\|^#CHROM\|^chr[1-23,X,Y,M]\'" #HARD-code chr1-23,X,T,M
+    #got this grep cmd from here-
+    #ref: https://www.biostars.org/p/201603/
+      grep_cmd = "\'^#\|^#CHROM\|^chr[1-23,X,Y,M]\'" #HARD-code chr1-23,X,T,M
     shell:
-        "grep -w {params.grep_cmd} {input} > {output}"
+      "grep -w {params.grep_cmd} {input} > {output}"
 
 
-rule  vcfintersect_bedtools:
+rule vcfintersect_bedtools:
     input:
         #dnascopevcf="analysis/germlineVariants/{sample}/{sample}_dnascope.output.vcf",
         dnascopevcf="analysis/germlineVariants/{sample}/{sample}_dnascope.canonical.vcf",
@@ -204,7 +202,7 @@ rule  vcfintersect_bedtools:
     output:
         comparedfiles="analysis/germlineVariants/{sample}/{sample}_comparedsamples.diff.discordance_matrix"
     params:
-        outfile=lambda wildcards: "analysis/germlineVariants/%s/%s_comparedsamples" % (wildcards.run, wildcards.run)
+        outfile=lambda wildcards: "analysis/germlineVariants/%s/%s_comparedsamples" % (wildcards.sample, wildcards.sample)
     benchmark:
         "benchmarks/germlineVariantscall/{sample}/{sample}.vcfintersect_comparedsamples.txt"
     shell:
