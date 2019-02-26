@@ -25,10 +25,10 @@ def somatic_runsHelper(wildcards, iindex):
     return tmp
 
 
-def getNormal_sample(wildcards):
+def somatic_getNormal(wildcards):
     return somatic_runsHelper(wildcards, 0)
 
-def getTumor_sample(wildcards):
+def somatic_getTumor(wildcards):
     return somatic_runsHelper(wildcards, 1)
 
 def somaticall_targets(wildcards):
@@ -196,12 +196,12 @@ rule vcf2maf:
         vep_filter= config['vep_filter'],
         buffer_size=config['vcf2maf_bufferSize'],
 
-        tumor= lambda wildcards: getTumor_sample(wildcards),
-        normal= lambda wildcards: getNormal_sample(wildcards),
+        tumor= lambda wildcards: somatic_getTumor(wildcards),
+        normal= lambda wildcards: somatic_getNormal(wildcards),
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.txt"
     shell:
-        """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size}"""
+        """echo vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size}"""
 
 
 rule mutationSignature:
