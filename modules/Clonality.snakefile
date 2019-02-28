@@ -13,7 +13,7 @@ def clonality_runsHelper(wildcards, iindex):
     #check that we have a valid pair
     if len(r) >=2:
         sample_name = r[iindex]
-        tmp.append("analysis/somaticVariants/%s/%s_%s.output.vcf.gz" % (sample_name, sample_name, wildcards.caller))
+        tmp.append("analysis/somaticVariants/%s/%s_recalibrated.bam" % (sample_name, sample_name))
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
@@ -31,13 +31,8 @@ def clonality_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/somaticVariants/%s/%s_{caller}.output.tsv" % (run,run))
-        ls.append("analysis/clonality/%s/%s_{caller}_pyclone_analysis/plots/%s.pdf" % (run,run))
-        ls.append("analysis/clonality/%s/%s_{caller}_pyclone_analysis/tables/%s.tsv" % (run,run))
-        ls.append("analysis/clonality/%s/%s_{caller}_pyclone_analysis/config.yaml" % (run,run))
-        ls.append("analysis/clonality/%s/%s_{caller}_pyclone_analysis/trace/%s.tsv" % (run,run))
-        ls.append("analysis/clonality/%s/%s_{caller}_pyclone_analysis/yaml/%s.yaml" % (run,run))
-	  return ls
+        ls.append("analysis/clonality/%s/%s_pyclone.tsv" % (run,run))
+        return ls
 
 rule clonality_all:
     input:
