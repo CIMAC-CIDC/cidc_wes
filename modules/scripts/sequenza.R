@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env Rscript  
 #setRepositories(graphics = FALSE, ind = 1:6)
 #install.packages("sequenza")
@@ -8,6 +9,16 @@ library(sequenza)
 
 sequenza_results<-function(arg_in,arg_out,arg_name){
     test <- sequenza.extract(arg_in,assembly="hg38")
+=======
+#!/usr/bin/env Rscript
+#setRepositories(graphics = FALSE, ind = 1:6)
+#install.packages("sequenza")
+
+library(sequenza)
+
+sequenza_results<-function(arg_in,arg_out,arg_name){
+    test <- sequenza.extract(arg_in)
+>>>>>>> 33a19477feb624e0f31c2c100e065da78025f190
     CP <- sequenza.fit(test)
     sequenza.results(sequenza.extract = test, cp.table = CP, sample.id = arg_name, out.dir=arg_out)
     mut.tab <- read.table(paste0(arg_out,"/",arg_name,"_mutations.txt"), header=TRUE)
@@ -28,3 +39,11 @@ arg_out = args[2]
 arg_name = args[3]
 
 sequenza_results(arg_in,arg_out,arg_name)
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> 33a19477feb624e0f31c2c100e065da78025f190

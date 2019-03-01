@@ -1,0 +1,10 @@
+name: sequenza
+channels:
+- bioconda
+- biobuilds
+- defaults
+dependencies:
+- r-sequenza
+- r-devtools
+- pip:
+  - sequenza-utils
