@@ -53,11 +53,11 @@ rule sequenza_processing:
         ref=config['genome_fasta'],
         #sequenz_path="/home/aashna/.local/bin", #LEN-add this 
     conda:
-        "cidc_wes/envs/sequenza.yml"
+        "/mnt/ssd/wes/cidc_wes/envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_preclonality.txt"
     shell:
-      "/home/aashna/.local/bin/sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
+        "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
     
 
 rule sequenza_preprocessing:
@@ -70,11 +70,11 @@ rule sequenza_preprocessing:
         ref=config['genome_fasta'],
         #sequenz_path="/home/aashna/.local/bin", #LEN-
     conda:
-        "cidc_wes/envs/sequenza.yml"
+        "/mnt/ssd/wes/cidc_wes/envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:
-      "/home/aashna/.local/bin/sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
+        "sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
 
 
 
