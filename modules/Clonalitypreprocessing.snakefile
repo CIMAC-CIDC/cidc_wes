@@ -52,6 +52,8 @@ rule sequenza_processing:
         gc_file="/mnt/ssd/wes/cidc_wes/hg38.gc50Base.wig.gz",
         ref=config['genome_fasta'],
         #sequenz_path="/home/aashna/.local/bin", #LEN-add this 
+    conda:
+        "cidc_wes/envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_preclonality.txt"
     shell:
@@ -64,12 +66,11 @@ rule sequenza_preprocessing:
     output:
         sequenzafinal_out="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz"
     params:
-        #JUST sample names - can also use the helper fns, e.g.                                                                                                                                              
-        #normal = lambda wildcards: config['runs'][wildcards.run][0],                                                                                                                                       
-        #tumor = lambda wildcards: config['runs'][wildcards.run][1],                                                                                                                                        
         gc_file="/mnt/ssd/wes/cidc_wes/hg38.gc50Base.wig.gz",
         ref=config['genome_fasta'],
-        #sequenz_path="/home/aashna/.local/bin", #LEN-add this                                                                                                                                              
+        #sequenz_path="/home/aashna/.local/bin", #LEN-
+    conda:
+        "cidc_wes/envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:

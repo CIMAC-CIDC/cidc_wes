@@ -55,22 +55,23 @@ rule vcftotab_conversion:
 
 
 rule pyclone_clonality:
-   input:
-       intsv="analysis/somaticVariants/{run}/{run}_{caller}.output.tsv"
-   output:
-       pyclone_configyaml="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/config.yaml"
-       pyclone_plots="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/plots/{run}.pdf"
-       pyclone_tables="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/tables/{run}.tsv"
-       pyclone_trace="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/trace/{run}.txt"
-       pyclone_yaml="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/yaml/{run}.yaml"
-  params:
-       #JUST sample names - can also use the helper fns, e.g.
-       #normal = lambda wildcards: getNormal_sample(wildcards)
-       #normal = lambda wildcards: config['runs'][wildcards.run][0],
-       tumor = lambda wildcards: config['runs'][wildcards.run][1],
-       out_dir=lambda wildcards: "analysis/clonality/%s/%s_%s " % (wildcards.run, wildcards.run, wildcards.caller)
-
-  benchmark:
-       "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
-   shell:
-       """PyClone run_analysis_pipeline --in_files {input.intsv} --working_dir {params.out_dir}"""
+    input:
+        intsv="analysis/somaticVariants/{run}/{run}_{caller}.output.tsv"
+    output:
+        pyclone_configyaml="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/config.yaml"
+        pyclone_plots="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/plots/{run}.pdf"
+        pyclone_tables="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/tables/{run}.tsv"
+        pyclone_trace="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/trace/{run}.txt"
+        pyclone_yaml="analysis/clonality/{run}/{run}_{caller}_pyclone_analysis/yaml/{run}.yaml"
+    params:
+        #JUST sample names - can also use the helper fns, e.g.
+        #normal = lambda wildcards: getNormal_sample(wildcards)
+        #normal = lambda wildcards: config['runs'][wildcards.run][0],
+        tumor = lambda wildcards: config['runs'][wildcards.run][1],
+        out_dir=lambda wildcards: "analysis/clonality/%s/%s_%s " % (wildcards.run, wildcards.run, wildcards.caller)
+    conda:
+        "cidc_wes/envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
+    shell:
+        """PyClone run_analysis_pipeline --in_files {input.intsv} --working_dir {params.out_dir}"""
