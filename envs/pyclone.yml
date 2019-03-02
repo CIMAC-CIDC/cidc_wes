@@ -1,0 +1,7 @@
+name: pyclone
+channels:
+- bioconda
+- aroth85
+- defaults
+dependencies:
+- pyclone
