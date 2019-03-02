@@ -35,11 +35,11 @@ def clonalitypreprocess_targets(wildcards):
         ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
         return ls
 
-rule clonality_all:
+rule clonality_pre_all:
     input:
         clonalitypreprocess_targets
 
-rule sequenza_processing:
+rule sequenza_bam2seqz:
     input:
         tumor_bam=getTumor_sample,
         normal_bam=getNormal_sample,
@@ -49,16 +49,36 @@ rule sequenza_processing:
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
-        gc_file="/mnt/ssd/wes/cidc_wes/hg38.gc50Base.wig.gz",
+        gc_file=config['gc_file'],
         ref=config['genome_fasta'],
+        #chroms= ['chr%' % c for c in list(range(1,22+1))]
         #sequenz_path="/home/aashna/.local/bin", #LEN-add this 
     conda:
-        "/mnt/ssd/wes/cidc_wes/envs/sequenza.yml"
+        "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_preclonality.txt"
     shell:
-        "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
-    
+      "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
+
+# rule sequenza_processing:
+#     input:
+#         tumor_bam=getTumor_sample,
+#         normal_bam=getNormal_sample,
+#     output:
+#         sequenza_out="analysis/clonality/{run}/{run}.seqz.txt.gz"
+#     params:
+#         #JUST sample names - can also use the helper fns, e.g.
+#         #normal = lambda wildcards: config['runs'][wildcards.run][0],
+#         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
+#         gc_file=config['gc_file'],
+#         ref=config['genome_fasta'],
+#         #sequenz_path="/home/aashna/.local/bin", #LEN-add this 
+#     conda:
+#         "../envs/sequenza.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}_{run}_preclonality.txt"
+#     shell:
+#       "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
 
 rule sequenza_preprocessing:
     input:
@@ -66,15 +86,15 @@ rule sequenza_preprocessing:
     output:
         sequenzafinal_out="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz"
     params:
-        gc_file="/mnt/ssd/wes/cidc_wes/hg38.gc50Base.wig.gz",
+        gc_file=config['gc_file'],
         ref=config['genome_fasta'],
         #sequenz_path="/home/aashna/.local/bin", #LEN-
     conda:
-        "/mnt/ssd/wes/cidc_wes/envs/sequenza.yml"
+        "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:
-        "sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
+      "sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
 
 
 

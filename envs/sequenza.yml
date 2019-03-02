@@ -1,10 +1,12 @@
-name: sequenza
+name: test2
 channels:
 - bioconda
 - biobuilds
 - defaults
 dependencies:
 - r-sequenza
-- r-devtools
+- r-devtools=1.13.3
+- bioconductor-biocinstaller
 - pip:
   - sequenza-utils
+
