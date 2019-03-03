@@ -5,31 +5,32 @@ _germlinecalls_threads=8
 _vcf2maf_threads=8
 
 
-#NOTE: germline_runsHelper, getNormal_sample, and getTumor_sample are NOT
-#called by any one!
-def germline_runsHelper(wildcards, iindex):
-    """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
-    returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
-    tmp = []
-    r = config['runs'][wildcards.run]
-    #print(r)
+#NOT used 
+# #NOTE: germline_runsHelper, getNormal_sample, and germ_getTumor are NOT
+# #called by any one!
+# def germline_runsHelper(wildcards, iindex):
+#     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
+#     returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
+#     tmp = []
+#     r = config['runs'][wildcards.run]
+#     #print(r)
 
-    #check that we have a valid pair
-    if len(r) >=2:
-        sample_name = r[iindex]
-        tmp.append("analysis/align/%s/%s_recalibrated.bam" % (sample_name, sample_name))
-    else:
-        #NOTE: I can't figure out a proper kill command so I'll do this
-        tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
-    #print(tmp)
-    return tmp
+#     #check that we have a valid pair
+#     if len(r) >=2:
+#         sample_name = r[iindex]
+#         tmp.append("analysis/align/%s/%s_recalibrated.bam" % (sample_name, sample_name))
+#     else:
+#         #NOTE: I can't figure out a proper kill command so I'll do this
+#         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
+#     #print(tmp)
+#     return tmp
 
 
-def getNormal_sample(wildcards):
-    return germline_runsHelper(wildcards, 0)
+# def germ_getNormal(wildcards):
+#     return germline_runsHelper(wildcards, 0)
 
-def getTumor_sample(wildcards):
-    return germline_runsHelper(wildcards, 1)
+# def germ_getTumor(wildcards):
+#     return germline_runsHelper(wildcards, 1)
 
 def germlinecalls_targets(wildcards):
     """Generates the targets for this module"""
@@ -85,7 +86,7 @@ rule germline_calling_haplotyper:
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
         #JUST sample names - can also use the helper fns, e.g.
-        #normal = lambda wildcards: getNormal_sample(wildcards)
+        #normal = lambda wildcards: germ_getNormal(wildcards)
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:_germlinecalls_threads
