@@ -200,8 +200,10 @@ rule vcf2maf:
         normal= lambda wildcards: somatic_getNormal(wildcards),
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.txt"
+    log:
+        "analysis/log/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     shell:
-        """echo vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size}"""
+        """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} 2> {log}"""
 
 
 rule mutationSignature:
