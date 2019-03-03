@@ -51,6 +51,7 @@ rule sequenza_fileprep:
     params:
         out_dir="analysis/clonality",
         sample_name=lambda wildcards:wildcards.run,
+        #HARD-CODED- CHANGE
         sequenza_env="/home/taing/miniconda3/envs/sequenza/bin/",
     output:
         pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv"
@@ -77,7 +78,7 @@ rule pyclone_finalprocessing:
         out_dir="analysis/clonality"
         #pyclone_env="/home/taing/miniconda3/envs/pyclone/bin/"
     conda:
-        "/mnt/ssd/wes/cidc_wes/envs/pyclone.yml"
+        "../envs/pyclone.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
     shell:

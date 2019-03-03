@@ -52,13 +52,15 @@ rule sequenza_bam2seqz:
         gc_file=config['gc_file'],
         ref=config['genome_fasta'],
         #chroms= ['chr%' % c for c in list(range(1,22+1))]
-        #sequenz_path="/home/aashna/.local/bin", #LEN-add this 
-    conda:
-        "../envs/sequenza.yml"
+        #sequenz_path="/home/aashna/.local/bin", #LEN-add this
+        #HARD-CODED- CHANGE
+        sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/"
+    #conda:
+    #    "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_preclonality.txt"
     shell:
-      "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
+      "{params.sequenza_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {output.sequenza_out}"
 
 # rule sequenza_processing:
 #     input:
@@ -89,12 +91,14 @@ rule sequenza_preprocessing:
         gc_file=config['gc_file'],
         ref=config['genome_fasta'],
         #sequenz_path="/home/aashna/.local/bin", #LEN-
-    conda:
-        "../envs/sequenza.yml"
+        #HARD-CODED- CHANGE
+        sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/"
+    #conda:
+    #    "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:
-      "sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
+        "{params.sequenza_path}sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
 
 
 
