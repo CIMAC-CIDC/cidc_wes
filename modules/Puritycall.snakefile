@@ -52,8 +52,8 @@ def getTumor_bai_sample(wildcards):
 def puritycalls_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    for sample in config["runs"]:
-    	ls.append("analysis/purity/%s/%s_purity_results.txt" % (sample,sample))
+    for run in config["runs"]:
+    	ls.append("analysis/purity/%s/%s_purity_results.txt" % (run,run))
     return ls
 
 rule puritycalls_all:

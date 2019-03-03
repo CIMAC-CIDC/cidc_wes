@@ -31,8 +31,10 @@ def purityprocessing_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/germlineVariants/%s/%s_purity_postprocessed_results.txt" % (run,run))
-        ls.append("analysis/germlineVariants/%s/%s_results" % (run,run))
+        ls.append("analysis/purity/%s/%s_purity_postprocessed_results.txt" % (run,run))
+        ls.append("analysis/purity/%s/%s.cncf" % (run,run))
+        ls.append("analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run))
+        ls.append("analysis/purity/%s/%s.iterpurityvalues.txt" % (run,run))
     return ls
 
 rule purityprocessing_all:
@@ -56,10 +58,13 @@ rule purityplots_postprocessing:
     input:
         "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
     params:
-        runname=lambda wildcards: wildcards.run
+        name=lambda wildcards: wildcards.run,
+        output_dir=lambda wildcards: "analysis/purity/%s/%s" % (wildcards.run, wildcards.run)
     output:
-        output_dir="analysis/purity/{run}/{run}_results"
+        cncf="analysis/purity/{run}/{run}.cncf",
+        opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
+        iter="analysis/purity/{run}/{run}.iterpurityvalues.txt",
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
     shell:
-        "Rscript --vanilla cidc_wes/modules/scripts/facets_plot.R {input} {output.output_dir} {params.runname}"
+        "Rscript --vanilla cidc_wes/modules/scripts/facets_plot.R {input} {params.output_dir} {params.name}"

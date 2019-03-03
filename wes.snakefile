@@ -71,8 +71,8 @@ def all_targets(wildcards):
     ls.extend(germlinecalls_targets(wildcards))
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(cnvcall_targets(wildcards))
-#    ls.extend(puritycalls_targets(wildcards))
-#    ls.extend(purityprocessing_targets(wildcards))
+    ls.extend(puritycalls_targets(wildcards))
+    ls.extend(purityprocessing_targets(wildcards))
     ls.extend(clonality_targets(wildcards))
     #ls.extend(report_targets(wildcards))
     return ls
