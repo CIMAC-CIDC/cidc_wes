@@ -59,7 +59,7 @@ rule purityplots_postprocessing:
         "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
     params:
         name=lambda wildcards: wildcards.run,
-        output_dir=lambda wildcards: "analysis/purity/%s/%s" % (wildcards.run, wildcards.run)
+        output_dir=lambda wildcards: "analysis/purity/%s/" % (wildcards.run)
     output:
         cncf="analysis/purity/{run}/{run}.cncf",
         opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
@@ -67,4 +67,4 @@ rule purityplots_postprocessing:
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
     shell:
-        "Rscript --vanilla cidc_wes/modules/scripts/facets_plot.R {input} {params.output_dir} {params.name}"
+        "Rscript --vanilla cidc_wes/modules/scripts/facets_plots.R {input} {params.output_dir} {params.name}"
