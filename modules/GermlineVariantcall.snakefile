@@ -1,7 +1,7 @@
 #module: germline calls by Sentieon,added all samples
 #import os
 #from string import Template
-_germlinecalls_threads=8
+_germlinecalls_threads=32
 _vcf2maf_threads=8
 
 
