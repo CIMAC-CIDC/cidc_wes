@@ -5,9 +5,9 @@ devtools::install_github("aroneklund/copynumber")
 library(sequenza)
 
 sequenza_results<-function(arg_in,arg_out,arg_name){
-    test <- sequenza.extract(arg_in,assembly="hg38")
+    test <- sequenza.extract(arg_in,assembly="hg38", chromosome.list=paste0("chr", c(1:22,"X","Y")))
     CP <- sequenza.fit(test)
-    sequenza.results(sequenza.extract = test, cp.table = CP, sample.id = arg_name, out.dir=arg_out)
+    sequenza.results(sequenza.extract = test,cp.table = CP, sample.id = arg_name, out.dir=arg_out)
     mut.tab <- read.table(paste0(arg_out,"/",arg_name,"_mutations.txt"), header=TRUE)
     seg.res <- read.table(paste0(arg_out,"/",arg_name,"_segments.txt"),header=TRUE)
     ## fix chr list. Remark: do not use '$'
