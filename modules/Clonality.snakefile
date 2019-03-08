@@ -39,7 +39,7 @@ def clonality_targets(wildcards):
         #ls.append("analysis/clonality/%s/trace/%s.txt" % (run,run)),
         #ls.append("analysis/clonality/%s/yaml/%s.yaml" % (run,run))
         #ls.append("analysis/clonality/pyclone/%s" % (run,run))
-        return ls
+    return ls
 
 rule clonality_all:
     input:

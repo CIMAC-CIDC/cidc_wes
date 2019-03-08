@@ -33,7 +33,7 @@ def clonalitypreprocess_targets(wildcards):
     for run in config['runs']:
         ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run))
         ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
-        return ls
+    return ls
 
 rule clonality_pre_all:
     input:
