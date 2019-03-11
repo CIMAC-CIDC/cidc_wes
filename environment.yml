@@ -39,3 +39,6 @@ dependencies:
 
 #tumor clonality
 - pyclone
+
+#bamToFastq
+- bedtools
