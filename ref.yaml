@@ -38,7 +38,7 @@ hg38:
   facets_vcftar: ./ref_files/hg38/snp/00-common_all.vcf.gz
 
   #clonality
-  gc_file: ./ref_files/hg38/clonality/hg38.gc50Base.wig.gz
+  gc_file: ./ref_files/hg38/clonality/hg38.gc50Base.txt.gz
 
 hg19:
   bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
