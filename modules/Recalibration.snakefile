@@ -82,7 +82,8 @@ rule Base_recalibration_precal_sentieon:
         realignbam="analysis/align/{sample}/{sample}.realigned.bam",
     output:
         prerecaltable="analysis/align/{sample}/{sample}_prerecal_data.table",
-        recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
+        recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
+        recalibratedbai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
     message:
         " PRE BASE RECALIBRATION: base recalibration for  realigned files"
     params:
