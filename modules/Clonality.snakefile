@@ -47,7 +47,7 @@ rule clonality_all:
 
 rule sequenza_fileprep:
     input:
-        bin50="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz"
+        bin50="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
     params:
         out_dir="analysis/clonality",
         sample_name=lambda wildcards:wildcards.run,
