@@ -40,7 +40,8 @@ def clonal_trial_targets(wildcards):
     ls = []
     for run in config['runs']:
         ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run)),
-        ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run))
+        ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run)),
+        ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
         #ls.append("analysis/testclonality/%s/%s.pileup.seqz.txt.gz" % (run,run))
         #ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
         return ls
@@ -93,6 +94,26 @@ rule mergeChroms:
 #" zcat MDA-Run1-pt1-FF.seqz_chr1.txt.gz    MDA-Run1-pt1-FF.seqz_chr2.txt.gz MDA-Run1-pt1-FF.seqz_chr3.txt.gz  MDA-Run1-pt1-FF.seqz_chr4.txt.gz  MDA-Run1-pt1-FF.seqz_chr5.txt.gz MDA-Run1-pt1-FF.seqz_chr6.txt.gz MDA-Run1-pt1-FF.seqz_chr7.txt.gz MDA-Run1-pt1-FF.seqz_chr8.txt.gz  MDA-Run1-pt1-FF.seqz_chr9.txt.gz  MDA-Run1-pt1-FF.seqz_chr10.txt.gz MDA-Run1-pt1-FF.seqz_chr11.txt.gz MDA-Run1-pt1-FF.seqz_chr12.txt.gz MDA-Run1-pt1-FF.seqz_chr13.txt.gz MDA-Run1-pt1-FF.seqz_chr14.txt.gz MDA-Run1-pt1-FF.seqz_ch16.txt.gz MDA-Run1-pt1-FF.seqz_chr17.txt.gz MDA-Run1-pt1-FF.seqz_chr18.txt.gz MDA-Run1-pt1-FF.seqz_chr19.txt.gz MDA-Run1-pt1-FF.seqz_chr20.txt.gz MDA-Run1-pt1-FF.seqz_chr21.txt.gz MDA-Run1-pt1-FF.seqz_chr22.txt.gz  |gawk '{if (NR!=1 && $1 != "chromosome") {print $0}}' | bgzip > sample.out.seqz.txt.gz"
 
 #To be noted - chromosome 16 file name has a bug in the software . File name comes as "ch16"
+
+rule clonality_sequenza_binning:
+    input:
+        completeseq="analysis/clonality/{run}/{run}.seqz.txt.gz",
+    output:
+        sequenzafinal_out="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz"
+    params:
+        gc_file=config['gc_file'],
+        ref=config['genome_fasta'],
+        #sequenz_path="/home/aashna/.local/bin", #LEN-
+        #HARD-CODED- CHANGE
+        sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/"
+    #conda:
+    #    "../envs/sequenza.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
+    shell:
+        "{params.sequenza_path}sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
+
+
 
 
 ###step4:
