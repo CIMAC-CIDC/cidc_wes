@@ -75,11 +75,11 @@ rule pyclone_finalprocessing:
         #out_dir="analysis/clonality/pyclone"
     params:
         #out_dir=lambda wildcards: "analysis/clonality/%s/" % (wildcards.run, wildcards.run)
-        out_dir="analysis/clonality"
-        #pyclone_env="/home/taing/miniconda3/envs/pyclone/bin/"
-    conda:
-        "../envs/pyclone.yml"
+        out_dir="analysis/clonality",
+        pyclone_env="/home/taing/miniconda3/envs/pyclone/bin/"
+    #conda:
+    #    "../envs/pyclone.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
     shell:
-        """PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
+        """{params.pyclone_env}PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
