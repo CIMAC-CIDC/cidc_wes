@@ -173,3 +173,16 @@ rule corealignment:
         "benchmarks/recalibration/{run}/{run}.corealignment.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
+
+#in support of clonalitymultithread, we must sort the recalibrated bam file
+rule sort_Recalibrated_bam:
+    input:
+        recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
+        recalibratedbai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
+    output:
+        sortbam="analysis/align/{sample}/{sample}.sort_recalibrated.bam",
+        sortbai="analysis/align/{sample}/{sample}.sort_recalibrated.bam.bai",
+    threads: 64
+    shell:
+        "sambamba sort -t 64 -o {output.sortbam} {input.recalibratedbam}"
+    
