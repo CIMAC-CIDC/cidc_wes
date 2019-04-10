@@ -94,7 +94,7 @@ rule somatic_calling_TNsnv:
         #JUST sample names - can also use the helper fns, e.g.
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-    threads:_somaticcall_threads
+    threads:96
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run}.somatic_calling_TNsnv.txt"
     shell:

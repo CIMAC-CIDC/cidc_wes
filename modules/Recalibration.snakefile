@@ -47,6 +47,7 @@ def recalibration_targets(wildcards):
         ls.append("analysis/align/%s/%s_postrecal_data.table" % (sample,sample))
         ls.append("analysis/align/%s/%s_recal.csv" % (sample,sample))
         ls.append("analysis/align/%s/%s_recal_plots.pdf" % (sample,sample))
+        ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
     for run in config['runs']:
         ls.append("analysis/corealignments/%s/%s_tn_corealigned.bam" % (run,run))
     return ls

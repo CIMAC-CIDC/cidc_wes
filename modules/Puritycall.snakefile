@@ -1,6 +1,6 @@
 #MODULE: Purity by Facets
 #import os
-_puritycalls_threads=8
+_puritycalls_threads=32
 
 def puritybam_runsHelper(wildcards, iindex):
     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,

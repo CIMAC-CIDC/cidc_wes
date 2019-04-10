@@ -44,6 +44,7 @@ def clonal_trial_targets(wildcards):
     ls = []
     for run in config['runs']:
         ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run))
+        ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run))
         #ls.append("analysis/testclonality/%s/%s.pileup.seqz.txt.gz" % (run,run))
         #ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
         return ls
