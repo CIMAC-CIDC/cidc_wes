@@ -2,10 +2,6 @@
 #import os
 #from string import Template
 
-
-
-
-
 ###step1:
 #add this to align module
 #samtools sort *_recalibrated.bam > *sort_recalibrated.bam
@@ -43,7 +39,7 @@ def clonal_trial_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run))
+        ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run)),
         ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run))
         #ls.append("analysis/testclonality/%s/%s.pileup.seqz.txt.gz" % (run,run))
         #ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run))
@@ -85,10 +81,13 @@ rule mergeChroms:
         "analysis/clonality/{run}/{run}.seqz.txt.gz"
     params:
         chroms="\t".join(["chr%s" % str(i) for i in range(1,23)]),
-        name= lambda wildcards: wildcards.run
+        name= lambda wildcards: wildcards.run,
+	gawk_cmd= "gawk \'{if (NR!=1 && $1 != \"chromosome\") {print $0}}\'" 
     run:
-        files=["%s.seqz_%s.txt.gz" % (params.name, chrom) for chrom in params.chroms.split("\t")]
-        shell("zcat {files} |gawk '{if (NR!=1 && $1 != \"chromosome\") {print $0}}' | bgzip > {output}")
+        files=" ".join(["analysis/clonality/%s/%s.seqz_%s.txt.gz" % (params.name, params.name, chrom) for chrom in params.chroms.split("\t")])
+	#print(params.gawk_cmd)
+        #shell("echo zcat {files} |gawk '{if (NR!=1 && $1 != \"chromosome\") {print $0}}' | bgzip > {output}")
+	shell("zcat {files} | {params.gawk_cmd} | bgzip > {output}")
 
  ##step3:
 #" zcat MDA-Run1-pt1-FF.seqz_chr1.txt.gz    MDA-Run1-pt1-FF.seqz_chr2.txt.gz MDA-Run1-pt1-FF.seqz_chr3.txt.gz  MDA-Run1-pt1-FF.seqz_chr4.txt.gz  MDA-Run1-pt1-FF.seqz_chr5.txt.gz MDA-Run1-pt1-FF.seqz_chr6.txt.gz MDA-Run1-pt1-FF.seqz_chr7.txt.gz MDA-Run1-pt1-FF.seqz_chr8.txt.gz  MDA-Run1-pt1-FF.seqz_chr9.txt.gz  MDA-Run1-pt1-FF.seqz_chr10.txt.gz MDA-Run1-pt1-FF.seqz_chr11.txt.gz MDA-Run1-pt1-FF.seqz_chr12.txt.gz MDA-Run1-pt1-FF.seqz_chr13.txt.gz MDA-Run1-pt1-FF.seqz_chr14.txt.gz MDA-Run1-pt1-FF.seqz_ch16.txt.gz MDA-Run1-pt1-FF.seqz_chr17.txt.gz MDA-Run1-pt1-FF.seqz_chr18.txt.gz MDA-Run1-pt1-FF.seqz_chr19.txt.gz MDA-Run1-pt1-FF.seqz_chr20.txt.gz MDA-Run1-pt1-FF.seqz_chr21.txt.gz MDA-Run1-pt1-FF.seqz_chr22.txt.gz  |gawk '{if (NR!=1 && $1 != "chromosome") {print $0}}' | bgzip > sample.out.seqz.txt.gz"
