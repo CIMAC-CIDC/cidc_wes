@@ -184,6 +184,8 @@ rule sort_Recalibrated_bam:
         sortbam="analysis/align/{sample}/{sample}.sort_recalibrated.bam",
         sortbai="analysis/align/{sample}/{sample}.sort_recalibrated.bam.bai",
     threads: 64
+    benchmark:
+        "benchmarks/recalibration/{run}/{run}.sort_Recalibrated_bam.txt"
     shell:
         "sambamba sort -t 64 -o {output.sortbam} {input.recalibratedbam}"
     
