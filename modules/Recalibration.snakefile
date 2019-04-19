@@ -23,7 +23,6 @@ def recal_runsHelper(wildcards, iindex, input_template):
     #print(tmp)
     return tmp
     
-
 def recal_getNormal(wildcards):
     return recal_runsHelper(wildcards, 0, "analysis/align/{sample}/{sample}.realigned.bam")
 
@@ -47,14 +46,25 @@ def recalibration_targets(wildcards):
         ls.append("analysis/align/%s/%s_postrecal_data.table" % (sample,sample))
         ls.append("analysis/align/%s/%s_recal.csv" % (sample,sample))
         ls.append("analysis/align/%s/%s_recal_plots.pdf" % (sample,sample))
-        ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
+        #ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
     for run in config['runs']:
         ls.append("analysis/corealignments/%s/%s_tn_corealigned.bam" % (run,run))
+    return ls
+
+def recalibration_sort_targets(wildcards):
+    ls = []
+    for sample in config['samples']:
+        ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
     return ls
 
 rule recalibration_all:
     input:
         recalibration_targets
+    
+rule recalibration_sort:
+    input:
+        recalibration_sort_targets
+
 
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""
@@ -183,7 +193,7 @@ rule sort_Recalibrated_bam:
     output:
         sortbam="analysis/align/{sample}/{sample}.sort_recalibrated.bam",
         sortbai="analysis/align/{sample}/{sample}.sort_recalibrated.bam.bai",
-    threads: 64
+    threads: 32
     benchmark:
         "benchmarks/recalibration/{sample}/{sample}.sort_Recalibrated_bam.txt"
     shell:

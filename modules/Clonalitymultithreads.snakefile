@@ -13,7 +13,7 @@ def clonal_trial_runsHelper(wildcards, iindex):
     #check that we have a valid pair
     if len(r) >=2:
         sample_name = r[iindex]
-        tmp.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample_name, sample_name))
+	tmp.append("analysis/align/%s/%s_recalibrated.bam" % (sample_name, sample_name))
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
@@ -65,8 +65,9 @@ rule sequenza_multibam2seqz:
     #    "../envs/sequenza.yml"
     #benchmark:
         #"benchmarks/testclonality/{run}/{run}_{run}_preclonality.txt"
+    threads: 12
     shell:
-        "{params.sequenza_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel 12 -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
+        "{params.sequenza_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
 
 rule mergeChroms:
     input:
