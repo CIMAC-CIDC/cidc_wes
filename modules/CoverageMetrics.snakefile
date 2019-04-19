@@ -37,7 +37,7 @@ rule CoverageMetrics_sentieon:
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.coveragemetrics}"""
 
 
-rule Coveragemetrics_targets_sentieon:
+rule targets_sentieon:
     """Get the coverage metrics from target beds"""
     input:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
@@ -50,9 +50,11 @@ rule Coveragemetrics_targets_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         cov_thresh=50,
-        index2=config['target_BED_input'],
-    threads:_coveragemetrics_threads
+        index2=config['target_Bed_input'],
+    threads: _coveragemetrics_threads
     benchmark:
         "benchmarks/targetcoverage/{sample}/{sample}.targetMetrics.txt"
     shell:
-        """{params.index1}/sentieon driver -r {params.index} -t {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
+        """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
+
+
