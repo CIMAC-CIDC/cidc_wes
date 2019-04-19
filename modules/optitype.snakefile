@@ -6,9 +6,9 @@ def optitype_targets(wildcards):
     for sample in config['samples']:
         ls.append("analysis/HLATyping/%s/%s_result.tsv" % (sample,sample))
         ls.append("analysis/HLATyping/%s/%s_coverage_plot.pdf" % (sample,sample))
-        # ls.append("analysis/HLATyping/%s/%s.sorted.chr6.bam" % (sample,sample))
-        # ls.append("analysis/HLATyping/%s/%s.sorted.chr6.end1.fastq" % (sample,sample))
-        # ls.append("analysis/HLATyping/%s/%s.sorted.chr6.end2.fastq" % (sample,sample))
+        ls.append("analysis/HLATyping/%s/%s.sorted.chr6.bam" % (sample,sample))
+        ls.append("analysis/HLATyping/%s/%s.sorted.chr6.end1.fastq" % (sample,sample))
+        ls.append("analysis/HLATyping/%s/%s.sorted.chr6.end2.fastq" % (sample,sample))
     return ls
     
 rule optitype_all:
