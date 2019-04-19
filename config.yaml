@@ -2,7 +2,7 @@
 metasheet: 'metasheet.csv'
 ref: "cidc_wes/ref.yaml"
 
-sentieon_path: "/path/to/sentieon"
+sentieon_path: "/homes/jjyu/sentieon/sentieon-genomics-201808.05/bin"
 
 #Tell us what assembly to use (!! MUST be defined in chips/ref.yaml !!)
 assembly: hg38
@@ -20,9 +20,9 @@ vcf2maf_bufferSize: 1000 #for standard8 #50000 for highmem-64
 # ALSO: having the string "rep" or '.' in your sample name will throw an ERROR
 # '.' causes Rscripts chop off names; and it's used as replicate splitter
 samples:
-  SAMPLE1:
-    - data/sample1.fastq.gz
-  SAMPLE1_input:
-    - data/sample1.input.fastq.gz
-  SAMPLE2:
-    - data/sample2.fastq.gz
+  mocha2-Run2-pt7-FF-Tumor:
+    - data/foo.1.fq
+    - data/foo.2.fq
+  mocha2-Run2-pt7-Normal:
+    - data/foo.1.fq
+    - data/foo.2.fq
