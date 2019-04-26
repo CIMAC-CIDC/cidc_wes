@@ -10,17 +10,18 @@ import sys
 from optparse import OptionParser
 
 def Calculate_Nmutations(infile, outfile = "outfile.txt"):
+    infile_name = infile.lower()
     ofile = open(outfile, "w")
     i=0
     with open(infile,'r') as fin:
         for line in fin:
             if(line[0]!='#') or (line[0]!='Hugo_Symbol'):
                 i=i+1
-    if 'MDA' in infile:
+    if 'mda' in infile_name:
         rate=float(i)/28969900
-    elif 'Mocha' in infile or  'merge' in infile:
+    elif 'mocha' in infile_name or  'merge' in infile_name:
         rate=float(i)/34208715
-    elif 'Broad' in infile:
+    elif 'broad' in infile_name:
         rate=float(i)/33062838
     else:
         rate=float(i)/30000000 #30000000 is general number。
