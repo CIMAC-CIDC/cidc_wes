@@ -3,7 +3,6 @@ metasheet: 'metasheet.csv'
 ref: "cidc_wes/ref.yaml"
 
 sentieon_path: "/homes/jjyu/sentieon/sentieon-genomics-201808.05/bin"
-
 #Tell us what assembly to use (!! MUST be defined in chips/ref.yaml !!)
 assembly: hg38
 
