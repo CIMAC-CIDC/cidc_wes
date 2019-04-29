@@ -18,8 +18,8 @@ rule coveragemetrics_all:
 rule CoverageMetrics_sentieon:
     """Get the metrics calculations from  mapped reads"""
     input:
-         bam="analysis/align/{sample}/{sample}.sorted.bam",
-         bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
+         bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+         bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
          coveragemetrics="analysis/metrics/{sample}/{sample}_coverage_metrics.txt",
     message:
@@ -40,8 +40,8 @@ rule CoverageMetrics_sentieon:
 rule targets_sentieon:
     """Get the coverage metrics from target beds"""
     input:
-        bam="analysis/align/{sample}/{sample}.sorted.bam",
-        bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
+        bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
         targetmetrics="analysis/metrics/{sample}/{sample}_target_metrics.txt",
     message:
