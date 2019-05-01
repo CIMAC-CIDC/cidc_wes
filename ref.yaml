@@ -19,6 +19,7 @@ hg38:
   target_Bed_input: ./ref_files/hg38/target_beds/mocha.liftover.hg38.bed
 
   vep_data: ./ref_files/hg38/vep
+  vep_plugins: ./ref_files/hg38/vep/VEP_plugins
   vep_synonyms: ./ref_files/hg38/vep/homo_sapiens/91_GRCh38/chr_synonyms.txt
   vep_custom_enst: ./ref_files/hg38/vep/myc_isoform_overrides_uniprot
   #NOTE: this should be deprecated once we have all of the results

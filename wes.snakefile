@@ -73,6 +73,7 @@ def all_targets(wildcards):
     ls.extend(cnvcall_targets(wildcards))
     ls.extend(puritycalls_targets(wildcards))
     ls.extend(purityprocessing_targets(wildcards))
+    ls.extend(neoantigen_targets(wildcards))
     #ls.extend(clonal_trial_targets(wildcards))
     #ls.extend(clonality_targets(wildcards))
     #ls.extend(report_targets(wildcards))
@@ -96,5 +97,6 @@ include: "./modules/Puritycall.snakefile" #...
 include: "./modules/Puritypostprocess.snakefile" #...
 include: "./modules/Clonality.snakefile" # ...
 include: "./modules/Clonalitymultithreads.snakefile"
+include: "./modules/neoantigen.snakefile"
 #include: "./modules/Clonalitypreprocessing.snakefile" # ...
 #include: "./modules/report.snakefile"          # report module
