@@ -69,6 +69,7 @@ All work in WES is done in a **PROJECT** directory, which is simply a directory 
 > data/  - *optional*
 > config.yaml
 > metasheet.csv
+> ref_dir
 
 The 'cidc_wes' directory contains all of the WES source code.  We'll explain how to download that directory below.  The 'data' directory is an optional directory that contains all of your raw data.  It is optional because those paths __may__ be fully established in the config.yaml, __however__ it is best practice to gather your raw data within 'data' using [symbolic links](https://www.cyberciti.biz/faq/creating-soft-link-or-symbolic-link/).
 
