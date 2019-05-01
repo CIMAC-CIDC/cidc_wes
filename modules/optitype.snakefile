@@ -1,4 +1,5 @@
 # module:Precision HLA typing from next-generation sequencing data by Optitype and Polysolver
+_optitype_threads=16
 # def polysolver_runsHelper(wildcards, iindex):
 #     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
 #     returns the sample name of Normal (if iindex=0) else sample name of Tumor"""
@@ -47,13 +48,14 @@ rule optitype_all:
         optitype_targets
         
 rule optitype_extract_chr6:
-    """Extract chr6 by samtool"""
+    """Extract chr6 by sambamba"""
     input:
         in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam"
     output:
         chr6sortbamfile = "analysis/HLATyping/{sample}/{sample}.sorted.chr6.bam"
+    threads:_optitype_threads
     shell:
-        """samtools view -b -h {input.in_sortbamfile} chr6 > {output.chr6sortbamfile}"""
+        """sambamba view -t {threads} -f bam -h {input.in_sortbamfile} chr6 > {output.chr6sortbamfile}"""
         
 rule optitype_bamtofastq:
     """Convert the sorted.chr6.bam file to fastq by bedtools"""
