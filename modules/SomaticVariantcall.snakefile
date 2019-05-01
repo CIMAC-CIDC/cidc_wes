@@ -50,108 +50,7 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
         #Filtered MAF
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.maf" % (run,run))#module: Somatic Variant calls by Sentieon
-#import os
-#from string import Template
-
-_somaticcall_threads=32
-#_vcf2maf_threads=4
-
-#NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
-#called by any one!
-def somatic_runsHelper(wildcards, iindex):
-    """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
-    returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
-    tmp = []
-    r = config['runs'][wildcards.run]
-    #print(r)
-
-    #check that we have a valid pair
-    if len(r) >=2:
-        sample_name = r[iindex]
-        tmp.append(sample_name) 
-    else:
-        #NOTE: I can't figure out a proper kill command so I'll do this
-        tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
-    #print(tmp)
-    return tmp
-
-
-def somatic_getNormal(wildcards):
-    return somatic_runsHelper(wildcards, 0)
-
-def somatic_getTumor(wildcards):
-    return somatic_runsHelper(wildcards, 1)
-
-def somaticall_targets(wildcards):
-    """Generates the targets for this module"""
-    ls = []
-    for run in config['runs']:
-        #Consolidate these with an inner-for-loop?
-        ls.append("analysis/somaticVariants/%s/%s_call.output.stats" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.vcf.gz" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.vcf.gz" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.vcf.gz" % (run,run))
-        #FILTERED VCF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.vcf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.vcf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.vcf" % (run,run))
-        #MAF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.maf" % (run,run))
-        #Filtered MAF
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.maf" % (run,run))
         ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.maf" % (run,run))
-        #Mutation Signatures
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.pdf" % (run,run))
-        #Filtered Mutation Signatures
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.filter.pdf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.pdf" % (run,run))
-
-        #EXON mutations- should this be on full or filtered?
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.exon.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.exon.maf" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.output.exon.maf" % (run,run))
-        
-        #mutation load
-        ls.append("analysis/somaticVariants/%s/%s_tnsnv.mutationload.txt" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.mutationload.txt" % (run,run))
-        ls.append("analysis/somaticVariants/%s/%s_tnscope.mutationload.txt" % (run,run))
-
-        #alleleFrac cutoffs - should this be on full or filtered?
-         for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
-             ls.append("analysis/somaticVariants/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
-             ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
-
-        # #read depth/coverage filter: 10x, 20x, 50x - should this be on full or filtered?
-         for frac in [10, 20, 50]:
-             ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
-             ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
-
-    return ls
-
-rule somaticcalls_all:
-    input:
-        somaticall_targets
-
-
-
-rule calculate_mutation:
-    input:
-        "analysis/somaticVariants/{run}/{run}_{caller}.output.exon.maf"
-    output:
-        "analysis/somaticVariants/{run}/{run}_{caller}.mutationload.txt"
-    shell:
-        "cidc_wes/modules/scripts/mutation_load.py -v {input} -o {output}"
-
-
-
-
         ls.append("analysis/somaticVariants/%s/%s_tnscope.filter.maf" % (run,run))
         #Mutation Signatures
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.output.pdf" % (run,run))
@@ -176,6 +75,8 @@ rule calculate_mutation:
             ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
             ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
 
+        #Mutation load
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.mutationload.txt" % (run,run))
     return ls
 
 rule somaticcalls_all:
@@ -399,6 +300,3 @@ rule calculate_mutation:
         "analysis/somaticVariants/{run}/{run}_{caller}.mutationload.txt"
     shell:
         "cidc_wes/modules/scripts/mutation_load.py -v {input} -o {output}"
-
-
-
