@@ -43,3 +43,6 @@ dependencies:
 #bamToFastq
 - bedtools
 - pysam
+
+#optitype
+- optitype
