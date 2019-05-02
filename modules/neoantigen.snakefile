@@ -40,6 +40,32 @@ def getPvacseqOut(wildcards):
     tumor = config['runs'][run][1]
     return(run,tumor)
 
+def getTumorHLA(wildcards):
+    """get the optitype results file for the tumor sample"""
+    run = wildcards.run
+    tumor = config['runs'][run][1]
+    ls = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
+    #print(ls)
+    return ls
+
+def parseOptitype(optitype_out_file):
+    """Given an optitypes '_results.tsv' file; parses the HLA A, B, C
+    and returns these as a comma-separated string (for pvacseq) input
+
+    NOTE: cureently the optitype results.tsv looks somthing like this:
+    	A1	A2	B1	B2	C1	C2	Reads	Objective
+    0					C*06:04	C*06:04	4.0	3.99
+    **So were' going to parse cols 1-6 and return that"""
+    f = open(optitype_out_file)
+    hdr = f.readline().strip().split("\t") #ignore for now
+    tmp = f.readline().strip().split("\t")[1:7] #want first 6 cols
+
+    hla = ",".join(["HLA-%s" % x for x in tmp if x]) #ignore empty strings
+    #print(hla)
+    return hla
+    
+    
+
 rule neoantigen_all:
     input:
         neoantigen_targets
@@ -64,7 +90,8 @@ rule neoantigen_vep_annotate:
 
 rule neoantigen_pvacseq:
     input:
-        "analysis/somaticVariants/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf"
+        vcf="analysis/somaticVariants/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+        hla=getTumorHLA,
     output:
         "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv"
         #NOTE: the wildcard tumor is used b/c we can't actually pull in the
@@ -76,13 +103,14 @@ rule neoantigen_pvacseq:
     params:
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-        HLA = "HLA-A*02:01,HLA-B*35:01,DRB1*11:01", #Hard coding antigents
-        callers=" MHCflurry NetMHC", #hardcoding list of callers to try
+        HLA = lambda wildcards,input: parseOptitype(input.hla),
+        callers=config['neoantigen_callers'] if config['neoantigen_callers'] else "MHCflurry NetMHCcons MHCnuggetsII",
+        epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
         output_dir = lambda wildcards: "analysis/neoantigen/%s/" % wildcards.run,
-        epitope_lengths="8,9,10", #hard-coding these--these are standard
     threads: _neoantigen_threads
     benchmark:
         "benchmarks/neoantigen/{run}/{run}.neoantigen_pvacseq.txt"
     shell:
-        """pvacseq run {input} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal}"""
+        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal}"""
+
   

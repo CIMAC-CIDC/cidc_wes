@@ -8,6 +8,17 @@ assembly: hg38
 
 vcf2maf_bufferSize: 1000 #for standard8 #50000 for highmem-64
 
+# neoantigen module - Define which callers to use in a space-separated list
+# Callers avaliable:
+# 'MHCflurry', 'MHCnuggetsI', 'MHCnuggetsII', 'NNalign', 'NetMHC',
+# 'NetMHCIIpan', 'NetMHCcons', 'NetMHCpan', 'PickPocket', 'SMM',
+# 'SMMPMBEC', 'SMMalign'
+neoantigen_callers: "MHCflurry NetMHCcons MHCnuggetsII"
+
+# neoantigen module - Define which epitope lengths to analyze in comma
+# 	     	      separated list
+neoantigen_epitope_lengths: "8,9,10,11"
+
 # DEFINE the samples- each sample should have a name, e.g. SAMPLE1
 # and a path to the input file, e.g. data/sample1.fastq.gz
 # VALID INPUTS: fastq, fastq.gz, bam
