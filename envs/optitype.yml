@@ -1,0 +1,8 @@
+name: optitype
+channels:
+- bioconda
+- defaults
+dependencies:
+- optitype
+- pytz
+- glpk
