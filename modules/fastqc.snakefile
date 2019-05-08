@@ -63,6 +63,8 @@ rule sample_fastq:
         size=100000
     message: "FASTQC: sample_fastq"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.sample_fastq.txt"
     shell:
         "seqtk sample -s {params.seed} {input} {params.size} > {output} 2>>{log}"
 
@@ -77,6 +79,8 @@ rule sample_bam:
         temp("analysis/align/{sample}/{sample}_100k.bam")
     message: "FASTQC: sampling 100k reads from bam"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.sample_bam.txt"
     shell:
         "cidc_wes/modules/scripts/sampleBam.sh -i {input} -n {params.n} -o {output}"
 
@@ -88,6 +92,8 @@ rule convertBamToFastq:
         temp("analysis/align/{sample}/{sample}_100k.bam.fastq")
     message: "FASTQC: converting 100k.bam to 100k.fastq"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.convertBamToFastq.txt"
     shell:
         "bamToFastq -i {input} -fq {output} 2>> {log}"
     
@@ -105,6 +111,8 @@ rule call_fastqc:
         sample = lambda wildcards: wildcards.sample
     message: "FASTQC: call fastqc"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.call_fastqc.txt"
     shell:
         "fastqc {input} --extract -o analysis/fastqc/{params.sample} 2>>{log}"
 
@@ -119,6 +127,8 @@ rule get_PerSequenceQual:
         section="'Per sequence quality'"
     message: "FASTQC: get_PerSequenceQual"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.get_PerSequenceQual.txt"
     shell:
         "cidc_wes/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
 
@@ -133,6 +143,8 @@ rule get_PerSequenceGC:
         section="'Per sequence GC content'"
     message: "FASTQC: get_PerSequenceGC"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.get_PerSequenceGC.txt"
     shell:
         "cidc_wes/modules/scripts/fastqc_data_extract.py -f {input} -s {params.section} > {output} 2>>{log}"
 
@@ -145,6 +157,8 @@ rule extract_FastQCStats:
         "analysis/fastqc/{sample}/{sample}_stats.csv"
     message: "FASTQC: extract_FastQCStats"
     log:_logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.extract_FastQCStats.txt"
     shell:
         "cidc_wes/modules/scripts/fastqc_stats.py -a {input.qual} -b {input.gc} > {output} 2>>{log}"
 
@@ -156,6 +170,8 @@ rule collect_fastQCStats:
         "analysis/fastqc/fastqc.csv"
     message: "FASTQC: collect and parse ALL mapping stats"
     log: _logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.collect_fastQCStats.txt"
     run:
         files = " -f ".join(input)
         shell("cidc_wes/modules/scripts/fastqc_getFastQCStats.py -f {files} > {output} 2>>{log}")
@@ -173,5 +189,7 @@ rule plot_fastQC_GC:
     message:
         "FASTQC: generating GC content distrib. plots"
     log: _logfile
+    benchmark:
+        "benchmarks/fastqc/{sample}/{sample}.plot_fastQC_GC.txt"
     shell:
         "Rscript cidc_wes/modules/scripts/fastqc_plotGC.R {input.gc} {output.png} {output.thumb}"

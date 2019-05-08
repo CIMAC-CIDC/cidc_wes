@@ -190,6 +190,8 @@ rule filterOutRandomContigs:
     #got this grep cmd from here-
     #ref: https://www.biostars.org/p/201603/
       grep_cmd = "\'^#\|^#CHROM\|^chr[1-23,X,Y,M]\'" #HARD-code chr1-23,X,T,M
+    benchmark:
+        "benchmarks/germlineVariantscall/{run}/{run}_{caller}.filterOutRandomContigs.txt"
     shell:
       "grep -w {params.grep_cmd} {input} > {output}"
 

@@ -54,6 +54,8 @@ rule optitype_extract_chr6:
     output:
         chr6sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     threads:_optitype_threads
+    benchmark:
+        "benchmarks/optitype/{sample}/{sample}.optitype_extract_chr6.txt"
     shell:
         """sambamba view -t {threads} -f bam -h {input.in_sortbamfile} chr6 > {output.chr6sortbamfile}"""
         
@@ -64,6 +66,8 @@ rule optitype_bamtofastq:
     output:
         chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
         chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"
+    benchmark:
+        "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"
     shell:
         """bedtools bamtofastq -i {input.in_sortchr6bamfile} -fq {output.chr6fastqfile1} -fq2 {output.chr6fastqfile2}"""
 
@@ -84,6 +88,8 @@ This will produce a time-stamped directory inside the specified outputn director
     output:
         HLAgenotype = "analysis/optitype/{sample}/{sample}_result.tsv",
         Coverageplot = "analysis/optitype/{sample}/{sample}_coverage_plot.pdf"
+    benchmark:
+        "benchmarks/optitype/{sample}/{sample}.optitype_hlatyping.txt"
     shell:
         """{params.path}OptiTypePipeline.py -i {input.in_chr6fastqfile1} {input.in_chr6fastqfile2} --dna -v -o {params.output_dir} -p {params.name} --config {params.optitype_config}"""
 
