@@ -235,7 +235,7 @@ rule germlinecalls_bamtovcf:
         output_vcf="analysis/germlineVariants/{sample}/{sample}_variant.vcf"
     params:
         index=config['genome_fasta']
-        positions_bamtovcf=['positions_bamtovcf']
+        positions_bamtovcf=config['positions_bamtovcf']
     shell:
         """samtools mpileup -g -Q 0 -f index {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
 
