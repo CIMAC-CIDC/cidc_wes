@@ -222,7 +222,8 @@ def germlinecalls_targets(wildcards):
     for sample in config['samples']:
         #Consolidate these with an inner-for-loop?
         ls.append("analysis/germlineVariants/%s/%s_variant.vcf" % (sample,sample))
-        ls.append("analysis/germlineVariants/%s/%s_SNP92.recode.vcf" % (sample,sample))
+        ls.append("analysis/germlineVariants/%s/%s_SNP92" % (sample,sample))
+        return ls
 
 rule germlinecalls_all:
     input:
@@ -230,14 +231,14 @@ rule germlinecalls_all:
 
 rule germlinecalls_bamtovcf:
     input:
-        input_sortbamfile = "analysis/align/{sample}/{sample}_sorted.bam" 
+        input_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam" 
     output:
         output_vcf="analysis/germlineVariants/{sample}/{sample}_variant.vcf"
     params:
-        index=config['genome_fasta']
+        index=config['genome_fasta'],
         positions_bamtovcf=config['positions_bamtovcf']
     shell:
-        """samtools mpileup -g -Q 0 -f index {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
+        """samtools mpileup -g -Q 0 -f {params.index} {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
 
 rule germlinecalls_snp92:
     input:
