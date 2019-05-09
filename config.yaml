@@ -30,9 +30,9 @@ neoantigen_epitope_lengths: "8,9,10,11"
 # ALSO: having the string "rep" or '.' in your sample name will throw an ERROR
 # '.' causes Rscripts chop off names; and it's used as replicate splitter
 samples:
-  mocha2-Run2-pt7-FF-Tumor:
-    - data/foo.1.fq
-    - data/foo.2.fq
-  mocha2-Run2-pt7-Normal:
-    - data/foo.1.fq
-    - data/foo.2.fq
+  SAMPLE1:
+    - data/sample1.fastq.gz
+  SAMPLE1_input:
+    - data/sample1.input.fastq.gz
+  SAMPLE2:
+    - data/sample2.fastq.gz
