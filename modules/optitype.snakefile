@@ -79,14 +79,14 @@ This will produce a time-stamped directory inside the specified outputn director
         name=lambda wildcards: wildcards.sample,
         output_dir=lambda wildcards: "./analysis/optitype/%s/" % (wildcards.sample),
         #outputname = lambda wildcards: wildcards.sample
-        path="/home/taing/miniconda3/envs/optitype/bin/", #HARD-CODING path
+        path="source activate /home/taing/miniconda3/envs/optitype/", #HARD-Coding the path and activateing conda env
         optitype_config="cidc_wes/static/optitype/config.ini",
     output:
         HLAgenotype = "analysis/optitype/{sample}/{sample}_result.tsv",
         Coverageplot = "analysis/optitype/{sample}/{sample}_coverage_plot.pdf"
     shell:
-        """{params.path}OptiTypePipeline.py -i {input.in_chr6fastqfile1} {input.in_chr6fastqfile2} --dna -v -o {params.output_dir} -p {params.name} --config {params.optitype_config}"""
-
+        """{params.path}; OptiTypePipeline.py -i {input.in_chr6fastqfile1} {input.in_chr6fastqfile2} --dna -v -o {params.output_dir} -p {params.name} --config {params.optitype_config}"""
+        
 # rule polysolver:
 #     input:
 #         in_sortchr6bamfile = "analysis/HLATyping/{sample}/{sample}.sorted.chr6.bam"

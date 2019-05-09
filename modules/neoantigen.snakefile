@@ -56,10 +56,14 @@ def parseOptitype(optitype_out_file):
     	A1	A2	B1	B2	C1	C2	Reads	Objective
     0					C*06:04	C*06:04	4.0	3.99
     **So were' going to parse cols 1-6 and return that"""
+    #CATCH when the HLA does not exist yet
+    if not os.path.isfile(optitype_out_file):
+        return ""
+
     f = open(optitype_out_file)
     hdr = f.readline().strip().split("\t") #ignore for now
     tmp = f.readline().strip().split("\t")[1:7] #want first 6 cols
-
+        
     hla = ",".join(["HLA-%s" % x for x in tmp if x]) #ignore empty strings
     #print(hla)
     return hla
