@@ -1,6 +1,6 @@
 #module: neoantigen prediction module using pvacseq pipeline (from pvactools)
 
-_neoantigen_threads=8 #need to tune this
+_neoantigen_threads=64 #should be set to as max cores; w/ 64 runtime~=1hr
 
 def neoantigen_runsHelper(wildcards, iindex):
     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
@@ -107,6 +107,7 @@ rule neoantigen_pvacseq:
     params:
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
+        iedb = config['neoantigen_iedb'],
         HLA = lambda wildcards,input: parseOptitype(input.hla),
         callers=config['neoantigen_callers'] if config['neoantigen_callers'] else "MHCflurry NetMHCcons MHCnuggetsII",
         epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
@@ -115,6 +116,6 @@ rule neoantigen_pvacseq:
     benchmark:
         "benchmarks/neoantigen/{run}/{run}.neoantigen_pvacseq.txt"
     shell:
-        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal}"""
+        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb}"""
 
   

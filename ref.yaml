@@ -42,6 +42,9 @@ hg38:
   #clonality
   gc_file: ./ref_files/hg38/clonality/hg38.gc50Base.txt.gz
 
+  #neoantigen
+  neoantigen_iedb: ./ref_files/hg38/iedb
+
 hg19:
   bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
   genome_fasta: ./path/to/hg19.fasta #TODO
