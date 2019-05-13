@@ -17,7 +17,8 @@ hg38:
   G1000_indels: ./ref_files/hg38/snp/1000G_phase1.snps.high_confidence.hg38.vcf.gz
   CDS_Bed_input: ./ref_files/hg38/gencode27.canonical.bed
   target_Bed_input: ./ref_files/hg38/target_beds/mocha.liftover.hg38.bed
-
+  positions_bamtovcf: ./ref_files/hg38/target_beds/pos_bamtovcf.bed 
+  positions_SNP92: ./ref_files/hg38/target_beds/pos_filtervcf.bed
   vep_data: ./ref_files/hg38/vep
   vep_plugins: ./ref_files/hg38/vep/VEP_plugins
   vep_synonyms: ./ref_files/hg38/vep/homo_sapiens/91_GRCh38/chr_synonyms.txt
