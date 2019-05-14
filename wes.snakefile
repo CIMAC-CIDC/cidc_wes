@@ -63,8 +63,6 @@ def all_targets(wildcards):
     ls = []
     #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
-    #Commenting out for now b/c I believe metrics_sentieon does the same job
-    #ls.extend(fastqc_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
     ls.extend(somaticall_targets(wildcards))
@@ -87,7 +85,6 @@ rule target:
     message: "Compiling all output"
     
 include: "./modules/align.snakefile"     # common align rules
-#include: "./modules/fastqc.snakefile"           # fastqc (sequence qual) rules
 include: "./modules/metrics_sentieon.snakefile"   # ...
 include: "./modules/Recalibration.snakefile"      # ...
 include: "./modules/SomaticVariantcall.snakefile" # ...
