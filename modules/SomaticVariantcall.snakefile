@@ -298,7 +298,9 @@ rule calculate_mutation:
         "analysis/somaticVariants/{run}/{run}_{caller}.output.exon.maf"
     output:
         "analysis/somaticVariants/{run}/{run}_{caller}.mutationload.txt"
+    params:
+        size=config['effective_size'],
     benchmark:
         "benchmarks/somaticvariantcall/{run}/{run_{caller}.calculate_mutation.txt"    
     shell:
-        "cidc_wes/modules/scripts/mutation_load.py -v {input} -o {output}"
+        "cidc_wes/modules/scripts/mutation_load.py -v {input} -o {output} -s {params.size}"
