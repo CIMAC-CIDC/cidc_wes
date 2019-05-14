@@ -1,9 +1,6 @@
 #MODULE: Data Metrics by Sentieon
 #import os
 _metrics_threads=32
-##sentieon  config sentieon_path in the config file as below
-#sentieon_path="/cluster/jxfu/proj/CIDC/Sentieon/release/sentieon-genomics-201808.01/bin/"
-#export SENTIEON_LICENSE=172.24.216.24:8990
 
 def metrics_targets(wildcards):
     """Generates the targets for this module"""

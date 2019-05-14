@@ -58,25 +58,6 @@ rule sentieon_bwa:
     shell:
         """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output.bam} --sam2bam -i -"""
 
-#REMOVING THIS
-# rule uniquely_mapped_reads:
-#     """Get the uniquely mapped reads"""
-#     input:
-#         "analysis/align/{sample}/{sample}.sorted.bam"
-#     params:
-#         filter="\'mapping_quality >= 1\'"
-#     output:
-#         "analysis/align/{sample}/{sample}_unique.sorted.bam"
-#     message: "ALIGN: Filtering for uniquely mapped reads"
-#     log: _logfile
-#     threads: _align_threads
-#     shell:
-#         #NOTE: this is the generally accepted way of doing this as multiply 
-#         #mapped reads have a Quality score of 0
-#         #"samtools view -bq 1 -@ {threads} {input} > {output}"
-#         "sambamba view -f bam -F {params.filter} -t {threads} {input} > {output}"
-
-#NOTE: dropping uniquely sorted.bam
 rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
@@ -112,25 +93,6 @@ rule collect_map_stats:
     run:
         files = " -f ".join(input)
         shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
-
-#REMOVING THIS
-# rule sortUniqueBams:
-#     """General sort rule--take a bam {filename}.bam and 
-#     output {filename}.sorted.bam"""
-#     input:
-#         "analysis/align/{sample}/{sample}_unique.bam"
-#     output:
-#         #CANNOT temp this b/c it's used by qdnaseq!
-#         "analysis/align/{sample}/{sample}_unique.sorted.bam",
-#         #"analysis/align/{sample}/{sample}_unique.sorted.bam.bai"
-#     message: "ALIGN: sort bam file"
-#     log: _logfile
-#     threads: _align_threads
-#     shell:
-#         "sambamba sort {input} -o {output} -t {threads} 2>>{log}"
-
-#REPLACING picard with sentieon - next two rules
-#NOTE: if we don't have a sentieon license, then should use sambamba markdup!!
 
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
@@ -169,18 +131,3 @@ rule dedupSortedUniqueBam:
         "benchmarks/align/{sample}/{sample}.dedupSortedUniqueBam.txt"
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
-
-# REMOVING this
-# rule indexBam:
-#     """Index bam file"""
-#     input:
-#         "analysis/align/{sample}/{prefix}_unique.{suffix}.bam"
-#     output:
-#         "analysis/align/{sample}/{prefix}_unique.{suffix}.bam.bai"
-#     message: "ALIGN: indexing bam file {input}"
-#     log: _logfile
-#     threads: _align_threads
-#     shell:
-#         "sambamba index -t {threads} {input} {output}"
-
-    

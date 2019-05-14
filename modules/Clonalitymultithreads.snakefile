@@ -118,19 +118,3 @@ rule clonality_addheader:
         #"zcat {input.headerfile} {input.binned_file_in} |bgzip > {output.finalsequenzaoutput}"
          "cat {input.headerfile} {input.binned_file_in} > {output.finalsequenzaoutput}"
         
-##step5:
-#to check the order of chromosome
-# zcat sample_bin50.out1.20.seqz.txt.gz |cut -f 1 |uniq -c
-
-##step6:
-##add header to the file sample_bin50.out1.20.seqz.txt.gz
-#chromosome      position        base.ref        depth.normal    depth.tumor     depth.ratio     Af      Bf      zygosity.normal GC.percent      good.reads      AB.normal       AB.tumor        tumor.strand
-
-
-##step7:
-#/home/taing/miniconda3/envs/sequenza/bin/Rscript  /mnt/ssd/wes/cidc_wes/modules/scripts/sequenza.R  /mnt/ssd/wes/analysis/clonality/MDA-Run1-pt1-FF/sample_bin50.out1.20.seqz.txt.gz  /mnt/ssd/wes/analysis/clonality/     sample1.2
-
-##step8:
-#run pyclone
-
-
