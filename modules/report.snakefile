@@ -184,6 +184,8 @@ rule report:
         #OBSOLETE, but keeping around
         samples = config['samples']
     output: html="analysis/report/report.html"
+    benchmark:
+        "benchmarks/report/report.txt"
     run:
         (macsVersion, fdr) = processRunInfo(input.run_info)
         samplesSummaryTable = csvToSimpleTable(input.samples_summary)
@@ -210,6 +212,8 @@ rule samples_summary_table:
     output:
         "analysis/report/sequencingStatsSummary.csv"
     log: _logfile
+    benchmark:
+        "benchmarks/report/samples_summary_table.txt"
     shell:
         "chips/modules/scripts/get_sampleSummary.py -f {input.fastqc} -m {input.mapping} -p {input.pbc} > {output} 2>>{log}"
 
@@ -222,6 +226,8 @@ rule runs_summary_table:
     output:
         "analysis/report/peaksSummary.csv"
     log: _logfile
+    benchmark:
+        "benchmarks/report/runs_summary_table.txt"
     shell:
         "chips/modules/scripts/get_runsSummary.py -p {input.peaks} -f {input.frips} -d {input.dhs} -m {input.meta} -o {output} 2>>{log}"
 
@@ -232,6 +238,8 @@ rule plot_map_stat:
     output:
         "analysis/report/mapping.png"
     log: _logfile
+    benchmark:
+        "benchmarks/report/plot_map_stat.txt"
     shell:
         "Rscript chips/modules/scripts/map_stats.R {input} {output}"
 
@@ -242,6 +250,8 @@ rule plot_pbc_stat:
     output:
         "analysis/report/pbc.png"
     log: _logfile
+    benchmark:
+        "benchmarks/report/plot_pbc_stat.txt"
     shell:
         "Rscript chips/modules/scripts/plot_pbc.R {input} {output}"
 
@@ -251,6 +261,8 @@ rule plot_peakFoldChange:
     output:
         "analysis/report/peakFoldChange.png"
     log: _logfile
+    benchmark:
+        "benchmarks/report/plot_peakFoldChange.txt"
     shell:
         "Rscript chips/modules/scripts/plot_foldChange.R {input} {output}"
 
@@ -261,6 +273,8 @@ rule plot_nonChrM_stats:
     output:
         "analysis/report/attic/nonChrM_stats.png"
     log: _logfile
+    benchmark:
+        "benchmarks/report/plot_nonChrM_stats.txt"
     shell:
         "Rscript chips/modules/scripts/plot_nonChrM.R {input} {output}"
 

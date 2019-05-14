@@ -63,8 +63,8 @@ rule sequenza_multibam2seqz:
         sequenza_out="analysis/clonality/{run}/{run}.seqz.txt.gz"
     #conda:
     #    "../envs/sequenza.yml"
-    #benchmark:
-        #"benchmarks/testclonality/{run}/{run}_{run}_preclonality.txt"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}_{run}_sequenza_multibam2seqz.txt"
     threads: 12
     shell:
         "{params.sequenza_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
@@ -78,6 +78,8 @@ rule mergeChroms:
         chroms="\t".join(["chr%s" % str(i) for i in range(1,23)]),
         name= lambda wildcards: wildcards.run,
 	gawk_cmd= "gawk \'{if (NR!=1 && $1 != \"chromosome\") {print $0}}\'" 
+    benchmark:
+        "benchmarks/clonality/{run}/{run}_mergeChroms.txt"
     run:
         files=" ".join(["analysis/clonality/%s/%s.seqz_%s.txt.gz" % (params.name, params.name, chrom) for chrom in params.chroms.split("\t")])
 	#print(params.gawk_cmd)
@@ -110,6 +112,8 @@ rule clonality_addheader:
         headerfile="cidc_wes/header.txt.gz"
     output:
         finalsequenzaoutput="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}_clonality_addheader.txt"
     shell:
         #"zcat {input.headerfile} {input.binned_file_in} |bgzip > {output.finalsequenzaoutput}"
          "cat {input.headerfile} {input.binned_file_in} > {output.finalsequenzaoutput}"

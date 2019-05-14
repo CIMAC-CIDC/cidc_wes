@@ -53,6 +53,8 @@ rule sentieon_bwa:
     threads: _bwa_threads
     message: "ALIGN: Running sentieon BWA mem for alignment"
     log: _logfile
+    benchmark:
+        "benchmarks/align/{sample}/{sample}.sentieon_bwa.txt"
     shell:
         """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output.bam} --sam2bam -i -"""
 
@@ -88,6 +90,8 @@ rule map_stats:
     log: _logfile
     #CAN/should samtools view be multi-threaded--
     #UPDATE: tricky on how to do this right w/ compounded commands
+    benchmark:
+        "benchmarks/align/{sample}/{sample}.map_stats.txt"
     shell:
         #FLAGSTATS is the top of the file, and we append the uniquely mapped
         #reads to the end of the file
@@ -103,6 +107,8 @@ rule collect_map_stats:
         "analysis/align/mapping.csv"
     message: "ALIGN: collect and parse ALL mapping stats"
     log: _logfile
+    benchmark:
+        "benchmarks/align/collect_map_stats.txt"
     run:
         files = " -f ".join(input)
         shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
@@ -138,6 +144,8 @@ rule scoreSample:
     threads: _align_threads
     params:
         index1=config['sentieon_path'],
+    benchmark:
+        "benchmarks/align/{sample}/{sample}.scoreSample.txt"
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output}"""
 
@@ -157,6 +165,8 @@ rule dedupSortedUniqueBam:
     threads: _align_threads
     params:
         index1=config['sentieon_path'],
+    benchmark:
+        "benchmarks/align/{sample}/{sample}.dedupSortedUniqueBam.txt"
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
 

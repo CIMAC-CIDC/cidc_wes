@@ -237,6 +237,8 @@ rule germlinecalls_bamtovcf:
     params:
         index=config['genome_fasta'],
         positions_bamtovcf=config['positions_bamtovcf']
+    benchmark:
+        "benchmarks/germline/{sample}/{sample}.bamtovcf.txt"
     shell:
         """samtools mpileup -g -Q 0 -f {params.index} {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
 
@@ -248,5 +250,7 @@ rule germlinecalls_snp92:
     params:
         positons_SNP92=config['positions_SNP92'],
         outname=lambda wildcards: "analysis/germlineVariants/%s/%s_SNP92" % (wildcards.sample, wildcards.sample),
+    benchmark:
+        "benchmarks/germline/{sample}/{sample}.snp92.txt"
     shell:
         """vcftools --vcf {input.input_vcf} --positions {params.positons_SNP92} --recode --out {params.outname}"""
