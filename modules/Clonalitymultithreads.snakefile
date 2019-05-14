@@ -109,7 +109,7 @@ rule clonality_sequenza_binning:
 rule clonality_addheader:
     input:
         binned_file_in="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz",
-        headerfile="cidc_wes/header.txt.gz"
+        headerfile="cidc_wes/static/clonality/header.txt.gz"
     output:
         finalsequenzaoutput="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
     benchmark:
