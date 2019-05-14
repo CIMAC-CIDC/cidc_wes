@@ -2,7 +2,9 @@
 metasheet: 'metasheet.csv'
 ref: "cidc_wes/ref.yaml"
 
-sentieon_path: "/homes/jjyu/sentieon/sentieon-genomics-201808.05/bin"
+#Path to sentieon binary
+sentieon_path: "/path/to/sentieon"
+
 #Tell us what assembly to use (!! MUST be defined in chips/ref.yaml !!)
 assembly: hg38
 
