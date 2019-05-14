@@ -36,16 +36,16 @@ def puritybai_runsHelper(wildcards, iindex):
     return tmp
 
 
-def getNormal_bam_sample(wildcards):
+def purity_getNormal_bam_sample(wildcards):
     return puritybam_runsHelper(wildcards, 0)
 
-def getTumor_bam_sample(wildcards):
+def purity_getTumor_bam_sample(wildcards):
     return puritybam_runsHelper(wildcards, 1)
     
-def getNormal_bai_sample(wildcards):
+def purity_getNormal_bai_sample(wildcards):
     return puritybai_runsHelper(wildcards, 0)
 
-def getTumor_bai_sample(wildcards):
+def purity_getTumor_bai_sample(wildcards):
     return puritybai_runsHelper(wildcards, 1)
 
     
@@ -54,6 +54,13 @@ def puritycalls_targets(wildcards):
     ls = []
     for run in config["runs"]:
     	ls.append("analysis/purity/%s/%s_purity_results.txt" % (run,run))
+
+        #purity post process
+        ls.append("analysis/purity/%s/%s_purity_postprocessed_results.txt" % (run,run))
+        ls.append("analysis/purity/%s/%s.cncf" % (run,run))
+        ls.append("analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run))
+        ls.append("analysis/purity/%s/%s.iterpurityvalues.txt" % (run,run))
+
     return ls
 
 rule puritycalls_all:
@@ -63,10 +70,10 @@ rule puritycalls_all:
 rule Puritycalls_Facets:
     """Get the  recalibrated bam files from  mapped reads"""
     input:
-         NormalBam=getNormal_bam_sample,
-         TumorBam= getTumor_bam_sample,
-         Normalbai= getNormal_bai_sample,
-         Tumorbai= getTumor_bai_sample
+         NormalBam=purity_getNormal_bam_sample,
+         TumorBam=purity_getTumor_bam_sample,
+         Normalbai=purity_getNormal_bai_sample,
+         Tumorbai=purity_getTumor_bai_sample
     output:
          puritycalls="analysis/purity/{run}/{run}_purity_results.txt",
     message:
@@ -79,3 +86,31 @@ rule Puritycalls_Facets:
         "benchmarks/puritycalls/{run}/{run}.purityresults.txt"
     shell:
         "snp-pileup -q15 -Q20  {params.index1} {output} {input.NormalBam} {input.TumorBam}"
+
+rule purityprocessing_filter:
+    input:
+        "analysis/purity/{run}/{run}_purity_results.txt"
+    params:
+        #no params
+    output:
+        "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
+    benchmark:
+        "benchmarks/puritycalls/{run}/{run}.postprocessed.purity.results.txt"
+    shell:
+        #"cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
+        """cat {input} | sed 's/chr//g'  > {output} """
+
+rule purityplots_postprocessing:
+    input:
+        "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
+    params:
+        name=lambda wildcards: wildcards.run,
+        output_dir=lambda wildcards: "analysis/purity/%s/" % (wildcards.run)
+    output:
+        cncf="analysis/purity/{run}/{run}.cncf",
+        opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
+        iter="analysis/purity/{run}/{run}.iterpurityvalues.txt",
+    benchmark:
+        "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
+    shell:
+        "Rscript --vanilla cidc_wes/modules/scripts/facets_plots.R {input} {params.output_dir} {params.name}"

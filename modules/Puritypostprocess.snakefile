@@ -4,28 +4,29 @@
 _purityprocessing_threads=32
 
 
-def purityprocessing_runsHelper(wildcards, iindex):
-    """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
-    returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
-    tmp = []
-    r = config['runs'][wildcards.run]
-    #print(r)
+#I don't think these fns are used
+# def purityprocessing_runsHelper(wildcards, iindex):
+#     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
+#     returns the sample name of Normal (if iindex=0) else sample name of Tmr"""
+#     tmp = []
+#     r = config['runs'][wildcards.run]
+#     #print(r)
 
-    # check that we have a valid pair
-    if len(r) >=2:
-        sample_name = r[iindex]
-        tmp.append(input_template.format(sample=sample_name))
-    else:
-        #NOTE: I can't figure out a proper kill command so I'll do this
-        tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
-        #print(tmp)
-    return tmp
+#     # check that we have a valid pair
+#     if len(r) >=2:
+#         sample_name = r[iindex]
+#         tmp.append(input_template.format(sample=sample_name))
+#     else:
+#         #NOTE: I can't figure out a proper kill command so I'll do this
+#         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
+#         #print(tmp)
+#     return tmp
 
-def getNormal_sample(wildcards):
-    return purityprocessing_runsHelper(wildcards, 0)
+# def getNormal_sample(wildcards):
+#     return purityprocessing_runsHelper(wildcards, 0)
 
-def getTumor_sample(wildcards):
-    return purityprocessing_runsHelper(wildcards, 1)
+# def getTumor_sample(wildcards):
+#     return purityprocessing_runsHelper(wildcards, 1)
 
 def purityprocessing_targets(wildcards):
     """Generates the targets for this module"""
