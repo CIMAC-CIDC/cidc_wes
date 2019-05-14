@@ -222,7 +222,7 @@ def germlinecalls_targets(wildcards):
     for sample in config['samples']:
         #Consolidate these with an inner-for-loop?
         ls.append("analysis/germlineVariants/%s/%s_variant.vcf" % (sample,sample))
-        ls.append("analysis/germlineVariants/%s/%s_SNP92" % (sample,sample))
+        ls.append("analysis/germlineVariants/%s/%s_SNP92.recode.vcf" % (sample,sample))
         return ls
 
 rule germlinecalls_all:
@@ -244,8 +244,9 @@ rule germlinecalls_snp92:
     input:
         input_vcf="analysis/germlineVariants/{sample}/{sample}_variant.vcf"
     output:
-        output_SNP92="analysis/germlineVariants/{sample}/{sample}_SNP92"
+        output_SNP92="analysis/germlineVariants/{sample}/{sample}_SNP92.recode.vcf"
     params:
-        positons_SNP92=config['positions_SNP92']
+        positons_SNP92=config['positions_SNP92'],
+        outname=lambda wildcards: "analysis/germlineVariants/%s/%s_SNP92" % (wildcards.sample, wildcards.sample),
     shell:
-        """vcftools --vcf {input.input_vcf} --positions {params.positons_SNP92} --recode --out {output.output_SNP92}"""
+        """vcftools --vcf {input.input_vcf} --positions {params.positons_SNP92} --recode --out {params.outname}"""
