@@ -75,8 +75,11 @@ def somaticall_targets(wildcards):
             ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
             ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
 
+        #BEGIN HARMONIZATION
         #Mutation load
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.mutationload.txt" % (run,run))
+        #STATS:
+        ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.stats.txt" % (run,run))
     return ls
 
 rule somaticcalls_all:
@@ -301,6 +304,17 @@ rule calculate_mutation:
     params:
         size=config['effective_size'],
     benchmark:
-        "benchmarks/somaticvariantcall/{run}/{run_{caller}.calculate_mutation.txt"    
+        "benchmarks/somaticvariantcall/{run}/{run}_{caller}.calculate_mutation.txt"
     shell:
         "cidc_wes/modules/scripts/mutation_load.py -v {input} -o {output} -s {params.size}"
+
+rule extract_VAF_DEPTH:
+    """Run Jingxins harmonization script to extract VAF and DEPTH stats"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.stats.txt"
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}_{caller}.extract_VAF_DEPTH.txt"
+    shell:
+        "cidc_wes/modules/scripts/extract_vaf_depth.py -v {input} > {output}"
