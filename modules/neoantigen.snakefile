@@ -76,9 +76,9 @@ rule neoantigen_all:
 
 rule neoantigen_vep_annotate:
     input:
-        "analysis/somaticVariants/{run}/{run}_tnsnv.filter.vcf"
+        "analysis/somatic/{run}/{run}_tnsnv.filter.vcf"
     output:
-        "analysis/somaticVariants/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf"
+        "analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf"
     params:
         index=config['genome_fasta'],
         vep_data=config['vep_data'],
@@ -94,7 +94,7 @@ rule neoantigen_vep_annotate:
 
 rule neoantigen_pvacseq:
     input:
-        vcf="analysis/somaticVariants/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+        vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
         hla=getTumorHLA,
     output:
         "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv"
