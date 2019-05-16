@@ -71,8 +71,6 @@ def somaticall_targets(wildcards):
             #ls.append("analysis/somaticVariants/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
 
         #read depth/coverage filter: 10x, 20x, 50x - should this be on full or filtered?
-        #for frac in [10, 20, 50]:
-            #ls.append("analysis/somaticVariants/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
             #ls.append("analysis/somaticVariants/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
 
         #Mutation load
