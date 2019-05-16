@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_realigner_threads=32
+_realigner_threads=15
 
 
 def recal_runsHelper(wildcards, iindex, input_template):
@@ -45,27 +45,16 @@ def recalibration_targets(wildcards):
     	ls.append("analysis/align/%s/%s_recalibrated.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s_postrecal_data.table" % (sample,sample))
         ls.append("analysis/align/%s/%s_recal.csv" % (sample,sample))
-        ls.append("analysis/align/%s/%s_recal_plots.pdf" % (sample,sample))
+        #ls.append("analysis/align/%s/%s_recal_plots.pdf" % (sample,sample))
         #ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
     for run in config['runs']:
         ls.append("analysis/corealignments/%s/%s_tn_corealigned.bam" % (run,run))
-    return ls
-
-def recalibration_sort_targets(wildcards):
-    ls = []
-    for sample in config['samples']:
-        ls.append("analysis/align/%s/%s.sort_recalibrated.bam" % (sample,sample))
     return ls
 
 rule recalibration_all:
     input:
         recalibration_targets
     
-rule recalibration_sort:
-    input:
-        recalibration_sort_targets
-
-
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""
     input:
@@ -148,23 +137,6 @@ rule Base_recalibration_sentieon:
     shell:
         """{params.sentieon_path}/sentieon driver -t {threads} --algo QualCal --plot --before {input.prerecaltable} --after {input.postrecaltable} {output.recalfile}"""
 
-rule Base_recalibration_plot:
-    """base realigner plotter for recalibrated files"""
-    input:
-        recalfile="analysis/align/{sample}/{sample}_recal.csv"
-    output:
-        recalplot="analysis/align/{sample}/{sample}_recal_plots.pdf"
-    message:
-        "BASE RECALIBRATED PLOTS: base realigner plotting"
-    params:
-        #index=config['genome_fasta'],
-        sentieon_path=config['sentieon_path'],
-    threads: _realigner_threads
-    benchmark:
-        "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_plot.txt"    
-    shell:
-        """{params.sentieon_path}/sentieon plot bqsr -o {output.recalplot}  {input.recalfile}"""
-
 rule corealignment:
     input:
         normal = recal_getNormal, 
@@ -185,17 +157,3 @@ rule corealignment:
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
 
-#in support of clonalitymultithread, we must sort the recalibrated bam file
-rule sort_Recalibrated_bam:
-    input:
-        recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
-        recalibratedbai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
-    output:
-        sortbam="analysis/align/{sample}/{sample}.sort_recalibrated.bam",
-        sortbai="analysis/align/{sample}/{sample}.sort_recalibrated.bam.bai",
-    threads: 32
-    benchmark:
-        "benchmarks/recalibration/{sample}/{sample}.sort_Recalibrated_bam.txt"
-    shell:
-        "sambamba sort -t 64 -o {output.sortbam} {input.recalibratedbam}"
-    
