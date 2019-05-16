@@ -19,14 +19,14 @@ def align_targets(wildcards):
     ls.append("analysis/align/mapping.csv")
     return ls
 
-def all_mapping_targets(wildcards):
+def align_mapping_targets(wildcards):
     """Generates just the mapping targets for rule map_all"""
     ls = []
     for sample in config["samples"]:
         ls.append("analysis/align/%s/%s.sorted.bam" % (sample,sample))
     return ls
 
-def getFastq(wildcards):
+def align_getFastq(wildcards):
     return config["samples"][wildcards.sample]
 
 rule align_all:
@@ -35,11 +35,11 @@ rule align_all:
 
 rule map_all:
     input:
-        all_mapping_targets
+        align_mapping_targets
 
 rule sentieon_bwa:
     input:
-        getFastq
+        align_getFastq
     output:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
         bai="analysis/align/{sample}/{sample}.sorted.bam.bai"

@@ -24,10 +24,10 @@ def clonalitypost_runsHelper(wildcards, iindex):
     return tmp
 
 
-def getNormal_samplename(wildcards):
+def clonality_getNormal_samplename(wildcards):
     return clonalitypost_runsHelper(wildcards, 0)
 
-def getTumor_samplename(wildcards):
+def clonality_getTumor_samplename(wildcards):
     return clonalitypost_runsHelper(wildcards, 1)
 
 #------------------------------------------------------------------------------
@@ -51,10 +51,10 @@ def clonal_trial_runsHelper(wildcards, iindex):
     return tmp
 
 
-def getNormal_recalsample(wildcards):
+def clonality_getNormal_recalsample(wildcards):
     return clonal_trial_runsHelper(wildcards, 0)
 
-def getTumor_recalsample(wildcards):
+def clonality_getTumor_recalsample(wildcards):
     return clonal_trial_runsHelper(wildcards, 1)
 
 def clonality_targets(wildcards):
@@ -79,8 +79,8 @@ rule clonality_all:
 #------------------------------------------------------------------------------
 rule sequenza_multibam2seqz:
     input:
-        tumor_bam=getTumor_recalsample,
-        normal_bam=getNormal_recalsample,
+        tumor_bam=clonality_getTumor_recalsample,
+        normal_bam=clonality_getNormal_recalsample,
     output:
         "analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt"
     params:

@@ -19,10 +19,10 @@ def cnvcall_runsHelper(wildcards,pairs):
     #print(tmp)
     return tmp
 
-def getNormal_sample(wildcards):
+def cnv_getNormal_sample(wildcards):
     return cnvcall_runsHelper(wildcards, 0)
 
-def getTumor_sample(wildcards):
+def cnv_getTumor_sample(wildcards):
     return cnvcall_runsHelper(wildcards, 1)
 
 def cnvcall_targets(wildcards):
@@ -58,7 +58,7 @@ rule create_pon_sentieon:
 rule CNVcall_sentieon:
     input:
         #ONLY perform this analysis for Tumor samples-
-        tumor_recalibratedbam = getTumor_sample
+        tumor_recalibratedbam = cnv_getTumor_sample
     output:
         cnvcalls="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt"
     params:
