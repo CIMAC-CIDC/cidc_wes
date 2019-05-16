@@ -5,6 +5,11 @@
 _somaticcall_threads=32
 #_vcf2maf_threads=4
 
+#Dictionary of center targets
+center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
+                "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
+                "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
+
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
 def somatic_runsHelper(wildcards, iindex):
@@ -80,6 +85,9 @@ def somaticall_targets(wildcards):
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.mutationload.txt" % (run,run))
         #STATS:
         ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.stats.txt" % (run,run))
+        #Center specific exon targets
+        for center in center_targets:
+            ls.append("analysis/somaticVariants/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
     return ls
 
 rule somaticcalls_all:
@@ -318,3 +326,60 @@ rule extract_VAF_DEPTH:
         "benchmarks/somaticvariantcall/{run}/{run}_{caller}.extract_VAF_DEPTH.txt"
     shell:
         "cidc_wes/modules/scripts/extract_vaf_depth.py -v {input} > {output}"
+
+rule somatic_gzip_filtered_vcf:
+    """Prepping the files filtered.vcf file for somatic_getExonic_mutations
+    bgzip-ing and tabix"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf.gz",
+    shell:
+        "bgzip -c {input} > {output}"
+
+rule somatic_tabix_filtered_vcf_gz:
+    """Prepping the files filtered.vcf file for somatic_getExonic_mutations
+    bgzip-ing and tabix"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf.gz"
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf.gz.tbi",
+    shell:
+        "tabix -p vcf {input}"
+
+rule somatic_getExonic_mutations:
+    """Get the mutations that fall into the exonic regions"""
+    input:
+        vcf="analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf.gz",
+        tbi="analysis/somaticVariants/{run}/{run}_{caller}.filter.vcf.gz.tbi"
+    params:
+        exons=config['CDS_Bed_input']
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.vcf.gz",
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}_{caller}.somatic_getExonic_mutations.txt"
+    shell:
+        "bcftools view -R {params.exons} {input.vcf} | bcftools sort | bcftools view -Oz > {output}"
+
+rule somatic_tabix_exonic_mutations:
+    """Get the mutations that fall into the exonic regions"""
+    input:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.vcf.gz",
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi",
+    shell:
+        "tabix -p vcf {input}"
+
+rule somatic_getTarget_mutations:
+    """Get the mutations that fall into the exonic regions"""
+    input:
+        vcf="analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.vcf.gz",
+        tbi="analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi"
+    params:
+        target= lambda wildcards: center_targets[wildcards.center]
+    output:
+        "analysis/somaticVariants/{run}/{run}_{caller}.filter.exons.{center}.vcf.gz",
+    benchmark:
+        "benchmarks/somaticvariantcall/{run}/{run}_{caller}.somatic_getTarget_mutations.txt"
+    shell:
+        "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"
