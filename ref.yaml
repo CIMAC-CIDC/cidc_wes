@@ -34,7 +34,7 @@ hg38:
   pons: ./ref_files/hg38/pons/lung_TCGA_cnv_pad0
   pons_target: ./ref_files/hg38/pons/MDA_Broad_Miao.target.bed
 
-  pons_haplotyper: ./ref_files/hg38/pons/TNhaplotyper_PoN.vcf
+  pons_haplotyper: ./ref_files/hg38/pons/TNhaplotyper_PoN.vcf.gz
   pons_tnsnv: ./ref_files/hg38/pons/TNsnv_PoN.vcf
   
   #Tumor purity

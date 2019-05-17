@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_somaticcall_threads=32
+_somaticcall_threads=8
 #_vcf2maf_threads=4
 
 #Dictionary of center targets
@@ -18,11 +18,11 @@ def somatic_runsHelper(wildcards, iindex):
     tmp = []
     r = config['runs'][wildcards.run]
     #print(r)
-
+    
     #check that we have a valid pair
     if len(r) >=2:
         sample_name = r[iindex]
-        tmp.append(sample_name) 
+        tmp.append(sample_name)
     else:
         #NOTE: I can't figure out a proper kill command so I'll do this
         tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
@@ -36,49 +36,63 @@ def somatic_getNormal(wildcards):
 def somatic_getTumor(wildcards):
     return somatic_runsHelper(wildcards, 1)
 
+def somatic_getNormal_recal(wildcards):
+    sample = somatic_runsHelper(wildcards, 0)[0]
+    return "analysis/align/%s/%s_recalibrated.bam" % (sample,sample)
+
+def somatic_getNTumor_recal(wildcards):
+    sample = somatic_runsHelper(wildcards, 1)[0]
+    return "analysis/align/%s/%s_recalibrated.bam" % (sample,sample)
+
+def somatic_getNormal_recal_bai(wildcards):
+    sample = somatic_runsHelper(wildcards, 0)[0]
+    return "analysis/align/%s/%s_recalibrated.bam.bai" % (sample,sample)
+
+def somatic_getNTumor_recal_bai(wildcards):
+    sample = somatic_runsHelper(wildcards, 1)[0]
+    return "analysis/align/%s/%s_recalibrated.bam.bai" % (sample,sample)
+
 def somaticall_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
         #Consolidate these with an inner-for-loop?
-        ls.append("analysis/somatic/%s/%s_call.output.stats" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_call.output.stats" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.output.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run))
+#LEN FIX THIS
+#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.vcf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run))
         #FILTERED VCF
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.filter.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf" % (run,run))
+#LEN FIX THIS
+#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf" % (run,run))
         #MAF
         ls.append("analysis/somatic/%s/%s_tnsnv.output.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.output.maf" % (run,run))
         #Filtered MAF
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.filter.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnsnv.filter.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.filter.maf" % (run,run))
+       
         #Mutation Signatures
         ls.append("analysis/somatic/%s/%s_tnsnv.output.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.pdf" % (run,run))
-        #Filtered Mutation Signatures
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.filter.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.pdf" % (run,run))
-
+#LEN FIX THIS
+#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.pdf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.output.pdf" % (run,run))
         #EXON mutations- should this be on full or filtered?
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
+        #ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
         #alleleFrac cutoffs - should this be on full or filtered?
-        for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
-            ls.append("analysis/somatic/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
-            ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
+        #for frac in [0.05,0.1,0.2,0.3,0.4,0.5]:
+        #ls.append("analysis/somatic/%s/%s_tnscope.output.%s.vcf" % (run,run, str(frac)))
+        #ls.append("analysis/somatic/%s/%s_tnhaplotyper.output.%s.vcf" % (run,run, str(frac)))
 
         #read depth/coverage filter: 10x, 20x, 50x - should this be on full or filtered?
-        for frac in [10, 20, 50]:
-            ls.append("analysis/somatic/%s/%s_tnscope.coverage.%s.vcf" % (run,run, str(frac)))
-            ls.append("analysis/somatic/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
+        #ls.append("analysis/somatic/%s/%s_tnsnv.coverage.%s.vcf" % (run,run, str(frac)))
+
 
         #BEGIN HARMONIZATION
         #Mutation load
@@ -93,6 +107,28 @@ def somaticall_targets(wildcards):
 rule somaticcalls_all:
     input:
         somaticall_targets
+    
+rule somatic_calling_TNhaplotyper2:
+    input:
+        tumorbam=somatic_getNTumor_recal,
+	tumorbai=somatic_getNTumor_recal_bai,
+        normalbam=somatic_getNormal_recal,
+        normalbai=somatic_getNormal_recal_bai,
+    output:
+        tnhaplotyper2vcf="analysis/somatic/{run}/{run}_tnhaplotyper2.output.vcf.gz"
+    params:
+        index=config['genome_fasta'],
+        sentieon_path=config['sentieon_path'],
+        tnhaplotyper_pon= config['pons_haplotyper'],
+	#JUST sample names - can also use the helper fns, e.g.
+	#normal = lambda wildcards: getNormal_sample(wildcards)
+	normal = lambda wildcards: config['runs'][wildcards.run][0],
+	tumor = lambda wildcards: config['runs'][wildcards.run][1],
+    threads:_somaticcall_threads
+    benchmark:
+        "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper2.txt"
+    shell:
+        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index}  -i {input.normalbam}  -i  {input.tumorbam}  --algo TNhaplotyper2 --pon {params.tnhaplotyper_pon}  --tumor_sample {params.tumor} --normal_sample {params.normal}   {output.tnhaplotyper2vcf}"""
 
 rule somatic_calling_TNsnv:
     input:
@@ -111,48 +147,48 @@ rule somatic_calling_TNsnv:
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNsnv.txt"
     shell:
-        #"""{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
+        #"""{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealig#nedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.#dbsnp} --call_stats_out {output.statscall} --min_tumor_allele_frac 0.05 {output.tnsnvvcf}"""
         #REMOVING min_tumor_allele_frac param
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} {output.tnsnvvcf}"""
 
 
-rule somatic_calling_TNhaplotyper:
-    input:
-        corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
-    output:
-        tnhaplotypervcf="analysis/somatic/{run}/{run}_tnhaplotyper.output.vcf.gz"
-    params:
-        index=config['genome_fasta'],
-        sentieon_path=config['sentieon_path'],
-        dbsnp= config['dbsnp'],
-        #JUST sample names - can also use the helper fns, e.g.
-        #normal = lambda wildcards: getNormal_sample(wildcards)
-        normal = lambda wildcards: config['runs'][wildcards.run][0],
-        tumor = lambda wildcards: config['runs'][wildcards.run][1],
-    threads:_somaticcall_threads
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper.txt"
-    shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
+# rule somatic_calling_TNhaplotyper:
+#     input:
+#         corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
+#     output:
+#         tnhaplotypervcf="analysis/somatic/{run}/{run}_tnhaplotyper.output.vcf.gz"
+#     params:
+#         index=config['genome_fasta'],
+#         sentieon_path=config['sentieon_path'],
+#         dbsnp= config['dbsnp'],
+#         #JUST sample names - can also use the helper fns, e.g.
+#         #normal = lambda wildcards: getNormal_sample(wildcards)
+#         normal = lambda wildcards: config['runs'][wildcards.run][0],
+#         tumor = lambda wildcards: config['runs'][wildcards.run][1],
+#     threads:_somaticcall_threads
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper.txt"
+#     shell:
+#         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNhaplotyper --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnhaplotypervcf}"""
 
 
-rule somatic_calling_TNscope:
-    input:
-        corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
-    output:
-        tnscopevcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
-    params:
-        index=config['genome_fasta'],
-        sentieon_path=config['sentieon_path'],
-        dbsnp= config['dbsnp'],
-        #JUST sample names - can also use the helper fns, e.g.
-        normal = lambda wildcards: config['runs'][wildcards.run][0],
-        tumor = lambda wildcards: config['runs'][wildcards.run][1],
-    threads:_somaticcall_threads
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.somatic_calling_TNscope.txt"
-    shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
+# rule somatic_calling_TNscope:
+#     input:
+#         corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
+#     output:
+#         tnscopevcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
+#     params:
+#         index=config['genome_fasta'],
+#         sentieon_path=config['sentieon_path'],
+#         dbsnp= config['dbsnp'],
+#         #JUST sample names - can also use the helper fns, e.g.
+#         normal = lambda wildcards: config['runs'][wildcards.run][0],
+#         tumor = lambda wildcards: config['runs'][wildcards.run][1],
+#     threads:_somaticcall_threads
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.somatic_calling_TNscope.txt"
+#     shell:
+#         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
 rule vcftoolsfilter:
     """General rule to filter the three different types of vcf.gz files"""
@@ -166,6 +202,7 @@ rule vcftoolsfilter:
         "benchmarks/somatic/{run}/{run}.{caller}_vcftoolsfilter.txt"
     shell:
        """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
+
 
 rule gunzip_vcf:
     """General rule to gunzip the three types of vcf.gz files-
@@ -235,74 +272,74 @@ rule mutationSignature:
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
-rule alleleFrac_filter_tnscope:
-    input:
-        "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
-    params:
-        threshold=lambda wildcards: wildcards.frac
-    output:
-        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
-        #with vcftoolsfilter
-        "analysis/somatic/{run}/{run}_tnscope.output.{frac,\d\.\d+}.vcf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnscope.txt"
-    shell:
-        "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
+# rule alleleFrac_filter_tnscope:
+#     input:
+#         "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
+#     params:
+#         threshold=lambda wildcards: wildcards.frac
+#     output:
+#         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+#         #with vcftoolsfilter
+#         "analysis/somatic/{run}/{run}_tnscope.output.{frac,\d\.\d+}.vcf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnscope.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
-rule alleleFrac_filter_tnhaplotyper:
-    input:
-        "analysis/somatic/{run}/{run}_tnhaplotyper.output.vcf.gz"
-    params:
-        threshold=lambda wildcards: wildcards.frac
-    output:
-        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
-        #with vcftoolsfilter
-        "analysis/somatic/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnhaplotyper.txt"
-    shell:
-        "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
+# rule alleleFrac_filter_tnhaplotyper:
+#     input:
+#         "analysis/somatic/{run}/{run}_tnhaplotyper.output.vcf.gz"
+#     params:
+#         threshold=lambda wildcards: wildcards.frac
+#     output:
+#         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+#         #with vcftoolsfilter
+#         "analysis/somatic/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnhaplotyper.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
-rule maf_exon_filter:
-    """General rule to filter coding exon mutations"""
-    input:
-        "analysis/somatic/{run}/{run}_{caller}.output.maf"
-    output:
-        "analysis/somatic/{run}/{run}_{caller}.output.exon.maf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.{caller}_maf_exon_filter.txt"
-    shell:
-        "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
+# rule maf_exon_filter:
+#     """General rule to filter coding exon mutations"""
+#     input:
+#         "analysis/somatic/{run}/{run}_{caller}.output.maf"
+#     output:
+#         "analysis/somatic/{run}/{run}_{caller}.output.exon.maf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.{caller}_maf_exon_filter.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
 
-rule coverage_filter_tnscope:
-    input:
-        "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
-    params:
-        threshold=lambda wildcards: wildcards.frac,
-        field="AFDP" #NOTE this is the particular field tnscope vcf files
-    output:
-        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
-        #with vcftoolsfilter; {frac} is int
-        "analysis/somatic/{run}/{run}_tnscope.coverage.{frac,\d+}.vcf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.coverage_filter_tnscope.txt"
-    shell:
-        "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
+# rule coverage_filter_tnscope:
+#     input:
+#         "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
+#     params:
+#         threshold=lambda wildcards: wildcards.frac,
+#         field="AFDP" #NOTE this is the particular field tnscope vcf files
+#     output:
+#         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+#         #with vcftoolsfilter; {frac} is int
+#         "analysis/somatic/{run}/{run}_tnscope.coverage.{frac,\d+}.vcf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.coverage_filter_tnscope.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
 
-rule coverage_filter_tnsnv:
-    input:
-        "analysis/somatic/{run}/{run}_tnsnv.output.vcf.gz"
-    params:
-        threshold=lambda wildcards: wildcards.frac,
-        field="DP" #NOTE this is the particular field tnsnv vcf files
-    output:
-        #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
-        #with vcftoolsfilter; {frac} is int
-        "analysis/somatic/{run}/{run}_tnsnv.coverage.{frac,\d+}.vcf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.coverage_filter_tnsnv.txt"
-    shell:
-        "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
+# rule coverage_filter_tnsnv:
+#     input:
+#         "analysis/somatic/{run}/{run}_tnsnv.output.vcf.gz"
+#     params:
+#         threshold=lambda wildcards: wildcards.frac,
+#         field="DP" #NOTE this is the particular field tnsnv vcf files
+#     output:
+#         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
+#         #with vcftoolsfilter; {frac} is int
+#         "analysis/somatic/{run}/{run}_tnsnv.coverage.{frac,\d+}.vcf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.coverage_filter_tnsnv.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/vcf_filterByReadDepth.py -v {input} -t {params.threshold} -f {params.field} -o {output}"
 
 rule calculate_mutation:
     input:
