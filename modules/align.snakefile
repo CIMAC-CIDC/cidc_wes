@@ -1,6 +1,6 @@
 #MODULE: Align fastq files to genome - common rules
 #import os
-_logfile="analysis/logs/align.log"
+#_logfile="analysis/logs/align.log"
 _align_threads=32
 _bwa_threads=16
 
@@ -10,10 +10,6 @@ def align_targets(wildcards):
     for sample in config["samples"]:
         ls.append("analysis/align/%s/%s.sorted.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s.sorted.bam.bai" % (sample,sample))
-        
-        #REMOVING THIS!
-        #ls.append("analysis/align/%s/%s_unique.sorted.bam" % (sample,sample))
-        #ls.append("analysis/align/%s/%s_unique.sorted.bam.bai"%(sample,sample))
         ls.append("analysis/align/%s/%s.sorted.dedup.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s.sorted.dedup.bam.bai" % (sample,sample))
     ls.append("analysis/align/mapping.csv")
@@ -27,7 +23,8 @@ def align_mapping_targets(wildcards):
     return ls
 
 def align_getFastq(wildcards):
-    return config["samples"][wildcards.sample]
+    ls = config["samples"][wildcards.sample]
+    return ls
 
 rule align_all:
     input:
@@ -52,7 +49,8 @@ rule sentieon_bwa:
         tthreads=lambda wildcards, input, output, threads, resources: threads-1
     threads: _bwa_threads
     message: "ALIGN: Running sentieon BWA mem for alignment"
-    log: _logfile
+    log: "analysis/logs/align.sentieon_bwa.{sample}.log"
+    group: "align"
     benchmark:
         "benchmarks/align/{sample}/{sample}.sentieon_bwa.txt"
     shell:
@@ -62,15 +60,14 @@ rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
-        #uniq_bam="analysis/align/{sample}/{sample}_unique.sorted.bam"
     output:
-        #temp("analysis/align/{sample}/{sample}_mapping.txt")
         "analysis/align/{sample}/{sample}_mapping.txt"
     threads: _align_threads
     message: "ALIGN: get mapping stats for each bam"
-    log: _logfile
+    log: "analysis/logs/align.map_stats.{sample}.log"
     #CAN/should samtools view be multi-threaded--
     #UPDATE: tricky on how to do this right w/ compounded commands
+    group: "align"
     benchmark:
         "benchmarks/align/{sample}/{sample}.map_stats.txt"
     shell:
@@ -87,7 +84,8 @@ rule collect_map_stats:
     output:
         "analysis/align/mapping.csv"
     message: "ALIGN: collect and parse ALL mapping stats"
-    log: _logfile
+    log: "analysis/logs/align.collect_map_stats.log"
+    group: "align"
     benchmark:
         "benchmarks/align/collect_map_stats.txt"
     run:
@@ -102,10 +100,11 @@ rule scoreSample:
     output:
         "analysis/align/{sample}/{sample}.sorted.score.txt"
     message: "ALIGN: score sample"
-    log: _logfile
+    log: "analysis/logs/align.scoreSample.{sample}.log"
     threads: _align_threads
     params:
         index1=config['sentieon_path'],
+    group: "align"
     benchmark:
         "benchmarks/align/{sample}/{sample}.scoreSample.txt"
     shell:
@@ -123,10 +122,11 @@ rule dedupSortedUniqueBam:
         baii="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
         met="analysis/align/{sample}/{sample}.sorted.dedup.metric.txt",
     message: "ALIGN: dedup sorted unique bam file"
-    log: _logfile
+    log: "analysis/logs/align.dedupSortedUniqueBam.{sample}.log"
     threads: _align_threads
     params:
         index1=config['sentieon_path'],
+    group: "align"
     benchmark:
         "benchmarks/align/{sample}/{sample}.dedupSortedUniqueBam.txt"
     shell:

@@ -417,6 +417,6 @@ rule somatic_getTarget_mutations:
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.{center}.vcf.gz",
     benchmark:
-        "benchmarks/somatic/{run}/{run}_{caller}.somatic_getTarget_mutations.txt"
+        "benchmarks/somatic/{run}/{run}_{caller}.{center}.somatic_getTarget_mutations.txt"
     shell:
         "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"

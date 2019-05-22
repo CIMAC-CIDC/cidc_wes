@@ -50,7 +50,7 @@ rule create_pon_sentieon:
         #targetbed= config['pon_target_bed'],
     threads: 32 #_cnvcall_threads
     benchmark:
-        "benchmarks/CNV/{sample}/{sample}.create_pon_sentieon.txt"
+        "benchmarks/CNV/{run}/{run}.create_pon_sentieon.txt"
     shell:
         """{params.index1}/sentieon driver  -t {threads} -r {params.index} -i {input.normal_recalibratedbam} --algo CNV  --target {input.targetbed} --target_padding 0 --create_pon {output.ponfile}"""
 
@@ -68,7 +68,7 @@ rule CNVcall_sentieon:
         target=config['pons_target'],
     threads:_cnvcall_threads
     benchmark:
-        "benchmarks/CNV/{sample}/{sample}.cnvcall.txt"
+        "benchmarks/CNV/{run}/{sample}.cnvcall.txt"
     shell:
         #NOTE: target_padding is being set to 0--following the broad's method
         #"""{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
