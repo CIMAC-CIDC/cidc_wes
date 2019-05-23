@@ -49,6 +49,7 @@ rule purityprocessing_filter:
         #no params
     output:
         "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
+    group: "purity"
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.postprocessed.purity.results.txt"
     shell:
@@ -65,6 +66,7 @@ rule purityplots_postprocessing:
         cncf="analysis/purity/{run}/{run}.cncf",
         opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
         iter="analysis/purity/{run}/{run}.iterpurityvalues.txt",
+    group: "purity"
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
     shell:

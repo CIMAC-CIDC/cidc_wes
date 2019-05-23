@@ -63,6 +63,7 @@ rule sequenza_multibam2seqz:
         sequenza_out="analysis/clonality/{run}/{run}.seqz.txt.gz"
     #conda:
     #    "../envs/sequenza.yml"
+    group: "Clonalitymultithreads"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_sequenza_multibam2seqz.txt"
     threads: 12
@@ -78,6 +79,7 @@ rule mergeChroms:
         chroms="\t".join(["chr%s" % str(i) for i in range(1,23)]),
         name= lambda wildcards: wildcards.run,
 	gawk_cmd= "gawk \'{if (NR!=1 && $1 != \"chromosome\") {print $0}}\'" 
+    group: "Clonalitymultithreads"
     benchmark:
         "benchmarks/clonality/{run}/{run}_mergeChroms.txt"
     run:
@@ -100,6 +102,7 @@ rule clonality_sequenza_binning:
         sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/"
     #conda:
     #    "../envs/sequenza.yml"
+    group: "Clonalitymultithreads"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:
@@ -114,6 +117,7 @@ rule clonality_addheader:
         finalsequenzaoutput="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
     benchmark:
         "benchmarks/clonality/{run}/{run}_clonality_addheader.txt"
+    group: "Clonalitymultithreads"
     shell:
         #"zcat {input.headerfile} {input.binned_file_in} |bgzip > {output.finalsequenzaoutput}"
          "cat {input.headerfile} {input.binned_file_in} > {output.finalsequenzaoutput}"
