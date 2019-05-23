@@ -144,6 +144,7 @@ rule somatic_calling_TNsnv:
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
     threads:96
+    group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNsnv.txt"
     shell:
@@ -166,6 +167,7 @@ rule somatic_calling_TNsnv:
 #         normal = lambda wildcards: config['runs'][wildcards.run][0],
 #         tumor = lambda wildcards: config['runs'][wildcards.run][1],
 #     threads:_somaticcall_threads
+#      group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper.txt"
 #     shell:
@@ -185,6 +187,7 @@ rule somatic_calling_TNsnv:
 #         normal = lambda wildcards: config['runs'][wildcards.run][0],
 #         tumor = lambda wildcards: config['runs'][wildcards.run][1],
 #     threads:_somaticcall_threads
+#      group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.somatic_calling_TNscope.txt"
 #     shell:
@@ -198,6 +201,7 @@ rule vcftoolsfilter:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     params:
         index=config['genome_fasta'],
+    group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_vcftoolsfilter.txt"
     shell:
@@ -214,6 +218,7 @@ rule gunzip_vcf:
         "analysis/somatic/{run}/{run}_{caller}.output.vcf"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_gunzip_vcf.txt"
+    group: "somatic"
     shell:
         #NOTE: we want to keep the original .gz vcf file
         "gunzip -k {input}"
@@ -229,6 +234,7 @@ rule vcfVEP:
         vep_synonyms=config['vep_synonyms'],
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcfVEP.txt"
+    group: "somatic"
     shell:
         "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs"
     
@@ -252,6 +258,7 @@ rule vcf2maf:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcf2maf.txt"
     log:
         "analysis/log/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
+    group: "somatic"
     shell:
         """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} 2> {log}"""
 
@@ -269,6 +276,7 @@ rule mutationSignature:
         name = lambda wildcards: wildcards.run
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_mutationSignature.txt"
+    group: "somatic"
     shell:
         "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
@@ -281,6 +289,7 @@ rule mutationSignature:
 #         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
 #         #with vcftoolsfilter
 #         "analysis/somatic/{run}/{run}_tnscope.output.{frac,\d\.\d+}.vcf"
+#     group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnscope.txt"
 #     shell:
@@ -295,6 +304,7 @@ rule mutationSignature:
 #         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
 #         #with vcftoolsfilter
 #         "analysis/somatic/{run}/{run}_tnhaplotyper.output.{frac,\d\.\d+}.vcf"
+#     group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.alleleFrac_filter_tnhaplotyper.txt"
 #     shell:
@@ -306,6 +316,7 @@ rule mutationSignature:
 #         "analysis/somatic/{run}/{run}_{caller}.output.maf"
 #     output:
 #         "analysis/somatic/{run}/{run}_{caller}.output.exon.maf"
+#     group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.{caller}_maf_exon_filter.txt"
 #     shell:
@@ -321,6 +332,7 @@ rule mutationSignature:
 #         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
 #         #with vcftoolsfilter; {frac} is int
 #         "analysis/somatic/{run}/{run}_tnscope.coverage.{frac,\d+}.vcf"
+#     group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.coverage_filter_tnscope.txt"
 #     shell:
@@ -336,6 +348,7 @@ rule mutationSignature:
 #         #NOTE: need to add regular-expression for {frac} b/c it's ambiguous
 #         #with vcftoolsfilter; {frac} is int
 #         "analysis/somatic/{run}/{run}_tnsnv.coverage.{frac,\d+}.vcf"
+#     group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.coverage_filter_tnsnv.txt"
 #     shell:
@@ -348,6 +361,7 @@ rule calculate_mutation:
         "analysis/somatic/{run}/{run}_{caller}.mutationload.txt"
     params:
         size=config['effective_size'],
+    group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.calculate_mutation.txt"
     shell:
@@ -359,6 +373,7 @@ rule extract_VAF_DEPTH:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.stats.txt"
+    group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.extract_VAF_DEPTH.txt"
     shell:
@@ -371,6 +386,7 @@ rule somatic_gzip_filtered_vcf:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz",
+    group: "somatic"
     shell:
         "bgzip -c {input} > {output}"
 
@@ -381,6 +397,7 @@ rule somatic_tabix_filtered_vcf_gz:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz.tbi",
+    group: "somatic"
     shell:
         "tabix -p vcf {input}"
 
@@ -393,6 +410,7 @@ rule somatic_getExonic_mutations:
         exons=config['CDS_Bed_input']
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz",
+    group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.somatic_getExonic_mutations.txt"
     shell:
@@ -404,6 +422,7 @@ rule somatic_tabix_exonic_mutations:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz",
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi",
+    group: "somatic"
     shell:
         "tabix -p vcf {input}"
 
@@ -414,6 +433,7 @@ rule somatic_getTarget_mutations:
         tbi="analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi"
     params:
         target= lambda wildcards: center_targets[wildcards.center]
+    group: "somatic"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.{center}.vcf.gz",
     benchmark:
