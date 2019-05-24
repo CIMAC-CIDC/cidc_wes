@@ -34,8 +34,8 @@ rule optitype_bamtofastq:
     input:
         in_sortchr6bamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     output:
-        chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
-        chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"
+        chr6fastqfile1 = temp("analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq"),
+        chr6fastqfile2 = temp("analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq")
     group: "optitype"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"

@@ -82,7 +82,7 @@ rule sequenza_multibam2seqz:
         tumor_bam=clonality_getTumor_recalsample,
         normal_bam=clonality_getNormal_recalsample,
     output:
-        "analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt"
+        temp("analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt")
     params:
         #JUST sample names - can also use the helper fns, e.g.
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
@@ -106,7 +106,7 @@ rule mergeChroms:
     input:
         "analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt"
     output:
-        "analysis/clonality/{run}/{run}.seqz.txt.gz"
+        temp("analysis/clonality/{run}/{run}.seqz.txt.gz")
     params:
         chroms="\t".join(["chr%s" % str(i) for i in range(1,23)]),
         name= lambda wildcards: wildcards.run,
@@ -124,7 +124,7 @@ rule clonality_sequenza_binning:
     input:
         completeseq="analysis/clonality/{run}/{run}.seqz.txt.gz",
     output:
-        sequenzafinal_out="analysis/clonality/{run}/{run}.bin50.seqz.txt.gz"
+        sequenzafinal_out=temp("analysis/clonality/{run}/{run}.bin50.seqz.txt.gz")
     params:
         gc_file=config['gc_file'],
         ref=config['genome_fasta'],

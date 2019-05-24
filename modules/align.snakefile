@@ -98,7 +98,7 @@ rule scoreSample:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
         bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
     output:
-        "analysis/align/{sample}/{sample}.sorted.score.txt"
+        temp("analysis/align/{sample}/{sample}.sorted.score.txt")
     message: "ALIGN: score sample"
     log: "analysis/logs/align.scoreSample.{sample}.log"
     threads: _align_threads
