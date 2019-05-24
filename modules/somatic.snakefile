@@ -82,7 +82,10 @@ def somaticall_targets(wildcards):
 #        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.pdf" % (run,run))
         #ls.append("analysis/somatic/%s/%s_tnscope.output.pdf" % (run,run))
         #EXON mutations- should this be on full or filtered?
-        #ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
+
+        #tnsnv.output.exon.maf is required by calculate_mutation
+        ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
+
         #ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
         #ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
         #alleleFrac cutoffs - should this be on full or filtered?
@@ -310,17 +313,17 @@ rule mutationSignature:
 #     shell:
 #         "cidc_wes/modules/scripts/vcf_alleleFracFilter.py -v {input} -t {params.threshold} -o {output}"
 
-# rule maf_exon_filter:
-#     """General rule to filter coding exon mutations"""
-#     input:
-#         "analysis/somatic/{run}/{run}_{caller}.output.maf"
-#     output:
-#         "analysis/somatic/{run}/{run}_{caller}.output.exon.maf"
-#     group: "somatic"
-#     benchmark:
-#         "benchmarks/somatic/{run}/{run}.{caller}_maf_exon_filter.txt"
-#     shell:
-#         "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
+rule maf_exon_filter:
+    """General rule to filter coding exon mutations"""
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.output.maf"
+    output:
+        "analysis/somatic/{run}/{run}_{caller}.output.exon.maf"
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/{run}/{run}.{caller}_maf_exon_filter.txt"
+    shell:
+        "cidc_wes/modules/scripts/maf_exon_filter.py -m {input} -o {output}"
 
 # rule coverage_filter_tnscope:
 #     input:
