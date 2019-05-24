@@ -40,6 +40,7 @@ rule Metrics_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
     threads: _metrics_threads
+    group: "metrics"
     benchmark:
         "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon.txt"
     shell:
@@ -63,6 +64,7 @@ rule Metrics_sentieon_plots:
     params:
         index1=config['sentieon_path'],
     threads: _metrics_threads
+    group: "metrics"
     benchmark:
         "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon_plots.txt"
     shell:

@@ -30,6 +30,7 @@ rule CoverageMetrics_sentieon:
         cov_thresh=50, #LT: put this in config.yaml
         index2=config['CDS_Bed_input'],
     threads: _coveragemetrics_threads
+    group: "coverage"
     benchmark:
         "benchmarks/coverage/{sample}/{sample}.CoverageMetrics.txt"
     shell:
@@ -52,6 +53,7 @@ rule targets_sentieon:
         cov_thresh=50,
         index2=config['target_Bed_input'],
     threads: _coveragemetrics_threads
+    group: "coverage"
     benchmark:
         "benchmarks/targetcoverage/{sample}/{sample}.targetMetrics.txt"
     shell:

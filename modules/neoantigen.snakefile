@@ -86,6 +86,7 @@ rule neoantigen_vep_annotate:
 
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
+    group: "neoantigen"
     benchmark:
         "benchmarks/neoantigen/{run}/{run}.neoantigen_vep_annotate.txt"
     shell:
@@ -113,6 +114,7 @@ rule neoantigen_pvacseq:
         epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
         output_dir = lambda wildcards: "analysis/neoantigen/%s/" % wildcards.run,
     threads: _neoantigen_threads
+    group: "neoantigen"
     benchmark:
         "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
     shell:
