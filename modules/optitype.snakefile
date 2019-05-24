@@ -23,6 +23,7 @@ rule optitype_extract_chr6:
     output:
         chr6sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     threads:_optitype_threads
+    group: "optitype"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_extract_chr6.txt"
     shell:
@@ -35,6 +36,7 @@ rule optitype_bamtofastq:
     output:
         chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
         chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"
+    group: "optitype"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"
     shell:
@@ -61,6 +63,7 @@ rule optitype_hlatyping:
     output:
         HLAgenotype = "analysis/optitype/{sample}/{sample}_result.tsv",
         Coverageplot = "analysis/optitype/{sample}/{sample}_coverage_plot.pdf"
+    group: "optitype"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_hlatyping.txt"
     shell:

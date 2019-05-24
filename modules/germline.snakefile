@@ -22,6 +22,7 @@ rule germlinecalls_bamtovcf:
     params:
         index=config['genome_fasta'],
         positions_bamtovcf=config['positions_bamtovcf']
+    group: "germline"
     benchmark:
         "benchmarks/germline/{sample}/{sample}.bamtovcf.txt"
     shell:
@@ -35,6 +36,7 @@ rule germlinecalls_snp92:
     params:
         positons_SNP92=config['positions_SNP92'],
         outname=lambda wildcards: "analysis/germline/%s/%s_SNP92" % (wildcards.sample, wildcards.sample),
+    group: "germline"
     benchmark:
         "benchmarks/germline/{sample}/{sample}.snp92.txt"
     shell:
