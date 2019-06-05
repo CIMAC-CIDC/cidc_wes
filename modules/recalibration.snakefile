@@ -104,6 +104,7 @@ rule Base_recalibration_postcal_sentieon:
     """post recalibration for realigned files"""
     input:
         recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
+        recalibrated_bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai",
         prerecaltable="analysis/align/{sample}/{sample}_prerecal_data.table"
     output:
         postrecaltable="analysis/align/{sample}/{sample}_postrecal_data.table"

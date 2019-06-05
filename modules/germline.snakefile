@@ -35,7 +35,7 @@ rule germlinecalls_snp92:
         output_SNP92="analysis/germline/{sample}/{sample}_SNP92.recode.vcf"
     params:
         positons_SNP92=config['positions_SNP92'],
-        outname=lambda wildcards: "analysis/germline/%s/%s_SNP92" % (wildcards.sample, wildcards.sample),
+        outname=lambda wildcards: "%sanalysis/germline/%s/%s_SNP92" % (config['remote_path'], wildcards.sample, wildcards.sample),
     group: "germline"
     benchmark:
         "benchmarks/germline/{sample}/{sample}.snp92.txt"

@@ -107,7 +107,7 @@ rule purityplots_postprocessing:
         "analysis/purity/{run}/{run}_purity_postprocessed_results.txt"
     params:
         name=lambda wildcards: wildcards.run,
-        output_dir=lambda wildcards: "analysis/purity/%s/" % (wildcards.run)
+        output_dir=lambda wildcards: "%sanalysis/purity/%s/" % (config['remote_path'], wildcards.run)
     output:
         cncf="analysis/purity/{run}/{run}.cncf",
         opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",

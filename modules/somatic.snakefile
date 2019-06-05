@@ -275,7 +275,7 @@ rule mutationSignature:
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
         matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
-        outname = lambda wildcards: "analysis/somatic/%s/%s_%s.%s" % (wildcards.run, wildcards.run, wildcards.caller, wildcards.type),
+        outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.%s" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller, wildcards.type),
         name = lambda wildcards: wildcards.run
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_mutationSignature.txt"
