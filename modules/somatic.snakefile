@@ -119,6 +119,7 @@ rule somatic_calling_TNhaplotyper2:
         normalbai=somatic_getNormal_recal_bai,
     output:
         tnhaplotyper2vcf="analysis/somatic/{run}/{run}_tnhaplotyper2.output.vcf.gz"
+        #LEN/AASHNA: IF tnhaplotyper2 generates tbi, we should add it as output
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
@@ -138,7 +139,8 @@ rule somatic_calling_TNsnv:
         corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
     output:
         statscall="analysis/somatic/{run}/{run}_call.output.stats",
-        tnsnvvcf="analysis/somatic/{run}/{run}_tnsnv.output.vcf.gz"
+        tnsnvvcf="analysis/somatic/{run}/{run}_tnsnv.output.vcf.gz",
+        tnsnvvcftbi="analysis/somatic/{run}/{run}_tnsnv.output.vcf.gz.tbi",
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
@@ -260,7 +262,7 @@ rule vcf2maf:
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcf2maf.txt"
     log:
-        "analysis/log/somaticvariantcall/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
+        "analysis/logs/somatic/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     group: "somatic"
     shell:
         """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} 2> {log}"""
