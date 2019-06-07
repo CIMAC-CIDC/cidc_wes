@@ -90,17 +90,14 @@ rule sequenza_multibam2seqz:
         gc_file=config['gc_file'],
         ref=config['genome_fasta'],
         #chroms= ['chr%' % c for c in list(range(1,22+1))]
-        #sequenz_path="/home/aashna/.local/bin", #LEN-add this
-        #HARD-CODED- CHANGE
-        sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/",
         sequenza_out="%sanalysis/clonality/{run}/{run}.seqz.txt.gz" % config['remote_path']
-    #conda:
-    #    "../envs/sequenza.yml"
+    conda:
+        "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_sequenza_multibam2seqz.txt"
     threads: 12
     shell:
-        "{params.sequenza_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
+        "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
 
 rule mergeChroms:
     input:
@@ -128,15 +125,12 @@ rule clonality_sequenza_binning:
     params:
         gc_file=config['gc_file'],
         ref=config['genome_fasta'],
-        #sequenz_path="/home/aashna/.local/bin", #LEN-
-        #HARD-CODED- CHANGE
-        sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/"
-    #conda:
-    #    "../envs/sequenza.yml"
+    conda:
+        "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
     shell:
-        "{params.sequenza_path}sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
+        "sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
 
 
 rule clonality_addheader:
@@ -160,17 +154,15 @@ rule sequenza_fileprep:
     params:
         out_dir="%sanalysis/clonality" % config['remote_path'],
         sample_name=lambda wildcards:wildcards.run,
-        #HARD-CODED- CHANGE
-        sequenza_env="/home/taing/miniconda3/envs/sequenza/bin/",
     output:
         pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv"
-    #conda:
-    #    "../envs/sequenza.yml"
+    conda:
+        "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}_{run}_postRscript.txt"
     shell:
         #"""Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
-        """{params.sequenza_env}Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
+        """Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
 
 rule pyclone_finalprocessing:
     input:
@@ -185,10 +177,9 @@ rule pyclone_finalprocessing:
     params:
         #out_dir=lambda wildcards: "analysis/clonality/%s/" % (wildcards.run, wildcards.run)
         out_dir="%sanalysis/clonality" % config['remote_path'],
-        pyclone_env="/home/taing/miniconda3/envs/pyclone/bin/"
-    #conda:
-    #    "../envs/pyclone.yml"
+    conda:
+        "../envs/pyclone.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
     shell:
-        """{params.pyclone_env}PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
+        """PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
