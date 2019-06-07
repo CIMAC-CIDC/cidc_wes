@@ -56,7 +56,7 @@ rule optitype_hlatyping:
     params:
         #PathtoOptiType = config['conda_path'],
         name=lambda wildcards: wildcards.sample,
-        output_dir=lambda wildcards: "./analysis/optitype/%s/" % (wildcards.sample),
+        output_dir=lambda wildcards: "%sanalysis/optitype/%s/" % (config['remote_path'], wildcards.sample),
         #outputname = lambda wildcards: wildcards.sample
         path="source activate /home/taing/miniconda3/envs/optitype/", #HARD-Coding the path and activateing conda env
         optitype_config="cidc_wes/static/optitype/config.ini",

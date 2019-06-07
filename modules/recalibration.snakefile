@@ -61,7 +61,8 @@ rule Indel_realigner_sentieon:
          bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
          bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
-         realignbam="analysis/align/{sample}/{sample}.realigned.bam"
+         realignbam="analysis/align/{sample}/{sample}.realigned.bam",
+         realignbai="analysis/align/{sample}/{sample}.realigned.bam.bai"
     message:
          "INDEL REALIGNER: indel realigner for  mapped reads"
     params:
@@ -104,6 +105,7 @@ rule Base_recalibration_postcal_sentieon:
     """post recalibration for realigned files"""
     input:
         recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam",
+        recalibrated_bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai",
         prerecaltable="analysis/align/{sample}/{sample}_prerecal_data.table"
     output:
         postrecaltable="analysis/align/{sample}/{sample}_postrecal_data.table"
@@ -148,7 +150,8 @@ rule corealignment:
         norm_recal = recal_getNormal_table,
         tumor_recal = recal_getTumor_table
     output:
-        "analysis/corealignments/{run}/{run}_tn_corealigned.bam"
+        bam="analysis/corealignments/{run}/{run}_tn_corealigned.bam",
+        bai="analysis/corealignments/{run}/{run}_tn_corealigned.bam.bai",
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
@@ -160,5 +163,5 @@ rule corealignment:
     benchmark:
         "benchmarks/recalibration/{run}/{run}.corealignment.txt"
     shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.tumor} -i {input.normal} -q {input.tumor_recal} -q {input.norm_recal} --algo Realigner -k {params.mills} -k {params.g1000} {output.bam}"""
 

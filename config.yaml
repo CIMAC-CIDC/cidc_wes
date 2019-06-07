@@ -2,6 +2,13 @@
 metasheet: 'metasheet.csv'
 ref: "cidc_wes/ref.yaml"
 
+# IF YOU ARE using snakemake remote files then you will need to set the
+# 'remote_path' parameter to your (google) bucket path.
+# **REMEMBER to add the / to the end of the path**
+#
+# OTHERWISE, if running locally, LEAVE it commented out
+# remote_path: "bucket_name/path/to/wes_project/"
+
 #Path to sentieon binary
 sentieon_path: "/path/to/sentieon"
 

@@ -93,7 +93,7 @@ rule sequenza_multibam2seqz:
         #sequenz_path="/home/aashna/.local/bin", #LEN-add this
         #HARD-CODED- CHANGE
         sequenza_path="/home/taing/miniconda3/envs/sequenza/bin/",
-        sequenza_out="analysis/clonality/{run}/{run}.seqz.txt.gz"
+        sequenza_out="%sanalysis/clonality/{run}/{run}.seqz.txt.gz" % config['remote_path']
     #conda:
     #    "../envs/sequenza.yml"
     benchmark:
@@ -158,7 +158,7 @@ rule sequenza_fileprep:
     input:
         bin50="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
     params:
-        out_dir="analysis/clonality",
+        out_dir="%sanalysis/clonality" % config['remote_path'],
         sample_name=lambda wildcards:wildcards.run,
         #HARD-CODED- CHANGE
         sequenza_env="/home/taing/miniconda3/envs/sequenza/bin/",
@@ -184,7 +184,7 @@ rule pyclone_finalprocessing:
         #out_dir="analysis/clonality/pyclone"
     params:
         #out_dir=lambda wildcards: "analysis/clonality/%s/" % (wildcards.run, wildcards.run)
-        out_dir="analysis/clonality",
+        out_dir="%sanalysis/clonality" % config['remote_path'],
         pyclone_env="/home/taing/miniconda3/envs/pyclone/bin/"
     #conda:
     #    "../envs/pyclone.yml"
