@@ -3,6 +3,8 @@ channels:
 - bioconda
 - defaults
 dependencies:
+- sambamba
+- bedtools 
 - optitype
 - pytz
 - glpk

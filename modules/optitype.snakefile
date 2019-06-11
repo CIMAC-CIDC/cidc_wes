@@ -24,6 +24,7 @@ rule optitype_extract_chr6:
         chr6sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     threads:_optitype_threads
     group: "optitype"
+    conda: "../envs/optitype.yml"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_extract_chr6.txt"
     shell:
@@ -37,6 +38,7 @@ rule optitype_bamtofastq:
         chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
         chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"
     group: "optitype"
+    conda: "../envs/optitype.yml"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"
     shell:
@@ -64,6 +66,7 @@ rule optitype_hlatyping:
         HLAgenotype = "analysis/optitype/{sample}/{sample}_result.tsv",
         Coverageplot = "analysis/optitype/{sample}/{sample}_coverage_plot.pdf"
     group: "optitype"
+    conda: "../envs/optitype.yml"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_hlatyping.txt"
     shell:
