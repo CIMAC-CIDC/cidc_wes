@@ -49,7 +49,7 @@ rule sentieon_bwa:
         tthreads=lambda wildcards, input, output, threads, resources: threads-1
     threads: _bwa_threads
     message: "ALIGN: Running sentieon BWA mem for alignment"
-    log: "analysis/logs/align.sentieon_bwa.{sample}.log"
+    log: "analysis/logs/align/{sample}/align.sentieon_bwa.{sample}.log"
     group: "align"
     benchmark:
         "benchmarks/align/{sample}/{sample}.sentieon_bwa.txt"
@@ -64,7 +64,7 @@ rule map_stats:
         "analysis/align/{sample}/{sample}_mapping.txt"
     threads: _align_threads
     message: "ALIGN: get mapping stats for each bam"
-    log: "analysis/logs/align.map_stats.{sample}.log"
+    log: "analysis/logs/align/{sample}/align.map_stats.{sample}.log"
     #CAN/should samtools view be multi-threaded--
     #UPDATE: tricky on how to do this right w/ compounded commands
     group: "align"
@@ -84,13 +84,17 @@ rule collect_map_stats:
     output:
         "analysis/align/mapping.csv"
     message: "ALIGN: collect and parse ALL mapping stats"
-    log: "analysis/logs/align.collect_map_stats.log"
+    log: "analysis/logs/align/align.collect_map_stats.log"
+    params:
+        files = lambda wildcards, input: " -f ".join(input)
     group: "align"
     benchmark:
-        "benchmarks/align/collect_map_stats.txt"
-    run:
-        files = " -f ".join(input)
-        shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
+        "benchmarks/align/align..collect_map_stats.txt"
+    shell:
+        "cidc_wes/modules/scripts/align_getMapStats.py -f {params.files} > {output} 2>>{log}"
+    #run:
+    #    files = " -f ".join(input)
+    #    shell("cidc_wes/modules/scripts/align_getMapStats.py -f {files} > {output} 2>>{log}")
 
 rule scoreSample:
     "Calls sentieon driver  --fun score_info on the sample"
@@ -98,9 +102,10 @@ rule scoreSample:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
         bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
     output:
-        "analysis/align/{sample}/{sample}.sorted.score.txt"
+        score="analysis/align/{sample}/{sample}.sorted.score.txt",
+        idx="analysis/align/{sample}/{sample}.sorted.score.txt.idx",
     message: "ALIGN: score sample"
-    log: "analysis/logs/align.scoreSample.{sample}.log"
+    log: "analysis/logs/align/{sample}/align.scoreSample.{sample}.log"
     threads: _align_threads
     params:
         index1=config['sentieon_path'],
@@ -108,7 +113,7 @@ rule scoreSample:
     benchmark:
         "benchmarks/align/{sample}/{sample}.scoreSample.txt"
     shell:
-        """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output}"""
+        """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.score}"""
 
 rule dedupSortedUniqueBam:
     """Dedup sorted unique bams using sentieon
@@ -122,7 +127,7 @@ rule dedupSortedUniqueBam:
         baii="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
         met="analysis/align/{sample}/{sample}.sorted.dedup.metric.txt",
     message: "ALIGN: dedup sorted unique bam file"
-    log: "analysis/logs/align.dedupSortedUniqueBam.{sample}.log"
+    log: "analysis/logs/align/{sample}/align.dedupSortedUniqueBam.{sample}.log"
     threads: _align_threads
     params:
         index1=config['sentieon_path'],

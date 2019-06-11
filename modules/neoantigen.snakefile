@@ -57,7 +57,9 @@ def parseOptitype(optitype_out_file):
     0					C*06:04	C*06:04	4.0	3.99
     **So were' going to parse cols 1-6 and return that"""
     #CATCH when the HLA does not exist yet
+    #print(optitype_out_file)
     if not os.path.isfile(optitype_out_file):
+        print("WES ERROR: %s is not found!" % optitype_out_file)
         return ""
 
     f = open(optitype_out_file)
@@ -98,7 +100,15 @@ rule neoantigen_pvacseq:
         vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
         hla=getTumorHLA,
     output:
-        "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv"
+        main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
+        #OTHERS:
+        filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
+        all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
+        tsv="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.tsv",
+        #NOTE: can't get this last one in b/c snakemake complains about
+        #a non-unique name
+        #input_log="analysis/neoantigen/{run}/MHC_Class_I/log/inputs.yml",
+    
         #NOTE: the wildcard tumor is used b/c we can't actually pull in the
         #tumor name 
 
@@ -112,7 +122,7 @@ rule neoantigen_pvacseq:
         HLA = lambda wildcards,input: parseOptitype(input.hla),
         callers=config['neoantigen_callers'] if config['neoantigen_callers'] else "MHCflurry NetMHCcons MHCnuggetsII",
         epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
-        output_dir = lambda wildcards: "analysis/neoantigen/%s/" % wildcards.run,
+        output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
     threads: _neoantigen_threads
     group: "neoantigen"
     benchmark:

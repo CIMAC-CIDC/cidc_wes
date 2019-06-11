@@ -60,7 +60,9 @@ rule CNVcall_sentieon:
         #ONLY perform this analysis for Tumor samples-
         tumor_recalibratedbam = cnv_getTumor_sample
     output:
-        cnvcalls="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt"
+        cnvcalls="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt",
+        tWeights="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt.targetWeights",
+        tsv="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt.tn.tsv",
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
