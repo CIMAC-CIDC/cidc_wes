@@ -1,0 +1,9 @@
+name: purity
+channels:
+- bioconda
+- biobuilds
+- defaults
+dependencies:
+- snp-pileup
+- r-pctgcdata
+- r-facets
