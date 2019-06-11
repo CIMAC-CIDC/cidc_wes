@@ -1,6 +1,6 @@
 #MODULE: Purity by Facets
 #import os
-_puritycalls_threads=32
+_puritycalls_threads=16
 
 def puritybam_runsHelper(wildcards, iindex):
     """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
@@ -83,6 +83,8 @@ rule Puritycalls_Facets:
         index=config['genome_fasta'],
         index1=config['facets_vcftar']
     threads: _puritycalls_threads
+    conda:
+        "../envs/purity.yml"
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purityresults.txt"
     shell:
@@ -113,6 +115,8 @@ rule purityplots_postprocessing:
         opt="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
         iter="analysis/purity/{run}/{run}.iterpurityvalues.txt",
     group: "purity"
+    conda:
+        "../envs/purity.yml"
     benchmark:
         "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
     shell:
