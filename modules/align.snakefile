@@ -89,7 +89,7 @@ rule collect_map_stats:
         files = lambda wildcards, input: " -f ".join(input)
     group: "align"
     benchmark:
-        "benchmarks/align/align..collect_map_stats.txt"
+        "benchmarks/align/align_collect_map_stats.txt"
     shell:
         "cidc_wes/modules/scripts/align_getMapStats.py -f {params.files} > {output} 2>>{log}"
     #run:

@@ -105,9 +105,11 @@ def somaticall_targets(wildcards):
         #Center specific exon targets
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
+        #target summaries
+        ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
 
-rule somaticcalls_all:
+rule somatic_all:
     input:
         somaticall_targets
     
@@ -445,3 +447,19 @@ rule somatic_getTarget_mutations:
         "benchmarks/somatic/{run}/{run}_{caller}.{center}.somatic_getTarget_mutations.txt"
     shell:
         "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"
+
+rule somatic_collect_target_summaries:
+    """Collect all of the sample summaries and put them in one file
+    input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
+    """
+    input:
+        expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples']))
+    output:
+        "analysis/metrics/all_sample_summaries.txt"
+    params:
+        files = lambda wildcards, input: " -f ".join(input)
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/somatic_collect_target_summaries.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_collect_target_summaries.py -f {params.files} > {output}"

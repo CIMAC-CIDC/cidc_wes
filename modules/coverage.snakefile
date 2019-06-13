@@ -45,6 +45,7 @@ rule targets_sentieon:
         bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
         targetmetrics="analysis/metrics/{sample}/{sample}_target_metrics.txt",
+        summary="analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary",
     message:
         "Coverage calculation from target bed files"
     params:
