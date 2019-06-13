@@ -58,7 +58,7 @@ def parseOptitype(optitype_out_file):
     **So were' going to parse cols 1-6 and return that"""
     #CATCH when the HLA does not exist yet
     #print(optitype_out_file)
-    if not os.path.isfile(optitype_out_file):
+    if not os.path.exists(optitype_out_file):
         print("WES ERROR: %s is not found!" % optitype_out_file)
         return ""
 

@@ -102,8 +102,8 @@ rule scoreSample:
         bam="analysis/align/{sample}/{sample}.sorted.bam",
         bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
     output:
-        score=temp("analysis/align/{sample}/{sample}.sorted.score.txt"),
-        idx=temp("analysis/align/{sample}/{sample}.sorted.score.txt.idx"),
+        score="analysis/align/{sample}/{sample}.sorted.score.txt",
+        idx="analysis/align/{sample}/{sample}.sorted.score.txt.idx",
     message: "ALIGN: score sample"
     log: "analysis/logs/align/{sample}/align.scoreSample.{sample}.log"
     threads: _align_threads
