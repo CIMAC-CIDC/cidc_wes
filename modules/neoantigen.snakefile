@@ -125,9 +125,10 @@ rule neoantigen_pvacseq:
         output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
     threads: _neoantigen_threads
     group: "neoantigen"
+    log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
     benchmark:
         "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
     shell:
-        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb}"""
+        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 
   

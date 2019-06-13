@@ -35,14 +35,15 @@ rule optitype_bamtofastq:
     input:
         in_sortchr6bamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     output:
-        chr6fastqfile1 = temp("analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq"),
-        chr6fastqfile2 = temp("analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq")
+        chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
+        chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"
     group: "optitype"
     conda: "../envs/optitype.yml"
+    log: "analysis/logs/optitype/{sample}/{sample}.optitype_bamtofastq.log"
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"
     shell:
-        """bedtools bamtofastq -i {input.in_sortchr6bamfile} -fq {output.chr6fastqfile1} -fq2 {output.chr6fastqfile2}"""
+        """bedtools bamtofastq -i {input.in_sortchr6bamfile} -fq {output.chr6fastqfile1} -fq2 {output.chr6fastqfile2} 2> {log}"""
 
 rule optitype_hlatyping:
     """Precision HLA typing from next-generation sequencing data by

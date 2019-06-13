@@ -49,6 +49,6 @@ rule testmatch:
     output:
         "analysis/germline/{run}/{run}_matchinformation.txt"
     shell:
-        "cidc_wes/modules/scripts/Match.py {input} > {output}"
+        "cidc_wes/modules/scripts/Match.py -i {input} > {output}"
 
 
