@@ -18,7 +18,7 @@ rule germlinecalls_bamtovcf:
     input:
         input_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam" 
     output:
-        output_vcf="analysis/germline/{sample}/{sample}_variant.vcf"
+        output_vcf=temp("analysis/germline/{sample}/{sample}_variant.vcf")
     params:
         index=config['genome_fasta'],
         positions_bamtovcf=config['positions_bamtovcf']
