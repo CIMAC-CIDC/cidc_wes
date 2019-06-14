@@ -33,7 +33,7 @@ def cnvcall_targets(wildcards):
         ls.append("analysis/cnvcalls/%s/%s_cnvcalls.txt"%(run,run))
     return ls
 
-rule cnvcalls_all:
+rule copynumber_all:
     input:
         cnvcall_targets
 

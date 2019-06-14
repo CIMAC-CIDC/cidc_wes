@@ -11,7 +11,7 @@ def coveragemetrics_targets(wildcards):
         ls.append("analysis/metrics/%s/%s_target_metrics.txt" % (sample,sample))
     return ls
 
-rule coveragemetrics_all:
+rule coverage_all:
     input:
         coveragemetrics_targets
 

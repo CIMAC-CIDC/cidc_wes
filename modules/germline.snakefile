@@ -10,7 +10,7 @@ def germlinecalls_targets(wildcards):
         ls.append("analysis/germline/%s/%s_SNP92.recode.vcf" % (sample,sample))
         return ls
 
-rule germlinecalls_all:
+rule germline_all:
     input:
         germlinecalls_targets
 

@@ -28,7 +28,7 @@ def checkmatch_targets(wildcards):
         #ls.append("analysis/germline/%s/matchfile.txt" % run)
     return ls
 
-rule checkmatch_all:  #aggregate of all rule
+rule germlinematch_all:  #aggregate of all rule
     input:
         checkmatch_targets
 
