@@ -1,7 +1,7 @@
 # module: Generate SNP92 to identification of germline variant.
 # paper_name:SNPs for a universal individual identification panel
 
-def germlinecalls_targets(wildcards):
+def germline_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for sample in config['samples']:
@@ -12,9 +12,9 @@ def germlinecalls_targets(wildcards):
 
 rule germline_all:
     input:
-        germlinecalls_targets
+        germline_targets
 
-rule germlinecalls_bamtovcf:
+rule germline_bamtovcf:
     input:
         input_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam" 
     output:
@@ -30,7 +30,7 @@ rule germlinecalls_bamtovcf:
     shell:
         """samtools mpileup -g -Q 0 -f {params.index} {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
 
-rule germlinecalls_snp92:
+rule germline_snp92:
     input:
         input_vcf="analysis/germline/{sample}/{sample}_variant.vcf"
     output:

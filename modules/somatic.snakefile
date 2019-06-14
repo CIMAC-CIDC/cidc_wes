@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_somaticcall_threads=8
+_somatic_threads=8
 #_vcf2maf_threads=4
 
 #Dictionary of center targets
@@ -52,7 +52,7 @@ def somatic_getNTumor_recal_bai(wildcards):
     sample = somatic_runsHelper(wildcards, 1)[0]
     return "analysis/align/%s/%s_recalibrated.bam.bai" % (sample,sample)
 
-def somaticall_targets(wildcards):
+def somatic_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
@@ -111,7 +111,7 @@ def somaticall_targets(wildcards):
 
 rule somatic_all:
     input:
-        somaticall_targets
+        somatic_targets
     
 rule somatic_calling_TNhaplotyper2:
     input:
@@ -130,7 +130,7 @@ rule somatic_calling_TNhaplotyper2:
 	#normal = lambda wildcards: getNormal_sample(wildcards)
 	normal = lambda wildcards: config['runs'][wildcards.run][0],
 	tumor = lambda wildcards: config['runs'][wildcards.run][1],
-    threads:_somaticcall_threads
+    threads:_somatic_threads
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper2.txt"
     shell:
@@ -173,7 +173,7 @@ rule somatic_calling_TNsnv:
 #         #normal = lambda wildcards: getNormal_sample(wildcards)
 #         normal = lambda wildcards: config['runs'][wildcards.run][0],
 #         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-#     threads:_somaticcall_threads
+#     threads:_somatic_threads
 #      group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper.txt"
@@ -193,7 +193,7 @@ rule somatic_calling_TNsnv:
 #         #JUST sample names - can also use the helper fns, e.g.
 #         normal = lambda wildcards: config['runs'][wildcards.run][0],
 #         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-#     threads:_somaticcall_threads
+#     threads:_somatic_threads
 #      group: "somatic"
 #     benchmark:
 #         "benchmarks/somatic/{run}/{run}.somatic_calling_TNscope.txt"

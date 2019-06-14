@@ -49,7 +49,7 @@ def purity_getTumor_bai_sample(wildcards):
     return puritybai_runsHelper(wildcards, 1)
 
     
-def puritycalls_targets(wildcards):
+def purity_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config["runs"]:
@@ -63,9 +63,9 @@ def puritycalls_targets(wildcards):
 
     return ls
 
-rule puritycalls_all:
+rule purity_all:
     input:
-        puritycalls_targets
+        purity_targets
 
 rule Puritycalls_Facets:
     """Get the  recalibrated bam files from  mapped reads"""

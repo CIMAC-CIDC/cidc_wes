@@ -25,24 +25,24 @@ def cnv_getNormal_sample(wildcards):
 def cnv_getTumor_sample(wildcards):
     return cnvcall_runsHelper(wildcards, 1)
 
-def cnvcall_targets(wildcards):
+def copynumber_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        #ls.append("analysis/cnvcalls/%s/%s_pon.hdf5" % (run,run))
-        ls.append("analysis/cnvcalls/%s/%s_cnvcalls.txt"%(run,run))
+        #ls.append("analysis/copynumber/%s/%s_pon.hdf5" % (run,run))
+        ls.append("analysis/copynumber/%s/%s_cnvcalls.txt"%(run,run))
     return ls
 
 rule copynumber_all:
     input:
-        cnvcall_targets
+        copynumber_targets
 
 #NOT NEEDED?--leave in for now just in case we want users to be able to do this
 rule create_pon_sentieon:
     input:
         normal_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam" ##get only Normal samples
     output:
-        ponfile="analysis/cnvcalls/{run}/{run}_pon.hdf5"
+        ponfile="analysis/copynumber/{run}/{run}_pon.hdf5"
     params:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
@@ -60,9 +60,9 @@ rule CNVcall_sentieon:
         #ONLY perform this analysis for Tumor samples-
         tumor_recalibratedbam = cnv_getTumor_sample
     output:
-        cnvcalls="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt",
-        tWeights="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt.targetWeights",
-        tsv="analysis/cnvcalls/{run}/{sample}_cnvcalls.txt.tn.tsv",
+        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt",
+        tWeights="analysis/copynumber/{run}/{sample}_cnvcalls.txt.targetWeights",
+        tsv="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
