@@ -209,6 +209,7 @@ rule vcftoolsfilter:
     params:
         index=config['genome_fasta'],
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_vcftoolsfilter.txt"
     shell:
@@ -242,6 +243,7 @@ rule vcfVEP:
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcfVEP.txt"
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     shell:
         "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs"
     
@@ -266,6 +268,7 @@ rule vcf2maf:
     log:
         "analysis/logs/somatic/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     shell:
         """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} 2> {log}"""
 
@@ -405,6 +408,7 @@ rule somatic_tabix_filtered_vcf_gz:
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz.tbi",
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     shell:
         "tabix -p vcf {input}"
 
@@ -418,6 +422,7 @@ rule somatic_getExonic_mutations:
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz",
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.somatic_getExonic_mutations.txt"
     shell:
@@ -430,6 +435,7 @@ rule somatic_tabix_exonic_mutations:
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi",
     group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     shell:
         "tabix -p vcf {input}"
 
@@ -440,9 +446,10 @@ rule somatic_getTarget_mutations:
         tbi="analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi"
     params:
         target= lambda wildcards: center_targets[wildcards.center]
-    group: "somatic"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.{center}.vcf.gz",
+    group: "somatic"
+    conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.{center}.somatic_getTarget_mutations.txt"
     shell:
