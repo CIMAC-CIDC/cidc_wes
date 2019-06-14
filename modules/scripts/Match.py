@@ -16,17 +16,14 @@ def main():
         optparser.print_help()
         sys.exit(-1)
 
-    #Input_file = options.input
     f = open(options.input, 'r')
-    lines = f.readlines()
-    sum = 0
-    for line in lines:
-        if ("non-matching" in line) or ("main file" in line) or ("main file" in line):
-            sum += int(line.split()[1])
-    if sum == 0:
-        print ("match")
-    else:
-        print("mismatch")
+    for line in f:
+        if ("non-matching" in line): 
+            if int(line.split(" ")[1]) == 0:
+                print("match")
+            else:
+                print("mismatch")
+            sys.exit() #break out--we're done
 
 if __name__=='__main__':
     main()

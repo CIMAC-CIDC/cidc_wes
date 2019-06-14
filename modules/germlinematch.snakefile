@@ -38,14 +38,17 @@ rule vcftoolsdiff:
         normal = germ_getNormal,
     output:
         out="analysis/germline/{run}/{run}.diff.sites_in_files",
-	log="analysis/germline/{run}/{run}.log",
-    params: run_name=lambda wildcards:wildcards.run, 
+	log="analysis/germline/{run}/{run}.wes.log",
+    params: run_name=lambda wildcards:wildcards.run,
+    conda: "../envs/somatic_vcftools.yml"
     shell:
-        "vcftools --vcf  {input.tumor} --diff  {input.normal} --diff-site --out analysis/germline/{params.run_name}/{params.run_name}"
+        #FIX for the missing input error, issue #12: germlinematch file latency
+        #DUMP the std err to the log
+        "vcftools --vcf  {input.tumor} --diff  {input.normal} --diff-site --out analysis/germline/{params.run_name}/{params.run_name} 2> {output.log}"
 
 rule testmatch:
     input: 
-    	"analysis/germline/{run}/{run}.log"
+    	"analysis/germline/{run}/{run}.wes.log"
     output:
         "analysis/germline/{run}/{run}_matchinformation.txt"
     shell:

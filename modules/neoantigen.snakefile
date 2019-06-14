@@ -89,6 +89,7 @@ rule neoantigen_vep_annotate:
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
     group: "neoantigen"
+    conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/neoantigen/{run}/{run}.neoantigen_vep_annotate.txt"
     shell:
@@ -96,6 +97,8 @@ rule neoantigen_vep_annotate:
 
 
 rule neoantigen_pvacseq:
+    """NOTE: neoantigen's pvacseq is not available on CONDA
+    MUST either be installed in base system/docker container"""
     input:
         vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
         hla=getTumorHLA,
