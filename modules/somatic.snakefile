@@ -59,13 +59,11 @@ def somatic_targets(wildcards):
         #Consolidate these with an inner-for-loop?
         #ls.append("analysis/somatic/%s/%s_call.output.stats" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.output.vcf.gz" % (run,run))
-#LEN FIX THIS
-#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.vcf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.vcf.gz" % (run,run))
         #ls.append("analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run))
         #FILTERED VCF
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf" % (run,run))
-#LEN FIX THIS
-#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf" % (run,run))
         #ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf" % (run,run))
         #MAF
         ls.append("analysis/somatic/%s/%s_tnsnv.output.maf" % (run,run))
@@ -78,8 +76,7 @@ def somatic_targets(wildcards):
        
         #Mutation Signatures
         ls.append("analysis/somatic/%s/%s_tnsnv.output.pdf" % (run,run))
-#LEN FIX THIS
-#        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.pdf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.pdf" % (run,run))
         #ls.append("analysis/somatic/%s/%s_tnscope.output.pdf" % (run,run))
         #EXON mutations- should this be on full or filtered?
 
@@ -200,7 +197,8 @@ rule somatic_calling_TNsnv:
 #     shell:
 #         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input.corealignedbam} --algo TNscope --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {output.tnscopevcf}"""
 
-rule vcftoolsfilter:
+#rule vcftoolsfilter:
+rule filter_raw_vcf:
     """General rule to filter the three different types of vcf.gz files"""
     input:
         "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz"
@@ -208,12 +206,19 @@ rule vcftoolsfilter:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     params:
         index=config['genome_fasta'],
+        sentieon_path=config['sentieon_path'],
+        tumor=lambda wildcards: somatic_getTumor(wildcards),
+        normal= lambda wildcards: somatic_getNormal(wildcards),
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     benchmark:
-        "benchmarks/somatic/{run}/{run}.{caller}_vcftoolsfilter.txt"
-    shell:
-       """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
+        "benchmarks/somatic/{run}/{run}.{caller}_filter_raw_vcf.txt"
+    run: #DISABLES the conda env
+        #SWITCH for tnhaplotyper2 filter
+        if (wildcards.caller == "tnhaplotyper2"):
+            shell("{params.sentieon_path}/sentieon tnhapfilter --tumor_sample {params.tumor} --normal_sample {params.normal} -v {input} {output}")
+        else:
+            shell("""vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}""")
 
 
 rule gunzip_vcf:
