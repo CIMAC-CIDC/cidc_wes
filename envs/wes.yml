@@ -21,6 +21,9 @@ dependencies:
 - seqtk
 #- fastqc>=0.11.5
 
+#coverage
+- mosdepth
+
 #vcf processing
 - vcftools
 - vcf2maf>=1.6.16

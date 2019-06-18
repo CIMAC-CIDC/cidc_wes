@@ -1,0 +1,6 @@
+name: coverage
+channels:
+- bioconda
+- defaults
+dependencies:
+- mosdepth
