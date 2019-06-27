@@ -66,11 +66,12 @@ rule targets_sentieon:
 rule coverage_mosdepth:
     """SAMPLE coverage at target sites"""
     input:
-        bam="analysis/align/{sample}/{sample}_recalibrated.bam"
+        bam="analysis/align/{sample}/{sample}_recalibrated.bam",
+        bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
     params:
         #FOUND center_targets found in somatic.snakefile
         target= lambda wildcards: center_targets[wildcards.center],
-        prefix=lambda wildcards: "analysis/metrics/%s/%s.%s" % (wildcards.sample, wildcards.sample, wildcards.center),
+        prefix=lambda wildcards: "%sanalysis/metrics/%s/%s.%s" % (config['remote_path'], wildcards.sample, wildcards.sample, wildcards.center),
     output:
         "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt",
     group: "coverage"
@@ -79,4 +80,4 @@ rule coverage_mosdepth:
     benchmark:
         "benchmarks/metrics/{sample}/{sample}.{center}.mosdepth.txt"
     shell:
-        "mosdepth -t {threads} -b {params.target} {params.prefix} {input}"
+        "mosdepth -t {threads} -b {params.target} {params.prefix} {input.bam}"

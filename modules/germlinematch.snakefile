@@ -39,12 +39,14 @@ rule vcftoolsdiff:
     output:
         out="analysis/germline/{run}/{run}.diff.sites_in_files",
 	log="analysis/germline/{run}/{run}.wes.log",
-    params: run_name=lambda wildcards:wildcards.run,
+    params:
+        #run_name=lambda wildcards:wildcards.run,
+        out_path= lambda wildcards: "%sanalysis/germline/%s/%s" % (config['remote_path'], wildcards.run, wildcards.run),
     conda: "../envs/somatic_vcftools.yml"
     shell:
         #FIX for the missing input error, issue #12: germlinematch file latency
         #DUMP the std err to the log
-        "vcftools --vcf  {input.tumor} --diff  {input.normal} --diff-site --out analysis/germline/{params.run_name}/{params.run_name} 2> {output.log}"
+        "vcftools --vcf  {input.tumor} --diff  {input.normal} --diff-site --out {params.out_path} 2> {output.log}"
 
 rule testmatch:
     input: 
