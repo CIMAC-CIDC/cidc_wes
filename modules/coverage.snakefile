@@ -11,6 +11,7 @@ def coveragemetrics_targets(wildcards):
         ls.append("analysis/metrics/%s/%s_target_metrics.txt" % (sample,sample))
         for center in center_targets:
             ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
+            ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
     return ls
 
 rule coverage_all:
@@ -81,3 +82,20 @@ rule coverage_mosdepth:
         "benchmarks/metrics/{sample}/{sample}.{center}.mosdepth.txt"
     shell:
         "mosdepth -t {threads} -b {params.target} {params.prefix} {input.bam}"
+
+rule coverage_summarize_sample_depth:
+    """Summarize the results of the coverage_mosdepth output, 
+    e.g. % 20x, 50x, etc"""
+    input:
+        "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt"
+    output:
+        "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.summary.txt"
+    params:
+        sample_name=lambda wildcards:"%s.%s" % (wildcards.sample, wildcards.center)
+    group: "coverage"
+    conda: "../envs/coverage.yml"
+    benchmark:
+        "benchmarks/metrics/{sample}/{sample}.{center}.coverage_summarize_sample_depth.txt"
+    shell:
+        "Rscript cidc_wes/modules/scripts/mosdepth_summary.R {input} {params.sample_name} {output}"
+    
