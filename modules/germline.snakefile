@@ -8,7 +8,7 @@ def germline_targets(wildcards):
         #Consolidate these with an inner-for-loop?
         ls.append("analysis/germline/%s/%s_variant.vcf" % (sample,sample))
         ls.append("analysis/germline/%s/%s_SNP92.recode.vcf" % (sample,sample))
-        return ls
+    return ls
 
 rule germline_all:
     input:
