@@ -9,6 +9,9 @@ ref: "cidc_wes/ref.yaml"
 # OTHERWISE, if running locally, LEAVE it commented out
 # remote_path: "bucket_name/path/to/wes_project/"
 
+# CIMAC center: choices are {'mocha', 'mda', 'broad' (default)}
+cimac_center: 'broad'
+
 #Path to sentieon binary
 sentieon_path: "/path/to/sentieon"
 
