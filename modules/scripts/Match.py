@@ -1,29 +1,40 @@
 #!/usr/bin/env python 
 """
-This Script is for judgment of germline matching situation of samples, 
-The input parameter is the log file which is generated from vcftools diff.
+This Script is for evaluation of germline matching situation of samples, 
+The input parameter is the vcf compare file which is generated from vcf-compare.
 """
 import os
 import sys
+import re 
+import numpy as np
 from optparse import OptionParser
 
 def main():
-    usage = "USAGE: %prog -i [_diff.log]"
-    optparser = OptionParser(usage=usage)
-    optparser.add_option("-i", "--input", help="path to _diff.log file")
-    (options, args) = optparser.parse_args(sys.argv)
-    if not options.input :
-        optparser.print_help()
-        sys.exit(-1)
+	usage = "USAGE: %prog -i [fcvcompare] "
+	optparser = OptionParser(usage=usage)
+	optparser.add_option("-i", "--input", help="path to vcfcompare file")
+	(options, args) = optparser.parse_args(sys.argv)
+	if not options.input :
+	    optparser.print_help()
+		sys.exit(-1)
 
-    f = open(options.input, 'r')
-    for line in f:
-        if ("non-matching" in line): 
-            if int(line.split(" ")[1]) == 0:
-                print("match")
-            else:
-                print("mismatch")
-            sys.exit() #break out--we're done
+	Input_file = options.input
+	f = open(Input_file, 'r')
+	lines = f.readlines()
+	for line in lines:
+	    line  = line.strip()
+	    p1 = re.compile(r'[(](.*?)[)]', re.S) 
+	    bracket = re.findall(p1, line)
+	    if line.startswith('VN') and len(bracket) == 2:
+	        bracket_list = [float(i.rstrip('%'))/100 for i in bracket]
+	        #print(bracket_list)
+	        bracket_array = np.array(bracket_list)
+	        if sum(bracket_array > 0.9) = 1:
+	            return ('match') 
+	        else:
+	            return ('mismatch')
+	            sys.exit(0)
 
-if __name__=='__main__':
-    main()
+if __name__ == '__main__':
+	#print('exe')
+	main()
