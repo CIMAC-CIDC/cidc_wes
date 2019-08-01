@@ -15,10 +15,10 @@ def main():
 	optparser.add_option("-i", "--input", help="path to vcfcompare file")
 	(options, args) = optparser.parse_args(sys.argv)
 	if not options.input :
-	    optparser.print_help()
+		optparser.print_help()
 		sys.exit(-1)
-
 	Input_file = options.input
+	#print(Input_file)  
 	f = open(Input_file, 'r')
 	lines = f.readlines()
 	for line in lines:
@@ -27,14 +27,14 @@ def main():
 	    bracket = re.findall(p1, line)
 	    if line.startswith('VN') and len(bracket) == 2:
 	        bracket_list = [float(i.rstrip('%'))/100 for i in bracket]
-	        #print(bracket_list)
+	        print(bracket_list)
 	        bracket_array = np.array(bracket_list)
-	        if sum(bracket_array > 0.9) = 1:
-	            return ('match') 
+	        if sum(bracket_array > 0.9) > 1:
+	            return 'match'
 	        else:
-	            return ('mismatch')
-	            sys.exit(0)
+	            return 'mismatch' 
+	            sys.exit()
 
 if __name__ == '__main__':
 	#print('exe')
-	main()
+    main()
