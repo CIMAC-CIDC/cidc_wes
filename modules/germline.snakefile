@@ -83,7 +83,7 @@ rule germline_center_targets:
     output:
         "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf"
     params:
-        target_bed= lambda wildcards: getTargetBed(config['cimac_center'])
+        target_bed= lambda wildcards: getTargetBed(config)
     benchmark:
         "benchmarks/germline/{sample}/{sample}.germline_center_targets.txt"    
     shell:
