@@ -122,11 +122,12 @@ rule germline_vcfcompare:
     shell:
         "vcf-compare {input.tumor} {input.normal} > {output}"
 
-#RULE to check {run}_vcfcompare.txt > 90% here
-rule testmatch:
-    input: 
-    	"analysis/germline/{run}/{run}_vcfcompare.txt"
-    output:
-        "analysis/germline/{run}/{run}_matchinformation.txt"
-    shell:
-        "cidc_wes/modules/scripts/Match.py -i {input} > {output}"
+#LEN: Turning off for now
+# #RULE to check {run}_vcfcompare.txt > 90% here
+# rule testmatch:
+#     input: 
+#     	"analysis/germline/{run}/{run}_vcfcompare.txt"
+#     output:
+#         "analysis/germline/{run}/{run}_matchinformation.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/Match.py -i {input} > {output}"
