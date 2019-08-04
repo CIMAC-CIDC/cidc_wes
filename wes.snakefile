@@ -81,12 +81,49 @@ def all_targets(wildcards):
     #ls.extend(report_targets(wildcards))
     return ls
 
+def level1_targets(wildcards):
+    ls = []
+    ls.extend(align_targets(wildcards))
+    ls.extend(metrics_targets(wildcards))
+    ls.extend(recalibration_targets(wildcards))
+    ls.extend(germline_targets(wildcards))
+    ls.extend(somatic_targets(wildcards))
+    return ls
+
+def level2_targets(wildcards):
+    ls = []
+    ls.extend(coveragemetrics_targets(wildcards))
+    ls.extend(copynumber_targets(wildcards))
+    ls.extend(purity_targets(wildcards))
+    ls.extend(neoantigen_targets(wildcards))
+    ls.extend(optitype_targets(wildcards))
+    return ls
+
+def level3_targets(wildcards):
+    ls = []
+    ls.extend(clonality_targets(wildcards))
+    return ls
+
 rule target:
     input: 
         all_targets,
+    message: "Compiling all outputs"
+    benchmark: "benchmarks/all_wes_targets.txt"
 
-    message: "Compiling all output"
-    
+rule level1:
+    input: level1_targets
+    message: "Compiling all LEVEL1 outputs"
+    benchmark: "benchmarks/wes_level1_targets.txt"
+
+rule level2:
+    input: level2_targets
+    message: "Compiling all LEVEL2 outputs"
+    benchmark: "benchmarks/wes_level2_targets.txt"
+
+rule level3:
+    input: level3_targets
+    message: "Compiling all LEVEL3 outputs"
+    benchmark: "benchmarks/wes_level3_targets.txt"
 
 include: "./modules/align.snakefile"     # common align rules
 include: "./modules/metrics.snakefile"   # ...
