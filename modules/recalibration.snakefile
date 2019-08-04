@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_realigner_threads=15
+_realigner_threads=32
 
 
 def recal_runsHelper(wildcards, iindex, input_template):

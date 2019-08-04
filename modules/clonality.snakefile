@@ -2,6 +2,8 @@
 #import os
 #from string import Template
 
+_clonality_threads=12
+
 #------------------------------------------------------------------------------
 # SET 1 of 2 run helpers: returning sample names
 #------------------------------------------------------------------------------
@@ -95,7 +97,7 @@ rule sequenza_multibam2seqz:
         "../envs/sequenza.yml"
     benchmark:
         "benchmarks/clonality/{run}/{run}_{run}_sequenza_multibam2seqz.txt"
-    threads: 12
+    threads: _clonality_threads
     shell:
         "sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
 
