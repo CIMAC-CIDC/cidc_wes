@@ -9,6 +9,11 @@ ref: "cidc_wes/ref.yaml"
 # OTHERWISE, if running locally, LEAVE it commented out
 # remote_path: "bucket_name/path/to/wes_project/"
 
+# The transfer bucket is used by the wes_automator transfer script to
+# tx the run AFTER a wes_automator run
+# transfer_bucket: "gs://some/bucket/path/wes_project/"
+
+
 # CIMAC center: choices are {'mocha', 'mda', 'broad' (default)}
 #cimac_center: 'broad'
 
