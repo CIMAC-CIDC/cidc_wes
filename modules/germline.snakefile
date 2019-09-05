@@ -1,47 +1,133 @@
-# module: Generate SNP92 to identification of germline variant.
-# paper_name:SNPs for a universal individual identification panel
+# module: Germline variant caller
+# QC module to ensure that the tumor and normal samples come from the same
+# patient
+
+_germline_threads=32
+
+def germline_runsHelper(wildcards, iindex, input_template):
+    """Given a snakemake wildcards, an iindex - 0 for Normal, 1 for Tumor,
+    and a Python format string (ref: https://www.programiz.com/python-programming/methods/string/format)
+    returns the template string with the run name"""
+    tmp = []
+    r = config['runs'][wildcards.run]
+    #print(r)
+
+    #check that we have a valid pair
+    if len(r) >=2:
+        sample_name = r[iindex]
+        tmp.append(input_template.format(sample=sample_name))
+    else:
+        #NOTE: I can't figure out a proper kill command so I'll do this
+        tmp=["ERROR! BAD pairing for run--requires at least two samples: %s" % (wildcards.run)]
+    #print(tmp)
+    return tmp
+    
+def germline_getNormalTargets(wildcards):
+    return germline_runsHelper(wildcards, 0, "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz")
+
+def germline_getTumorTargets(wildcards):
+    return germline_runsHelper(wildcards, 1, "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz")
+
+def germline_getNormalTargetsTbi(wildcards):
+    return germline_runsHelper(wildcards, 0, "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz.tbi")
+
+def germline_getTumorTargetsTbi(wildcards):
+    return germline_runsHelper(wildcards, 1, "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz.tbi")
+
 
 def germline_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for sample in config['samples']:
-        #Consolidate these with an inner-for-loop?
-        ls.append("analysis/germline/%s/%s_variant.vcf" % (sample,sample))
-        ls.append("analysis/germline/%s/%s_SNP92.recode.vcf" % (sample,sample))
+        ls.append("analysis/germline/%s/%s_haplotyper.output.vcf" % (sample,sample))
+        ls.append("analysis/germline/%s/%s_haplotyper.targets.vcf.gz" % (sample,sample))
+        ls.append("analysis/germline/%s/%s_haplotyper.targets.vcf.gz.tbi" % (sample,sample))
+    for run in config['runs']:
+        ls.append("analysis/germline/%s/%s_vcfcompare.txt" % (run,run))
     return ls
+
+def getTargetBed(config):
+    """USES center_targets in somtatic.snakefile to return the path to the
+    center's targets"""
+    
+    if 'cimac_center' in config and config['cimac_center'] in center_targets:
+        center = config['cimac_center']
+        return center_targets[center]
+    else:
+        return center_targets['broad']
 
 rule germline_all:
     input:
         germline_targets
 
-rule germline_bamtovcf:
+rule germline_haplotyper:
     input:
-        input_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam" 
+        recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam"
     output:
-        output_vcf="analysis/germline/{sample}/{sample}_variant.vcf"
+        haplotypervcf="analysis/germline/{sample}/{sample}_haplotyper.output.vcf"
     params:
         index=config['genome_fasta'],
-        positions_bamtovcf=config['positions_bamtovcf']
-    group: "germline"
-    conda: 
-    	"../envs/germline.yml"
+        sentieon_path=config['sentieon_path'],
+        dbsnp= config['dbsnp'],
+    threads:_germline_threads
     benchmark:
-        "benchmarks/germline/{sample}/{sample}.bamtovcf.txt"
+        "benchmarks/germline/{sample}/{sample}.germline_haplotyper.txt"
     shell:
-        """samtools mpileup -g -Q 0 -f {params.index} {input.input_sortbamfile} --positions {params.positions_bamtovcf} | bcftools view > {output.output_vcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.recalibratedbam} --algo Haplotyper  --dbsnp {params.dbsnp}  --emit_conf=30 --call_conf=30 {output.haplotypervcf}"""
 
-rule germline_snp92:
+rule germline_center_targets:
+    """outputs the variants that are found only in the cimac_center's target
+    bed file"""
     input:
-        input_vcf="analysis/germline/{sample}/{sample}_variant.vcf"
+        "analysis/germline/{sample}/{sample}_haplotyper.output.vcf"
     output:
-        output_SNP92="analysis/germline/{sample}/{sample}_SNP92.recode.vcf"
+        "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf"
     params:
-        positons_SNP92=config['positions_SNP92'],
-        outname=lambda wildcards: "%sanalysis/germline/%s/%s_SNP92" % (config['remote_path'], wildcards.sample, wildcards.sample),
-    group: "germline"
-    conda:
-        "../envs/germline.yml"
+        target_bed= lambda wildcards: getTargetBed(config)
     benchmark:
-        "benchmarks/germline/{sample}/{sample}.snp92.txt"
+        "benchmarks/germline/{sample}/{sample}.germline_center_targets.txt"    
     shell:
-        """vcftools --vcf {input.input_vcf} --positions {params.positons_SNP92} --recode --out {params.outname}"""
+        """vcftools --vcf {input} --bed {params.target_bed} --recode --stdout > {output}"""
+
+rule germline_bgzip:
+    input:
+        "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf"
+    output:
+        "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz"
+    benchmark:
+        "benchmarks/germline/{sample}/{sample}.germline_bgzip.txt"
+    shell:
+        "bgzip {input}"
+
+rule germline_tabix:
+    input:
+        "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz"
+    output:
+        "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf.gz.tbi"
+    benchmark:
+        "benchmarks/germline/{sample}/{sample}.germline_tabix.txt"
+    shell:
+        "tabix -p vcf {input}"
+    
+rule germline_vcfcompare:
+    input:
+        normal=germline_getNormalTargets,
+        normal_tbi=germline_getNormalTargetsTbi,
+        tumor=germline_getTumorTargets,
+        turmor_tbi=germline_getTumorTargetsTbi,
+    output:
+        "analysis/germline/{run}/{run}_vcfcompare.txt",
+    benchmark:
+        "benchmarks/germline/{run}/{run}.germline_vcfcompare.txt"
+    shell:
+        "vcf-compare {input.tumor} {input.normal} > {output}"
+
+#LEN: Turning off for now
+# #RULE to check {run}_vcfcompare.txt > 90% here
+# rule testmatch:
+#     input: 
+#     	"analysis/germline/{run}/{run}_vcfcompare.txt"
+#     output:
+#         "analysis/germline/{run}/{run}_matchinformation.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/Match.py -i {input} > {output}"

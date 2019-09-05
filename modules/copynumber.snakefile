@@ -1,6 +1,6 @@
 #MODULE: CNV  calls by Sentieon
 
-_cnvcall_threads=8
+_cnvcall_threads=32
 
 def cnvcall_runsHelper(wildcards,pairs):
     """Given a snakemake wildcards,  pairs - 0 for Normals, 1 for Tumors,
@@ -48,7 +48,7 @@ rule create_pon_sentieon:
         index1=config['sentieon_path'],
         #target bed provided by user- not enabled for now
         #targetbed= config['pon_target_bed'],
-    threads: 32 #_cnvcall_threads
+    threads: _cnvcall_threads
     benchmark:
         "benchmarks/CNV/{run}/{run}.create_pon_sentieon.txt"
     shell:
