@@ -59,15 +59,16 @@ def somatic_tnsnv_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf.gz" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.mutationload.txt" % (run,run))
+        #next 3 for filter.maf/pdf
+        ls.append("analysis/somatic/%s/%s_tnsnv.filter.vep.vcf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnsnv.filter.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnsnv.filter.pdf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.filter.stats.txt" % (run,run))
+        #next 2 for mutation load
+        ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnsnv.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
-
     return ls
 
 def somatic_tnhaplotyper2_targets(wildcards):
@@ -77,12 +78,14 @@ def somatic_tnhaplotyper2_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf.gz" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.mutationload.txt" % (run,run))
+        #next 3 for filter.maf/pdf
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vep.vcf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.pdf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.stats.txt" % (run,run))
+        #next 2 for mutation load
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
     return ls
@@ -94,12 +97,14 @@ def somatic_tnscope_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf.gz" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.output.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.mutationload.txt" % (run,run))
+        #next 3 for filter.maf/pdf
+        ls.append("analysis/somatic/%s/%s_tnscope.filter.vep.vcf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnscope.filter.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnscope.filter.pdf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnscope.filter.stats.txt" % (run,run))
+        #next 2 for mutation load
+        ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnscope.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
     return ls
