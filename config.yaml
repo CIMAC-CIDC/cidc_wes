@@ -19,7 +19,7 @@ ref: "cidc_wes/ref.yaml"
 
 # SOMATIC CALLER to use, options are {tnsnv, tnhaplotyper2, tnscope}
 # tnhaplotyper2 is the default EVEN if the somatic_caller param is NOT defined
-somatic_caller: tnhaplotyper2
+somatic_caller: tnscope
 
 #Path to sentieon binary
 sentieon_path: "/path/to/sentieon"
