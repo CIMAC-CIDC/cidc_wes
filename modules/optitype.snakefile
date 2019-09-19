@@ -31,7 +31,7 @@ rule optitype_extract_chr6:
         """sambamba view -t {threads} -f bam -h {input.in_sortbamfile} chr6 > {output.chr6sortbamfile}"""
         
 rule optitype_bamtofastq:
-    """Convert the sorted.chr6.bam file to fastq by bedtools"""
+    """Convert the sorted.chr6.bam file to fastq by samtools"""
     input:
         in_sortchr6bamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     output:
@@ -43,7 +43,7 @@ rule optitype_bamtofastq:
     benchmark:
         "benchmarks/optitype/{sample}/{sample}.optitype_bamtofastq.txt"
     shell:
-        """bedtools bamtofastq -i {input.in_sortchr6bamfile} -fq {output.chr6fastqfile1} -fq2 {output.chr6fastqfile2} 2> {log}"""
+        """samtools fastq -@ 2 -1 {output.chr6fastqfile1} -2 {output.chr6fastqfile2} {input.in_sortchr6bamfile} 2> {log}"""
 
 rule optitype_hlatyping:
     """Precision HLA typing from next-generation sequencing data by
