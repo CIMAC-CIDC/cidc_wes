@@ -1,0 +1,64 @@
+{% extends "wes_base.html" %}
+{% block main_content %}
+	      <!-- LEN: iterate this section -->
+	      <!-- LEN: template the id--main_meta-->
+              <div class="main_row" id="main_meta" >
+		<!-- template id -->
+		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">META</h2>
+		<table class="table" style="font-size: 15px">
+		  <tbody>
+		    <tr>
+                      <th scope="row">WES Version</th>
+                      <td>v1.1 (commit: d8c124c)</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Reference Files Version</th>
+                      <td>ver1.0 (build date: 20190911)</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Assembly Version</th>
+                      <td>GDC hg38</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Sentieon Version</th>
+                      <td>201808.05</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Somatic Caller</th>
+                      <td>tnscope (sentieon)</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">neoantigen callers</th>
+                      <td>MHCflurry NetMHCcons MHCnuggetsII</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Neoantigen Epitope lengths</th>
+                      <td>8,9,10,11</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Snakemake Version</th>
+                      <td>5.4.5</td>
+		    </tr>
+		  </tbody>
+		</table>
+	      </div>
+
+            <!-- Alignment bar  -->
+              <div class="main_row" id="main_alignment" style="display:none;">
+                <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Stats</h2>
+		<!-- LEN: SUB section -->
+		<!--
+                <div class="row">
+                    <ul>
+                      <li style="color:black;font-size:25px">OptiType</li>
+                    </ul>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <h3 class="h5" style="text-align:center">OptiType</h3>
+                    <a href="images/immune/hla_typing_frequency_plot.png"><img src="images/immune/hla_typing_frequency_plot.png" width="500" height="650" class="float-left"></a>
+                  </div>
+                </div>
+		-->
+              </div>  <!-- close main_row-->
+{% endblock %}
