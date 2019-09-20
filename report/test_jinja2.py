@@ -14,7 +14,20 @@ nav_list = [('wes_level1.html','WES_Level1'),
             ('wes_level3.html','WES_Level3')]
 sidebar = [("meta", "META"), ("alignment", "Alignment"),]
 pg_name = 'WES_LEVEL_1'
+
+meta = {'wes_version' : "v1.1 (commit: d8c124c)",
+        'ref_version' : "ver1.0 (build date: 20190911)",
+        "assembly_version": "GDC hg38",
+        "sentieon_version": "201808.05",
+        "somatic_caller": "tnscope (sentieon)",
+        "neoantigen_callers": "MHCflurry NetMHCcons MHCnuggetsII",
+        "epitope_lengths": "8,9,10,11",
+        "snakemake_version": "5.4.5"}
 wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                    'page_name': pg_name}
+#INSERT meta values into the dictionary!
+for k in meta.keys():
+    wes_report_vals['meta_%s' % k] = meta[k]
+    
 template.stream(wes_report_vals).dump(OUT_FILE)  
 
