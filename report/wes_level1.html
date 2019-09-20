@@ -43,22 +43,78 @@
 		</table>
 	      </div>
 
-            <!-- Alignment bar  -->
+              <!-- Alignment bar  -->
               <div class="main_row" id="main_alignment" style="display:none;">
-                <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Stats</h2>
+		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Stats</h2>
 		<!-- LEN: SUB section -->
-		<!--
                 <div class="row">
                     <ul>
-                      <li style="color:black;font-size:25px">OptiType</li>
+                      <li style="color:black;font-size:25px">Alignment</li>
                     </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-                    <h3 class="h5" style="text-align:center">OptiType</h3>
-                    <a href="images/immune/hla_typing_frequency_plot.png"><img src="images/immune/hla_typing_frequency_plot.png" width="500" height="650" class="float-left"></a>
+                    <h3 class="h5" style="text-align:center">mapping stats</h3>
+		    <img src="wes_images/align/mapping.png" width="500" height="650" class="float-left">
                   </div>
                 </div>
-		-->
-              </div>  <!-- close main_row-->
+              </div>
+	      
+	       <!-- METRICS bar  -->
+               <div class="main_row" id="main_metrics" style="display:none;">
+               <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Coverage Metrics</h2>
+		<!-- LEN: SUB section -->
+                <div class="row">
+                    <ul>
+                      <li style="color:black;font-size:25px">Coverage</li>
+                    </ul>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <h3 class="h5" style="text-align:center">coverage metrics</h3>
+		    <img src="wes_images/align/mapping.png" width="500" height="650" class="float-left">
+                  </div>
+                </div>
+               </div>
+	       
+	       <!-- Somatic bar  -->
+               <div class="main_row" id="main_somatic" style="display:none;">
+               <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Somatic Variants</h2>
+		<!-- LEN: SUB section -->
+                <div class="row">
+                    <ul>
+                      <li style="color:black;font-size:25px">Somatic Variants</li>
+                    </ul>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <h3 class="h5" style="text-align:center">Somatic Variants</h3>
+		    <img src="wes_images/align/mapping.png" width="500" height="650" class="float-left">
+                  </div>
+                </div>
+               </div>
+	       
+	       <!-- Germline bar  -->
+               <div class="main_row" id="main_germline" style="display:none;">
+               <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Germline Variants</h2>
+		<!-- LEN: SUB section -->
+                <div class="row">
+                    <ul>
+                      <li style="color:black;font-size:25px">Germline Variants</li>
+                    </ul>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+		    <table class="table" style="font-size: 15px">
+		      <tbody>
+			<tr>
+			  <th scope="row">Tumor/Normal Germline Match</th>
+			  <td>96.7%</td>
+			</tr>
+		      </tbody>
+		      </table>
+                  </div>
+                </div>
+              </div>  
+
 {% endblock %}

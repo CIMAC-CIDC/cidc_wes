@@ -2,7 +2,7 @@
 import jinja2
 
 TEMPLATE_FILE = "wes_level1.html"
-OUT_FILE = "wes_report.html"
+OUT_FILE = "output/wes_level1.html"
 
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
@@ -12,7 +12,8 @@ template = templateEnv.get_template(TEMPLATE_FILE)
 nav_list = [('wes_level1.html','WES_Level1'),
             ('wes_level2.html','WES_Level2'),
             ('wes_level3.html','WES_Level3')]
-sidebar = [("meta", "META"), ("alignment", "Alignment"),]
+sidebar = [("meta", "META"), ("alignment", "Alignment"), ('metrics','Metrics'),
+           ("somatic","Somatic"), ('germline',"Germline")]
 pg_name = 'WES_LEVEL_1'
 
 meta = {'wes_version' : "v1.1 (commit: d8c124c)",

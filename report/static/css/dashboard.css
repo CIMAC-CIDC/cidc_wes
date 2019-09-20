@@ -52,6 +52,13 @@ body {
   color: #007bff;
 }
 
+/* LEN- adding hover behavior
+ */
+.nav-item:hover {
+  cursor: pointer;
+  background-color: silver;
+}
+
 .sidebar .nav-link:hover .feather,
 .sidebar .nav-link.active .feather {
   color: inherit;
