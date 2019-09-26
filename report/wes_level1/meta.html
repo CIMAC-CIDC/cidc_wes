@@ -1,0 +1,45 @@
+          <!-- Meta bar -->
+          <div class="row">
+            <div class="container-fluid">
+	      <!-- LEN: iterate this section -->
+	      <!-- LEN: template the id--main_meta-->
+              <div class="main_row" id="main_meta" >
+		<!-- template id -->
+		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">META</h2>
+		<table class="table" style="font-size: 15px">
+		  <tbody>
+		    <tr>
+                      <th scope="row">WES Version</th>
+                      <td>{{ meta_wes_version }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Reference Files Version</th>
+                      <td>{{ meta_ref_version }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Assembly Version</th>
+                      <td>{{ meta_assembly_version }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Sentieon Version</th>
+                      <td>{{ meta_sentieon_version }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Somatic Caller</th>
+                      <td>{{ meta_somatic_caller }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">neoantigen callers</th>
+                      <td>{{ meta_neoantigen_callers }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Neoantigen Epitope lengths</th>
+                      <td>{{ meta_epitope_lengths }}</td>
+		    </tr>
+		    <tr>
+                      <th scope="row">Snakemake Version</th>
+                      <td>{{ meta_snakemake_version }}</td>
+		    </tr>
+		  </tbody>
+		</table>
+	      </div>
