@@ -54,7 +54,7 @@ body {
 
 /* LEN- adding hover behavior
  */
-.nav-item:hover {
+.nav-link:hover {
   cursor: pointer;
   background-color: silver;
 }

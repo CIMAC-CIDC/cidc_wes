@@ -25,9 +25,16 @@
           <div class="sidebar-sticky" style="padding-top: 1rem">
             <ul class="nav flex-column">
 	      <!-- LEN: SIDEBAR nav -->
-	      {% for (iid, name) in sidebar_nav %}
+	      {% for (iid, name, sub_topics) in sidebar_nav %}
               <li class="nav-item">
-                <a id="{{ iid }}" class="nav-link" onclick="click_sidebar(this)" style="font-size: 1rem">{{ name }}</a>
+                <a id="{{ iid }}" class="nav-link" href="#main_{{ iid }}" onclick="click_sidebar(this)" style="font-size: 1rem">{{ name }}</a>
+		<ul>
+		  {% for sub_topic in sub_topics %}
+		  <li class="nav-item">
+                    <a class="nav-link" href="#{{ sub_topic }}" style="padding-top: 0.25rem;padding-bottom: 0.25rem;padding-left: 0.25rem;padding-right: 0.25rem;">{{ sub_topic }}</a>
+                  </li>
+		  {% endfor %}
+		</ul>
               </li>
 	      {% endfor %}
             </ul>

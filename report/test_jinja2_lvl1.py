@@ -12,8 +12,11 @@ template = templateEnv.get_template(TEMPLATE_FILE)
 nav_list = [('wes_level1.html','WES_Level1'),
             ('wes_level2.html','WES_Level2'),
             ('wes_level3.html','WES_Level3')]
-sidebar = [("meta", "META"), ("alignment", "Alignment"), ('metrics','Metrics'),
-           ("somatic","Somatic"), ('germline',"Germline")]
+sidebar = [("meta", "META", []),
+           ("alignment", "Alignment", ['Mapping_Stats', 'GC_Bias_Plots','Quality_Score','Quality_by_Cycle']),
+           ('metrics','Metrics', []),
+           ("somatic","Somatic", []),
+           ('germline',"Germline", [])]
 pg_name = 'WES_LEVEL_1'
 
 meta = {'wes_version' : "v1.1 (commit: d8c124c)",
