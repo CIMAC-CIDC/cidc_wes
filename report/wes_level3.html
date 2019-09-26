@@ -1,19 +1,4 @@
-{% extends "wes_base.html" %}
-{% block main_content %}
-              <!-- Clonality bar  -->
-              <div class="main_row" id="main_clonality">
-		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Tumor Clonality</h2>
-		<!-- LEN: SUB section -->
-                <div class="row">
-                    <ul>
-                      <li style="color:black;font-size:25px">Tumor Clonality</li>
-                    </ul>
-                </div>
-                <div class="row">
-                  <div class="col-6">
-                    <h3 class="h5" style="text-align:center">Clonality Results</h3>
-		    <img src="wes_images/align/mapping.png" width="500" height="650" class="float-left">
-                  </div>
-                </div>
-              </div>
+{% extends "wes_level_template.html" %}
+{% block level_content %}
+              {% include "wes_level3/clonality.html" %}
 {% endblock %}
