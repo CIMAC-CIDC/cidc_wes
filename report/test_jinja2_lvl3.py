@@ -14,7 +14,7 @@ nav_list = [('wes_level1.html','WES_Level1'),
             ('wes_level2.html','WES_Level2'),
             ('wes_level3.html','WES_Level3')]
 
-sidebar = [("clonality", "Clonality")]
+sidebar = [("clonality", "Clonality", [])]
 pg_name = 'WES_LEVEL_3'
 
 wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
