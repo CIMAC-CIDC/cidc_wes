@@ -13,8 +13,10 @@ nav_list = [('wes_level1.html','WES_Level1'),
             ('wes_level2.html','WES_Level2'),
             ('wes_level3.html','WES_Level3')]
 
-sidebar = [("coverage", "Coverage"), ("cnv", "CNV"), ('purity','Purity'),
-           ("hla","HLA"), ('neoantigen',"Neoantigen")]
+sidebar = [("cnv", "CNV", []),
+           ('purity','Purity', []),
+           ("hla","HLA", []),
+           ('neoantigen',"Neoantigen",[])]
 pg_name = 'WES_LEVEL_2'
 
 wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
