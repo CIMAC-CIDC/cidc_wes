@@ -20,15 +20,17 @@
 			  <th>Granular_Q3</th>
 			  <th>%_bases_above_50</th>
 			</tr>
+			{% for sample in coverage %}
 			<tr>
-			  <td>mocha2-Run1-pt1-FF-Tumor</td>
-			  <td>39726868637</td>
-			  <td>498.74</td>
-			  <td>250</td>
-			  <td>411</td>
-			  <td>>500</td>
-			  <td>100</td>
+			  <td>{{ sample.sample_id }}</td>
+			  <td>{{ sample.total }}</td>
+			  <td>{{ sample.mean }}</td>
+			  <td>{{ sample.granular_Q1 }}</td>
+			  <td>{{ sample.granular_median }}</td>
+			  <td>{{ sample.granular_Q3 }}</td>
+			  <td>{{ sample.percent_bases_over_50 }}</td>
 			</tr>
+			{% endfor %}
 		      </tbody>
 		    </table>
                   </div>

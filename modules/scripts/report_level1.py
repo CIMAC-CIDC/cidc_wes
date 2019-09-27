@@ -78,6 +78,20 @@ def getAlignmentInfo(config):
     #print(ret)
     return ret
 
+def getCoverageInfo(config, coverage_file):
+    """Genereate the dictionary for the coverage section
+    open file "analysis/metrics/all_sample_summaries.txt
+    """
+    ret = []
+    f = open(coverage_file)
+    hdr = f.readline().strip().split("\t")
+    hdr[-1] = "percent_bases_over_50"
+    for l in f:
+        tmp = l.strip().split("\t")
+        ret.append(dict(zip(hdr,tmp)))
+    #print(ret)
+    return ret
+    
 def main():
     usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -126,7 +140,12 @@ def main():
 
     #ALIGNMENT
     wes_report_vals['alignment'] = getAlignmentInfo(config)
-    
+
+    #COVERAGE
+    #HARD-CODED relative path link which should work for now
+    coverage_f = "analysis/metrics/all_sample_summaries.txt"
+    wes_report_vals['coverage'] = getCoverageInfo(config, coverage_f)
+
     template.stream(wes_report_vals).dump(options.output)  
         
 if __name__ == '__main__':
