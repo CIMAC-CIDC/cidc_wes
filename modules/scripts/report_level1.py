@@ -3,6 +3,8 @@
 
 import os
 import sys
+
+import re
 import subprocess
 import yaml
 
@@ -111,6 +113,7 @@ def getCoverageInfo(config, coverage_file):
         tmp = l.strip().split("\t")
         ret.append(dict(zip(hdr,tmp)))
     #print(ret)
+    f.close()
     return ret
 
 def getSomaticInfo(config):
@@ -123,6 +126,27 @@ def getSomaticInfo(config):
                'lego_img': 'analysis/report/wes_images/somatic/%s/%s_%s.output_1.png' % (run, run, somatic_caller)}
         ret.append(tmp)
     #print(tmp)
+    return ret
+
+def getGermlineInfo(config):
+    """Genereate the dictionary for the germline section"""
+    ret = []
+    for run in config['runs']:
+        #get the file to check for Tumor/Normal match
+        #HARD-CODED relative path link which should be ok
+        f = open("analysis/germline/%s/%s_vcfcompare.txt" % (run, run))
+        lines=f.readlines()
+        
+        #STATISTIC is in 10th line
+        line = lines[9].strip().split("\t") #GET 2nd to last and last elm
+        #regex ref: https://stackoverflow.com/questions/4894069/regular-expression-to-return-text-between-parenthesis
+        p1 = re.search(r'\((.*?)\)',line[-2]).group(1)
+        p2 = re.search(r'\((.*?)\)',line[-1]).group(1)
+        print(p1,p2)
+        tmp = {'name': run, 'percent': "%s/%s" % (p1,p2)}
+        ret.append(tmp)
+        f.close()
+    #print(ret)
     return ret
 
 def main():
@@ -182,6 +206,9 @@ def main():
 
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
+
+    #GERMLINE
+    wes_report_vals['germline'] = getGermlineInfo(config)
 
     template.stream(wes_report_vals).dump(options.output)  
         
