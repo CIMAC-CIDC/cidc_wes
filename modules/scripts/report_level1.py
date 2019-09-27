@@ -8,6 +8,27 @@ import yaml
 
 from optparse import OptionParser
 import jinja2
+import pandas as pd
+
+################### THIS fn is copied from wes.snakefile ######################
+def getRuns(config):
+    """parse metasheet for Run groupings"""
+    ret = {}
+
+    #LEN: Weird, but using pandas to handle the comments in the file
+    #KEY: need skipinitialspace to make it fault tolerant to spaces!
+    metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
+    f = metadata.to_csv().split() #make it resemble an actual file with lines
+    #SKIP the hdr
+    for l in f[1:]:
+        tmp = l.strip().split(",")
+        #print(tmp)
+        ret[tmp[0]] = tmp[1:]
+
+    #print(ret)
+    config['runs'] = ret
+    return config
+###############################################################################
 
 def getMetaInfo(config):
     """Gets and populates a dictionary with the values required for the 
@@ -85,13 +106,25 @@ def getCoverageInfo(config, coverage_file):
     ret = []
     f = open(coverage_file)
     hdr = f.readline().strip().split("\t")
-    hdr[-1] = "percent_bases_over_50"
+    hdr[-1] = "percent_bases_over_50" #otherwise it's %_bases_above_50
     for l in f:
         tmp = l.strip().split("\t")
         ret.append(dict(zip(hdr,tmp)))
     #print(ret)
     return ret
-    
+
+def getSomaticInfo(config):
+    """Genereate the dictionary for the somatic section"""
+    ret = []
+    somatic_caller = config['somatic_caller']
+    for run in config['runs']:
+        tmp = {'name': run,
+               #NEED to simplify these names!!!!!!!
+               'lego_img': 'analysis/report/wes_images/somatic/%s/%s_%s.output_1.png' % (run, run, somatic_caller)}
+        ret.append(tmp)
+    #print(tmp)
+    return ret
+
 def main():
     usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -110,7 +143,8 @@ def main():
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-
+    config = getRuns(config)
+    
     #ASSUMING it's being run as WES project level
     templateLoader = jinja2.FileSystemLoader(searchpath="cidc_wes/report")
     templateEnv = jinja2.Environment(loader=templateLoader)
@@ -145,6 +179,9 @@ def main():
     #HARD-CODED relative path link which should work for now
     coverage_f = "analysis/metrics/all_sample_summaries.txt"
     wes_report_vals['coverage'] = getCoverageInfo(config, coverage_f)
+
+    #SOMATIC
+    wes_report_vals['somatic'] = getSomaticInfo(config)
 
     template.stream(wes_report_vals).dump(options.output)  
         
