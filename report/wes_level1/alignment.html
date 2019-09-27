@@ -1,7 +1,9 @@
               <!-- Alignment bar  -->
               <div class="main_row" id="main_alignment" style="display:none;">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Statistics</h2>
-		<!-- LEN: SUB section -->
+		<!-- LEN: THIS should be a for loop over each sample! -->
+		{% for sample in alignment %}
+		<strong>{{ sample.name }}</strong>
                 <div class="row" id="Mapping_Stats">
                     <ul>
                       <li style="color:black;font-size:25px">Mapping Stats</li>
@@ -9,7 +11,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="wes_images/align/mapping.png" width="500" height="650" class="float-left">
+		    <img src="{{ sample.mapping }}" width="500" height="650" class="float-left">
                   </div>
                 </div>
 
@@ -20,7 +22,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="wes_images/align/mocha2-Run1-pt1-Normal_metrics_1.png" width="864" height="650" class="float-left">
+		    <img src="{{ sample.gc_bias }}" width="864" height="650" class="float-left">
                   </div>
                 </div>
 
@@ -31,7 +33,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="wes_images/align/mocha2-Run1-pt1-Normal_metrics_2.png" width="864" height="650" class="float-left">
+		    <img src="{{ sample.quality_score }}" width="864" height="650" class="float-left">
                   </div>
                 </div>
 
@@ -42,7 +44,8 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="wes_images/align/mocha2-Run1-pt1-Normal_metrics_3.png" width="864" height="650" class="float-left">
+		    <img src="{{ sample.quality_by_cycle }}" width="864" height="650" class="float-left">
                   </div>
                 </div>
+		{% endfor %}
               </div>

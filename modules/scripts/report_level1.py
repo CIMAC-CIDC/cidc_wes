@@ -64,6 +64,20 @@ def getMetaInfo(config):
     #print(tmp)
     return tmp
 
+def getAlignmentInfo(config):
+    """Genereate the dictionary for the alignment section"""
+    ret = []
+    for sample in config['samples']:
+        tmp = {'name': sample,
+               'mapping': 'analysis/report/wes_images/align/%s/mapping.png' % sample,
+               'gc_bias': 'analysis/report/wes_images/align/%s/%s_metrics_1.png' % (sample, sample),
+               'quality_score': 'analysis/report/wes_images/align/%s/%s_metrics_2.png' % (sample, sample), 
+               'quality_by_cycle': 'analysis/report/wes_images/align/%s/%s_metrics_3.png' % (sample,sample)
+        }
+        ret.append(tmp)
+    #print(ret)
+    return ret
+
 def main():
     usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -110,6 +124,9 @@ def main():
     meta = getMetaInfo(config)
     wes_report_vals['meta'] = meta
 
+    #ALIGNMENT
+    wes_report_vals['alignment'] = getAlignmentInfo(config)
+    
     template.stream(wes_report_vals).dump(options.output)  
         
 if __name__ == '__main__':
