@@ -14,13 +14,13 @@
 			<tr>
 			  <th scope="row">Sample</th>
 			  <th scope="row">Purity</th>
-			  <th scope="row">Ploidy</th>
 			</tr>
+			{% for run in purity  %}
 			<tr>
-			  <td scope="row">mocha2-Run1-pt1-FF</td>
-			  <td scope="row">0.33</td>
-			  <td scope="row">0.33</td>
+			  <td scope="row">{{ run.name }}</td>
+			  <td scope="row">{{ run.purity }}</td>
 			</tr>
+			{% endfor %}
 		      </tbody>
 		      </table>
                   </div>

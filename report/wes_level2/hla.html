@@ -11,40 +11,24 @@
                   <div class="col-6">
 		    <table class="table" style="font-size: 15px">
 		      <tbody>
-			<tr><th>mocha2-Run1-pt1-FF</td></tr>
+			{% for sample in hla %}
+			<tr><th>{{ sample.name }}</td></tr>
 			<tr>
-			  <th scope="row">HLA-A</th>
-			  <td>A*24:02</td>
-			  <td>A*01:01</td>
+			  <th scope="row">SAMPLE-A</th>
+			  <td>{{ sample.HLA.A1 }}</td>
+			  <td>{{ sample.HLA.A2 }}</td>
 			</tr>
 			<tr>
-			  <th scope="row">HLA-B</th>
-			  <td>B*56:01</td>
-			  <td>B*51:01</td>
+			  <th scope="row">SAMPLE-B</th>
+			  <td>{{ sample.HLA.B1 }}</td>
+			  <td>{{ sample.HLA.B2 }}</td>
 			</tr>
 			<tr>			  
-			  <th scope="row">HLA-C</th>
-			  <td>C*15:02</td>
-			  <td>C*01:02</td>
+			  <th scope="row">SAMPLE-C</th>
+			  <td>{{ sample.HLA.C1 }}</td>
+			  <td>{{ sample.HLA.C2 }}</td>
 			</tr>
-			
-                        <tr><th>mocha2-Run1-pt1-Normal</td></tr>
-			<tr>
-			  <th scope="row">HLA-A</th>
-			  <td>A*24:02</td>
-			  <td>A*01:01</td>
-			</tr>
-			<tr>
-			  <th scope="row">HLA-B</th>
-			  <td>B*56:01</td>
-			  <td>B*51:01</td>
-			</tr>
-			<tr>			  
-			  <th scope="row">HLA-C</th>
-			  <td>C*15:02</td>
-			  <td>C*01:02</td>
-			</tr>
-
+			{% endfor %}
 		      </tbody>
 		      </table>
                   </div>
