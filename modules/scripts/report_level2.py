@@ -76,8 +76,14 @@ def getNeoantigenInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
-        neoantigen_plot = "wes_images/align/mapping.png" #LEN: plots here
-        tmp = {'name': run, 'neoantigen_plot': neoantigen_plot}
+        sub_path="wes_images/neoantigen/%s/" % run
+        hla_plot = sub_path+"HLA_epitopes_fraction_plot.png"
+        patient_plot = sub_path+"Patient_count_epitopes_plot.png"
+        epitopes_plot = sub_path+"epitopes_affinity_plot.png" 
+        tmp = {'name': run,
+               'hla_plot': hla_plot,
+               'patient_plot': patient_plot,
+               'epitopes_plot':epitopes_plot}
         ret.append(tmp)
     return ret
 
