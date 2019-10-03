@@ -14,6 +14,8 @@ def report_targets(wildcards):
         ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
         ls.append("analysis/report/wes_images/align/%s/%s_qualityByCycle.png" % (sample,sample))
         ls.append("analysis/report/wes_images/align/%s/%s_insertSize.png" % (sample,sample))
+    for run in config['runs']:
+        ls.append("analysis/report/wes_images/somatic/%s/%s_%s.legoPlot.png" % (run, run, config['somatic_caller']))
     return ls
 
 rule report_all:
@@ -82,6 +84,19 @@ rule report_level1_insertSize:
         page = 4
     message:
         "REPORT: generating wes level1 insert size plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_somatic_legoPlot:
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.pdf"
+    output:
+        "analysis/report/wes_images/somatic/{run}/{run}_{caller}.legoPlot.png"
+    params:
+        page = 1
+    message:
+        "REPORT: generating wes level1 lego plot"
     group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"

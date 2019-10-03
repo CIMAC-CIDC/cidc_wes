@@ -69,7 +69,7 @@ def getSomaticInfo(config):
     for run in config['runs']:
         tmp = {'name': run,
                #NEED to simplify these names!!!!!!!
-               'lego_img': 'analysis/report/wes_images/somatic/%s/%s_%s.output_1.png' % (run, run, somatic_caller)}
+               'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller)}
         ret.append(tmp)
     #print(tmp)
     return ret
