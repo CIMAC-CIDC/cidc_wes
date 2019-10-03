@@ -97,6 +97,7 @@ def level2_targets(wildcards):
     ls.extend(purity_targets(wildcards))
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
+    #ls.extend(report_targets(wildcards))
     return ls
 
 def level3_targets(wildcards):
@@ -139,4 +140,4 @@ include: "./modules/purity.snakefile" #...
 include: "./modules/clonality.snakefile" # ...
 include: "./modules/optitype.snakefile" #...
 include: "./modules/neoantigen.snakefile"
-#include: "./modules/report.snakefile"          # report module
+include: "./modules/report.snakefile" # report module
