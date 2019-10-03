@@ -9,6 +9,11 @@ def report_targets(wildcards):
     ls.append("analysis/report/wes_level3.html")
     ls.append("analysis/report/static/done.txt")
     #ls.append("analysis/report/wes_images/...")
+    for sample in config['samples']:
+        ls.append("analysis/report/wes_images/align/%s/%s_gcBias.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_qualityByCycle.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_insertSize.png" % (sample,sample))
     return ls
 
 rule report_all:
@@ -27,6 +32,59 @@ rule report_meta:
     group: "report"
     shell:
         """cidc_wes/modules/scripts/report_meta.py -c {input} -o {output}"""
+
+rule report_level1_gcBiasPlot:
+    """Generate gcBiasPlot"""
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_gcBias.png"
+    params:
+        page = 1
+    message:
+        "REPORT: generating wes level1 gc bias plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_qualityScore:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_qualityScore.png"
+    params:
+        page = 2
+    message:
+        "REPORT: generating wes level1 quality score plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_qualityByCycle:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_qualityByCycle.png"
+    params:
+        page = 3
+    message:
+        "REPORT: generating wes level1 quality by cycle plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_insertSize:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_insertSize.png"
+    params:
+        page = 4
+    message:
+        "REPORT: generating wes level1 insert size plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
 rule report_level1:
     """Generate wes_level1.html"""

@@ -37,10 +37,11 @@ def getAlignmentInfo(config):
     ret = []
     for sample in config['samples']:
         tmp = {'name': sample,
-               'mapping': 'analysis/report/wes_images/align/%s/mapping.png' % sample,
-               'gc_bias': 'analysis/report/wes_images/align/%s/%s_metrics_1.png' % (sample, sample),
-               'quality_score': 'analysis/report/wes_images/align/%s/%s_metrics_2.png' % (sample, sample), 
-               'quality_by_cycle': 'analysis/report/wes_images/align/%s/%s_metrics_3.png' % (sample,sample)
+               'mapping': 'wes_images/align/%s/mapping.png' % sample,
+               'gc_bias': 'wes_images/align/%s/%s_gcBias.png' % (sample, sample),
+               'quality_score': 'wes_images/align/%s/%s_qualityScore.png' % (sample, sample), 
+               'quality_by_cycle': 'wes_images/align/%s/%s_qualityByCycle.png' % (sample,sample),
+               'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample)
         }
         ret.append(tmp)
     #print(ret)
