@@ -88,8 +88,11 @@ def getGermlineInfo(config):
         #regex ref: https://stackoverflow.com/questions/4894069/regular-expression-to-return-text-between-parenthesis
         p1 = re.search(r'\((.*?)\)',line[-2]).group(1)
         p2 = re.search(r'\((.*?)\)',line[-1]).group(1)
-        #print(p1,p2)
-        tmp = {'name': run, 'percent': "%s/%s" % (p1,p2)}
+        #NOTE: p1 and p2 are strils like XX.Y%--with the % trailing
+        #So we need to remove the % character
+        percent = (float(p1[:-1]) + float(p2[:-1]))/2.0
+        #print(percent)
+        tmp = {'name': run, 'percent': "%.2f" % percent}
         ret.append(tmp)
         f.close()
     #print(ret)
