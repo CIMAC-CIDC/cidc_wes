@@ -32,52 +32,12 @@ def getRuns(config):
     return config
 ###############################################################################
 
-def getCNVInfo(config):
-    """Gets and populates a dictionary with the values required for the page"""
-    circos_plot = "wes_images/align/mapping.png" #LEN: CIRCOS plot here
-    tmp = {"circos_plot": circos_plot}
-    #print(tmp)
-    return tmp
-
-def getPurityInfo(config):
-    """Gets and populates a dictionary with the values required for the page"""
-    #read in the purity file for each RUN
-    ret = []
-    for run in config['runs']:
-        f_name = "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
-        if os.path.isfile(f_name):
-            f = open(f_name)
-            hdr = f.readline().strip().split("\t")
-            vals = dict(zip(hdr, f.readline().strip().split("\t")))
-            #print(vals)
-            tmp = {'name': run, 'purity': vals['purity']}
-            ret.append(tmp)
-        else:
-            print("WARNING: expected %s, but it does not exist" % f_name)
-    return ret
-
-def getHLAInfo(config):
-    """Gets and populates a dictionary with the values required for the page"""
-    ret = []
-    for sample in config['samples']:
-        f_name = "analysis/optitype/%s/%s_result.tsv" % (sample,sample)
-        if os.path.isfile(f_name):
-            f = open(f_name)
-            hdr = f.readline().strip().split("\t")
-            vals = dict(zip(hdr, f.readline().strip().split("\t")))
-            #print(vals)
-            tmp = {'name': sample, 'HLA': vals}
-            ret.append(tmp)
-        else:
-            print("WARNING: expected %s, but it does not exist" % f_name)
-    return ret
-
-def getNeoantigenInfo(config):
+def getClonalityInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
-        neoantigen_plot = "wes_images/align/mapping.png" #LEN: plots here
-        tmp = {'name': run, 'neoantigen_plot': neoantigen_plot}
+        clonality_plot = "wes_images/align/mapping.png" #LEN: plots here
+        tmp = {'name': run, 'clonality_plot': clonality_plot}
         ret.append(tmp)
     return ret
 
@@ -104,7 +64,7 @@ def main():
     #ASSUMING it's being run as WES project level
     templateLoader = jinja2.FileSystemLoader(searchpath="cidc_wes/report")
     templateEnv = jinja2.Environment(loader=templateLoader)
-    template = templateEnv.get_template("wes_level2.html")
+    template = templateEnv.get_template("wes_level3.html")
 
     #STANDARD nav bar list
     nav_list = [('wes_meta.html', 'WES_META'),
@@ -113,30 +73,15 @@ def main():
                 ('wes_level3.html','WES_Level3')]
 
     #MODIFY this!
-    pg_name = "WES_LEVEL_2"
-    sidebar = [("cnv", "CNV", []),
-               ("purity", "Purity", []),
-               ('hla','HLA', []),
-               ("neoantigen","Neoantigen", [])]
+    pg_name = "WES_LEVEL_3"
+    sidebar = [("clonality", "Clonality", [])]
     
     wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                        'page_name': pg_name}
 
-    #CNV
-    cnv = getCNVInfo(config)
-    wes_report_vals['cnv'] = cnv
-
-    #PURITY
-    purity = getPurityInfo(config)
-    wes_report_vals['purity'] = purity
-
-    #HLA
-    hla = getHLAInfo(config)
-    wes_report_vals['hla'] = hla
-
-    #Neoantigen
-    neoantigen = getNeoantigenInfo(config)
-    wes_report_vals['neoantigen'] = neoantigen
+    #Clonality
+    clonality = getClonalityInfo(config)
+    wes_report_vals['clonality'] = clonality
 
     template.stream(wes_report_vals).dump(options.output)  
         
