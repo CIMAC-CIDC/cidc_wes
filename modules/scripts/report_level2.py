@@ -108,7 +108,8 @@ def main():
     template = templateEnv.get_template("wes_level2.html")
 
     #STANDARD nav bar list
-    nav_list = [('wes_level1.html','WES_Level1'),
+    nav_list = [('wes_meta.html', 'WES_META'),
+                ('wes_level1.html','WES_Level1'),
                 ('wes_level2.html','WES_Level2'),
                 ('wes_level3.html','WES_Level3')]
 

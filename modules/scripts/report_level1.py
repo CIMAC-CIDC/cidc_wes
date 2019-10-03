@@ -32,61 +32,6 @@ def getRuns(config):
     return config
 ###############################################################################
 
-def getMetaInfo(config):
-    """Gets and populates a dictionary with the values required for the 
-    meta pg"""
-    
-    # tmp = {'wes_version' : "v1.1 (commit: d8c124c)",
-    #        'ref_version' : "ver1.0 (build date: 20190911)",
-    #        "assembly_version": "GDC hg38",
-    #        "sentieon_version": "201808.05",
-    #        "somatic_caller": "tnscope (sentieon)",
-    #        "neoantigen_callers": "MHCflurry NetMHCcons MHCnuggetsII",
-    #        "epitope_lengths": "8,9,10,11",
-    #        "snakemake_version": "5.4.5"}
-
-    #CHANGE to cidc_wes, but first store this
-    wd = os.getcwd()
-    os.chdir("cidc_wes")
-    #GET wes commit string--first six letters of this cmd
-    cmd = "git show --oneline -s".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    wes_commit = output[:6].decode("utf-8") 
-
-    #GET wes current tag
-    cmd = "git describe --tags".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    wes_tag = output.decode("utf-8").split("-")[0]
-    wes_version = "%s (commit: %s)" % (wes_tag, wes_commit)
-    #CHANGE back to CWD
-    os.chdir(wd)
-
-    #HARD_code
-    ref_version = "ver1.0 (build date: 20190911)"
-
-    #FROM CONFIG
-    assembly_version = config['assembly']
-    sentieon_version = config['sentieon_path'].split("/")[-2]
-    somatic_caller = "%s (sentieon)" % config['somatic_caller']
-    neoantigen_callers = config['neoantigen_callers']
-    epitope_lengths = config['neoantigen_epitope_lengths']
-
-    #GET wes current tag
-    cmd = "snakemake -v".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    snakemake_version = output.decode("utf-8").strip()
-
-    tmp = {'wes_version' : wes_version,
-           'ref_version' : ref_version,
-           'assembly_version': assembly_version,
-           'sentieon_version': sentieon_version,
-           'somatic_caller': somatic_caller,
-           'neoantigen_callers': neoantigen_callers,
-           'epitope_lengths': epitope_lengths,
-           'snakemake_version': snakemake_version}
-    #print(tmp)
-    return tmp
-
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
     ret = []
@@ -142,7 +87,7 @@ def getGermlineInfo(config):
         #regex ref: https://stackoverflow.com/questions/4894069/regular-expression-to-return-text-between-parenthesis
         p1 = re.search(r'\((.*?)\)',line[-2]).group(1)
         p2 = re.search(r'\((.*?)\)',line[-1]).group(1)
-        print(p1,p2)
+        #print(p1,p2)
         tmp = {'name': run, 'percent': "%s/%s" % (p1,p2)}
         ret.append(tmp)
         f.close()
@@ -176,25 +121,21 @@ def main():
 
     pg_name = "WES_LEVEL_1"
     #STANDARD nav bar list
-    nav_list = [('wes_level1.html','WES_Level1'),
+    nav_list = [('wes_meta.html', 'WES_META'),
+                ('wes_level1.html','WES_Level1'),
                 ('wes_level2.html','WES_Level2'),
                 ('wes_level3.html','WES_Level3')]
 
     #SIDE-BAR
     alignment_sub = ['Mapping_Stats', 'GC_Bias_Plots',
                      'Quality_Score', 'Quality_by_Cycle']
-    sidebar = [("meta", "META", []),
-               ("alignment", "Alignment", alignment_sub),
+    sidebar = [("alignment", "Alignment", alignment_sub),
                ('coverage','Coverage', []),
                ("somatic","Somatic", []),
                ('germline',"Germline", [])]
     
     wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                        'page_name': pg_name}
-
-    #META- get the dict and add it to wes_report_vals
-    meta = getMetaInfo(config)
-    wes_report_vals['meta'] = meta
 
     #ALIGNMENT
     wes_report_vals['alignment'] = getAlignmentInfo(config)
