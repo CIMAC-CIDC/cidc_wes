@@ -2,18 +2,19 @@
               <div class="main_row" id="main_alignment">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Statistics</h2>
 		<!-- LEN: THIS should be a for loop over each sample! -->
-		{% for sample in alignment %}
-		<strong>{{ sample.name }}</strong>
-                <div class="row" id="Mapping_Stats">
-                    <ul>
-                      <li style="color:black;font-size:25px">Mapping Stats</li>
-                    </ul>
+		<div class="row" id="Mapping_Stats">
+                  <ul>
+                    <li style="color:black;font-size:25px">Mapping Stats</li>
+                  </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.mapping }}" width="500" height="650" class="float-left">
+		    <img src="{{ alignment.mapping }}" width="500" height="650" class="float-left">
                   </div>
                 </div>
+
+		{% for sample in alignment.samples %}
+		<strong>{{ sample.name }}</strong>
 
 		<div class="row" id="GC_Bias_Plots">
                   <ul>

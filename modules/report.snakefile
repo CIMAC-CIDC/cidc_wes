@@ -18,7 +18,7 @@ def report_targets(wildcards):
     ls.append("analysis/report/wes_level2.html")
     ls.append("analysis/report/wes_level3.html")
     ls.append("analysis/report/static/done.txt")
-    #ls.append("analysis/report/wes_images/...")
+    ls.append("analysis/report/wes_images/align/mapping.png")
     for sample in config['samples']:
         ls.append("analysis/report/wes_images/align/%s/%s_gcBias.png" % (sample,sample))
         ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
@@ -182,3 +182,12 @@ rule pvacseq_plot:
     group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/pvacseq_plot.R -i {input} -o {params.outdir}"
+
+rule mapping_plot:
+    """Plot the mapping stats"""
+    input:
+        "analysis/align/mapping.csv"
+    output:
+        "analysis/report/wes_images/align/mapping.png"
+    shell:
+        "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"

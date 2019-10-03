@@ -34,16 +34,17 @@ def getRuns(config):
 
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
-    ret = []
+    ret = {'mapping': 'wes_images/align/mapping.png',
+           'samples': []}
     for sample in config['samples']:
         tmp = {'name': sample,
-               'mapping': 'wes_images/align/%s/mapping.png' % sample,
+               #'mapping': 'wes_images/align/%s/mapping.png' % sample,
                'gc_bias': 'wes_images/align/%s/%s_gcBias.png' % (sample, sample),
                'quality_score': 'wes_images/align/%s/%s_qualityScore.png' % (sample, sample), 
                'quality_by_cycle': 'wes_images/align/%s/%s_qualityByCycle.png' % (sample,sample),
                'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample)
         }
-        ret.append(tmp)
+        ret['samples'].append(tmp)
     #print(ret)
     return ret
 

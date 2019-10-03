@@ -18,7 +18,7 @@ def main():
         optparser.print_help()
         sys.exit(-1)
 
-    print(",".join(["Sample","Total","Mapped","UniquelyMapped"]))
+    print(",".join(["Sample","Total","Mapped"]))
 
     for f in options.files:
         #UGH: this script is ugly!!
