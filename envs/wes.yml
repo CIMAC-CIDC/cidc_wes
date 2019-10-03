@@ -50,3 +50,6 @@ dependencies:
 
 #optitype
 - optitype
+
+#report
+- pdftools
