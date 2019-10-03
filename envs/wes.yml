@@ -53,3 +53,7 @@ dependencies:
 
 #report
 - pdftools
+- dplyr
+- gridExtra
+- optparse
+- ggpubr

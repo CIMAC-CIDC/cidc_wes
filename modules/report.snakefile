@@ -1,5 +1,15 @@
 #MODULE: wes report module 
 
+def pvacseq_plot_inputfn(wildcards):
+    """Will return analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.addSample.tsv, but will need to derefernce tumor
+    USES neoantigen_getTumor fn from neoantigen.snakefile
+    """
+    ls = []
+    run = wildcards.run
+    tumor = neoantigen_getTumor(wildcards)[0]
+    ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.addSample.tsv" % (run,tumor))
+    return ls
+    
 def report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
@@ -14,8 +24,13 @@ def report_targets(wildcards):
         ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
         ls.append("analysis/report/wes_images/align/%s/%s_qualityByCycle.png" % (sample,sample))
         ls.append("analysis/report/wes_images/align/%s/%s_insertSize.png" % (sample,sample))
+        
     for run in config['runs']:
         ls.append("analysis/report/wes_images/somatic/%s/%s_%s.legoPlot.png" % (run, run, config['somatic_caller']))
+        #pvacseq images
+        ls.append("analysis/report/wes_images/neoantigen/%s/HLA_epitopes_fraction_plot.png" % run)
+        ls.append("analysis/report/wes_images/neoantigen/%s/Patient_count_epitopes_plot.png" % run)
+        ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
     return ls
 
 rule report_all:
@@ -151,3 +166,19 @@ rule report_cp_static:
     group: "report"
     shell:
         "cp -r cidc_wes/report/static/ analysis/report/ && touch {output}"
+
+rule pvacseq_plot:
+    """Plot the three pvacseq images"""
+    input:
+        pvacseq_plot_inputfn
+    output:
+        hla="analysis/report/wes_images/neoantigen/{run}/HLA_epitopes_fraction_plot.png",
+        patient="analysis/report/wes_images/neoantigen/{run}/Patient_count_epitopes_plot.png",
+        epitope="analysis/report/wes_images/neoantigen/{run}/epitopes_affinity_plot.png",
+    params:
+        outdir = lambda wildcards: "analysis/report/wes_images/neoantigen/%s/" % wildcards.run
+    message:
+        "REPORT: generating pvacseq images"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/pvacseq_plot.R -i {input} -o {params.outdir}"

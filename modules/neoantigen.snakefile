@@ -30,8 +30,9 @@ def neoantigen_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        tumor = config['runs'][run][1]
+        tumor = config['runs'][run][1] 
         ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.tsv" % (run,tumor))
+        ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.addSample.tsv" % (run,tumor))
     return ls
 
 def getPvacseqOut(wildcards):
@@ -107,7 +108,10 @@ rule neoantigen_pvacseq:
         #OTHERS:
         filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
         all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
-        tsv="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.tsv",
+        #The output below causes a rule ambiguity with neoantigen_addSample's
+        #output file
+        #tsv="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.tsv",
+    
         #NOTE: can't get this last one in b/c snakemake complains about
         #a non-unique name
         #input_log="analysis/neoantigen/{run}/MHC_Class_I/log/inputs.yml",
@@ -135,3 +139,17 @@ rule neoantigen_pvacseq:
         """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 
   
+rule neoantigen_add_sample:
+    """Takes the {tumor}.filtered.condensed.ranked.tsv file and adds a first
+    col, Sample which is set to the RUN name (not the sample name!)
+    to be used for pvacseq_plot.R"""
+    input:
+        "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv"
+    output:
+        "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.addSample.tsv"
+    params:
+        run_name = lambda wildcards: wildcards.run
+    group: "neoantigen"
+    shell:
+        "cidc_wes/modules/scripts/neoantigen_addSample.py -f {input} -n {params.run_name} -o {output}"
+
