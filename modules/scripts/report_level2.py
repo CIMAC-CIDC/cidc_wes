@@ -34,7 +34,7 @@ def getRuns(config):
 
 def getCNVInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
-    circos_plot = "wes_images/align/mapping.png" #LEN: CIRCOS plot here
+    circos_plot = "wes_images/fake.png" #LEN: CIRCOS plot here
     tmp = {"circos_plot": circos_plot}
     #print(tmp)
     return tmp

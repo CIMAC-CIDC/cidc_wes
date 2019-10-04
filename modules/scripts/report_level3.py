@@ -36,7 +36,7 @@ def getClonalityInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
-        clonality_plot = "wes_images/align/mapping.png" #LEN: plots here
+        clonality_plot = "wes_images/fake.png" #LEN: plots here
         tmp = {'name': run, 'clonality_plot': clonality_plot}
         ret.append(tmp)
     return ret
