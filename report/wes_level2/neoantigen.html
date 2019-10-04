@@ -2,17 +2,24 @@
               <div class="main_row" id="main_neoantigen" style="display:none;">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Neoantigen</h2>
 		<!-- LEN: SUB section -->
-                <div class="row">
-                    <ul>
-                      <li style="color:black;font-size:25px">pvacseq</li>
-                    </ul>
-                </div>
 		{% for run in neoantigen %}
                 <div class="row">
                   <div class="col-6">
-                    <h3 class="h5" style="text-align:center">{{ run.name }}</h3>
+                    <h3>{{ run.name }}- HLA Plot</h3>
 		    <img src="{{ run.hla_plot }}" width="500" height="650" class="float-left">
+		  </div>
+		</div>
+		<hr/>
+		<div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }}- Patient Plot</h3>
 		    <img src="{{ run.patient_plot }}" width="500" height="650" class="float-left">
+		  </div>
+		</div>
+		<hr/>
+		<div class="row">
+                  <div class="col-6">
+		    <h3>{{ run.name }}- Epitopes Plot</h3>
 		    <img src="{{ run.epitopes_plot }}" width="500" height="650" class="float-left">
                   </div>
                 </div>
