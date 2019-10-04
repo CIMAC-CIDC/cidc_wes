@@ -36,15 +36,6 @@ def getMetaInfo(config):
     """Gets and populates a dictionary with the values required for the 
     meta pg"""
     
-    # tmp = {'wes_version' : "v1.1 (commit: d8c124c)",
-    #        'ref_version' : "ver1.0 (build date: 20190911)",
-    #        "assembly_version": "GDC hg38",
-    #        "sentieon_version": "201808.05",
-    #        "somatic_caller": "tnscope (sentieon)",
-    #        "neoantigen_callers": "MHCflurry NetMHCcons MHCnuggetsII",
-    #        "epitope_lengths": "8,9,10,11",
-    #        "snakemake_version": "5.4.5"}
-
     #CHANGE to cidc_wes, but first store this
     wd = os.getcwd()
     os.chdir("cidc_wes")
@@ -68,22 +59,37 @@ def getMetaInfo(config):
     assembly_version = config['assembly']
     sentieon_version = config['sentieon_path'].split("/")[-2]
     somatic_caller = "%s (sentieon)" % config['somatic_caller']
-    neoantigen_callers = config['neoantigen_callers']
-    epitope_lengths = config['neoantigen_epitope_lengths']
 
+
+    #LEN: HARD code section
+    vep_version="ensemble-vep (91.3)"
+    facets_version="facets (0.5.14)"
+    optitype_version="optitype (1.3.2)"
+    neoantigen_caller = "pvactools (1.3.7)" #config['neoantigen_callers'] #LEN: hard-code
+    epitope_lengths = config['neoantigen_epitope_lengths']
+    vcftools_version="vcftools (0.1.16)"
+    bcftools_version="bcftools (1.9)"
+
+    
     #GET wes current tag
     cmd = "snakemake -v".split(" ")
     output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    snakemake_version = output.decode("utf-8").strip()
+    snakemake_version = "snakemake (%s)" % output.decode("utf-8").strip()
 
     tmp = {'wes_version' : wes_version,
            'ref_version' : ref_version,
            'assembly_version': assembly_version,
            'sentieon_version': sentieon_version,
            'somatic_caller': somatic_caller,
-           'neoantigen_callers': neoantigen_callers,
+           'vep_version': vep_version,
+           'facets_version':facets_version,
+           'optitype_version':optitype_version,
+           'neoantigen_caller': neoantigen_caller,
            'epitope_lengths': epitope_lengths,
-           'snakemake_version': snakemake_version}
+           'vcftools_version': vcftools_version,
+           'bcftools_version': bcftools_version,
+           'snakemake_version': snakemake_version,
+    }
     #print(tmp)
     return tmp
 
