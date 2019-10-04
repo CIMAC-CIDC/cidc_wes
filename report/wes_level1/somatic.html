@@ -2,15 +2,10 @@
                <div class="main_row" id="main_somatic" style="display:none;">
                <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Somatic Variants</h2>
 		<!-- LEN: SUB section -->
-                <div class="row">
-                    <ul>
-                      <li style="color:black;font-size:25px">Somatic Variants</li>
-                    </ul>
-                </div>
 		{% for run in somatic %}
                 <div class="row">
                   <div class="col-6">
-                    <h3 class="h5" style="text-align:center">{{ run.name }}</h3>
+                    <h3>{{ run.name }}- Lego Plot</h3>
 		    <img src="{{ run.lego_plot }}" width="1024" height="175" class="float-left">
                   </div>
                 </div>
