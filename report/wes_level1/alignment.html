@@ -9,54 +9,54 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ alignment.mapping }}" width="500" height="650" class="float-left">
+		    <img src="{{ alignment.mapping }}" width="600" class="float-left">
                   </div>
                 </div>
 
 		{% for sample in alignment.samples %}
-		<strong>{{ sample.name }}</strong>
-
+		<hr>
+		<h2>{{ sample.name }}</h2>
 		<div class="row" id="GC_Bias_Plots">
                   <ul>
-                    <li style="color:black;font-size:25px">GC Bias Plots</li>
+                    <li style="color:black;font-size:25px">{{ sample.name }}- GC Bias Plots</li>
                   </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.gc_bias }}" width="864" height="650" class="float-left">
+		    <img src="{{ sample.gc_bias }}" width="700" class="float-left">
                   </div>
                 </div>
 
 		<div class="row" id="Quality_Score">
                   <ul>
-                    <li style="color:black;font-size:25px">Quality Score</li>
+                    <li style="color:black;font-size:25px">{{ sample.name }}- Quality Score</li>
                   </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.quality_score }}" width="864" height="650" class="float-left">
+		    <img src="{{ sample.quality_score }}" width="700" class="float-left">
                   </div>
                 </div>
 
 		<div class="row" id="Quality_by_Cycle">
                   <ul>
-                    <li style="color:black;font-size:25px">Quality By Cycle</li>
+                    <li style="color:black;font-size:25px">{{ sample.name }}- Quality By Cycle</li>
                   </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.quality_by_cycle }}" width="864" height="650" class="float-left">
+		    <img src="{{ sample.quality_by_cycle }}" width="700" class="float-left">
                   </div>
                 </div>
 
 		<div class="row" id="Insert_Size">
                   <ul>
-                    <li style="color:black;font-size:25px">Insert Size</li>
+                    <li style="color:black;font-size:25px">{{ sample.name }}- Insert Size</li>
                   </ul>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.insert_size }}" width="864" height="650" class="float-left">
+		    <img src="{{ sample.insert_size }}" width="700" class="float-left">
                   </div>
                 </div>
 		{% endfor %}

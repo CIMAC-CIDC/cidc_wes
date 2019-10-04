@@ -38,7 +38,8 @@ map_stats_f <- function(map_stats_in, map_stats_out) {
     }
 
     #NOTE: lightblue-ish #91b6d4
-    colors <- c(Total_Reads="Grey", Mapped_Reads="#91b6d4")
+    #colors <- c(Total_Reads="Grey", Mapped_Reads="#91b6d4")
+    colors <- c(Total_Reads="Grey", Mapped_Reads="steelblue")
     #KEY directive to make the barplot horizontal: coord_flip()
     #ggplot(x1, aes(x=value, y=Sample, fill=variable)) + geom_bar(stat="identity", position="identity") + coord_flip()
     ggplot(x1,aes(x=Sample, y=value, fill=variable)) +
