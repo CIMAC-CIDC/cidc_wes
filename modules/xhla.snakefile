@@ -5,7 +5,7 @@ def xhla_targets(wildcards):
     """ Generates the targets for this module"""
     ls = []
     for sample in config['samples']:
-        ls.append("analysis/xhla/hla-%s/%s.json" % (sample,sample))
+        ls.append("analysis/xhla/%s/report-%s-hla.json" % (sample,sample))
         #ls.append("analysis/optitype/hla-%s/%s.tsv" % (sample,sample))
         #ls.append("analysis/optitype/hla-%s/%s.hla" % (sample,sample))
         #ls.append("analysis/optitype/hla-%s/%s.fq.gz" % (sample,sample))
@@ -21,15 +21,16 @@ rule xhla:
     input:
         in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam"
     output:
-        chr6sortbamfile = "analysis/xhla/hla-{sample}/{sample}.json"
+        chr6sortbamfile = "analysis/xhla/{sample}/report-{sample}-hla.json"
     threads:_xhla_threads
     group: "xhla"
     params:
         name=lambda wildcards: wildcards.sample,
-        #output_dir=lambda wildcards: "%sanalysis/xhla/%s/" % (config['remote_path'], wildcards.sample),
-        xhla_path=config['xhla_path']
-    singularity: "docker://humanlongevity/hla"
+        output_dir=lambda wildcards: "%sanalysis/xhla/%s/" % (config['remote_path'], wildcards.sample),
+        path="source activate /home/taing/miniconda3/envs/xHLA/", #HARD-Coding the path and activateing conda env
+    #singularity: "docker://humanlongevity/hla"
+    conda: "../envs/xhla_env.yml"
     benchmark:
         "benchmarks/xhla/{sample}/{sample}.xhla.txt"
     shell:
-        """{params.xhla_path}/typer.sh {input.in_sortbamfile} {params.name}"""
+        """{params.path}; run.py --sample_id {params.name} --input_bam_path {input.in_sortbamfile} --output_path  {params.output_dir}"""

@@ -1,0 +1,15 @@
+name: xHLA
+channels:
+- bioconda
+- biobuilds
+- defaults
+dependencies:
+- samtools
+- bwa
+- sambamba
+- bedtools
+- r-data.table
+- r-lpsolve
+- boto3
+- pip:
+  - logger
