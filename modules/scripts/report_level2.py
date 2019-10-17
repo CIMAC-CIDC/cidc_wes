@@ -34,10 +34,14 @@ def getRuns(config):
 
 def getCNVInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
-    circos_plot = "wes_images/fake.png" #LEN: CIRCOS plot here
-    tmp = {"circos_plot": circos_plot}
-    #print(tmp)
-    return tmp
+    ret = []
+    for run in config['runs']:
+        circos_plot = "wes_images/copynumber/%s/circos.png" % run
+        tmp = {'name': run,
+               'circos_plot': circos_plot}
+        ret.append(tmp)
+    #print(ret)
+    return ret
 
 def getPurityInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
