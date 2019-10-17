@@ -31,6 +31,7 @@ def copynumber_targets(wildcards):
     for run in config['runs']:
         #ls.append("analysis/copynumber/%s/%s_pon.hdf5" % (run,run))
         ls.append("analysis/copynumber/%s/%s_cnvcalls.txt"%(run,run))
+        ls.append("analysis/copynumber/%s/%s_cnvcalls.circos.txt"%(run,run))
     return ls
 
 rule copynumber_all:
@@ -38,7 +39,7 @@ rule copynumber_all:
         copynumber_targets
 
 #NOT NEEDED?--leave in for now just in case we want users to be able to do this
-rule create_pon_sentieon:
+rule copynumber_create_pon_sentieon:
     input:
         normal_recalibratedbam="analysis/align/{sample}/{sample}_recalibrated.bam" ##get only Normal samples
     output:
@@ -55,7 +56,7 @@ rule create_pon_sentieon:
         """{params.index1}/sentieon driver  -t {threads} -r {params.index} -i {input.normal_recalibratedbam} --algo CNV  --target {input.targetbed} --target_padding 0 --create_pon {output.ponfile}"""
 
 
-rule CNVcall_sentieon:
+rule copynumber_CNVcall:
     input:
         #ONLY perform this analysis for Tumor samples-
         tumor_recalibratedbam = cnv_getTumor_sample
@@ -70,9 +71,22 @@ rule CNVcall_sentieon:
         target=config['pons_target'],
     threads:_cnvcall_threads
     benchmark:
-        "benchmarks/CNV/{run}/{sample}.cnvcall.txt"
+        "benchmarks/copynumber/{run}/{sample}.CNVcall.txt"
     shell:
         #NOTE: target_padding is being set to 0--following the broad's method
         #"""{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
         """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV  --pon {params.ponfile} {output.cnvcalls}"""
-    
+
+rule copynumber_processCNVcircos:
+    """Process the cnv output file to be an adaquate input into the circos 
+    plot"""
+    input:
+        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt",
+    output:
+        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.circos.txt",
+    #params:
+    #threads:_cnvcall_threads
+    benchmark:
+        "benchmarks/copynumber/{run}/{sample}.processCNVcircos.txt"
+    shell:
+        "cidc_wes/modules/scripts/copynumber_processCircos.py -f {input} -o {output}"

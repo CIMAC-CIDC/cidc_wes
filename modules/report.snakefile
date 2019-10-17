@@ -31,6 +31,8 @@ def report_targets(wildcards):
         ls.append("analysis/report/wes_images/neoantigen/%s/HLA_epitopes_fraction_plot.png" % run)
         ls.append("analysis/report/wes_images/neoantigen/%s/Patient_count_epitopes_plot.png" % run)
         ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
+        #copynumber
+        ls.append("analysis/report/wes_images/copynumber/%s/circos.png" % run)
     return ls
 
 rule report_all:
@@ -191,3 +193,22 @@ rule mapping_plot:
         "analysis/report/wes_images/align/mapping.png"
     shell:
         "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"
+
+rule copynumber_circos_plot:
+    """Generates the circos plot for a run"""
+    input:
+        "analysis/copynumber/{run}/{run}_cnvcalls.circos.txt"
+    params:
+        output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
+    output:
+        "analysis/report/wes_images/copynumber/{run}/circos.png"
+    shell:
+        #FOR circos we need to do the following:
+        #0. make a data sub-dir in the {output_dir}
+        #1. copy/link in the input file as {output_dir}/data/data.cnv.txt
+        #2. copy cidc_wes/static/circos/etc/ into {output_dir}
+        #3. run circos (in that directory)
+        """mkdir -p {params.output_dir}/data && \
+        cp {input} {params.output_dir}/data/data.cnv.txt && \
+        cp -r cidc_wes/static/circos/etc {params.output_dir} && \
+        cd {params.output_dir} && circos"""
