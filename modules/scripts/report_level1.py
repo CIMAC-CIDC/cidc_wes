@@ -115,6 +115,14 @@ def getGermlineInfo(config):
         percent = (float(p1[:-1]) + float(p2[:-1]))/2.0
         #print(percent)
         tmp = {'name': run, 'percent': "%.2f" % percent}
+
+        #FILES: get the _haplotyper.output.vcf for each of the samples
+        hap_files=[]
+        for sample in config['runs'][run]:
+            haplotyper_file = "analysis/germline/%s/%s_haplotyper.output.vcf" % (sample, sample)
+            hap_files.append([getFileName(haplotyper_file), haplotyper_file])
+        print(hap_files)
+        tmp['haplotyper_files']= hap_files
         ret.append(tmp)
         f.close()
     #print(ret)
