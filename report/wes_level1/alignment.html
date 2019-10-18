@@ -16,6 +16,12 @@
 		{% for sample in alignment.samples %}
 		<hr>
 		<h2>{{ sample.name }}</h2>
+		<ul>
+		  <strong>Files:</strong>
+                  <a href="{{ sample.sorted_bam[1] }}"><li>{{ sample.sorted_bam[0] }}</li></a>
+		  <a href="{{ sample.sorted_dedup_bam[1] }}"><li>{{ sample.sorted_dedup_bam[0] }}</li></a>
+                </ul>
+
 		<div class="row" id="GC_Bias_Plots">
                   <ul>
                     <li style="color:black;font-size:25px">{{ sample.name }}- GC Bias Plots</li>

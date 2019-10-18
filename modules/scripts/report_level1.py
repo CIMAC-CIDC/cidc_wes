@@ -31,18 +31,27 @@ def getRuns(config):
     config['runs'] = ret
     return config
 ###############################################################################
+def getFileName(path):
+    """Returns the file name of a given file path"""
+    filename = path.split("/")[-1]
+    return filename
 
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
     ret = {'mapping': 'wes_images/align/mapping.png',
            'samples': []}
     for sample in config['samples']:
+        sorted_bam = "analysis/align/%s/%s_sorted.bam" % (sample, sample)
+        sorted_dedup_bam = "analysis/align/%s/%s_sorted.dedup.bam" % (sample, sample)
         tmp = {'name': sample,
                #'mapping': 'wes_images/align/%s/mapping.png' % sample,
                'gc_bias': 'wes_images/align/%s/%s_gcBias.png' % (sample, sample),
                'quality_score': 'wes_images/align/%s/%s_qualityScore.png' % (sample, sample), 
                'quality_by_cycle': 'wes_images/align/%s/%s_qualityByCycle.png' % (sample,sample),
-               'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample)
+               'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample),
+               #FILES: are in the following form- (filename, filepath)
+               'sorted_bam': (getFileName(sorted_bam),sorted_bam),
+               'sorted_dedup_bam': (getFileName(sorted_dedup_bam),sorted_dedup_bam),
         }
         ret['samples'].append(tmp)
     #print(ret)
@@ -67,10 +76,11 @@ def getSomaticInfo(config):
     """Genereate the dictionary for the somatic section"""
     ret = []
     somatic_caller = config['somatic_caller']
-    for run in config['runs']:
+    for run in config['runs']:        
         tmp = {'name': run,
                #NEED to simplify these names!!!!!!!
-               'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller)}
+               'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller)
+        }
         ret.append(tmp)
     #print(tmp)
     return ret
