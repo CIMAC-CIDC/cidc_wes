@@ -81,10 +81,16 @@ def getSomaticInfo(config):
     """Genereate the dictionary for the somatic section"""
     ret = []
     somatic_caller = config['somatic_caller']
-    for run in config['runs']:        
+    for run in config['runs']:
+        #FILES:
+        caller= config['somatic_caller']
+        output_file="analysis/somatic/%s/%s_%s.output.vcf" % (run,run,caller)
+        filter_file="analysis/somatic/%s/%s_%s.filter.vcf" % (run,run,caller)
         tmp = {'name': run,
                #NEED to simplify these names!!!!!!!
-               'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller)
+               'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller),
+               'output_file': (getFileName(output_file), output_file),
+               'filter_file': (getFileName(filter_file), filter_file),
         }
         ret.append(tmp)
     #print(tmp)
