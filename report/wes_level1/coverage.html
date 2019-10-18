@@ -5,6 +5,11 @@
                 <div class="row">
                   <div class="col-6">
                     <h3 class="h5" style="text-align:center">Coverage Statistics</h3>
+		    <ul><strong>Files:</strong>
+		      {% for sample in coverage %}
+		      <a href="{{ sample.coverage_file[1] }}"><li>{{ sample.coverage_file[0] }}</li></a>
+		      {% endfor %}
+		    </ul>
 		    <table class="table" style="font-size: 15px">
 		      <tbody>
 			<tr>

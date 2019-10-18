@@ -67,7 +67,12 @@ def getCoverageInfo(config, coverage_file):
     hdr[-1] = "percent_bases_over_50" #otherwise it's %_bases_above_50
     for l in f:
         tmp = l.strip().split("\t")
-        ret.append(dict(zip(hdr,tmp)))
+        d = dict(zip(hdr,tmp))
+        #FILES--use sample_id as sample name
+        sample = d['sample_id']
+        coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
+        d['coverage_file'] = (getFileName(coverage_file),coverage_file)
+        ret.append(d)
     #print(ret)
     f.close()
     return ret
