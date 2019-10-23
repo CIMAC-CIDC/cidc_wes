@@ -1,0 +1,14 @@
+              <!-- CNV bar  -->
+              <div class="main_row" id="main_cnv">
+		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Copy Number Variantion</h2>
+		<!-- LEN: SUB section -->
+		{% for run in cnv %}
+		<div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }}- Circos Plot</h3>
+		    <img src="{{ run.circos_plot }}" width="650" height="650" class="float-left">
+		  </div>
+		</div>
+		<hr/>
+		{% endfor %}
+	      </div>

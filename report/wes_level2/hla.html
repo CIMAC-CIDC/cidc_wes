@@ -1,0 +1,36 @@
+	      <!-- HLA bar  -->
+              <div class="main_row" id="main_hla" style="display:none;">
+		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">HLA Alleles</h2>
+		<!-- LEN: SUB section -->
+                <div class="row">
+                    <ul>
+                      <li style="color:black;font-size:25px">Optitype Results</li>
+                    </ul>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+		    <table class="table" style="font-size: 15px">
+		      <tbody>
+			{% for sample in hla %}
+			<tr><th>{{ sample.name }}</td></tr>
+			<tr>
+			  <th scope="row">SAMPLE-A</th>
+			  <td>{{ sample.HLA.A1 }}</td>
+			  <td>{{ sample.HLA.A2 }}</td>
+			</tr>
+			<tr>
+			  <th scope="row">SAMPLE-B</th>
+			  <td>{{ sample.HLA.B1 }}</td>
+			  <td>{{ sample.HLA.B2 }}</td>
+			</tr>
+			<tr>			  
+			  <th scope="row">SAMPLE-C</th>
+			  <td>{{ sample.HLA.C1 }}</td>
+			  <td>{{ sample.HLA.C2 }}</td>
+			</tr>
+			{% endfor %}
+		      </tbody>
+		      </table>
+                  </div>
+                </div>
+              </div>  

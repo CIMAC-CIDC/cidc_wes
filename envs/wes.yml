@@ -21,6 +21,13 @@ dependencies:
 - seqtk
 #- fastqc>=0.11.5
 
+#copynumber
+- circos
+- perl-clone
+- perl-module-runtime
+- perl-exporter-tiny
+- perl-svg
+
 #coverage
 - mosdepth
 
@@ -50,3 +57,10 @@ dependencies:
 
 #optitype
 - optitype
+
+#report
+- pdftools
+- dplyr
+- gridExtra
+- optparse
+- ggpubr

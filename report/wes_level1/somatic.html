@@ -1,0 +1,18 @@
+               <!-- Somatic bar  -->
+               <div class="main_row" id="main_somatic" style="display:none;">
+               <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Somatic Variants</h2>
+		<!-- LEN: SUB section -->
+		{% for run in somatic %}
+		<ul>
+		  <strong>Files:</strong>
+                  <a href="{{ run.output_file[1] }}"><li>{{ run.output_file[0] }}</li></a>
+		  <a href="{{ run.filter_file[1] }}"><li>{{ run.filter_file[0] }}</li></a>
+		</ul>
+                <div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }}- Lego Plot</h3>
+		    <img src="{{ run.lego_plot }}" width="1024" height="175" class="float-left">
+                  </div>
+                </div>
+		{% endfor %}
+               </div>
