@@ -44,11 +44,13 @@ def getTumorHLA(wildcards):
     """get the optitype results file for the tumor sample"""
     run = wildcards.run
     tumor = config['runs'][run][1]
-    ls = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
+    ls = ["analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)]
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls.append("analysis/xhla/%s/report-%s-hla.json" % (tumor,tumor))
     #print(ls)
     return ls
 
-def parseOptitype(optitype_out_file):
+def parseHLA(hla_files):
     """Given an optitypes '_results.tsv' file; parses the HLA A, B, C
     and returns these as a comma-separated string (for pvacseq) input
 
@@ -56,17 +58,41 @@ def parseOptitype(optitype_out_file):
     	A1	A2	B1	B2	C1	C2	Reads	Objective
     0					C*06:04	C*06:04	4.0	3.99
     **So were' going to parse cols 1-6 and return that"""
+
     #CATCH when the HLA does not exist yet
     #print(optitype_out_file)
+    optitype_out_file = hla_files[0]
     if not os.path.exists(optitype_out_file):
-        print("WES ERROR: %s is not found!" % optitype_out_file)
+        #print("WES WARNING: %s is not found!" % optitype_out_file)
         return ""
 
     f = open(optitype_out_file)
     hdr = f.readline().strip().split("\t") #ignore for now
-    tmp = f.readline().strip().split("\t")[1:7] #want first 6 cols
+    classI = f.readline().strip().split("\t")[1:7] #want first 6 cols
+    #FOR classI alleles, prepend a HLA to each of them
+    classI = ["HLA-%s" % a for a in classI if a]
+    #print(classI)
+    f.close()
+    
+    #check for xhla file
+    classII = []
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII'] and len(hla_files) > 1:
+        xhla_out_file = hla_files[1]
         
-    hla = ",".join(["HLA-%s" % x for x in tmp if x]) #ignore empty strings
+        #PARSE xhla json file...
+        f = open(xhla_out_file)
+        xhla_out = json.load(f)
+        f.close()
+
+        #build classII alleleles
+        #ONLY add class II alleles--i.e. ones that start with "D"
+        classII = [a for a in xhla_out['hla']['alleles'] if a.startswith("D")]
+        #print(classII)
+        
+    if classII:
+        classI.extend(classII)
+    #NOTE: NOW classI has all hla alleles (including classII if opted for)
+    hla = ",".join(["%s" % a for a in classI if a])
     #print(hla)
     return hla
     
@@ -122,7 +148,7 @@ rule neoantigen_pvacseq:
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
         iedb = config['neoantigen_iedb'],
-        HLA = lambda wildcards,input: parseOptitype(input.hla),
+        HLA = lambda wildcards,input: parseHLA(input.hla),
         callers=config['neoantigen_callers'] if config['neoantigen_callers'] else "MHCflurry NetMHCcons MHCnuggetsII",
         epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
         output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),

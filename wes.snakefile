@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import pandas as pd
+import json
 import yaml
 
 from string import Template
@@ -65,7 +66,6 @@ if 'remote_path' not in config:
 
 def all_targets(wildcards):
     ls = []
-    #IMPORT all of the module targets
     ls.extend(align_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
@@ -76,10 +76,12 @@ def all_targets(wildcards):
     ls.extend(purity_targets(wildcards))
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
-    ls.extend(xhla_targets(wildcards))
-    #ls.extend(clonal_trial_targets(wildcards))
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls.extend(xhla_targets(wildcards))
+        
     #ls.extend(clonality_targets(wildcards))
     #ls.extend(report_targets(wildcards))
+    print("\n".join(ls))
     return ls
 
 def level1_targets(wildcards):
@@ -98,7 +100,9 @@ def level2_targets(wildcards):
     ls.extend(purity_targets(wildcards))
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
-    ls.extend(xhla_targets(wildcards))
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls.extend(xhla_targets(wildcards))
+
     return ls
 
 def level3_targets(wildcards):
