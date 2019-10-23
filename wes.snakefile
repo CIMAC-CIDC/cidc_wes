@@ -66,22 +66,14 @@ if 'remote_path' not in config:
 
 def all_targets(wildcards):
     ls = []
-    ls.extend(align_targets(wildcards))
-    ls.extend(metrics_targets(wildcards))
-    ls.extend(recalibration_targets(wildcards))
-    ls.extend(somatic_targets(wildcards))
-    ls.extend(germline_targets(wildcards))
-    ls.extend(coveragemetrics_targets(wildcards))
-    ls.extend(copynumber_targets(wildcards))
-    ls.extend(purity_targets(wildcards))
-    ls.extend(neoantigen_targets(wildcards))
-    ls.extend(optitype_targets(wildcards))
-    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        ls.extend(xhla_targets(wildcards))
-        
+    #using level helper fns--so I Don't repeat myself!
+    lvl1_targets = level1_targets(wildcards)
+    lvl2_targets = level2_targets(wildcards)
+    ls.extend(lvl1_targets)
+    ls.extend(lvl2_targets)
     #ls.extend(clonality_targets(wildcards))
     #ls.extend(report_targets(wildcards))
-    print("\n".join(ls))
+    #print("\n".join(ls))
     return ls
 
 def level1_targets(wildcards):
