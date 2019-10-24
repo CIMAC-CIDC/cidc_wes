@@ -14,26 +14,7 @@ import jinja2
 import pandas as pd
 
 from report_level1 import getFileName
-
-################### THIS fn is copied from wes.snakefile ######################
-def getRuns(config):
-    """parse metasheet for Run groupings"""
-    ret = {}
-
-    #LEN: Weird, but using pandas to handle the comments in the file
-    #KEY: need skipinitialspace to make it fault tolerant to spaces!
-    metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
-    f = metadata.to_csv().split() #make it resemble an actual file with lines
-    #SKIP the hdr
-    for l in f[1:]:
-        tmp = l.strip().split(",")
-        #print(tmp)
-        ret[tmp[0]] = tmp[1:]
-
-    #print(ret)
-    config['runs'] = ret
-    return config
-###############################################################################
+from report_level1 import getRuns
 
 ################ THIS fn is copied from neoantigen.snakefile ##################
 def parseHLA(config, hla_files):

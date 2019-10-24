@@ -33,6 +33,14 @@ def report_targets(wildcards):
         ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
         #copynumber
         ls.append("analysis/report/wes_images/copynumber/%s/circos.png" % run)
+
+        #TEST if clonality was run or not
+        clonality_density = "analysis/clonality/%s/%s_plot.density.pdf" % (run,run)
+        if os.path.exists(clonality_density):
+            #COPY over the clonality plots
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
     return ls
 
 rule report_all:
@@ -191,6 +199,7 @@ rule mapping_plot:
         "analysis/align/mapping.csv"
     output:
         "analysis/report/wes_images/align/mapping.png"
+    group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"
 
@@ -202,6 +211,7 @@ rule copynumber_circos_plot:
         output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
     output:
         "analysis/report/wes_images/copynumber/{run}/circos.png"
+    group: "report"
     shell:
         #FOR circos we need to do the following:
         #0. make a data sub-dir in the {output_dir}
@@ -212,3 +222,36 @@ rule copynumber_circos_plot:
         cp {input} {params.output_dir}/data/data.cnv.txt && \
         cp -r cidc_wes/static/circos/etc {params.output_dir} && \
         cd {params.output_dir} && circos"""
+
+rule report_level3_density_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.density.pdf",
+    output:
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.density.png",
+    params: page=1
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level3_scatter_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.scatter.pdf",
+    output:
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.scatter.png",
+    params: page=1
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level3_coordinates_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.coordinates.pdf",
+    output:
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.coordinates.png"
+    params: page=1
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"

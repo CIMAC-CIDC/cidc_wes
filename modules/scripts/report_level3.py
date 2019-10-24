@@ -12,33 +12,25 @@ from optparse import OptionParser
 import jinja2
 import pandas as pd
 
-################### THIS fn is copied from wes.snakefile ######################
-def getRuns(config):
-    """parse metasheet for Run groupings"""
-    ret = {}
-
-    #LEN: Weird, but using pandas to handle the comments in the file
-    #KEY: need skipinitialspace to make it fault tolerant to spaces!
-    metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
-    f = metadata.to_csv().split() #make it resemble an actual file with lines
-    #SKIP the hdr
-    for l in f[1:]:
-        tmp = l.strip().split(",")
-        #print(tmp)
-        ret[tmp[0]] = tmp[1:]
-
-    #print(ret)
-    config['runs'] = ret
-    return config
-###############################################################################
+from report_level1 import getFileName
+from report_level1 import getRuns
 
 def getClonalityInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
-        clonality_plot = "wes_images/fake.png" #LEN: plots here
-        tmp = {'name': run, 'clonality_plot': clonality_plot}
+        density_plot = "wes_images/clonality/%s/%s_plot.density.png" % (run,run)
+        scatter_plot = "wes_images/clonality/%s/%s_plot.scatter.png" % (run,run)
+        coordinates_plot = "wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run)
+        table_file = "analysis/clonality/%s/%s_table.tsv" % (run,run)
+        tmp = {'name': run,
+               'density_plot': density_plot,
+               'scatter_plot': scatter_plot,
+               'coordinates_plot': coordinates_plot,
+               'pyclone_table_file': (getFileName(table_file), table_file),
+        }
         ret.append(tmp)
+    #print(ret)
     return ret
 
 def main():
