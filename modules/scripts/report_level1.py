@@ -121,7 +121,7 @@ def getGermlineInfo(config):
         for sample in config['runs'][run]:
             haplotyper_file = "analysis/germline/%s/%s_haplotyper.output.vcf" % (sample, sample)
             hap_files.append([getFileName(haplotyper_file), haplotyper_file])
-        print(hap_files)
+        #print(hap_files)
         tmp['haplotyper_files']= hap_files
         ret.append(tmp)
         f.close()

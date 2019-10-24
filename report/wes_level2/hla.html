@@ -1,6 +1,15 @@
 	      <!-- HLA bar  -->
               <div class="main_row" id="main_hla" style="display:none;">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">HLA Alleles</h2>
+		<ul><strong>Files:</strong>
+		  {% for sample in hla %}
+		  <a href="{{ sample.optitype_file[1] }}"><li>{{ sample.optitype_file[0] }}</li></a>
+		  {% if sample.xhla_file %}
+		  <a href="{{ sample.xhla_file[1] }}"><li>{{ sample.xhla_file[0] }}</li></a>
+		  {% endif %}
+		  {% endfor %}
+		</ul>
+
 		<!-- LEN: SUB section -->
                 <div class="row">
                     <ul>
@@ -14,20 +23,31 @@
 			{% for sample in hla %}
 			<tr><th>{{ sample.name }}</td></tr>
 			<tr>
-			  <th scope="row">SAMPLE-A</th>
 			  <td>{{ sample.HLA.A1 }}</td>
 			  <td>{{ sample.HLA.A2 }}</td>
 			</tr>
 			<tr>
-			  <th scope="row">SAMPLE-B</th>
 			  <td>{{ sample.HLA.B1 }}</td>
 			  <td>{{ sample.HLA.B2 }}</td>
 			</tr>
-			<tr>			  
-			  <th scope="row">SAMPLE-C</th>
+			<tr>
 			  <td>{{ sample.HLA.C1 }}</td>
 			  <td>{{ sample.HLA.C2 }}</td>
 			</tr>
+			{% if sample.HLA.DP1 %}
+                        <tr>
+			  <td>{{ sample.HLA.DP1 }}</td>
+			  <td>{{ sample.HLA.DP2 }}</td>
+			</tr>
+			<tr>
+			  <td>{{ sample.HLA.DQ1 }}</td>
+			  <td>{{ sample.HLA.DQ }}</td>
+			</tr>
+			<tr>
+			  <td>{{ sample.HLA.DR1 }}</td>
+			  <td>{{ sample.HLA.DR2 }}</td>
+			</tr>
+			{% endif %}
 			{% endfor %}
 		      </tbody>
 		      </table>

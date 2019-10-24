@@ -7,10 +7,13 @@ import sys
 import re
 import subprocess
 import yaml
+import json
 
 from optparse import OptionParser
 import jinja2
 import pandas as pd
+
+from report_level1 import getFileName
 
 ################### THIS fn is copied from wes.snakefile ######################
 def getRuns(config):
@@ -32,13 +35,70 @@ def getRuns(config):
     return config
 ###############################################################################
 
+################ THIS fn is copied from neoantigen.snakefile ##################
+def parseHLA(config, hla_files):
+    """Given an optitypes '_results.tsv' file; parses the HLA A, B, C
+    and returns these as a comma-separated string (for pvacseq) input
+
+    NOTE: cureently the optitype results.tsv looks somthing like this:
+    	A1	A2	B1	B2	C1	C2	Reads	Objective
+    0					C*06:04	C*06:04	4.0	3.99
+    **So were' going to parse cols 1-6 and return that"""
+
+    #CATCH when the HLA does not exist yet
+    #print(optitype_out_file)
+    optitype_out_file = hla_files[0]
+    if not os.path.exists(optitype_out_file):
+        #print("WES WARNING: %s is not found!" % optitype_out_file)
+        return ""
+
+    f = open(optitype_out_file)
+    hdr = f.readline().strip().split("\t") #ignore for now
+    classI = f.readline().strip().split("\t")[1:7] #want first 6 cols
+    #FOR classI alleles, prepend a HLA to each of them
+    classI = ["HLA-%s" % a for a in classI if a]
+    #print(classI)
+    f.close()
+    
+    #check for xhla file
+    classII = []
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII'] and len(hla_files) > 1:
+        xhla_out_file = hla_files[1]
+        
+        #PARSE xhla json file...
+        if os.path.exists(xhla_out_file):
+            f = open(xhla_out_file)
+            xhla_out = json.load(f)
+            f.close()
+
+            #build classII alleleles
+            #ONLY add class II alleles--i.e. ones that start with "D"
+            classII = [a for a in xhla_out['hla']['alleles'] if a.startswith("D")]
+    if classII:
+        classI.extend(classII)
+    #NOTE: NOW classI has all hla alleles (including classII if opted for)
+    hdr = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    hla = ["%s" % a for a in classI if a]
+    if len(classI) > 6: #includes class II
+        hdr.extend(["DP1","DP2","DQ1","DQ2","DR1","DR2"])
+        hla = dict(zip(hdr, hla))
+    else:
+        hla = dict(zip(hdr, hla))
+    #print(hla)
+    return hla
+
+###############################################################################
 def getCNVInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
         circos_plot = "wes_images/copynumber/%s/circos.png" % run
+        cnv_calls = "analysis/copynumber/%s/%s_cnvcalls.txt" % (run, run)
         tmp = {'name': run,
-               'circos_plot': circos_plot}
+               'circos_plot': circos_plot,
+               #Files
+               'cnv_calls_file': (getFileName(cnv_calls), cnv_calls),
+        }
         ret.append(tmp)
     #print(ret)
     return ret
@@ -54,7 +114,9 @@ def getPurityInfo(config):
             hdr = f.readline().strip().split("\t")
             vals = dict(zip(hdr, f.readline().strip().split("\t")))
             #print(vals)
-            tmp = {'name': run, 'purity': vals['purity']}
+            tmp = {'name': run, 'purity': vals['purity'],
+                   'purity_file': (getFileName(f_name), f_name),
+            }
             ret.append(tmp)
         else:
             print("WARNING: expected %s, but it does not exist" % f_name)
@@ -64,16 +126,17 @@ def getHLAInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for sample in config['samples']:
-        f_name = "analysis/optitype/%s/%s_result.tsv" % (sample,sample)
-        if os.path.isfile(f_name):
-            f = open(f_name)
-            hdr = f.readline().strip().split("\t")
-            vals = dict(zip(hdr, f.readline().strip().split("\t")))
-            #print(vals)
-            tmp = {'name': sample, 'HLA': vals}
-            ret.append(tmp)
-        else:
-            print("WARNING: expected %s, but it does not exist" % f_name)
+        optitype_fname = "analysis/optitype/%s/%s_result.tsv" % (sample,sample)
+        xhla_fname = "analysis/xhla/%s/report-%s-hla.json" % (sample,sample)
+        hla = parseHLA(config, [optitype_fname,xhla_fname])
+        tmp = {'name': sample, 'HLA': hla,
+               'optitype_file': (getFileName(optitype_fname), optitype_fname),
+        }
+        #Easy check for whether there were classII--check if it was set by
+        #parseHLA
+        if "DP1" in hla:
+            tmp['xhla_file']: (getFileName(xhla_fname), xhla_fname)
+        ret.append(tmp)
     return ret
 
 def getNeoantigenInfo(config):
@@ -83,11 +146,18 @@ def getNeoantigenInfo(config):
         sub_path="wes_images/neoantigen/%s/" % run
         hla_plot = sub_path+"HLA_epitopes_fraction_plot.png"
         patient_plot = sub_path+"Patient_count_epitopes_plot.png"
-        epitopes_plot = sub_path+"epitopes_affinity_plot.png" 
+        epitopes_plot = sub_path+"epitopes_affinity_plot.png"
+
+        if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+            pvacseq_file = "analysis/neoantigen/%s/combined/%s.all_epitopes.tsv" % (run, run)
+        else:
+            pvacseq_file = "analysis/neoantigen/%s/MHC_Class_I/%s.all_epitopes.tsv" % (run, run)
         tmp = {'name': run,
                'hla_plot': hla_plot,
                'patient_plot': patient_plot,
-               'epitopes_plot':epitopes_plot}
+               'epitopes_plot':epitopes_plot,
+                'pvacseq_file': (getFileName(pvacseq_file), pvacseq_file),
+        }
         ret.append(tmp)
     return ret
 

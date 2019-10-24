@@ -1,6 +1,12 @@
               <!-- CNV bar  -->
               <div class="main_row" id="main_cnv">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Copy Number Variantion</h2>
+		<ul><strong>Files:</strong>
+		  {% for run in cnv %}
+		  <a href="{{ run.cnv_calls_file[1] }}"><li>{{ run.cnv_calls_file[0] }}</li></a>
+		  {% endfor %}
+		</ul>
+
 		<!-- LEN: SUB section -->
 		{% for run in cnv %}
 		<div class="row">
