@@ -15,7 +15,7 @@ concentration:
   value: 1.0
 density: pyclone_beta_binomial
 init_method: connected
-num_iters: 1000
+num_iters: 5000
 max_clusters: 100
 samples:
   sample1_pyclone:
