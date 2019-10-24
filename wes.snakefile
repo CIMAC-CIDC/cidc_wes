@@ -9,6 +9,11 @@ import yaml
 
 from string import Template
 
+#Dictionary of center targets
+center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
+                "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
+                "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
+
 def getRuns(config):
     """parse metasheet for Run groupings"""
     ret = {}

@@ -5,11 +5,6 @@
 _somatic_threads=32
 #_vcf2maf_threads=4
 
-#Dictionary of center targets
-center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
-                "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
-                "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
-
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
 def somatic_runsHelper(wildcards, iindex):
