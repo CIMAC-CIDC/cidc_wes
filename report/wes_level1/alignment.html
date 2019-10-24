@@ -9,7 +9,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ alignment.mapping }}" width="600" class="float-left">
+		    <a href="{{ alignment.mapping_csv }}"><img src="{{ alignment.mapping_plot }}" width="600" class="float-left"/></a>
                   </div>
                 </div>
 
@@ -29,7 +29,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.gc_bias }}" width="700" class="float-left">
+		    <a href="{{ sample.gc_bias_file }}"><img src="{{ sample.gc_bias }}" width="700" class="float-left"/></ar>
                   </div>
                 </div>
 
@@ -40,7 +40,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.quality_score }}" width="700" class="float-left">
+		    <a href="{{ sample.quality_score_file }}"><img src="{{ sample.quality_score }}" width="700" class="float-left"/></a>
                   </div>
                 </div>
 
@@ -51,7 +51,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.quality_by_cycle }}" width="700" class="float-left">
+		    <a href="{{ sample.quality_by_cycle_file }}"><img src="{{ sample.quality_by_cycle }}" width="700" class="float-left"/></a>
                   </div>
                 </div>
 
@@ -62,7 +62,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <img src="{{ sample.insert_size }}" width="700" class="float-left">
+		    <a href="{{ sample.insert_size_file }}"<img src="{{ sample.insert_size }}" width="700" class="float-left"/></a>
                   </div>
                 </div>
 		{% endfor %}

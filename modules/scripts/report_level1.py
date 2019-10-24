@@ -55,20 +55,30 @@ def millify(n):
 
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
-    ret = {'mapping': 'wes_images/align/mapping.png',
+    mapping_csv = "analysis/align/mapping.csv"
+    ret = {'mapping_plot': 'wes_images/align/mapping.png',
+           'mapping_csv': mapping_csv,
            'samples': []}
     for sample in config['samples']:
         sorted_bam = "analysis/align/%s/%s_sorted.bam" % (sample, sample)
         sorted_dedup_bam = "analysis/align/%s/%s_sorted.dedup.bam" % (sample, sample)
+        gc_bias_file = " analysis/metrics/%s/%s_gc_metrics.txt" % (sample, sample)
+        quality_score_file = " analysis/metrics/%s/%s_qd_metrics.txt" % (sample, sample)
+        quality_by_cycle_file = " analysis/metrics/%s/%s_mq_metrics.txt" % (sample, sample)
+        insert_size_file = " analysis/metrics/%s/%s_is_metrics.txt" % (sample, sample)
         tmp = {'name': sample,
-               #'mapping': 'wes_images/align/%s/mapping.png' % sample,
                'gc_bias': 'wes_images/align/%s/%s_gcBias.png' % (sample, sample),
+               
                'quality_score': 'wes_images/align/%s/%s_qualityScore.png' % (sample, sample), 
                'quality_by_cycle': 'wes_images/align/%s/%s_qualityByCycle.png' % (sample,sample),
                'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample),
                #FILES: are in the following form- (filename, filepath)
                'sorted_bam': (getFileName(sorted_bam),sorted_bam),
                'sorted_dedup_bam': (getFileName(sorted_dedup_bam),sorted_dedup_bam),
+               'gc_bias_file': gc_bias_file,
+               'quality_score_file': quality_score_file,
+               'quality_by_cycle_file':quality_by_cycle_file,
+               'insert_size_file': insert_size_file,
         }
         ret['samples'].append(tmp)
     #print(ret)
