@@ -81,13 +81,14 @@ def parseHLA(hla_files):
         xhla_out_file = hla_files[1]
         
         #PARSE xhla json file...
-        f = open(xhla_out_file)
-        xhla_out = json.load(f)
-        f.close()
+        if os.path.exists(xhla_out_file):
+            f = open(xhla_out_file)
+            xhla_out = json.load(f)
+            f.close()
 
-        #build classII alleleles
-        #ONLY add class II alleles--i.e. ones that start with "D"
-        classII = [a for a in xhla_out['hla']['alleles'] if a.startswith("D")]
+            #build classII alleleles
+            #ONLY add class II alleles--i.e. ones that start with "D"
+            classII = [a for a in xhla_out['hla']['alleles'] if a.startswith("D")]
         #print(classII)
         
     if classII:
