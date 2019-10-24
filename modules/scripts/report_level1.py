@@ -12,6 +12,8 @@ from optparse import OptionParser
 import jinja2
 import pandas as pd
 
+import math
+
 ################### THIS fn is copied from wes.snakefile ######################
 def getRuns(config):
     """parse metasheet for Run groupings"""
@@ -31,10 +33,25 @@ def getRuns(config):
     config['runs'] = ret
     return config
 ###############################################################################
+
 def getFileName(path):
     """Returns the file name of a given file path"""
     filename = path.split("/")[-1]
     return filename
+
+def millify(n):
+    """Given a large int n, returns a string representation of n in human-
+    readable form
+    ref: https://stackoverflow.com/questions/3154460/python-human-readable-large-numbers
+    """
+    millnames = ['',' K',' M',' B',' T']
+
+    n = float(n)
+    millidx = max(0,min(len(millnames)-1,
+                    int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+
+    return '{:.1f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+
 
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
@@ -70,6 +87,11 @@ def getCoverageInfo(config, coverage_file):
         d = dict(zip(hdr,tmp))
         #FILES--use sample_id as sample name
         sample = d['sample_id']
+
+        #print out total as quantities of Millions of reads
+        if int(d['total']) >= 1000:
+            d['total'] = millify(int(d['total']))
+
         coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
         d['coverage_file'] = (getFileName(coverage_file),coverage_file)
         ret.append(d)
