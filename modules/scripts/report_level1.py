@@ -187,8 +187,9 @@ def main():
                      'Quality_Score', 'Quality_by_Cycle']
     sidebar = [("alignment", "Alignment", alignment_sub),
                ('coverage','Coverage', []),
+               ('germline',"Germline", []),
                ("somatic","Somatic", []),
-               ('germline',"Germline", [])]
+    ]
     
     wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                        'page_name': pg_name}
