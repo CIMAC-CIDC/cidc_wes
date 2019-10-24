@@ -92,7 +92,26 @@ def getCoverageInfo(config, coverage_file):
         if int(d['total']) >= 1000:
             d['total'] = millify(int(d['total']))
 
-        coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
+        #GET the %_bases_above_50 from
+        #analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.summary.txt
+        if 'cimac_center' in config and config['cimac_center']:
+            center = config['cimac_center']
+        else:
+            #default broad
+            center = 'broad'
+        
+        #coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
+        coverage_file = "analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample, center)
+        #parse the coverage_file to get >50X
+        if os.path.exists(coverage_file):
+            cov_f = open(coverage_file)
+            foo_hdr = cov_f.readline().strip().split(",")
+            foo_vals = cov_f.readline().strip().split(",")
+            cov_f.close()
+            #NOTE: >50x is the second col
+            bases_50x = "%.2f" % (float(foo_vals[1])*100.0)
+            d['percent_bases_over_50'] = "%s %%" % bases_50x
+        
         d['coverage_file'] = (getFileName(coverage_file),coverage_file)
         ret.append(d)
     #print(ret)
