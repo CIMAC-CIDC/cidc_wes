@@ -2,7 +2,7 @@
 #import os
 #from string import Template
 
-_clonality_threads=12
+_clonality_threads=16
 
 #------------------------------------------------------------------------------
 # SET 1 of 2 run helpers: returning sample names
@@ -68,8 +68,15 @@ def clonality_targets(wildcards):
         ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run)),
         ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
         #pyclone output
-        ls.append("analysis/clonality/%s/%s_pyclone.tsv" % (run,run)),
-        ls.append("analysis/clonality/%s/config.yaml" % run)
+        ls.append("analysis/clonality/%s/%s_pyclone.yaml" % (run,run))
+        ls.append("analysis/clonality/%s/pyclone.config.yaml" % run)
+        ls.append("analysis/clonality/%s/trace/alpha.tsv.bz2" % run)
+        ls.append("analysis/clonality/%s/%s_table.tsv" % (run,run))
+        ls.append("analysis/clonality/%s/%s_plot.density.pdf" % (run,run))
+        ls.append("analysis/clonality/%s/%s_plot.scatter.pdf" % (run,run))
+        ls.append("analysis/clonality/%s/%s_plot.coordinates.pdf" % (run,run))
+        #ls.append("analysis/clonality/%s/%s_pyclone.tsv" % (run,run)),
+        #ls.append("analysis/clonality/%s/config.yaml" % run)
     return ls
 
 rule clonality_all:
@@ -166,22 +173,115 @@ rule sequenza_fileprep:
         #"""Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
         """Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
 
-rule pyclone_finalprocessing:
+rule pyclone_build_mutation_file:
     input:
         "analysis/clonality/{run}/{run}_pyclone.tsv"
     output:
-        "analysis/clonality/{run}/config.yaml"
-        #"analysis/clonality/{run}/plots/{run}.pdf",
-        #"analysis/clonality/{run}/tables/{run}.tsv",
-        #"analysis/clonality/{run}/trace/{run}.txt",
-        #"analysis/clonality/{run}/yaml/{run}.yaml",
-        #out_dir="analysis/clonality/pyclone"
-    params:
-        #out_dir=lambda wildcards: "analysis/clonality/%s/" % (wildcards.run, wildcards.run)
-        out_dir="%sanalysis/clonality" % config['remote_path'],
+        "analysis/clonality/{run}/{run}_pyclone.yaml"
     conda:
         "../envs/pyclone.yml"
     benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
+        "benchmarks/clonality/{run}/{run}.pyclone_build_mutation_file.txt"
     shell:
-        """PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
+        "PyClone build_mutations_file --in_file {input} --out_file {output}"
+
+rule pyclone_generate_config:
+    input:
+        "analysis/clonality/{run}/{run}_pyclone.yaml"
+    output:
+        "analysis/clonality/{run}/pyclone.config.yaml"
+    params:
+        outdir = lambda wildcards: "%sanalysis/clonality/%s" % (config['remote_path'],wildcards.run),
+        template = "cidc_wes/static/clonality/pyclone.config.yaml"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone.generate.config.txt"
+    shell:
+        "cidc_wes/modules/scripts/clonality_pycloneConfig.py -t {params.template} -m {input} -o {params.outdir} > {output}"
+
+rule pyclone_run_analysis:
+    input:
+        "analysis/clonality/{run}/pyclone.config.yaml"
+    output:
+        #LEN: I don't know what to key in on as output
+        "analysis/clonality/{run}/trace/alpha.tsv.bz2"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone.run_analysis.txt"
+    shell:
+        "PyClone run_analysis --config_file {input}"
+
+rule pyclone_build_table:
+    input:
+        conf="analysis/clonality/{run}/pyclone.config.yaml",
+        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+    output:
+        "analysis/clonality/{run}/{run}_table.tsv"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone.build_table.txt"
+    shell:
+        "PyClone build_table --config_file {input.conf} --out_file {output} --table_type cluster --max_clusters 100"
+
+rule pyclone_density_plot:
+    input:
+        conf="analysis/clonality/{run}/pyclone.config.yaml",
+        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+    output:
+        "analysis/clonality/{run}/{run}_plot.density.pdf"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone_density_plot.txt"
+    shell:
+        "PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type density --max_clusters 100"
+
+rule pyclone_scatter_plot:
+    input:
+        conf="analysis/clonality/{run}/pyclone.config.yaml",
+        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+    output:
+        "analysis/clonality/{run}/{run}_plot.scatter.pdf"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone_scatter_plot.txt"
+    shell:
+        "PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type scatter --max_clusters 100"
+
+    
+rule pyclone_parallelCoordinates_plot:
+    input:
+        conf="analysis/clonality/{run}/pyclone.config.yaml",
+        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+    output:
+        "analysis/clonality/{run}/{run}_plot.coordinates.pdf"
+    conda:
+        "../envs/pyclone.yml"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.pyclone_coordinates_plot.txt"
+    shell:
+        "PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type parallel_coordinates --max_clusters 100"
+
+# rule pyclone_finalprocessing:
+#     input:
+#         "analysis/clonality/{run}/{run}_pyclone.tsv"
+#     output:
+#         "analysis/clonality/{run}/config.yaml"
+#         #"analysis/clonality/{run}/plots/{run}.pdf",
+#         #"analysis/clonality/{run}/tables/{run}.tsv",
+#         #"analysis/clonality/{run}/trace/{run}.txt",
+#         #"analysis/clonality/{run}/yaml/{run}.yaml",
+#         #out_dir="analysis/clonality/pyclone"
+#     params:
+#         #out_dir=lambda wildcards: "analysis/clonality/%s/" % (wildcards.run, wildcards.run)
+#         out_dir="%sanalysis/clonality" % config['remote_path'],
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone.analysis.txt"
+#     shell:
+#         """PyClone run_analysis_pipeline --in_files {input}  --working_dir {params.out_dir}/{wildcards.run} """
