@@ -116,8 +116,10 @@ def getHLAInfo(config):
         #Easy check for whether there were classII--check if it was set by
         #parseHLA
         if "DP1" in hla:
-            tmp['xhla_file']: (getFileName(xhla_fname), xhla_fname)
+            tmp['xhla_file']= (getFileName(xhla_fname), xhla_fname)
+        #print(tmp)
         ret.append(tmp)
+        
     return ret
 
 def getNeoantigenInfo(config):

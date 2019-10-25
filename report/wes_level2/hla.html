@@ -4,12 +4,12 @@
 		<ul><strong>Files:</strong>
 		  {% for sample in hla %}
 		  <a href="{{ sample.optitype_file[1] }}"><li>{{ sample.optitype_file[0] }}</li></a>
-		  {% if sample.xhla_file %}
+		    {% if sample.xhla_file %}
 		  <a href="{{ sample.xhla_file[1] }}"><li>{{ sample.xhla_file[0] }}</li></a>
-		  {% endif %}
+		    {% endif %}
 		  {% endfor %}
 		</ul>
-
+		<hr/>
 		<!-- LEN: SUB section -->
                 <div class="row">
                     <ul>
