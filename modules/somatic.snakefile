@@ -64,6 +64,7 @@ def somatic_tnsnv_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnsnv.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnsnv.csv")
     return ls
 
 def somatic_tnhaplotyper2_targets(wildcards):
@@ -83,6 +84,7 @@ def somatic_tnhaplotyper2_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnhaplotyper2.csv")
     return ls
 
 def somatic_tnscope_targets(wildcards):
@@ -102,6 +104,7 @@ def somatic_tnscope_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnscope.mutationload.txt" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnscope.csv")
     return ls
 
 def somatic_targets(wildcards):
@@ -347,3 +350,18 @@ rule somatic_collect_target_summaries:
         "benchmarks/somatic/somatic_collect_target_summaries.txt"
     shell:
         "cidc_wes/modules/scripts/somatic_collect_target_summaries.py -f {params.files} > {output}"
+
+rule summarize_somatic_mutations:
+    """Use the filter.maf to generate summary statistics for SNPS, INS, DEL
+    --used in the wes report"""
+    input:
+        expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs']))
+    output:
+        "analysis/somatic/somatic_mutation_summaries.{caller}.csv"
+    params:
+        files = lambda wildcards, input: " -m ".join(input)
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output}"

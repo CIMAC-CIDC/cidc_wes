@@ -128,6 +128,21 @@ def getCoverageInfo(config, coverage_file):
     f.close()
     return ret
 
+def getSomaticSummaryTable(config):
+    """Generates the mutation summary table"""
+    #PARSE out the summary
+    somatic_summary_table = {}
+    mut_summary_f = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
+    f = open(mut_summary_f)
+    hdr = f.readline().strip().split(",")
+    for l in f:
+        tmp = l.strip().split(",")
+        run_name = tmp[0]
+        somatic_summary_table[run_name] = dict(zip(hdr,tmp))
+    f.close()
+    #print(somatic_summary_table)
+    return somatic_summary_table
+
 def getSomaticInfo(config):
     """Genereate the dictionary for the somatic section"""
     ret = []
@@ -233,6 +248,7 @@ def main():
 
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
+    wes_report_vals['somatic_table'] = getSomaticSummaryTable(config)
 
     #GERMLINE
     wes_report_vals['germline'] = getGermlineInfo(config)
