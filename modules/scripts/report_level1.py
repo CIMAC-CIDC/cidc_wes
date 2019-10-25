@@ -156,7 +156,8 @@ def getSomaticInfo(config):
                #NEED to simplify these names!!!!!!!
                'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller),
                'output_file': (getFileName(output_file), output_file),
-               'filter_file': (getFileName(filter_file), filter_file),
+               #NOTE: shirley just wants this called "{run}_{caller}.vcf}
+               'filter_file': (getFileName(filter_file), "%s_%s.vcf" % (run, caller)),
         }
         ret.append(tmp)
     #print(tmp)
@@ -249,6 +250,7 @@ def main():
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
     wes_report_vals['somatic_table'] = getSomaticSummaryTable(config)
+    wes_report_vals['somatic_summary_table_file'] = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
 
     #GERMLINE
     wes_report_vals['germline'] = getGermlineInfo(config)

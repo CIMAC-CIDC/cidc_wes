@@ -2,6 +2,7 @@
                <div class="main_row" id="main_somatic" style="display:none;">
 		 <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Somatic Variants</h2>
 		 <strong>Somatic Mutation Summary Table</strong>
+		 <a href="{{ somatic_summary_table_file}}"><li>summary table file</li></a>
 		 <table class="table" style="font-size: 15px">
 		   <tbody>
 		     <tr>
@@ -27,7 +28,6 @@
 		{% for run in somatic %}
 		<ul>
 		  <strong>Files:</strong>
-                  <a href="{{ run.output_file[1] }}"><li>{{ run.output_file[0] }}</li></a>
 		  <a href="{{ run.filter_file[1] }}"><li>{{ run.filter_file[0] }}</li></a>
 		</ul>
                 <div class="row">
