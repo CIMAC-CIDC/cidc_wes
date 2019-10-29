@@ -37,6 +37,11 @@ def addCondaPaths_Config(config):
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
     config['conda_root'] = conda_root
     config['wes_root'] = "%s/envs/wes" % conda_root
+    config['optitype_root'] = "%s/envs/optitype" % conda_root
+    config['xhla_root'] = "%s/envs/xhla" % conda_root
+    config['sequenza_root'] = "%s/envs/sequenza" % conda_root
+    config['pyclone_root'] = "%s/envs/pyclone" % conda_root
+
 
 def loadRef(config):
     """Adds the static reference paths found in config['ref']
