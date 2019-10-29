@@ -61,7 +61,7 @@ rule optitype_hlatyping:
         name=lambda wildcards: wildcards.sample,
         output_dir=lambda wildcards: "%sanalysis/optitype/%s/" % (config['remote_path'], wildcards.sample),
         #outputname = lambda wildcards: wildcards.sample
-        path="source activate /home/taing/miniconda3/envs/optitype/", #HARD-Coding the path and activateing conda env
+        path="source activate %s" % config['optitype_root'],
         optitype_config="cidc_wes/static/optitype/config.ini",
     output:
         HLAgenotype = "analysis/optitype/{sample}/{sample}_result.tsv",

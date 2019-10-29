@@ -27,7 +27,7 @@ rule xhla:
     params:
         name=lambda wildcards: wildcards.sample,
         output_dir=lambda wildcards: "%sanalysis/xhla/%s/" % (config['remote_path'], wildcards.sample),
-        path="source activate /home/taing/miniconda3/envs/xHLA/", #HARD-Coding the path and activateing conda env
+        path="source activate %s" % config['xhla_root'],
     #singularity: "docker://humanlongevity/hla"
     conda: "../envs/xhla_env.yml"
     benchmark:
