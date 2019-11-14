@@ -37,7 +37,7 @@ def main():
                 #print(label)
                 run_ct[label] += 1
         f.close()
-        run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['INS']])
+        run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['DEL']])
         cts[run_name] = run_ct
 
     out = open(options.out, "w")
