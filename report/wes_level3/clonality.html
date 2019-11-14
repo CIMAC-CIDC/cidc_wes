@@ -1,18 +1,32 @@
               <!-- Clonality bar  -->
               <div class="main_row" id="main_clonality">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Tumor Clonality</h2>
+		<ul><strong>Files:</strong>
+		  {% for run in clonality %}
+		  <a href="{{ run.pyclone_table_file[1] }}"><li>{{ run.pyclone_table_file[0] }}</li></a>
+		  {% endfor %}
+		</ul>
+
 		<!-- LEN: SUB section -->
-                <div class="row">
-                    <ul>
-                      <li style="color:black;font-size:25px">Tumor Clonality</li>
-                    </ul>
-                </div>
 		{% for run in clonality %}
                 <div class="row">
                   <div class="col-6">
-                    <h3 class="h5" style="text-align:center">{{ run.name }}</h3>
-		    <img src="{{ run.clonality_plot }}" width="500" height="650" class="float-left">
+                    <h3>{{ run.name }} - Density plot</h3>
+		    <img src="{{ run.density_plot }}" height="300px" width="969px" class="float-left">
                   </div>
                 </div>
+		<div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }} - Scatter plot</h3>
+		    <img src="{{ run.scatter_plot }}" height="400px" width="392px" class="float-left">
+                  </div>
+                </div>
+		<div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }} - Coordinates plot</h3>
+		    <img src="{{ run.coordinates_plot }}" height="850px" width="300px" class="float-left">
+                  </div>
+                </div>
+		<hr/>
 		{% endfor %}
               </div>

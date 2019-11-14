@@ -12,6 +12,8 @@ from optparse import OptionParser
 import jinja2
 import pandas as pd
 
+import math
+
 ################### THIS fn is copied from wes.snakefile ######################
 def getRuns(config):
     """parse metasheet for Run groupings"""
@@ -31,27 +33,52 @@ def getRuns(config):
     config['runs'] = ret
     return config
 ###############################################################################
+
 def getFileName(path):
     """Returns the file name of a given file path"""
     filename = path.split("/")[-1]
     return filename
 
+def millify(n):
+    """Given a large int n, returns a string representation of n in human-
+    readable form
+    ref: https://stackoverflow.com/questions/3154460/python-human-readable-large-numbers
+    """
+    millnames = ['',' K',' M',' B',' T']
+
+    n = float(n)
+    millidx = max(0,min(len(millnames)-1,
+                    int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+
+    return '{:.1f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+
+
 def getAlignmentInfo(config):
     """Genereate the dictionary for the alignment section"""
-    ret = {'mapping': 'wes_images/align/mapping.png',
+    mapping_csv = "analysis/align/mapping.csv"
+    ret = {'mapping_plot': 'wes_images/align/mapping.png',
+           'mapping_csv': mapping_csv,
            'samples': []}
     for sample in config['samples']:
         sorted_bam = "analysis/align/%s/%s_sorted.bam" % (sample, sample)
         sorted_dedup_bam = "analysis/align/%s/%s_sorted.dedup.bam" % (sample, sample)
+        gc_bias_file = " analysis/metrics/%s/%s_gc_metrics.txt" % (sample, sample)
+        quality_score_file = " analysis/metrics/%s/%s_qd_metrics.txt" % (sample, sample)
+        quality_by_cycle_file = " analysis/metrics/%s/%s_mq_metrics.txt" % (sample, sample)
+        insert_size_file = " analysis/metrics/%s/%s_is_metrics.txt" % (sample, sample)
         tmp = {'name': sample,
-               #'mapping': 'wes_images/align/%s/mapping.png' % sample,
                'gc_bias': 'wes_images/align/%s/%s_gcBias.png' % (sample, sample),
+               
                'quality_score': 'wes_images/align/%s/%s_qualityScore.png' % (sample, sample), 
                'quality_by_cycle': 'wes_images/align/%s/%s_qualityByCycle.png' % (sample,sample),
                'insert_size': 'wes_images/align/%s/%s_insertSize.png' % (sample,sample),
                #FILES: are in the following form- (filename, filepath)
                'sorted_bam': (getFileName(sorted_bam),sorted_bam),
                'sorted_dedup_bam': (getFileName(sorted_dedup_bam),sorted_dedup_bam),
+               'gc_bias_file': gc_bias_file,
+               'quality_score_file': quality_score_file,
+               'quality_by_cycle_file':quality_by_cycle_file,
+               'insert_size_file': insert_size_file,
         }
         ret['samples'].append(tmp)
     #print(ret)
@@ -70,12 +97,51 @@ def getCoverageInfo(config, coverage_file):
         d = dict(zip(hdr,tmp))
         #FILES--use sample_id as sample name
         sample = d['sample_id']
-        coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
+
+        #print out total as quantities of Millions of reads
+        if int(d['total']) >= 1000:
+            d['total'] = millify(int(d['total']))
+
+        #GET the %_bases_above_50 from
+        #analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.summary.txt
+        if 'cimac_center' in config and config['cimac_center']:
+            center = config['cimac_center']
+        else:
+            #default broad
+            center = 'broad'
+        
+        #coverage_file = "analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample)
+        coverage_file = "analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample, center)
+        #parse the coverage_file to get >50X
+        if os.path.exists(coverage_file):
+            cov_f = open(coverage_file)
+            foo_hdr = cov_f.readline().strip().split(",")
+            foo_vals = cov_f.readline().strip().split(",")
+            cov_f.close()
+            #NOTE: >50x is the second col
+            bases_50x = "%.2f" % (float(foo_vals[1])*100.0)
+            d['percent_bases_over_50'] = "%s %%" % bases_50x
+        
         d['coverage_file'] = (getFileName(coverage_file),coverage_file)
         ret.append(d)
     #print(ret)
     f.close()
     return ret
+
+def getSomaticSummaryTable(config):
+    """Generates the mutation summary table"""
+    #PARSE out the summary
+    somatic_summary_table = {}
+    mut_summary_f = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
+    f = open(mut_summary_f)
+    hdr = f.readline().strip().split(",")
+    for l in f:
+        tmp = l.strip().split(",")
+        run_name = tmp[0]
+        somatic_summary_table[run_name] = dict(zip(hdr,tmp))
+    f.close()
+    #print(somatic_summary_table)
+    return somatic_summary_table
 
 def getSomaticInfo(config):
     """Genereate the dictionary for the somatic section"""
@@ -90,7 +156,8 @@ def getSomaticInfo(config):
                #NEED to simplify these names!!!!!!!
                'lego_plot': 'wes_images/somatic/%s/%s_%s.legoPlot.png' % (run, run, somatic_caller),
                'output_file': (getFileName(output_file), output_file),
-               'filter_file': (getFileName(filter_file), filter_file),
+               #NOTE: shirley just wants this called "{run}_{caller}.vcf}
+               'filter_file': (getFileName(filter_file), "%s_%s.vcf" % (run, caller)),
         }
         ret.append(tmp)
     #print(tmp)
@@ -121,7 +188,7 @@ def getGermlineInfo(config):
         for sample in config['runs'][run]:
             haplotyper_file = "analysis/germline/%s/%s_haplotyper.output.vcf" % (sample, sample)
             hap_files.append([getFileName(haplotyper_file), haplotyper_file])
-        print(hap_files)
+        #print(hap_files)
         tmp['haplotyper_files']= hap_files
         ret.append(tmp)
         f.close()
@@ -165,8 +232,9 @@ def main():
                      'Quality_Score', 'Quality_by_Cycle']
     sidebar = [("alignment", "Alignment", alignment_sub),
                ('coverage','Coverage', []),
+               ('germline',"Germline", []),
                ("somatic","Somatic", []),
-               ('germline',"Germline", [])]
+    ]
     
     wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                        'page_name': pg_name}
@@ -181,6 +249,8 @@ def main():
 
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
+    wes_report_vals['somatic_table'] = getSomaticSummaryTable(config)
+    wes_report_vals['somatic_summary_table_file'] = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
 
     #GERMLINE
     wes_report_vals['germline'] = getGermlineInfo(config)

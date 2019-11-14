@@ -5,3 +5,7 @@ channels:
 - defaults
 dependencies:
 - pdftools
+- dplyr
+- gridExtra
+- optparse
+- ggpubr
