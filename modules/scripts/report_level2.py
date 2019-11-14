@@ -71,9 +71,10 @@ def parseHLA(config, hla_files):
 ###############################################################################
 def getCNVInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
+    caller = config['somatic_caller']
     ret = []
     for run in config['runs']:
-        circos_plot = "wes_images/copynumber/%s/circos.png" % run
+        circos_plot = "wes_images/copynumber/%s.%s/circos.png" % (run, caller)
         cnv_calls = "analysis/copynumber/%s/%s_cnvcalls.txt" % (run, run)
         tmp = {'name': run,
                'circos_plot': circos_plot,
