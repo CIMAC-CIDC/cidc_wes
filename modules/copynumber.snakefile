@@ -69,6 +69,7 @@ rule copynumber_CNVcall:
         sentieon_path=config['sentieon_path'],
         ponfile=config['pons'],
         target=config['pons_target'],
+    group: "copynumber"
     threads:_cnvcall_threads
     benchmark:
         "benchmarks/copynumber/{run}/{sample}.CNVcall.txt"
@@ -81,12 +82,11 @@ rule copynumber_processCNVcircos:
     """Process the cnv output file to be an adaquate input into the circos 
     plot"""
     input:
-        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt",
+        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
     output:
         cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.circos.txt",
-    #params:
-    #threads:_cnvcall_threads
+    group: "copynumber"
     benchmark:
         "benchmarks/copynumber/{run}/{sample}.processCNVcircos.txt"
     shell:
-        "cidc_wes/modules/scripts/copynumber_processCircos.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/copynumber_processCircos.py -f {input} > {output}"
