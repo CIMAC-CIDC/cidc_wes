@@ -7,6 +7,23 @@
 		  {% endfor %}
 		</ul>
 
+		<div class="row">
+		  <table class="table" style="font-size: 15px">
+		    <tbody>
+		      <tr>
+			<th>Run</th>
+			<th>Tumor Value</th>
+		      </tr>
+		      {% for run in clonality %}
+		      <tr>
+			<td>{{ run.name }}</td>
+			<td>{{ run.clonality }}</td>
+		      </tr>
+		      {% endfor %}
+		    </tbody>
+		  </table>
+                </div>
+
 		<!-- LEN: SUB section -->
 		{% for run in clonality %}
                 <div class="row">

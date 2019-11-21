@@ -14,6 +14,7 @@ import pandas as pd
 
 from report_level1 import getFileName
 from report_level1 import getRuns
+from clonality_calcClonality import calcClonality
 
 def getClonalityInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
@@ -23,10 +24,12 @@ def getClonalityInfo(config):
         scatter_plot = "wes_images/clonality/%s/%s_plot.scatter.png" % (run,run)
         coordinates_plot = "wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run)
         table_file = "analysis/clonality/%s/%s_table.tsv" % (run,run)
+        clonality = calcClonality(table_file)
         tmp = {'name': run,
                'density_plot': density_plot,
                'scatter_plot': scatter_plot,
                'coordinates_plot': coordinates_plot,
+               'clonality': clonality,
                'pyclone_table_file': (getFileName(table_file), table_file),
         }
         ret.append(tmp)
