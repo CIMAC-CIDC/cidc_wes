@@ -131,9 +131,6 @@ def somatic_targets(wildcards):
             ls = somatic_tnhaplotyper2_targets(wildcards)
     else: #default
         ls = somatic_tnhaplotyper2_targets(wildcards)
-        
-    #target summaries
-    ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
 
 rule somatic_all:
@@ -346,22 +343,6 @@ rule somatic_getTarget_mutations:
         "benchmarks/somatic/{run}/{run}_{caller}.{center}.somatic_getTarget_mutations.txt"
     shell:
         "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"
-
-rule somatic_collect_target_summaries:
-    """Collect all of the sample summaries and put them in one file
-    input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
-    """
-    input:
-        expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples']))
-    output:
-        "analysis/metrics/all_sample_summaries.txt"
-    params:
-        files = lambda wildcards, input: " -f ".join(input)
-    group: "somatic"
-    benchmark:
-        "benchmarks/somatic/somatic_collect_target_summaries.txt"
-    shell:
-        "cidc_wes/modules/scripts/somatic_collect_target_summaries.py -f {params.files} > {output}"
 
 rule summarize_somatic_mutations:
     """Use the filter.maf to generate summary statistics for SNPS, INS, DEL
