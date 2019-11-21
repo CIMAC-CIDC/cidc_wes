@@ -76,13 +76,15 @@ rule metrics_collect_target_summaries:
     input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
     """
     input:
-        expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples']))
+        coverage=expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples'])),
+        align=expand("analysis/align/{sample}/{sample}_mapping.txt", sample=sorted(config['samples'])),
     output:
         "analysis/metrics/all_sample_summaries.txt"
     params:
-        files = lambda wildcards, input: " -f ".join(input)
-    group: "somatic"
+        cov_files = lambda wildcards, input: " -f ".join(input.coverage),
+        align_files = lambda wildcards, input: " -a ".join(input.align)
+    group: "metrics"
     benchmark:
-        "benchmarks/metrics/somatic_collect_target_summaries.txt"
+        "benchmarks/metrics/metrics_collect_target_summaries.txt"
     shell:
-        "cidc_wes/modules/scripts/somatic_collect_target_summaries.py -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/metrics_collect_target_summaries.py -f {params.cov_files} -a {params.align_files} > {output}"
