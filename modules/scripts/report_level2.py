@@ -15,6 +15,7 @@ import pandas as pd
 
 from report_level1 import getFileName
 from report_level1 import getRuns
+from clonality_calcClonality import calcClonality
 
 ################ THIS fn is copied from neoantigen.snakefile ##################
 def parseHLA(config, hla_files):
@@ -145,6 +146,26 @@ def getNeoantigenInfo(config):
         ret.append(tmp)
     return ret
 
+def getClonalityInfo(config):
+    """Gets and populates a dictionary with the values required for the page"""
+    ret = []
+    for run in config['runs']:
+        density_plot = "wes_images/clonality/%s/%s_plot.density.png" % (run,run)
+        scatter_plot = "wes_images/clonality/%s/%s_plot.scatter.png" % (run,run)
+        coordinates_plot = "wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run)
+        table_file = "analysis/clonality/%s/%s_table.tsv" % (run,run)
+        clonality = calcClonality(table_file)
+        tmp = {'name': run,
+               'density_plot': density_plot,
+               'scatter_plot': scatter_plot,
+               'coordinates_plot': coordinates_plot,
+               'clonality': clonality,
+               'pyclone_table_file': (getFileName(table_file), table_file),
+        }
+        ret.append(tmp)
+    #print(ret)
+    return ret
+
 def main():
     usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -173,15 +194,16 @@ def main():
     #STANDARD nav bar list
     nav_list = [('wes_meta.html', 'WES_META'),
                 ('wes_level1.html','WES_Level1'),
-                ('wes_level2.html','WES_Level2'),
-                ('wes_level3.html','WES_Level3')]
+                ('wes_level2.html','WES_Level2')]
 
     #MODIFY this!
     pg_name = "WES_LEVEL_2"
     sidebar = [("cnv", "CNV", []),
                ("purity", "Purity", []),
                ('hla','HLA', []),
-               ("neoantigen","Neoantigen", [])]
+               ("neoantigen","Neoantigen", []),
+               ("clonality","Clonality", []),
+    ]
     
     wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
                        'page_name': pg_name}
@@ -201,6 +223,10 @@ def main():
     #Neoantigen
     neoantigen = getNeoantigenInfo(config)
     wes_report_vals['neoantigen'] = neoantigen
+
+    #Clonality
+    clonality = getClonalityInfo(config)
+    wes_report_vals['clonality'] = clonality
 
     template.stream(wes_report_vals).dump(options.output)  
         

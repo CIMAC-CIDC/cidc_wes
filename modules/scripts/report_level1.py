@@ -224,8 +224,7 @@ def main():
     #STANDARD nav bar list
     nav_list = [('wes_meta.html', 'WES_META'),
                 ('wes_level1.html','WES_Level1'),
-                ('wes_level2.html','WES_Level2'),
-                ('wes_level3.html','WES_Level3')]
+                ('wes_level2.html','WES_Level2')]
 
     #SIDE-BAR
     alignment_sub = ['Mapping_Stats', 'GC_Bias_Plots',

@@ -16,7 +16,6 @@ def report_targets(wildcards):
     ls.append("analysis/report/wes_meta.html")
     ls.append("analysis/report/wes_level1.html")
     ls.append("analysis/report/wes_level2.html")
-    ls.append("analysis/report/wes_level3.html")
     ls.append("analysis/report/static/done.txt")
     ls.append("analysis/report/wes_images/align/mapping.png")
     for sample in config['samples']:
@@ -152,18 +151,18 @@ rule report_level2:
     shell:
         """cidc_wes/modules/scripts/report_level2.py -c {input} -o {output}"""
 
-rule report_level3:
-    """Generate wes_level3.html"""
-    input:
-        #NOTE: need to ensure that this runs AFTER everything is generated!
-        config="config.yaml"
-    output:
-         "analysis/report/wes_level3.html"
-    message:
-        "REPORT: creating wes_level3.html"
-    group: "report"
-    shell:
-        """cidc_wes/modules/scripts/report_level3.py -c {input} -o {output}"""
+# rule report_level3:
+#     """Generate wes_level3.html"""
+#     input:
+#         #NOTE: need to ensure that this runs AFTER everything is generated!
+#         config="config.yaml"
+#     output:
+#          "analysis/report/wes_level3.html"
+#     message:
+#         "REPORT: creating wes_level3.html"
+#     group: "report"
+#     shell:
+#         """cidc_wes/modules/scripts/report_level3.py -c {input} -o {output}"""
 
 rule report_cp_static:
     """Copy cidc_wes/reprt/static to analysis/report/static
@@ -230,7 +229,7 @@ rule copynumber_circos_plot:
         cp -r cidc_wes/static/circos/etc {params.output_dir} && \
         cd {params.output_dir} && circos"""
 
-rule report_level3_density_plot:
+rule report_level2_density_plot:
     "convert the density.pdf to png"
      input:
          "analysis/clonality/{run}/{run}_plot.density.pdf",
@@ -241,7 +240,7 @@ rule report_level3_density_plot:
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-rule report_level3_scatter_plot:
+rule report_level2_scatter_plot:
     "convert the density.pdf to png"
      input:
          "analysis/clonality/{run}/{run}_plot.scatter.pdf",
@@ -252,7 +251,7 @@ rule report_level3_scatter_plot:
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-rule report_level3_coordinates_plot:
+rule report_level2_coordinates_plot:
     "convert the density.pdf to png"
      input:
          "analysis/clonality/{run}/{run}_plot.coordinates.pdf",
