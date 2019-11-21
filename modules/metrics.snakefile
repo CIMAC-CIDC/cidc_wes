@@ -14,7 +14,8 @@ def metrics_targets(wildcards):
 	ls.append("analysis/metrics/%s/%s_is_metrics.txt" % (sample,sample))
 	ls.append("analysis/metrics/%s/%s_metrics.pdf" % (sample,sample))
 	
-    #TODO- fill this in
+    #coverage metrics summaries
+    ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
 
 rule metrics_all:
@@ -69,3 +70,21 @@ rule Metrics_sentieon_plots:
         "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon_plots.txt"
     shell:
         """{params.index1}/sentieon plot metrics -o {output.overallmetricspdf}  gc={input.gcmetrics} qd={input.qd} mq={input.mq}  isize={input.insertsize}"""
+
+rule metrics_collect_target_summaries:
+    """Collect all of the sample summaries and put them in one file
+    input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
+    """
+    input:
+        coverage=expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples'])),
+        align=expand("analysis/align/{sample}/{sample}_mapping.txt", sample=sorted(config['samples'])),
+    output:
+        "analysis/metrics/all_sample_summaries.txt"
+    params:
+        cov_files = lambda wildcards, input: " -f ".join(input.coverage),
+        align_files = lambda wildcards, input: " -a ".join(input.align)
+    group: "metrics"
+    benchmark:
+        "benchmarks/metrics/metrics_collect_target_summaries.txt"
+    shell:
+        "cidc_wes/modules/scripts/metrics_collect_target_summaries.py -f {params.cov_files} -a {params.align_files} > {output}"

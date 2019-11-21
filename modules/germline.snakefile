@@ -47,7 +47,7 @@ def germline_targets(wildcards):
     return ls
 
 def getTargetBed(config):
-    """USES center_targets in somtatic.snakefile to return the path to the
+    """USES center_targets in wes.snakefile to return the path to the
     center's targets"""
     
     if 'cimac_center' in config and config['cimac_center'] in center_targets:

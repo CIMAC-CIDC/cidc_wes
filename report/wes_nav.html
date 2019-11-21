@@ -1,0 +1,13 @@
+    <nav class="navbar navbar-dark fixed-top navbar-expand-lg flex-md-nowrap p-0" style="background-color:#1E284A">
+      <strong class="navbar-brand col-sm-3 col-md-2 mr-0">WES Summary Report</strong>
+      <div class="container-fluid">
+        <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+	  <!-- LEN: TOP nav bar -->
+	  {% for (href, name) in top_nav_list %}
+          <li class="nav-item active">
+            <a class="nav-link nav-a" href="{{ href }}" style="font-size: 1rem">{{ name }}</a>
+          </li>
+	  {% endfor %}
+        </ul>
+      </div>
+    </nav>

@@ -1,0 +1,10 @@
+name: copynumber
+channels:
+- bioconda
+- defaults
+dependencies:
+- circos
+- perl-clone
+- perl-module-runtime
+- perl-exporter-tiny
+- perl-svg

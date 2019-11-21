@@ -4,9 +4,15 @@ import os
 import sys
 import subprocess
 import pandas as pd
+import json
 import yaml
 
 from string import Template
+
+#Dictionary of center targets
+center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
+                "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
+                "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
 
 def getRuns(config):
     """parse metasheet for Run groupings"""
@@ -31,6 +37,11 @@ def addCondaPaths_Config(config):
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
     config['conda_root'] = conda_root
     config['wes_root'] = "%s/envs/wes" % conda_root
+    config['optitype_root'] = "%s/envs/optitype" % conda_root
+    config['xhla_root'] = "%s/envs/xHLA" % conda_root
+    config['sequenza_root'] = "%s/envs/sequenza" % conda_root
+    config['pyclone_root'] = "%s/envs/pyclone" % conda_root
+
 
 def loadRef(config):
     """Adds the static reference paths found in config['ref']
@@ -65,20 +76,14 @@ if 'remote_path' not in config:
 
 def all_targets(wildcards):
     ls = []
-    #IMPORT all of the module targets
-    ls.extend(align_targets(wildcards))
-    ls.extend(metrics_targets(wildcards))
-    ls.extend(recalibration_targets(wildcards))
-    ls.extend(somatic_targets(wildcards))
-    ls.extend(germline_targets(wildcards))
-    ls.extend(coveragemetrics_targets(wildcards))
-    ls.extend(copynumber_targets(wildcards))
-    ls.extend(purity_targets(wildcards))
-    ls.extend(neoantigen_targets(wildcards))
-    ls.extend(optitype_targets(wildcards))
-    #ls.extend(clonal_trial_targets(wildcards))
+    #using level helper fns--so I Don't repeat myself!
+    lvl1_targets = level1_targets(wildcards)
+    lvl2_targets = level2_targets(wildcards)
+    ls.extend(lvl1_targets)
+    ls.extend(lvl2_targets)
     #ls.extend(clonality_targets(wildcards))
     #ls.extend(report_targets(wildcards))
+    #print("\n".join(ls))
     return ls
 
 def level1_targets(wildcards):
@@ -97,6 +102,9 @@ def level2_targets(wildcards):
     ls.extend(purity_targets(wildcards))
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls.extend(xhla_targets(wildcards))
+    #ls.extend(report_targets(wildcards))
     return ls
 
 def level3_targets(wildcards):
@@ -138,5 +146,6 @@ include: "./modules/copynumber.snakefile" # ...
 include: "./modules/purity.snakefile" #...
 include: "./modules/clonality.snakefile" # ...
 include: "./modules/optitype.snakefile" #...
+include: "./modules/xhla.snakefile" #....
 include: "./modules/neoantigen.snakefile"
-#include: "./modules/report.snakefile"          # report module
+include: "./modules/report.snakefile" # report module

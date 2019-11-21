@@ -5,11 +5,6 @@
 _somatic_threads=32
 #_vcf2maf_threads=4
 
-#Dictionary of center targets
-center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
-                "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
-                "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
-
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
 def somatic_runsHelper(wildcards, iindex):
@@ -67,8 +62,13 @@ def somatic_tnsnv_targets(wildcards):
         #next 2 for mutation load
         ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.mutationload.txt" % (run,run))
+        #next 2 for circos
+        ls.append("analysis/somatic/%s/%s_tnsnv.indel.circos.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnsnv.snp.circos.txt" % (run,run))
+        
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnsnv.csv")
     return ls
 
 def somatic_tnhaplotyper2_targets(wildcards):
@@ -86,8 +86,13 @@ def somatic_tnhaplotyper2_targets(wildcards):
         #next 2 for mutation load
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.mutationload.txt" % (run,run))
+        #next 2 for circos
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.indel.circos.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.snp.circos.txt" % (run,run))
+
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnhaplotyper2.csv")
     return ls
 
 def somatic_tnscope_targets(wildcards):
@@ -105,8 +110,13 @@ def somatic_tnscope_targets(wildcards):
         #next 2 for mutation load
         ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnscope.mutationload.txt" % (run,run))
+        #next 2 for circos
+        ls.append("analysis/somatic/%s/%s_tnscope.indel.circos.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_tnscope.snp.circos.txt" % (run,run))
+
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
+    ls.append("analysis/somatic/somatic_mutation_summaries.tnscope.csv")
     return ls
 
 def somatic_targets(wildcards):
@@ -121,9 +131,6 @@ def somatic_targets(wildcards):
             ls = somatic_tnhaplotyper2_targets(wildcards)
     else: #default
         ls = somatic_tnhaplotyper2_targets(wildcards)
-        
-    #target summaries
-    ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
 
 rule somatic_all:
@@ -337,18 +344,41 @@ rule somatic_getTarget_mutations:
     shell:
         "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"
 
-rule somatic_collect_target_summaries:
-    """Collect all of the sample summaries and put them in one file
-    input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
-    """
+rule summarize_somatic_mutations:
+    """Use the filter.maf to generate summary statistics for SNPS, INS, DEL
+    --used in the wes report"""
     input:
-        expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples']))
+        expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs']))
     output:
-        "analysis/metrics/all_sample_summaries.txt"
+        "analysis/somatic/somatic_mutation_summaries.{caller}.csv"
     params:
-        files = lambda wildcards, input: " -f ".join(input)
+        files = lambda wildcards, input: " -m ".join(input)
     group: "somatic"
     benchmark:
-        "benchmarks/somatic/somatic_collect_target_summaries.txt"
+        "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
     shell:
-        "cidc_wes/modules/scripts/somatic_collect_target_summaries.py -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output}"
+
+rule summarize_processINDELcircos:
+    """Process the filter.maf file to generate a file suitable for circos"""
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
+    output:
+        "analysis/somatic/{run}/{run}_{caller}.indel.circos.txt"
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/summarize_processINDELcircos.{run}.{caller}.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_processINDEL.py -m {input} > {output}"
+
+rule summarize_processSNPcircos:
+    """Process the filter.maf file to generate a file suitable for circos"""
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
+    output:
+        "analysis/somatic/{run}/{run}_{caller}.snp.circos.txt"
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/summarize_processSNPcircos.{run}.{caller}.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_processSNP.py -m {input} > {output}"

@@ -1,280 +1,263 @@
-#REPORT module - must come last in includes!
-import sys
-from string import Template
-from snakemake.utils import report
-from snakemake.report import data_uri
+#MODULE: wes report module 
 
-#DEPENDENCIES
-from tabulate import tabulate
-
-_ReportTemplate = Template(open("chips/static/chips_report.txt").read())
-_logfile = "analysis/logs/report.log"
-
+def pvacseq_plot_inputfn(wildcards):
+    """Will return analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.addSample.tsv, but will need to derefernce tumor
+    USES neoantigen_getTumor fn from neoantigen.snakefile
+    """
+    ls = []
+    run = wildcards.run
+    tumor = neoantigen_getTumor(wildcards)[0]
+    ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.addSample.tsv" % (run,tumor))
+    return ls
+    
 def report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    ls.append('analysis/report/sequencingStatsSummary.csv')
-    ls.append('analysis/report/peaksSummary.csv')
-    ls.append('analysis/report/report.html')
+    ls.append("analysis/report/wes_meta.html")
+    ls.append("analysis/report/wes_level1.html")
+    ls.append("analysis/report/wes_level2.html")
+    ls.append("analysis/report/static/done.txt")
+    ls.append("analysis/report/wes_images/align/mapping.png")
+    for sample in config['samples']:
+        ls.append("analysis/report/wes_images/align/%s/%s_gcBias.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_qualityByCycle.png" % (sample,sample))
+        ls.append("analysis/report/wes_images/align/%s/%s_insertSize.png" % (sample,sample))
+        
+    for run in config['runs']:
+        ls.append("analysis/report/wes_images/somatic/%s/%s_%s.legoPlot.png" % (run, run, config['somatic_caller']))
+        #pvacseq images
+        ls.append("analysis/report/wes_images/neoantigen/%s/HLA_epitopes_fraction_plot.png" % run)
+        ls.append("analysis/report/wes_images/neoantigen/%s/Patient_count_epitopes_plot.png" % run)
+        ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
+        #copynumber
+        ls.append("analysis/report/wes_images/copynumber/%s.%s/circos.png" % (run, config['somatic_caller']))
+
+        #TEST if clonality was run or not
+        clonality_density = "analysis/clonality/%s/%s_plot.density.pdf" % (run,run)
+        if os.path.exists(clonality_density):
+            #COPY over the clonality plots
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
+            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
     return ls
 
-def csvToSimpleTable(csv_file):
-    """function to translate a .csv file into a reStructuredText simple table
-    ref: http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#simple-tables
-    """
-    #read in file
-    f = open(csv_file)
-    stats = [l.strip().split(",") for l in f]
-    f.close()
-
-    hdr = stats[0]
-    rest = stats[1:]
-    #RELY on the tabulate pkg
-    ret = tabulate(rest, hdr, tablefmt="rst")
-    return ret
-
-def processRunInfo(run_info_file):
-    """extracts the macs version and the fdr used first and second line"""
-    f = open(run_info_file)
-    ver = f.readline().strip()
-    fdr = f.readline().strip()
-    return (ver,fdr)
-
-def genPeakSummitsTable(conservPlots,motifSummary):
-    """generates rst formatted table that will contain the conservation plot
-    and motif analysis for ALL runs
-    hdr = array of header/column elms
-    """
-    #parse MotifSummary
-    motifs = parseMotifSummary(motifSummary) if motifSummary else {}
-    runs = sorted(_getRepInput("$runRep"))
-    #HEADER- PROCESS the different modules differently
-    if 'motif' in config and config['motif'] == 'mdseqpos':
-        hdr = ["Run", "Conservation","MotifID","MotifName","Logo","Zscore"]
-    else:
-        hdr = ["Run", "Conservation","Motif","Logo","Pval","LogPval"]
-    #BUILD up the rest of the table
-    rest = []
-    for run,img in zip(runs,conservPlots):
-        #HANDLE null values
-        if img and (img != 'NA'):
-            conserv = ".. image:: %s" % data_uri(img)
-        else:
-            conserv = "NA"
-        #HANDLE null values--Also check that we're doing motif analysis
-        if 'motif' in config and motifs[run]['logo'] and (motifs[run]['logo'] != 'NA'):
-            motif_logo = ".. image:: %s" % data_uri(motifs[run]['logo'])
-        else:
-            motif_logo = "NA"
-
-        #PROCESS the different modules differently
-        if 'motif' in config:
-            if config['motif'] == 'mdseqpos':
-                rest.append([run, conserv, motifs[run]['motifId'], motifs[run]['motifName'], motif_logo,  motifs[run]['zscore']])
-            else:
-                rest.append([run, conserv, motifs[run]['motifName'], motif_logo, motifs[run]['pval'],motifs[run]['logp']])
-        else:
-            #motif analysis was skipped
-            rest.append([run, conserv, 'NA', 'NA', 'NA','NA'])
-
-    ret = tabulate(rest, hdr, tablefmt="rst")
-    return ret
-
-def parseMotifSummary(motif_csv):
-    """Given a motifSummary.csv file, parses this into a dictionary 
-    {run: {motifId: , motifName: , logo: , zscore: }}
-    Returns this dictionary
-    """
-    ret = {}
-    f = open(motif_csv)
-    hdr = f.readline().strip().split(",")
-    for l in f:
-        tmp = l.strip().split(",")
-        if config['motif'] == 'mdseqpos':
-            ret[tmp[0]] = {'motifId': tmp[1], 'motifName': tmp[2], 'logo': tmp[3], 'zscore': tmp[4]}
-        else:
-            ret[tmp[0]] = {'motifName':tmp[1], 'logo':tmp[2], 'pval': tmp[3], 'logp': tmp[4]}
-    f.close()
-    return ret
-
-def sampleGCandContam_table(fastqc_stats, fastqc_gc_plots, contam_table):
-    """generates rst formatted table that will contain the fastqc GC dist. plot
-    for all samples
-    hdr = array of header/column elms
-    NOTE: we use the thumb nail image for the GC content plots
-    """
-    #READ in fastqc_stats
-    f_stats = {}
-    f = open(fastqc_stats)
-    hdr = f.readline().strip().split(",")  #largely ignored
-    for l in f:
-        tmp = l.strip().split(",")
-        #store GC content, 3 col, using sample names as keys
-        f_stats[tmp[0]] = tmp[2]
-    f.close()
-    
-    #READ in contam_panel
-    contam = {}
-    f = open(contam_table)
-    hdr = f.readline().strip().split(',') #We'll use this!
-    species = hdr[1:]
-    for l in f:
-        tmp = l.strip().split(",")
-        #build dict, use sample name as key
-        contam[tmp[0]] = zip(species, tmp[1:]) #dict of tupes, (species, %)
-    f.close()
-
-    #PUT GC plots into a dictionary--keys are sample names
-    plots = {}
-    for p in fastqc_gc_plots:
-        #NOTE the path structure is analysis/fastqc/{sample}/png_filename
-        #we take second to last
-        tmp = p.split("/")[-2]
-        plots[tmp] = str(p)
-    
-    #build output
-    ret=[]
-    samples = sorted(list(f_stats.keys()))
-    hdr = ["Sample", "GC median", "GC distribution"]
-    hdr.extend(species)
-    rest=[]
-
-    for sample in samples:
-        #HANDLE null values
-        if plots[sample] and (plots[sample] != 'NA'):
-            gc_plot = ".. image:: %s" % data_uri(plots[sample])
-        else:
-            gc_plot = "NA"
-        #get rest of values and compose row
-        contam_values = [v for (s, v) in contam[sample]]
-        row = [sample, f_stats[sample], gc_plot]
-        row.extend(contam_values)
-
-        rest.append(row)
-    ret = tabulate(rest, hdr, tablefmt="rst")
-    return ret
-
-def getReportInputs(wildcards):
-    """Input function created just so we can switch-off motif analysis"""
-    ret = {'cfce_logo':"chips/static/CFCE_Logo_Final.jpg",
-           'run_info':"analysis/peaks/run_info.txt",
-           'map_stat':"analysis/report/mapping.png",
-           'pbc_stat':"analysis/report/pbc.png",
-           'peakFoldChange_png':"analysis/report/peakFoldChange.png",
-           'conservPlots': sorted(_getRepInput("analysis/conserv/$runRep/$runRep_conserv_thumb.png")),
-           'samples_summary':"analysis/report/sequencingStatsSummary.csv",
-           'runs_summary':"analysis/report/peaksSummary.csv",
-           'contam_panel':"analysis/contam/contamination.csv",
-           #MOTIF handled after
-           'fastqc_stats':"analysis/fastqc/fastqc.csv",
-           'fastqc_gc_plots': expand("analysis/fastqc/{sample}/{sample}_perSeqGC_thumb.png", sample=config["samples"])
-           }
-    if 'motif' in config:
-        ret['motif'] = "analysis/motif/motifSummary.csv"
-    return ret
-           
 rule report_all:
     input:
         report_targets
 
-rule report:
+rule report_meta:
+    """Generate wes_meta.html"""
     input:
-        unpack(getReportInputs)
+        #NOTE: need to ensure that this runs AFTER everything is generated!
+        config="config.yaml"
+    output:
+         "analysis/report/wes_meta.html"
+    message:
+        "REPORT: creating wes_meta.html"
+    group: "report"
+    shell:
+        """cidc_wes/modules/scripts/report_meta.py -c {input} -o {output}"""
+
+rule report_level1_gcBiasPlot:
+    """Generate gcBiasPlot"""
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_gcBias.png"
     params:
-        #OBSOLETE, but keeping around
-        samples = config['samples']
-    output: html="analysis/report/report.html"
-    benchmark:
-        "benchmarks/report/report.txt"
-    run:
-        (macsVersion, fdr) = processRunInfo(input.run_info)
-        samplesSummaryTable = csvToSimpleTable(input.samples_summary)
-        runsSummaryTable = csvToSimpleTable(input.runs_summary)
-        #HACK b/c unpack is ruining the input.fastqc_gc_plots element--the list
-        #becomes a singleton
-        conservPlots = sorted(_getRepInput("analysis/conserv/$runRep/$runRep_conserv_thumb.png"))
-        if 'motif' in config:
-            peakSummitsTable = genPeakSummitsTable(conservPlots, input.motif)
-        else:
-            peakSummitsTable = genPeakSummitsTable(conservPlots, None)
-        #HACK b/c unpack is ruining the input.fastqc_gc_plots element--the list
-        #becomes a singleton
-        fastqc_gc_plots = ["analysis/fastqc/%s/%s_perSeqGC_thumb.png" % (s,s) for s in config['samples']]
-        sampleGCandContam = sampleGCandContam_table(input.fastqc_stats, fastqc_gc_plots, input.contam_panel)
-        tmp = _ReportTemplate.substitute(cfce_logo=data_uri(input.cfce_logo),map_stat=data_uri(input.map_stat),pbc_stat=data_uri(input.pbc_stat),peakSummitsTable=peakSummitsTable,peakFoldChange_png=data_uri(input.peakFoldChange_png))
-        report(tmp, output.html, metadata="Len Taing", **input)
-
-rule samples_summary_table:
-    input:
-        fastqc = "analysis/fastqc/fastqc.csv",
-        mapping = "analysis/align/mapping.csv",
-        pbc = "analysis/frips/pbc.csv",
-    output:
-        "analysis/report/sequencingStatsSummary.csv"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/samples_summary_table.txt"
+        page = 1
+    message:
+        "REPORT: generating wes level1 gc bias plot"
+    group: "report"
     shell:
-        "chips/modules/scripts/get_sampleSummary.py -f {input.fastqc} -m {input.mapping} -p {input.pbc} > {output} 2>>{log}"
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-rule runs_summary_table:
+rule report_level1_qualityScore:
     input:
-        peaks = "analysis/peaks/peakStats.csv",
-        frips = "analysis/frips/frips.csv",
-        dhs = "analysis/ceas/dhs.csv",
-        meta = "analysis/ceas/meta.csv",
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report/peaksSummary.csv"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/runs_summary_table.txt"
+        "analysis/report/wes_images/align/{sample}/{sample}_qualityScore.png"
+    params:
+        page = 2
+    message:
+        "REPORT: generating wes level1 quality score plot"
+    group: "report"
     shell:
-        "chips/modules/scripts/get_runsSummary.py -p {input.peaks} -f {input.frips} -d {input.dhs} -m {input.meta} -o {output} 2>>{log}"
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-######## PLOTS ######
-rule plot_map_stat:
+rule report_level1_qualityByCycle:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_qualityByCycle.png"
+    params:
+        page = 3
+    message:
+        "REPORT: generating wes level1 quality by cycle plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_insertSize:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/wes_images/align/{sample}/{sample}_insertSize.png"
+    params:
+        page = 4
+    message:
+        "REPORT: generating wes level1 insert size plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1_somatic_legoPlot:
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.pdf"
+    output:
+        "analysis/report/wes_images/somatic/{run}/{run}_{caller}.legoPlot.png"
+    params:
+        page = 1
+    message:
+        "REPORT: generating wes level1 lego plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_level1:
+    """Generate wes_level1.html"""
+    input:
+        #NOTE: need to ensure that this runs AFTER everything is generated!
+        config="config.yaml"
+    output:
+         "analysis/report/wes_level1.html"
+    message:
+        "REPORT: creating wes_level1.html"
+    group: "report"
+    shell:
+        """cidc_wes/modules/scripts/report_level1.py -c {input} -o {output}"""
+
+rule report_level2:
+    """Generate wes_level2.html"""
+    input:
+        #NOTE: need to ensure that this runs AFTER everything is generated!
+        config="config.yaml"
+    output:
+         "analysis/report/wes_level2.html"
+    message:
+        "REPORT: creating wes_level2.html"
+    group: "report"
+    shell:
+        """cidc_wes/modules/scripts/report_level2.py -c {input} -o {output}"""
+
+# rule report_level3:
+#     """Generate wes_level3.html"""
+#     input:
+#         #NOTE: need to ensure that this runs AFTER everything is generated!
+#         config="config.yaml"
+#     output:
+#          "analysis/report/wes_level3.html"
+#     message:
+#         "REPORT: creating wes_level3.html"
+#     group: "report"
+#     shell:
+#         """cidc_wes/modules/scripts/report_level3.py -c {input} -o {output}"""
+
+rule report_cp_static:
+    """Copy cidc_wes/reprt/static to analysis/report/static
+    HACK: need a 'done' file to indicate the job worked"""
+    input:
+    output:
+         "analysis/report/static/done.txt"
+    message:
+        "REPORT: copying static files"
+    group: "report"
+    shell:
+        "cp -r cidc_wes/report/static/ analysis/report/ && touch {output}"
+
+rule pvacseq_plot:
+    """Plot the three pvacseq images"""
+    input:
+        pvacseq_plot_inputfn
+    output:
+        hla="analysis/report/wes_images/neoantigen/{run}/HLA_epitopes_fraction_plot.png",
+        patient="analysis/report/wes_images/neoantigen/{run}/Patient_count_epitopes_plot.png",
+        epitope="analysis/report/wes_images/neoantigen/{run}/epitopes_affinity_plot.png",
+    params:
+        outdir = lambda wildcards: "analysis/report/wes_images/neoantigen/%s/" % wildcards.run
+    message:
+        "REPORT: generating pvacseq images"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/pvacseq_plot.R -i {input} -o {params.outdir}"
+
+rule mapping_plot:
+    """Plot the mapping stats"""
     input:
         "analysis/align/mapping.csv"
     output:
-        "analysis/report/mapping.png"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/plot_map_stat.txt"
+        "analysis/report/wes_images/align/mapping.png"
+    group: "report"
     shell:
-        "Rscript chips/modules/scripts/map_stats.R {input} {output}"
+        "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"
 
-rule plot_pbc_stat:
+rule copynumber_circos_plot:
+    """Generates the circos plot for a run"""
     input:
-        #"analysis/align/pbc.csv"
-        "analysis/frips/pbc.csv"
+        cnv="analysis/copynumber/{run}/{run}_cnvcalls.circos.txt",
+        indel="analysis/somatic/{run}/{run}_{caller}.indel.circos.txt",
+        snp="analysis/somatic/{run}/{run}_{caller}.snp.circos.txt",
+    params:
+        output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
     output:
-        "analysis/report/pbc.png"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/plot_pbc_stat.txt"
+        #NOTE: because the etc script generates a file called circos.png
+        #we put the caller in the dir name--not pretty but i don't want to
+        #dynamically generatethe etc/circos.conf
+        "analysis/report/wes_images/copynumber/{run}.{caller}/circos.png"
+    group: "report"
     shell:
-        "Rscript chips/modules/scripts/plot_pbc.R {input} {output}"
+        #FOR circos we need to do the following:
+        #0. make a data sub-dir in the {output_dir}
+        #1. copy/link in the input file as {output_dir}/data/data.*.txt
+        #2. copy cidc_wes/static/circos/etc/ into {output_dir}
+        #3. run circos (in that directory)
+        """mkdir -p {params.output_dir}/data && \
+        cp {input.cnv} {params.output_dir}/data/data.cnv.txt && \
+        cp {input.indel} {params.output_dir}/data/data.indel.txt && \
+        cp {input.snp} {params.output_dir}/data/data.snp.txt && \
+        cp -r cidc_wes/static/circos/etc {params.output_dir} && \
+        cd {params.output_dir} && circos"""
 
-rule plot_peakFoldChange:
-    input: 
-        "analysis/peaks/peakStats.csv"
+rule report_level2_density_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.density.pdf",
     output:
-        "analysis/report/peakFoldChange.png"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/plot_peakFoldChange.txt"
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.density.png",
+    params: page=1
+    group: "report"
     shell:
-        "Rscript chips/modules/scripts/plot_foldChange.R {input} {output}"
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-#DEPRECATED!! this plot is no longer used!
-rule plot_nonChrM_stats:
-    input:
-        "analysis/frips/nonChrM_stats.csv"
+rule report_level2_scatter_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.scatter.pdf",
     output:
-        "analysis/report/attic/nonChrM_stats.png"
-    log: _logfile
-    benchmark:
-        "benchmarks/report/plot_nonChrM_stats.txt"
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.scatter.png",
+    params: page=1
+    group: "report"
     shell:
-        "Rscript chips/modules/scripts/plot_nonChrM.R {input} {output}"
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
+rule report_level2_coordinates_plot:
+    "convert the density.pdf to png"
+     input:
+         "analysis/clonality/{run}/{run}_plot.coordinates.pdf",
+    output:
+        "analysis/report/wes_images/clonality/{run}/{run}_plot.coordinates.png"
+    params: page=1
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"

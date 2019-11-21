@@ -70,7 +70,7 @@ rule coverage_mosdepth:
         bam="analysis/align/{sample}/{sample}_recalibrated.bam",
         bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
     params:
-        #FOUND center_targets found in somatic.snakefile
+        #FOUND center_targets found in wes.snakefile
         target= lambda wildcards: center_targets[wildcards.center],
         prefix=lambda wildcards: "%sanalysis/metrics/%s/%s.%s" % (config['remote_path'], wildcards.sample, wildcards.sample, wildcards.center),
     output:

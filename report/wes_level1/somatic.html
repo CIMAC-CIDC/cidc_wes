@@ -1,0 +1,40 @@
+               <!-- Somatic bar  -->
+               <div class="main_row" id="main_somatic" style="display:none;">
+		 <h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Somatic Variants</h2>
+		 <strong>Somatic Mutation Summary Table</strong>
+		 <a href="{{ somatic_summary_table_file}}"><li>summary table file</li></a>
+		 <table class="table" style="font-size: 15px">
+		   <tbody>
+		     <tr>
+		       <th>RUN</th>
+		       <th>Total</th>
+		       <th>SNPs</th>
+		       <th>INSERT</th>
+		       <th>DEL</th>
+		     </tr>
+		     {% for run in somatic_table %}
+		     <tr>
+		       <td>{{ run }}</td>
+		       <td>{{ somatic_table[run].TOTAL }}</td>
+		       <td>{{ somatic_table[run].SNP }}</td>
+		       <td>{{ somatic_table[run].INSERT }}</td>
+		       <td>{{ somatic_table[run].DELETE }}</td>
+		     </tr>
+		     {% endfor %}
+		   </tbody>
+		 </table>
+
+		<!-- LEN: SUB section -->
+		{% for run in somatic %}
+		<ul>
+		  <strong>Files:</strong>
+		  <a href="{{ run.filter_file[1] }}"><li>{{ run.filter_file[0] }}</li></a>
+		</ul>
+                <div class="row">
+                  <div class="col-6">
+                    <h3>{{ run.name }}- Lego Plot</h3>
+		    <img src="{{ run.lego_plot }}" width="1024" height="175" class="float-left">
+                  </div>
+                </div>
+		{% endfor %}
+               </div>
