@@ -3,6 +3,13 @@
 # ***IMPORTANT: for Normal and Tumor columns, use the SampleName defined in
 # config.yaml.
 #
-RunName,Normal,Tumor
-Run1,Normal_sample1,Tumor_sample1
-Run2,Normal_sample2,Tumor_sample2
+# The final column, Cohort, allows you to group runs into cohorts
+# Cohort names can be any alphanumeric string and "_"
+# Give runs (i.e. rows) that belong in the same cohort group the same cohort
+# name OR leave it blank if the run is NOT part of a cohort
+#
+# **A minimal of 2 runs are required for each cohort set
+# As of now, runs can only belong to one cohort
+RunName,Normal,Tumor,Cohort
+Run1,Normal_sample1,Tumor_sample1,group1
+Run2,Normal_sample2,Tumor_sample2,group1
