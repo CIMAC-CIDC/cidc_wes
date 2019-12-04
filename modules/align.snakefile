@@ -26,6 +26,10 @@ def align_getFastq(wildcards):
     ls = config["samples"][wildcards.sample]
     return ls
 
+def align_getBam(wildcards):
+    bam = config["samples"][wildcards.sample][0] #returns only the first elm
+    return bam
+
 rule align_all:
     input:
         align_targets
@@ -34,12 +38,55 @@ rule map_all:
     input:
         align_mapping_targets
 
-rule sentieon_bwa:
+#BASED on xindong's aggregate_align_input in CIDC_Chips
+def aggregate_align_input(wildcards):
+    # handle .bam files separately from .fastq files
+    #check only the first file
+    sample_first_file = config["samples"][wildcards.sample][0]
+    if sample_first_file.endswith(".bam"):
+        return ["analysis/align/{sample}/{sample}.sorted.fromBam.bam",
+                "analysis/align/{sample}/{sample}.sorted.fromBam.bam.bai"]
+    else:
+        return ["analysis/align/{sample}/{sample}.sorted.fromFastq.bam",
+                "analysis/align/{sample}/{sample}.sorted.fromFastq.bam.bai"]
+
+rule aggregate_input:
+    input:
+        aggregate_align_input
+    params:
+        bam = lambda wildcards,input: input[0],
+        bai = lambda wildcards,input: input[1],
+    output:
+       bam="analysis/align/{sample}/{sample}.sorted.bam",
+       bai="analysis/align/{sample}/{sample}.sorted.bam.bai",
+    shell:
+        "mv {params.bam} {output.bam} && mv {params.bai} {output.bai}"
+
+rule align_from_bam:
+    input:
+        align_getBam
+    output:
+        bam="analysis/align/{sample}/{sample}.sorted.fromBam.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.fromBam.bam.bai"
+    threads: 32
+    params:
+        sentieon_path=config['sentieon_path'],
+        bwa_index=config['bwa_index'],
+        #DON'T write a mini-program withi a program-
+        #awk cmd to add sample names to RGs!!
+        awk_cmd=lambda wildcards: "awk -v OFS=\'\\t\' \'{ split($2,a,\":\"); read_id=a[2]; $2=\"ID:%s.\" read_id; print $0}\'" % wildcards.sample,
+        #NEVER do it twice!- gawk cmd to inject sample name into each read!!!
+        gawk_cmd=lambda wildcards: "gawk -v OFS=\'\\t\' \'{rg=match($0,/RG:Z:(\S+)/,a); read_id=a[1]; if (rg) {sub(/RG:Z:\S+/, \"RG:Z:%s.\" read_id, $0); print $0} else { print $0 }}\'" % wildcards.sample,
+    benchmark: "benchmarks/align/{sample}/{sample}.align_from_bam.txt"
+    shell:
+        """samtools view -H {input} | grep \"^@RG\" | {params.awk_cmd} > {wildcards.sample}.header && samtools collate --output-fmt SAM -@ {threads} -Of {input} | {params.gawk_cmd} | samtools view -@ {threads} -b - | samtools fastq -@ {threads} -t -s /dev/null -0 /dev/null - | ({params.sentieon_path}/sentieon bwa mem -t {threads} -M -K 10000000 -p -C -H {wildcards.sample}.header {params.bwa_index} - || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -t {threads} -o {output.bam} --sam2bam -; rm {wildcards.sample}.header"""
+
+rule align_from_fastq:
     input:
         align_getFastq
     output:
-        bam="analysis/align/{sample}/{sample}.sorted.bam",
-        bai="analysis/align/{sample}/{sample}.sorted.bam.bai"
+        bam="analysis/align/{sample}/{sample}.sorted.fromFastq.bam",
+        bai="analysis/align/{sample}/{sample}.sorted.fromFastq.bam.bai"
     params:
         sentieon_path=config['sentieon_path'],
         bwa_index=config['bwa_index'],
@@ -52,7 +99,7 @@ rule sentieon_bwa:
     log: "analysis/logs/align/{sample}/align.sentieon_bwa.{sample}.log"
     group: "align"
     benchmark:
-        "benchmarks/align/{sample}/{sample}.sentieon_bwa.txt"
+        "benchmarks/align/{sample}/{sample}.align_from_fastq.txt"
     shell:
         """({params.sentieon_path}/sentieon bwa mem -M -R \"{params.read_group}\" -t {params.tthreads} -K {params.input_bases} {params.bwa_index} {input} || echo -n 'error' ) | {params.sentieon_path}/sentieon util sort -r {params.bwa_index} -o {output.bam} --sam2bam -i -"""
 
