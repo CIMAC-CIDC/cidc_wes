@@ -14,7 +14,7 @@ center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.bed",
                 "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.bed",
                 "broad":"./ref_files/hg38/target_beds/broad.liftover.hg38.bed"}
 
-def getRuns(config):
+def getRunsCohorts(config):
     """parse metasheet for Run groupings"""
     ret = {}
 
@@ -23,13 +23,35 @@ def getRuns(config):
     metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
     f = metadata.to_csv().split() #make it resemble an actual file with lines
     #SKIP the hdr
+    cohorts = {}
     for l in f[1:]:
         tmp = l.strip().split(",")
         #print(tmp)
-        ret[tmp[0]] = tmp[1:]
+        ret[tmp[0]] = tmp[1:3]
+
+        if len(tmp) > 3:
+            chort=tmp[3] #it's the 4th col
+            if chort in cohorts:
+                cohorts[chort].append(tmp[0]) #add run to the cohort set
+            else:
+                #new cohort
+                cohorts[chort] = [tmp[0]]
+
+    #Find any cohorts that are singletons and print warning
+    delete_these = []
+    for c in cohorts:
+        if len(cohorts[c]) < 2:
+            print("WES WARNING: cohort group %s ignored because it has too few runs in the set (at least 2 are required).  Please correct your metasheet" % c)
+            delete_these.append(c)
+    #REMOVE them
+    for c in delete_these:
+        del cohorts[c] #not valid cohort, remove
 
     #print(ret)
     config['runs'] = ret
+
+    config['cohorts'] = cohorts if cohorts else None
+    #print(config['cohorts'])
     return config
 
 def addCondaPaths_Config(config):
@@ -58,7 +80,7 @@ def loadRef(config):
 
 #---------  CONFIG set up  ---------------
 configfile: "config.yaml"   # This makes snakemake load up yaml into config 
-config = getRuns(config)
+config = getRunsCohorts(config)
 addCondaPaths_Config(config)
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config

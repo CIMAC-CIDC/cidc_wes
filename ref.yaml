@@ -46,7 +46,6 @@ hg38:
   #neoantigen
   neoantigen_iedb: ./ref_files/hg38/iedb
 
-hg19:
-  bwa_index: ./ref_files/hg19/bwa_indices/hg19/hg19.fa
-  genome_fasta: ./path/to/hg19.fasta #TODO
+  #copynumber
+  gistic2: ./ref_files/hg38/gistic2/hg38.UCSC.add_miR.160920.refgene.mat
 
