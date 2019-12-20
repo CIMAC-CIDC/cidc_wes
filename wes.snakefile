@@ -103,8 +103,6 @@ def all_targets(wildcards):
     lvl2_targets = level2_targets(wildcards)
     ls.extend(lvl1_targets)
     ls.extend(lvl2_targets)
-    #ls.extend(clonality_targets(wildcards))
-    #ls.extend(report_targets(wildcards))
     #print("\n".join(ls))
     return ls
 
@@ -126,12 +124,8 @@ def level2_targets(wildcards):
     ls.extend(optitype_targets(wildcards))
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(xhla_targets(wildcards))
-    #ls.extend(report_targets(wildcards))
-    return ls
-
-def level3_targets(wildcards):
-    ls = []
     ls.extend(clonality_targets(wildcards))
+    ls.extend(report_targets(wildcards))
     return ls
 
 rule target:
@@ -149,11 +143,6 @@ rule level2:
     input: level2_targets
     message: "Compiling all LEVEL2 outputs"
     benchmark: "benchmarks/wes_level2_targets.txt"
-
-rule level3:
-    input: level3_targets
-    message: "Compiling all LEVEL3 outputs"
-    benchmark: "benchmarks/wes_level3_targets.txt"
 
 include: "./modules/align.snakefile"     # common align rules
 include: "./modules/metrics.snakefile"   # ...
