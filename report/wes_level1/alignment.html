@@ -1,6 +1,10 @@
               <!-- Alignment bar  -->
               <div class="main_row" id="main_alignment">
 		<h2 class="h3" style="padding-top: 10px;padding-bottom: 10px;">Alignment Statistics</h2>
+		<blockquote>
+		  <p>The raw reads for each sample were mapped to the reference genome (genome) using alignment software (see config.yaml).</p>
+		  <p>The <strong>mapped reads</strong> represent the number of reads which successfully map to the genome, while the <strong>total reads</strong> represent the total number of reads in the sample.</p>
+		</blockquote>
 		<!-- LEN: THIS should be a for loop over each sample! -->
 		<div class="row" id="Mapping_Stats">
                   <ul>
@@ -26,10 +30,13 @@
                   <ul>
                     <li style="color:black;font-size:25px">{{ sample.name }}- GC Bias Plots</li>
                   </ul>
+		  <dl class="docutils">
+		    <dd> The distribution of the GC content (% GC in 100bp window) is  plotted.  Typically, for <strong>human samples</strong>, the modal value should be roughly around the <strong>42% mark</strong> (ref).</dd>
+		  </dl>
                 </div>
                 <div class="row">
                   <div class="col-6">
-		    <a href="{{ sample.gc_bias_file }}"><img src="{{ sample.gc_bias }}" width="700" class="float-left"/></ar>
+		    <a href="{{ sample.gc_bias_file }}"><img src="{{ sample.gc_bias }}" width="700" class="float-left"/></a>
                   </div>
                 </div>
 
@@ -37,6 +44,9 @@
                   <ul>
                     <li style="color:black;font-size:25px">{{ sample.name }}- Quality Score</li>
                   </ul>
+		  <dl class="docutils">
+		    <dd> The distribution of the MAPQ read quatlity scores is  plotted.  Good quality samples will show a left-skewed distribution of reads with MAPQ scores of <strong>35 or higher</strong>.</dd>
+		  </dl>
                 </div>
                 <div class="row">
                   <div class="col-6">
