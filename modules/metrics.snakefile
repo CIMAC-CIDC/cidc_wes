@@ -73,10 +73,10 @@ rule Metrics_sentieon_plots:
 
 rule metrics_collect_target_summaries:
     """Collect all of the sample summaries and put them in one file
-    input: {sample}_target_metrics.txt.sample_summary from coverage.snakefile
+    input: {sample}_target_metrics.sample_summary.txt from coverage.snakefile
     """
     input:
-        coverage=expand("analysis/metrics/{sample}/{sample}_target_metrics.txt.sample_summary", sample=sorted(config['samples'])),
+        coverage=expand("analysis/metrics/{sample}/{sample}_target_metrics.sample_summary.txt", sample=sorted(config['samples'])),
         align=expand("analysis/align/{sample}/{sample}_mapping.txt", sample=sorted(config['samples'])),
     output:
         "analysis/metrics/all_sample_summaries.txt"

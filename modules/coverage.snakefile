@@ -8,7 +8,10 @@ def coveragemetrics_targets(wildcards):
     ls = []
     for sample in config["samples"]:
     	ls.append("analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample))
+        ls.append("analysis/metrics/%s/%s_coverage_metrics.sample_summary.txt" % (sample,sample))
         ls.append("analysis/metrics/%s/%s_target_metrics.txt" % (sample,sample))
+        ls.append("analysis/metrics/%s/%s_target_metrics.sample_summary.txt" % (sample,sample))
+
         for center in center_targets:
             ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
             ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
@@ -25,6 +28,7 @@ rule CoverageMetrics_sentieon:
          bai="analysis/align/{sample}/{sample}.sorted.dedup.bam.bai",
     output:
          coveragemetrics="analysis/metrics/{sample}/{sample}_coverage_metrics.txt",
+         coveragemetrics_summary="analysis/metrics/{sample}/{sample}_coverage_metrics.txt.sample_summary",
     message:
         "COVERAGE: coverage calculations for bam file"
     params:
@@ -40,6 +44,14 @@ rule CoverageMetrics_sentieon:
         #change cov_thresh as an user input config
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.coveragemetrics}"""
 
+rule addExtension:
+    """Simple rule to add .txt to our file"""
+    input:
+        "analysis/metrics/{sample}/{sample}_{region}_metrics.txt.sample_summary"
+    output:
+        "analysis/metrics/{sample}/{sample}_{region}_metrics.sample_summary.txt"
+    shell:
+        "mv {input} {output}"
 
 rule targets_sentieon:
     """Get the coverage metrics from target beds"""
