@@ -32,26 +32,15 @@ def getRuns(config):
     return config
 ###############################################################################
 
-def getMetaInfo(config):
+def getMetaInfo(config, wes_version_file):
     """Gets and populates a dictionary with the values required for the 
     meta pg"""
+
+    #READ WES version from wes_version file
+    f = open(wes_version_file)
+    wes_version = f.read().strip()
+    f.close()
     
-    #CHANGE to cidc_wes, but first store this
-    wd = os.getcwd()
-    os.chdir("cidc_wes")
-    #GET wes commit string--first six letters of this cmd
-    cmd = "git show --oneline -s".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    wes_commit = output[:6].decode("utf-8") 
-
-    #GET wes current tag
-    cmd = "git describe --tags".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    wes_tag = output.decode("utf-8").split("-")[0]
-    wes_version = "%s (commit: %s)" % (wes_tag, wes_commit)
-    #CHANGE back to CWD
-    os.chdir(wd)
-
     #HARD_code
     ref_version = "ver1.0 (build date: 20190911)"
 
@@ -97,6 +86,7 @@ def main():
     usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-c", "--config", help="config.yaml file")
+    optparser.add_option("-v", "--wes_ver_file", help="file that stores the wes version")
     optparser.add_option("-o", "--output", help="output html file")
     (options, args) = optparser.parse_args(sys.argv)
     
@@ -130,7 +120,7 @@ def main():
                        'page_name': pg_name}
 
     #META- get the dict and add it to wes_report_vals
-    meta = getMetaInfo(config)
+    meta = getMetaInfo(config, options.wes_ver_file)
     wes_report_vals['meta'] = meta
 
     template.stream(wes_report_vals).dump(options.output)  

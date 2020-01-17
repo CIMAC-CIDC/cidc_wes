@@ -45,19 +45,28 @@ def report_targets(wildcards):
 rule report_all:
     input:
         report_targets
-
+    
+rule getWES_version:
+    output:
+        "analysis/report/wes_version.txt"
+    message: "REPORT: storing wes version being used"
+    group: "report"
+    shell:
+        "cidc_wes/modules/scripts/report_getWES_version.py -o {output}"
+    
 rule report_meta:
     """Generate wes_meta.html"""
     input:
         #NOTE: need to ensure that this runs AFTER everything is generated!
-        config="config.yaml"
+        config="config.yaml",
+        wes_version="analysis/report/wes_version.txt",
     output:
          "analysis/report/wes_meta.html"
     message:
         "REPORT: creating wes_meta.html"
     group: "report"
     shell:
-        """cidc_wes/modules/scripts/report_meta.py -c {input} -o {output}"""
+        """cidc_wes/modules/scripts/report_meta.py -c {input.config} -v {input.wes_version} -o {output}"""
 
 rule report_level1_gcBiasPlot:
     """Generate gcBiasPlot"""
