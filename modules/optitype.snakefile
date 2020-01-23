@@ -19,7 +19,7 @@ rule optitype_all:
 rule optitype_extract_chr6:
     """Extract chr6 by sambamba"""
     input:
-        in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam"
+        in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.dedup.bam"
     output:
         chr6sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     threads:_optitype_threads

@@ -106,7 +106,7 @@ rule align_from_fastq:
 rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
-        bam="analysis/align/{sample}/{sample}.sorted.bam",
+        bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
     output:
         "analysis/align/{sample}/{sample}_mapping.txt"
     threads: _align_threads

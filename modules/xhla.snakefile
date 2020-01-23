@@ -19,7 +19,7 @@ rule xhla_all:
 rule xhla:
     """calculate hlatyping by xhla"""
     input:
-        in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.bam"
+        in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.dedup.bam"
     output:
         chr6sortbamfile = "analysis/xhla/{sample}/report-{sample}-hla.json"
     threads:_xhla_threads
