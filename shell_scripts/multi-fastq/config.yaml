@@ -1,0 +1,46 @@
+# Multi-fastq config file
+# DEFINITIONS:
+# read group: set of reads from a single sequencing run represented by a fastq file (SE) or
+#             a pair of fastq files (PE)
+# sample: a set of read groups that come from the same (biological) sample.
+#         NOTE: since we are in a multi-fastq situation, the output of the pipeline
+#               is an aggregation of the sample's read groups (as a bam)
+
+# DEFINE the read groups or the different sets of fastqs
+# NOTE: you can define read groups belonging to multiple biological samples, they will
+# later be grouped in the sampls section
+#
+# REQUIRED: the names of each reqad group will be stored in the bam header
+# EXAMPLE-
+# read_groups:
+#   readgroup_1:
+#     - data/sample1_pair1.fastq
+#     - data/sample1_pair2.fastq
+# will generate a bam file, analysis/align/read_group1/read_group1.sorted.bam *WHICH* has
+# 'readgroup_1' as the READ GROUP ID
+read_groups:
+  HTFLDSXX:
+    - down/R1-1-F_HHTFLDSXX_R1.fastq.1mil.gz
+    - down/R1-1-F_HHTFLDSXX_R2.fastq.1mil.gz
+  HHTFTDSXX:
+    - down/Sample_R1-1-F_HHTFTDSXX_R1.fastq.1mil.gz
+    - down/Sample_R1-1-F_HHTFTDSXX_R1.fastq.1mil.gz
+
+# DEFINE the samples- group read groups by biological sample source
+# Example:
+# samples:
+#   R1-1-F:
+#     - read_group1
+#     - read_group2
+#     ...
+#     - read_groupN
+#
+# **Read groups can belong to only one sample!**
+samples:
+  R1-1-F:
+    - HTFLDSXX
+    - HHTFTDSXX
+
+#Path to sentieon binary
+sentieon_path: "/home/taing/sentieon/sentieon-genomics-201808.05/bin"
+bwa_index: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.fa
