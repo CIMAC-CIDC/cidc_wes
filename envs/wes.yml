@@ -59,8 +59,8 @@ dependencies:
 - optitype
 
 #report
-- pdftools
-- dplyr
-- gridExtra
-- optparse
-- ggpubr
+- r-pdftools
+- r-dplyr
+- r-gridExtra
+- r-optparse
+- r-ggpubr
