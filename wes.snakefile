@@ -115,7 +115,7 @@ def level1_targets(wildcards):
     ls.extend(somatic_targets(wildcards))
     return ls
 
-def level2_targets(wildcards):
+def level2_sans_report(wildcards):
     ls = []
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(copynumber_targets(wildcards))
@@ -125,6 +125,11 @@ def level2_targets(wildcards):
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(xhla_targets(wildcards))
     ls.extend(clonality_targets(wildcards))
+    return ls
+
+def level2_targets(wildcards):
+    ls = []
+    ls.extend(level2_sans_report(wildcards))
     ls.extend(report_targets(wildcards))
     return ls
 

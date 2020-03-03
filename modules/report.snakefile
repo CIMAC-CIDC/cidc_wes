@@ -138,7 +138,8 @@ rule report_level1:
     """Generate wes_level1.html"""
     input:
         #NOTE: need to ensure that this runs AFTER everything is generated!
-        config="config.yaml"
+        config="config.yaml",
+        lv1=level1_targets, #to ensure that all level1 targets are in place
     output:
          "analysis/report/wes_level1.html"
     message:
@@ -151,7 +152,8 @@ rule report_level2:
     """Generate wes_level2.html"""
     input:
         #NOTE: need to ensure that this runs AFTER everything is generated!
-        config="config.yaml"
+        config="config.yaml",
+        lv2=level2_sans_report, #to ensure that all level2 targets are in place
     output:
          "analysis/report/wes_level2.html"
     message:
@@ -159,19 +161,6 @@ rule report_level2:
     group: "report"
     shell:
         """cidc_wes/modules/scripts/report_level2.py -c {input} -o {output}"""
-
-# rule report_level3:
-#     """Generate wes_level3.html"""
-#     input:
-#         #NOTE: need to ensure that this runs AFTER everything is generated!
-#         config="config.yaml"
-#     output:
-#          "analysis/report/wes_level3.html"
-#     message:
-#         "REPORT: creating wes_level3.html"
-#     group: "report"
-#     shell:
-#         """cidc_wes/modules/scripts/report_level3.py -c {input} -o {output}"""
 
 rule report_cp_static:
     """Copy cidc_wes/reprt/static to analysis/report/static
