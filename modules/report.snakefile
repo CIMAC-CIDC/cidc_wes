@@ -40,7 +40,44 @@ def report_targets(wildcards):
             ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
             ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
             ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
+            
+    ls.append("analysis/report/wes_version.txt")
+    ls.append("analysis/report/wes_filemap.yaml")
     return ls
+
+def report_output_files(wildcards):
+    """returns all of the output.yaml files from each module
+    """
+    ls = []
+    for sample in config['samples']:
+        ls.append("analysis/align/%s/%s.align.output.yaml" % (sample,sample))
+        ls.append("analysis/align/%s/%s.recalibration.output.yaml" % (sample,sample))
+        ls.append("analysis/metrics/%s/%s.coverage.output.yaml" % (sample,sample))
+        ls.append("analysis/optitype/%s/%s.optitype.output.yaml" % (sample, sample))
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls.append("analysis/xhla/%s/%s.xhla.output.yaml" % (sample,sample))
+        
+    for run in config['runs']:
+        ls.append("analysis/copynumber/%s/%s.copynumber.output.yaml"%(run,run))
+        ls.append("analysis/corealignments/%s/%s.corealignment.output.yaml" % (run,run)) #NOTE: this is in recalibration.snakefile
+        ls.append("analysis/germline/%s/%s.germline.output.yaml" % (run,run))
+        ls.append("analysis/neoantigen/%s/%s.neoantigen.output.yaml" % (run,run))
+        ls.append("analysis/purity/%s/%s.purity.output.yaml" % (run, run))
+        ls.append("analysis/somatic/%s/%s.somatic.output.yaml" % (run,run))
+    return ls
+
+rule report_make_file_map:
+    input:
+        version_txt="analysis/report/wes_version.txt",
+        metrics_summary="analysis/metrics/all_sample_summaries.txt",
+        yml_files=report_output_files,
+    output:
+        "analysis/report/wes_filemap.yaml"
+    params:
+        yml_files = lambda wildcards, input: " -y ".join(input.yml_files),
+    shell:
+        "cidc_wes/modules/scripts/report_wes_filemap.py -v {input.version_txt} -m {input.metrics_summary} -y {params.yml_files} > {output}"
+
 
 rule report_all:
     input:
