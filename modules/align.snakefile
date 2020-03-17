@@ -98,7 +98,7 @@ rule align_from_bam:
         bwa_index=config['bwa_index'],
         #DON'T write a mini-program withi a program-
         #awk cmd to add sample names to RGs!!
-        awk_cmd=lambda wildcards: "awk -v OFS=\'\\t\' \'{ split($2,a,\":\"); read_id=a[2]; $2=\"ID:%s.\" read_id; print $0}\'" % wildcards.sample,
+        awk_cmd=lambda wildcards: "awk -v OFS=\'\\t\' \'{ split($2,a,\":\"); read_id=a[2]; $2=\"ID:%s.\" read_id; gsub(/SM:.+\\t/,\"SM:%s\\t\"); print $0}\'" % (wildcards.sample, wildcards.sample),
         #NEVER do it twice!- gawk cmd to inject sample name into each read!!!
         gawk_cmd=lambda wildcards: "gawk -v OFS=\'\\t\' \'{rg=match($0,/RG:Z:(\S+)/,a); read_id=a[1]; if (rg) {sub(/RG:Z:\S+/, \"RG:Z:%s.\" read_id, $0); print $0} else { print $0 }}\'" % wildcards.sample,
     benchmark: "benchmarks/align/{sample}/{sample}.align_from_bam.txt"
