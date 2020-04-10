@@ -33,13 +33,10 @@ def report_targets(wildcards):
         #copynumber
         ls.append("analysis/report/wes_images/copynumber/%s.%s/circos.png" % (run, config['somatic_caller']))
 
-        #TEST if clonality was run or not
-        clonality_density = "analysis/clonality/%s/%s_plot.density.pdf" % (run,run)
-        if os.path.exists(clonality_density):
-            #COPY over the clonality plots
-            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
-            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
-            ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
+        #COPY over the clonality plots
+        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
+        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
+        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
             
     ls.append("analysis/report/wes_version.txt")
     ls.append("analysis/report/wes_filemap.yaml")
