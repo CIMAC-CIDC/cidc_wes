@@ -75,10 +75,16 @@ def getCNVInfo(config):
     caller = config['somatic_caller']
     ret = []
     for run in config['runs']:
-        circos_plot = "wes_images/copynumber/%s.%s/circos.png" % (run, caller)
+        #circos_plot = "wes_images/copynumber/%s.%s/circos.png" % (run, caller)
+        sequenza_plot_1 = "wes_images/copynumber/%s/%s_cnv_genome.1.pdf" % (run,run)
+        sequenza_plot_2 = "wes_images/copynumber/%s/%s_cnv_genome.2.pdf" % (run,run)
+        sequenza_plot_3 = "wes_images/copynumber/%s/%s_cnv_genome.3.pdf" % (run,run)
         cnv_calls = "analysis/copynumber/%s/%s_cnvcalls.txt" % (run, run)
         tmp = {'name': run,
-               'circos_plot': circos_plot,
+               #'circos_plot': circos_plot,
+               'sequenza_plot_1': sequenza_plot_1,
+               'sequenza_plot_2': sequenza_plot_2,
+               'sequenza_plot_3': sequenza_plot_3,
                #Files
                'cnv_calls_file': (getFileName(cnv_calls), cnv_calls),
         }

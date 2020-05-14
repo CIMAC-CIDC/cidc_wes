@@ -67,6 +67,7 @@ def clonality_targets(wildcards):
         ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run)),
         ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run)),
         ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
+        ls.append("analysis/clonality/%s/%s_genome_view.pdf" % (run,run))
         #pyclone output
         ls.append("analysis/clonality/%s/%s_pyclone.yaml" % (run,run))
         ls.append("analysis/clonality/%s/pyclone.config.yaml" % run)
@@ -165,7 +166,8 @@ rule sequenza_fileprep:
         sample_name=lambda wildcards:wildcards.run,
         sequenza_bin_path="%s/bin/" % config['sequenza_root'],
     output:
-        pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv"
+        pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv",
+        genome_view_plot="analysis/clonality/{run}/{run}_genome_view.pdf",
     conda:
         "../envs/sequenza.yml"
     benchmark:

@@ -30,8 +30,12 @@ def report_targets(wildcards):
         ls.append("analysis/report/wes_images/neoantigen/%s/HLA_epitopes_fraction_plot.png" % run)
         ls.append("analysis/report/wes_images/neoantigen/%s/Patient_count_epitopes_plot.png" % run)
         ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
-        #copynumber
-        ls.append("analysis/report/wes_images/copynumber/%s.%s/circos.png" % (run, config['somatic_caller']))
+        #copynumber--MOVING from circos plot to sequenza plots
+        #ls.append("analysis/report/wes_images/copynumber/%s.%s/circos.png" % (run, config['somatic_caller']))
+
+        #split up the pdf into 3 different pages. see copynumber_sequenza_plots
+        for i in range(1,4): 
+            ls.append("analysis/report/wes_images/copynumber/%s/%s_cnv_genome.%s.pdf" % (run,run,i))
 
         #COPY over the clonality plots
         ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
@@ -234,32 +238,45 @@ rule mapping_plot:
     shell:
         "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"
 
-rule copynumber_circos_plot:
-    """Generates the circos plot for a run"""
+#DEPRECATED: moving to sequenza plots
+# rule copynumber_circos_plot:
+#     """Generates the circos plot for a run"""
+#     input:
+#         cnv="analysis/copynumber/{run}/{run}_cnvcalls.circos.txt",
+#         indel="analysis/somatic/{run}/{run}_{caller}.indel.circos.txt",
+#         snp="analysis/somatic/{run}/{run}_{caller}.snp.circos.txt",
+#     params:
+#         output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
+#     output:
+#         #NOTE: because the etc script generates a file called circos.png
+#         #we put the caller in the dir name--not pretty but i don't want to
+#         #dynamically generatethe etc/circos.conf
+#         "analysis/report/wes_images/copynumber/{run}.{caller}/circos.png"
+#     group: "report"
+#     shell:
+#         #FOR circos we need to do the following:
+#         #0. make a data sub-dir in the {output_dir}
+#         #1. copy/link in the input file as {output_dir}/data/data.*.txt
+#         #2. copy cidc_wes/static/circos/etc/ into {output_dir}
+#         #3. run circos (in that directory)
+#         """mkdir -p {params.output_dir}/data && \
+#         cp {input.cnv} {params.output_dir}/data/data.cnv.txt && \
+#         cp {input.indel} {params.output_dir}/data/data.indel.txt && \
+#         cp {input.snp} {params.output_dir}/data/data.snp.txt && \
+#         cp -r cidc_wes/static/circos/etc {params.output_dir} && \
+#         cd {params.output_dir} && circos"""
+
+rule copynumber_sequenza_plots:
+    """Get the copy number plots from sequenza output by splitting 
+    {run}_genome_view.pdf"""
     input:
-        cnv="analysis/copynumber/{run}/{run}_cnvcalls.circos.txt",
-        indel="analysis/somatic/{run}/{run}_{caller}.indel.circos.txt",
-        snp="analysis/somatic/{run}/{run}_{caller}.snp.circos.txt",
+        "analysis/clonality/{run}/{run}_genome_view.pdf"
     params:
-        output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
+        pg = lambda wildcards: wildcards.pg
     output:
-        #NOTE: because the etc script generates a file called circos.png
-        #we put the caller in the dir name--not pretty but i don't want to
-        #dynamically generatethe etc/circos.conf
-        "analysis/report/wes_images/copynumber/{run}.{caller}/circos.png"
-    group: "report"
+        "analysis/report/wes_images/copynumber/{run}/{run}_cnv_genome.{pg}.pdf"
     shell:
-        #FOR circos we need to do the following:
-        #0. make a data sub-dir in the {output_dir}
-        #1. copy/link in the input file as {output_dir}/data/data.*.txt
-        #2. copy cidc_wes/static/circos/etc/ into {output_dir}
-        #3. run circos (in that directory)
-        """mkdir -p {params.output_dir}/data && \
-        cp {input.cnv} {params.output_dir}/data/data.cnv.txt && \
-        cp {input.indel} {params.output_dir}/data/data.indel.txt && \
-        cp {input.snp} {params.output_dir}/data/data.snp.txt && \
-        cp -r cidc_wes/static/circos/etc {params.output_dir} && \
-        cd {params.output_dir} && circos"""
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.pg}"
 
 rule report_level2_density_plot:
     "convert the density.pdf to png"
