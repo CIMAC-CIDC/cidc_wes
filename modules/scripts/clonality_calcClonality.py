@@ -21,7 +21,7 @@ def estClonality(df):
 
 def calcClonality(table_file):
     """Simple wrapper to call estClonality, but handles files not data frames
-    This is so I can make a call from within report_level3
+    This is so I can make a call from within report_level2
     """
     pd_table = pd.read_csv(table_file, delimiter="\t", encoding="utf-8")
     clonality_val = round(estClonality(pd_table), 3)
