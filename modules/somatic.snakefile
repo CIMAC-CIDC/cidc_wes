@@ -65,7 +65,8 @@ def somatic_tnsnv_targets(wildcards):
         #next 2 for circos
         ls.append("analysis/somatic/%s/%s_tnsnv.indel.circos.txt" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnsnv.snp.circos.txt" % (run,run))
-        
+
+        ls.append("analysis/somatic/%s/%s_tnsnv_somatic_SNV_summaries.csv" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnsnv.csv")
@@ -89,7 +90,7 @@ def somatic_tnhaplotyper2_targets(wildcards):
         #next 2 for circos
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.indel.circos.txt" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnhaplotyper2.snp.circos.txt" % (run,run))
-
+        ls.append("analysis/somatic/%s/%s_s_tnhaplotyper2_somatic_SNV_summaries.csv" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnhaplotyper2.csv")
@@ -114,6 +115,7 @@ def somatic_tnscope_targets(wildcards):
         ls.append("analysis/somatic/%s/%s_tnscope.indel.circos.txt" % (run,run))
         ls.append("analysis/somatic/%s/%s_tnscope.snp.circos.txt" % (run,run))
 
+        ls.append("analysis/somatic/%s/%s_tnscope_somatic_SNV_summaries.csv" % (run,run))
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnscope.csv")
@@ -391,6 +393,25 @@ rule summarize_somatic_mutations:
         "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
     shell:
         "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output}"
+
+rule summarize_SNV_mutations:
+    """Use the filter.vep.vcf to generate summary table for transition count
+    table, e.g. outputs:
+    Ref(rows)/Alt(cols),A,C,G,T
+    A
+    C
+    G
+    T
+    --used in the wes report"""
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.vep.vcf"
+    output:
+        "analysis/somatic/{run}/{run}_{caller}_somatic_SNV_summaries.csv"
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/{run}/{run}_{caller}_summarize_SNV_mutations.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_SNV_stats.py -v {input} -o {output}"
 
 rule summarize_processINDELcircos:
     """Process the filter.maf file to generate a file suitable for circos"""

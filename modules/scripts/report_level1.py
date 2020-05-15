@@ -143,6 +143,24 @@ def getSomaticSummaryTable(config):
     #print(somatic_summary_table)
     return somatic_summary_table
 
+def getSNVSummaryTable(config):
+    """Generates the Ref/Alt summary table, e.g. A>C, A>G counts"""
+    #PARSE out the summary SNV
+    somatic_SNV_table = {}
+    for run in config['runs']:
+        snv_summary_f = "analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run, run, config['somatic_caller'])
+        somatic_SNV_table[run] = []
+        f = open(snv_summary_f)
+        hdr = f.readline().strip().split(",")
+        #print(hdr)
+        for l in f:
+            tmp = l.strip().split(",")
+            #print(tmp)
+            somatic_SNV_table[run].append(tmp)
+        f.close()
+    #print(somatic_SNV_table)
+    return somatic_SNV_table
+
 def getSomaticInfo(config):
     """Genereate the dictionary for the somatic section"""
     ret = []
@@ -249,6 +267,7 @@ def main():
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
     wes_report_vals['somatic_table'] = getSomaticSummaryTable(config)
+    wes_report_vals['somatic_SNV_table'] = getSNVSummaryTable(config)
     wes_report_vals['somatic_summary_table_file'] = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
 
     #GERMLINE

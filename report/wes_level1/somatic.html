@@ -28,6 +28,33 @@
 		   </tbody>
 		 </table>
 
+		 </br>
+		 <strong>SNV Summary Table</strong>
+		 {% for run in somatic_SNV_table %}
+		 <strong>{{ run }}</strong>
+		 <table class="table" style="font-size: 15px">
+		   <tbody>
+		     <tr>
+		       <th>Ref/Alt</th>
+		       <th>A</th>
+		       <th>C</th>
+		       <th>G</th>
+		       <th>T</th>
+		       <th>Total</th>
+		     </tr>
+		     {% for row in somatic_SNV_table[run] %}
+		     <tr>
+		       <td>{{ row[0] }}</td>
+		       <td>{{ row[1] }}</td>
+		       <td>{{ row[2] }}</td>
+		       <td>{{ row[3] }}</td>
+		       <td>{{ row[4] }}</td>
+		       <td>{{ row[5] }}</td>
+		     </tr>
+		     {% endfor %}
+		   </tbody>
+		 </table>
+		 {% endfor %}
 		<!-- LEN: SUB section -->
 		{% for run in somatic %}
 		<ul>
