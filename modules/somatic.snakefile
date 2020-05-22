@@ -70,7 +70,7 @@ def somatic_tnsnv_targets(wildcards):
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnsnv.csv")
-    ls.append("analysis/somatic/somatic_nonSynonymous_summaries.tnsnv.csv")
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnsnv.csv")
     return ls
 
 def somatic_tnhaplotyper2_targets(wildcards):
@@ -95,7 +95,7 @@ def somatic_tnhaplotyper2_targets(wildcards):
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnhaplotyper2.csv")
-    ls.append("analysis/somatic/somatic_nonSynonymous_summaries.tnhaplotyper2.csv")
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnhaplotyper2.csv")
     return ls
 
 def somatic_tnscope_targets(wildcards):
@@ -121,7 +121,7 @@ def somatic_tnscope_targets(wildcards):
         for center in center_targets:
             ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
     ls.append("analysis/somatic/somatic_mutation_summaries.tnscope.csv")
-    ls.append("analysis/somatic/somatic_nonSynonymous_summaries.tnscope.csv")
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnscope.csv")
     return ls
 
 def somatic_targets(wildcards):
@@ -389,14 +389,14 @@ rule summarize_somatic_mutations:
         expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs']))
     output:
         cts = "analysis/somatic/somatic_mutation_summaries.{caller}.csv",
-        nonSynon = "analysis/somatic/somatic_nonSynonymous_summaries.{caller}.csv",
+        annot = "analysis/somatic/somatic_functional_annot_summaries.{caller}.csv",
     params:
         files = lambda wildcards, input: " -m ".join(input)
     group: "somatic"
     benchmark:
         "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
     shell:
-        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output.cts} -n {output.nonSynon}"
+        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output.cts} -a {output.annot}"
 
 rule summarize_SNV_mutations:
     """Use the filter.vep.vcf to generate summary table for transition count

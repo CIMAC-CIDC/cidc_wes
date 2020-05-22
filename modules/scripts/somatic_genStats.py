@@ -13,23 +13,25 @@ def main():
     optparser = OptionParser(usage=usage)
     optparser.add_option("-m", "--maf", action="append", help="filter.maf files")
     optparser.add_option("-o", "--out", help="output mutation variant type count .csv file")
-    optparser.add_option("-n", "--nonsyn", help="output nonsynonymous mutation count .csv file")
+    optparser.add_option("-a", "--annot", help="output functional annotations count .csv file")
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.maf or not options.out or not options.nonsyn:
+    if not options.maf or not options.out or not options.annot:
         optparser.print_help()
         sys.exit(-1)
 
     #READ in template file:
     cts = {}
-    non_cts = {}
+    annot_cts = {'Missense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
+                 'Nonsense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
+                 'Silent':{"SNP": 0, "INS": 0, "DEL": 0},
+    }
     for maf_f in options.maf:
         f = open(maf_f)
         #HACK: get run name from file
         run_name = maf_f.split("/")[-1].split("_")[0]
         #print(run_name)
         run_ct = {"SNP": 0, "INS": 0, "DEL": 0}
-        non_syn_ct = {"SNP": 0, "INS": 0, "DEL": 0}
         for l in f:
             if l.startswith("#"):
                 continue
@@ -41,32 +43,34 @@ def main():
             if label in run_ct:
                 #print(label)
                 run_ct[label] += 1
-            #HANDLE non-synomous i.e. Missense_Mutation or Nonsense_Mutation
-            if classification in ['Missense_Mutation', 'Nonsense_Mutation']:
-                if label in non_syn_ct:
-                    non_syn_ct[label] += 1
+                #HANDLE annotation- i.e. count Missense,Nonsense,Silent
+                if classification in annot_cts:
+                    annot_cts[classification][label] +=1
         f.close()
         run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['DEL']])
-        non_syn_ct['TOTAL']= sum([non_syn_ct['SNP'], non_syn_ct['INS'], non_syn_ct['DEL']])
+        for k in annot_cts.keys():
+            annot_cts[k]['TOTAL']= sum([v for v in annot_cts[k].values()])
         
         cts[run_name] = run_ct
-        non_cts[run_name] = non_syn_ct
 
     out = open(options.out, "w")
-    non_syn_out = open(options.nonsyn, "w")
     out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE"]))
-    non_syn_out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE"]))
     for r in sorted(cts.keys()):
         tmp = cts[r]
-        tmp_non = non_cts[r]
         out.write("%s\n" % ",".join([r, str(tmp['TOTAL']), str(tmp["SNP"]),
                                      str(tmp["INS"]), str(tmp["DEL"])]))
-        non_syn_out.write("%s\n" % ",".join([r, str(tmp_non['TOTAL']),
-                                             str(tmp_non["SNP"]),
-                                             str(tmp_non["INS"]),
-                                             str(tmp_non["DEL"])]))
     out.close()
-    non_syn_out.close()
+
+    #WRITE out annotation counts
+    annot_out = open(options.annot, "w")
+    annot_out.write("%s\n" % ",".join(["Classification","TOTAL", "SNP","INSERT","DELETE"]))
+    for (classification, counts) in annot_cts.items():
+        annot_out.write("%s\n" % ",".join([classification,
+                                             str(counts['TOTAL']),
+                                             str(counts["SNP"]),
+                                             str(counts["INS"]),
+                                             str(counts["DEL"])]))
+    annot_out.close()
 
 if __name__=='__main__':
     main()

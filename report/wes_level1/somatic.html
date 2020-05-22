@@ -29,23 +29,23 @@
 		 </table>
 		 </br>
 
-		 <strong>Somatic NonSynonymous Mutations Summary Table</strong>
+		 <strong>Somatic Mutation Functional Annotation Summary Table</strong>
 		 <table class="table" style="font-size: 15px">
 		   <tbody>
 		     <tr>
-		       <th>Run</th>
+		       <th>Type</th>
 		       <th>Total</th>
 		       <th>SNPs</th>o
 		       <th>INSERT</th>
 		       <th>DEL</th>
 		     </tr>
-		     {% for run in somatic_table %}
+		     {% for type in somatic_annot_table %}
 		     <tr>
-		       <td>{{ run }}</td>
-		       <td>{{ somatic_nonSyn_table[run].TOTAL }}</td>
-		       <td>{{ somatic_nonSyn_table[run].SNP }}</td>
-		       <td>{{ somatic_nonSyn_table[run].INSERT }}</td>
-		       <td>{{ somatic_nonSyn_table[run].DELETE }}</td>
+		       <td>{{ type }}</td>
+		       <td>{{ somatic_annot_table[type].TOTAL }}</td>
+		       <td>{{ somatic_annot_table[type].SNP }}</td>
+		       <td>{{ somatic_annot_table[type].INSERT }}</td>
+		       <td>{{ somatic_annot_table[type].DELETE }}</td>
 		     </tr>
 		     {% endfor %}
 		   </tbody>
