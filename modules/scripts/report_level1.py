@@ -143,6 +143,20 @@ def getSomaticSummaryTable(config):
     #print(somatic_summary_table)
     return somatic_summary_table
 
+def getSomaticNonSynTable(config):
+    """Generates the nonsynonymous summary table"""
+    #PARSE out the summary
+    somatic_nonsyn_table = {}
+    mut_summary_f = "analysis/somatic/somatic_nonSynonymous_summaries.%s.csv" % config['somatic_caller']
+    f = open(mut_summary_f)
+    hdr = f.readline().strip().split(",")
+    for l in f:
+        tmp = l.strip().split(",")
+        run_name = tmp[0]
+        somatic_nonsyn_table[run_name] = dict(zip(hdr,tmp))
+    f.close()
+    return somatic_nonsyn_table
+
 def getSNVSummaryTable(config):
     """Generates the Ref/Alt summary table, e.g. A>C, A>G counts"""
     #PARSE out the summary SNV
@@ -267,6 +281,7 @@ def main():
     #SOMATIC
     wes_report_vals['somatic'] = getSomaticInfo(config)
     wes_report_vals['somatic_table'] = getSomaticSummaryTable(config)
+    wes_report_vals['somatic_nonSyn_table'] = getSomaticNonSynTable(config)
     wes_report_vals['somatic_SNV_table'] = getSNVSummaryTable(config)
     wes_report_vals['somatic_summary_table_file'] = "analysis/somatic/somatic_mutation_summaries.%s.csv" % config['somatic_caller']
 

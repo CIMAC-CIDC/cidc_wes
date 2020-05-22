@@ -10,7 +10,7 @@
 		 <table class="table" style="font-size: 15px">
 		   <tbody>
 		     <tr>
-		       <th>RUN</th>
+		       <th>Run</th>
 		       <th>Total</th>
 		       <th>SNPs</th>
 		       <th>INSERT</th>
@@ -27,8 +27,31 @@
 		     {% endfor %}
 		   </tbody>
 		 </table>
-
 		 </br>
+
+		 <strong>Somatic NonSynonymous Mutations Summary Table</strong>
+		 <table class="table" style="font-size: 15px">
+		   <tbody>
+		     <tr>
+		       <th>Run</th>
+		       <th>Total</th>
+		       <th>SNPs</th>o
+		       <th>INSERT</th>
+		       <th>DEL</th>
+		     </tr>
+		     {% for run in somatic_table %}
+		     <tr>
+		       <td>{{ run }}</td>
+		       <td>{{ somatic_nonSyn_table[run].TOTAL }}</td>
+		       <td>{{ somatic_nonSyn_table[run].SNP }}</td>
+		       <td>{{ somatic_nonSyn_table[run].INSERT }}</td>
+		       <td>{{ somatic_nonSyn_table[run].DELETE }}</td>
+		     </tr>
+		     {% endfor %}
+		   </tbody>
+		 </table>
+		 </br>
+
 		 <strong>SNV Summary Table</strong>
 		 {% for run in somatic_SNV_table %}
 		 <strong>{{ run }}</strong>
