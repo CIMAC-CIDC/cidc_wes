@@ -2,8 +2,55 @@
 #import os
 #from string import Template
 
+_lego_plot_data_path="cidc_wes/cidc-vs/cidcvs/data/REF/"
+#MAP of TCGA Cancer type names and their data files
+_lego_plot_map={'ACC':'TCGA-ACC.mtrc',
+                'BLCA':'TCGA-BLCA.mtrx',
+                'BRCA':'TCGA-BRCA.mtrx',
+                'CESC':'TCGA-CESC.mtrx',
+                'CHOL':'TCGA-CHOL.mtrx',
+                'COAD':'TCGA-COAD.mtrx',
+                'DLBC':'TCGA-DLBC.mtrx',
+                'ESCA':'TCGA-ESCA.mtrx',
+                'GBM':'TCGA-GBM.mtrx',
+                'HNSC':'TCGA-HNSC.mtrx',
+                'KICH':'TCGA-KICH.mtrx',
+                'KIRC':'TCGA-KIRC.mtrx',
+                'KIRP':'TCGA-KIRP.mtrx',
+                'LGG':'TCGA-LGG.mtrx',
+                'LIHC':'TCGA-LIHC.mtrx',
+                'LUAD':'TCGA-LUAD.mtrx',
+                'LUSC':'TCGA-LUSC.mtrx',
+                'MESO':'TCGA-MESO.mtrx',
+                'OV':'TCGA-OV.mtrx',
+                'PAAD':'TCGA-PAAD.mtrx',
+                'PCPG':'TCGA-PCPG.mtrx',
+                'PRAD':'TCGA-PRAD.mtrx',
+                'READ':'TCGA-READ.mtrx',
+                'SARC':'TCGA-SARC.mtrx',
+                'SKCM':'TCGA-SKCM.mtrx',
+                'STAD':'TCGA-STAD.mtrx',
+                'TGCT':'TCGA-TGCT.mtrx',
+                'THCA':'TCGA-THCA.mtrx',
+                'THYM':'TCGA-THYM.mtrx',
+                'UCEC':'TCGA-UCEC.mtrx',
+                'UCS':'TCGA-UCS.mtrx',
+                'UVM':'TCGA-UVM.mtrx'}
+
+
 _somatic_threads=32
 #_vcf2maf_threads=4
+
+def build_tcga_param():
+    """Builds the TCGA panel parameter to use for the mutationSignature rule"""
+    tcga_panel = config.get('tcga_panel')
+    if tcga_panel:
+        tmp = " -c ".join([os.path.join(_lego_plot_data_path, _lego_plot_map[c]) for c in tcga_panel.split(" ") if c in _lego_plot_map])
+        #prepend a '-c'
+        tmp = " -c " + tmp
+    else:
+        tmp = ''
+    return tmp
 
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
@@ -270,14 +317,15 @@ rule mutationSignature:
         "analysis/somatic/{run}/{run}_{caller}.{type}.pdf"
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
-        matrix="cidc_wes/cidc-vs/cidcvs/data/REF/TCGA-LUAD.mtrx", #HARD coding this for now!!!
+        #BUILD up our tcga_panel using a helper fn
+        tcga_panel = build_tcga_param(),
         outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.%s" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller, wildcards.type),
         name = lambda wildcards: wildcards.run
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_mutationSignature.txt"
     group: "somatic"
     shell:
-        "cidc_wes/cidc-vs/mutProfile.py -c {params.matrix} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+        "cidc_wes/cidc-vs/mutProfile.py {params.tcga_panel} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
 rule maf_exon_filter:
     """General rule to filter coding exon mutations"""

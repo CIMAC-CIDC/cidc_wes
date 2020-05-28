@@ -20,6 +20,8 @@ import pandas as pd
 from collections import OrderedDict
 from io import StringIO
 import os
+import sys
+import numpy as np
 import argparse
 import pybedtools
 
@@ -100,8 +102,8 @@ def genTrinucleotideMtrx(maf, ref_fasta, dna_alt_col="HGVSc"):
 
     '''
 
-    conv = dict(zip(('A>G', 'T>C', 'C>T', 'G>A', 'A>T', 'T>A', 'A>C', 'T>G', 'C>A', 'G>T', 'C>G', 'G>C'),
-                    ("T>C", "T>C", "C>T", "C>T", "T>A", "T>A", "T>G", "T>G", "C>A", "C>A", "C>G", "C>G")))
+    conv = dict(zip(("T>C", "A>G", "C>T", "G>A", "T>A", "A>T","T>G", "A>C", "C>A", "G>T", "C>G", "G>C"),
+                    ("A>G", "A>G", "C>T", "C>T", "A>T", "A>T","A>C", "A>C", "C>A", "C>A", "C>G", "C>G")))
 
     snv_maf = fetchMut(maf, dna_alt_col=dna_alt_col).iloc[:, 1:]
     snv_intervel = pybedtools.BedTool.from_dataframe(snv_maf)
@@ -151,7 +153,7 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
                          ('T_A', 0), ('T_C', 0), ('T_G', 0), ('T_T', 0),
     ])
 
-    mut_panel = ['C>A', 'C>G', 'C>T', 'T>C', 'T>G', 'T>A']
+    mut_panel = ['C>A', 'C>G', 'C>T', 'A>G', 'A>C', 'A>T']
     colors = ["deepskyblue", "black", "red",
               "lightgray", 'springgreen', "pink"]
     if not rows is None:
@@ -160,7 +162,12 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
         row_panel = [title]
     num_row = len(row_panel)
     fig, axarr = plt.subplots(num_row, 6, sharex=True,
-                            sharey=True, figsize=(24, 2*num_row))
+                              sharey=True, figsize=(24, 2*num_row))
+    #LEN: HACK- if there's just one plot, i.e. no TCGA panel,
+    #then axarr = 2-D np-array with just one elm
+    if num_row == 1:
+        axarr = np.array([axarr])
+
     for j, r in enumerate(row_panel):
         for i, c in enumerate(mut_panel):
             tmp_tri = pd.Series(tri_n)
@@ -172,7 +179,6 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
                 df.loc[determiner, [neighbor, height]].set_index(neighbor).to_dict()[height])
             neighbor_h /= neighbor_h.sum()
             tmp_tri.update(neighbor_h)
-
             ax = axarr[j, i]
             if j == 0:
                 ax.set_title(c, weight='bold')
@@ -191,13 +197,14 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
 
 def main(sampleID, output,maf,ref_fasta,ref_cancer):
     tri_mtrx = genTrinucleotideMtrx(maf=maf, ref_fasta = ref_fasta)
-    if ref_cancer == '':
-        fig = plot96Mtrx(df=tri_mtrx)
-    else:
+    if ref_cancer and len(ref_cancer): #non-empty list of TCGA refs
         tri_mtrx['Group'] = sampleID
-        ref_mtrx = pd.read_table(ref_cancer)
-        fig = plot96Mtrx(df=pd.concat(
-            [tri_mtrx, ref_mtrx]), rows='Group')
+        #make list of TCGA ref pd matrices
+        mtrxs = [pd.read_table(ref_f) for ref_f in ref_cancer]
+        mtrxs.insert(0,tri_mtrx)
+        fig = plot96Mtrx(df=pd.concat(mtrxs), rows='Group')
+    else:
+        fig = plot96Mtrx(df=tri_mtrx)
     fig.savefig('{}.pdf'.format(output),dpi=200)
     plt.clf()
 
@@ -212,7 +219,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--maf', type=str,
                         required=True, help="MAF File")
 
-    parser.add_argument('-c', '--cancer', type=str, default='',
+    parser.add_argument('-c', '--cancer', type=str, action='append',
                         required=False, help="Reference cancer mutation frequency file")
     parser.add_argument('-n', '--name', type=str, default='sample', required=False, help="Sample Name")
   
