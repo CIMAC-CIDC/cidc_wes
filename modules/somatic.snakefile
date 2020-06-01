@@ -24,6 +24,7 @@ _lego_plot_map={'ACC':'TCGA-ACC.mtrc',
                 'MESO':'TCGA-MESO.mtrx',
                 'OV':'TCGA-OV.mtrx',
                 'PAAD':'TCGA-PAAD.mtrx',
+                'PANCAN':'TCGA-PANCAN.mtrx',
                 'PCPG':'TCGA-PCPG.mtrx',
                 'PRAD':'TCGA-PRAD.mtrx',
                 'READ':'TCGA-READ.mtrx',
@@ -43,14 +44,16 @@ _somatic_threads=32
 
 def build_tcga_param():
     """Builds the TCGA panel parameter to use for the mutationSignature rule"""
+    #PANCAN is a permanent member of the panel
+    ls = [os.path.join(_lego_plot_data_path, _lego_plot_map['PANCAN'])]
     tcga_panel = config.get('tcga_panel')
+
     if tcga_panel:
-        tmp = " -c ".join([os.path.join(_lego_plot_data_path, _lego_plot_map[c]) for c in tcga_panel.split(" ") if c in _lego_plot_map])
-        #prepend a '-c'
-        tmp = " -c " + tmp
-    else:
-        tmp = ''
-    return tmp
+        for cancer in tcga_panel.split(" "):
+            if cancer in _lego_plot_map:
+                ls.append(os.path.join(_lego_plot_data_path, _lego_plot_map[cancer]))
+    tmp = " -c ".join(ls)
+    return tmp #need to add a -c
 
 #NOTE: somatic_runsHelper, getNormal_sample, and getTumor_sample are NOT
 #called by any one!
@@ -325,7 +328,7 @@ rule mutationSignature:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_mutationSignature.txt"
     group: "somatic"
     shell:
-        "cidc_wes/cidc-vs/mutProfile.py {params.tcga_panel} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.tcga_panel} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
 
 rule maf_exon_filter:
     """General rule to filter coding exon mutations"""
