@@ -45,13 +45,14 @@ _somatic_threads=32
 def build_tcga_param():
     """Builds the TCGA panel parameter to use for the mutationSignature rule"""
     #PANCAN is a permanent member of the panel
-    ls = [os.path.join(_lego_plot_data_path, _lego_plot_map['PANCAN'])]
+    ls = []
     tcga_panel = config.get('tcga_panel')
 
     if tcga_panel:
         for cancer in tcga_panel.split(" "):
             if cancer in _lego_plot_map:
                 ls.append(os.path.join(_lego_plot_data_path, _lego_plot_map[cancer]))
+    ls.append(os.path.join(_lego_plot_data_path, _lego_plot_map['PANCAN']))
     tmp = " -c ".join(ls)
     return tmp #need to add a -c
 

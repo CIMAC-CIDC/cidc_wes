@@ -157,7 +157,7 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
     colors = ["deepskyblue", "black", "red",
               "lightgray", 'springgreen', "pink"]
     if not rows is None:
-        row_panel = sorted(df[rows].unique())
+        row_panel = df[rows].unique()
     else:
         row_panel = [title]
     num_row = len(row_panel)
