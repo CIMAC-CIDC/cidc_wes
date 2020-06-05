@@ -39,7 +39,7 @@ vcf2maf_bufferSize: 1000 #for standard8 #50000 for highmem-64
 # 'MHCflurry', 'MHCnuggetsI', 'MHCnuggetsII', 'NNalign', 'NetMHC',
 # 'NetMHCIIpan', 'NetMHCcons', 'NetMHCpan', 'PickPocket', 'SMM',
 # 'SMMPMBEC', 'SMMalign'
-neoantigen_callers: "MHCflurry NetMHCcons MHCnuggetsII"
+neoantigen_callers: "NetMHCpan NetMHCcons MHCflurry NetMHCIIpan"
 
 # neoantigen module - Define which epitope lengths to analyze in comma
 # 	     	      separated list

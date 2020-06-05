@@ -36,6 +36,7 @@ def neoantigen_targets(wildcards):
 
         #output file map
         ls.append("analysis/neoantigen/%s/%s.neoantigen.output.yaml" % (run,run))
+        ls.append("analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run,run))
     return ls
 
 def neoantigen_output_files(wildcards):
@@ -63,6 +64,16 @@ def neoantigen_get_output_keys(wildcards):
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(['classII_ranked_epitopes','classII_all_epitopes',
                    'combined_ranked_epitopes','combined_all_epitopes'])
+    return ls
+
+def neoantigen_getNeoantigenList_helper(wildcards):
+    ls = []
+    run = wildcards.run
+    tumor = neoantigen_getTumor(wildcards)[0]
+    if config.get('neoantigen_run_classII'):
+        ls.append("analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run,tumor))
+    else:
+        ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run,tumor))
     return ls
 
 rule neoantigen_make_file_map:
@@ -222,4 +233,15 @@ rule neoantigen_add_sample:
     group: "neoantigen"
     shell:
         "cidc_wes/modules/scripts/neoantigen_addSample.py -f {input} -n {params.run_name} -o {output}"
+
+rule neoantigen_getNeoantigenList:
+    """Reads through the appropriate filtered.tsv file and generate a table of 
+    neoantigens"""
+    input:
+        neoantigen_getNeoantigenList_helper
+    output:
+        "analysis/neoantigen/{run}/{run}_neoantigen_table.tsv"
+    group: "neoantigen"
+    shell:
+        "cidc_wes/modules/scripts/neoantigen_getNeoantgnList.py -f {input} -o {output}"
 

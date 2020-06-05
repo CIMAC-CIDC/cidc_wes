@@ -9,25 +9,40 @@
 
 		<!-- LEN: SUB section -->
 		{% for run in neoantigen %}
+		<strong>Predicted Neoantigens</strong>
                 <div class="row">
                   <div class="col-6">
-                    <h3>{{ run.name }}- HLA Plot</h3>
-		    <img src="{{ run.hla_plot }}" width="500" height="650" class="float-left">
+		    <table class="table" style="font-size: 15px">
+		      <tbody>
+			<tr>
+			  <th>Gene</th>
+			  <th>EnsenbleID</th>
+			  <th>HLA</th>
+			  <th>Peptide Sequence</th>
+			  <th>Read Depth</th>
+			  <th>DNA VAF</th>
+			  <th>Method</th>
+			  <th>Score</th>
+			  <th>WT Score</th>
+			  <th>FoldChange</th>
+			</tr>
+			{% for row in run.neoantigens_table %}
+			<tr>
+			  <td>{{ row[0] }}</td>
+			  <td>{{ row[1] }}</td>
+			  <td>{{ row[2] }}</td>
+			  <td>{{ row[3] }}</td>
+			  <td>{{ row[4] }}</td>
+			  <td>{{ row[5] }}</td>
+			  <td>{{ row[6] }}</td>
+			  <td>{{ row[7] }}</td>
+			  <td>{{ row[8] }}</td>
+			  <td>{{ row[9] }}</td>
+			</tr>
+			{% endfor %}
+		      </tbody>
+		    </table>
 		  </div>
 		</div>
-		<hr/>
-		<div class="row">
-                  <div class="col-6">
-                    <h3>{{ run.name }}- Patient Plot</h3>
-		    <img src="{{ run.patient_plot }}" width="500" height="650" class="float-left">
-		  </div>
-		</div>
-		<hr/>
-		<div class="row">
-                  <div class="col-6">
-		    <h3>{{ run.name }}- Epitopes Plot</h3>
-		    <img src="{{ run.epitopes_plot }}" width="500" height="650" class="float-left">
-                  </div>
-                </div>
 		{% endfor %}
               </div>

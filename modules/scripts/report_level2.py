@@ -134,20 +134,26 @@ def getNeoantigenInfo(config):
     """Gets and populates a dictionary with the values required for the page"""
     ret = []
     for run in config['runs']:
-        sub_path="wes_images/neoantigen/%s/" % run
-        hla_plot = sub_path+"HLA_epitopes_fraction_plot.png"
-        patient_plot = sub_path+"Patient_count_epitopes_plot.png"
-        epitopes_plot = sub_path+"epitopes_affinity_plot.png"
+        # sub_path="wes_images/neoantigen/%s/" % run
+        # hla_plot = sub_path+"HLA_epitopes_fraction_plot.png"
+        # patient_plot = sub_path+"Patient_count_epitopes_plot.png"
+        # epitopes_plot = sub_path+"epitopes_affinity_plot.png"
 
-        if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-            pvacseq_file = "analysis/neoantigen/%s/combined/%s.all_epitopes.tsv" % (run, run)
+        if config.get('neoantigen_run_classII'):
+            pvacseq_file = "analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run, run)
         else:
-            pvacseq_file = "analysis/neoantigen/%s/MHC_Class_I/%s.all_epitopes.tsv" % (run, run)
+            pvacseq_file = "analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run, run)
+        neoantigens_table = []
+        neoantigen_tbl_file = "analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run, run)
+        f = open(neoantigen_tbl_file)
+        hdr = f.readline() #skip hdr
+        for l in f:
+            neoantigens_table.append(l.strip().split("\t"))
+        f.close()
+
         tmp = {'name': run,
-               'hla_plot': hla_plot,
-               'patient_plot': patient_plot,
-               'epitopes_plot':epitopes_plot,
-                'pvacseq_file': (getFileName(pvacseq_file), pvacseq_file),
+               'neoantigens_table': neoantigens_table,
+               'pvacseq_file': (getFileName(pvacseq_file), pvacseq_file),
         }
         ret.append(tmp)
     return ret
