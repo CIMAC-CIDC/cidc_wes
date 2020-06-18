@@ -7,9 +7,7 @@
 # !VERY IMPORTANT: you can OVERRIDE any of these values in config.yaml!
 
 hg38:
-  #bwa_index: ./ref_files/hg38/bwa/Homo_sapiens_assembly38.fasta
-  #genome_fasta: ./ref_files/hg38/bwa/Homo_sapiens_assembly38.fasta
-  bwa_index: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.fa
+  bwa_index: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.CIDC.fa
   genome_fasta: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.fa
   
   dbsnp: ./ref_files/hg38/snp/Homo_sapiens_assembly38.dbsnp138.vcf
