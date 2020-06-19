@@ -1,0 +1,128 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title" : "WES results json schema",
+    "description" : "This schema defines the wes output used for cohort reports",
+    "definitions": {
+        "sample": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string"},
+                "alignment": { "type": "object",
+                               "properties": {
+                                   "total_reads": {"type": "number"},
+                                   "mapped_reads": {"type": "number"},
+                                   "dedup_reads": {"type": "number"},
+                                   "gc_content": {"type": "array", "items": { "type":"number"}},
+                                   "quality_score": {"type": "array", "items": { "type":"number"}}
+                               },
+                               "required": ["total_reads", "mapped_reads",
+			       "dedup_reads","gc_content","quality_score"]
+                             },
+                "coverage":  { "type": "object",
+                               "properties": {
+                                   "total_reads": {"type": "number"},
+                                   "mean_depth": {"type": "number"},
+                                   "q1_depth": {"type": "number"},
+                                   "median_depth": {"type": "number"},
+                                   "q3_depth": {"type": "number"},
+                                   "percent_bases_gt_50": {"type": "number"},
+                                   "$comment": "this is a comment"
+                               },
+                               "required": ["total_reads","mean_depth", 
+			       "q1_depth", "median_depth", "q3_depth",
+			       "percent_bases_gt_50"]
+                             },
+                "hla":       { "type": "object",
+                               "properties": {
+                                   "A-1": {"type": "string"},
+                                   "A-2": {"type": "string"},
+                                   "B-1": {"type": "string"},
+                                   "B-2": {"type": "string"},
+                                   "C-1": {"type": "string"},
+                                   "C-2": {"type": "string"},
+                                   "DPB1-1": {"type": "string"},
+                                   "DPB1-2": {"type": "string"},
+                                   "DQB1-1": {"type": "string"},
+                                   "DQB1-2": {"type": "string"},
+                                   "DRB1-1": {"type": "string"},
+                                   "DRB1-2": {"type": "string"}
+                               },
+                               "required": ["A-1","A-2","B-1","B-2","C-1","C-2"]
+                             }
+            },
+            "required": ["id","alignment","coverage","hla"]
+        },
+	"mutation_row" : { "type": "object",
+                           "properties": {
+                               "total": {"type": "number"},
+                               "snp": {"type": "number"},
+                               "insertion": {"type": "number"},
+                               "deletion": {"type": "number"}
+                           },
+                           "required": ["total","snp","insertion","deletion"]
+        },
+	"transition_row" : { "type": "object",
+                             "properties": {
+                                 "A": {"type": "number"},
+                                 "C": {"type": "number"},
+                                 "G": {"type": "number"},
+                                 "T": {"type": "number"}
+                           },
+                           "required": ["A","C","G","T"]
+        },
+	"neoantigen_row" : { "type": "object",
+                             "properties": {
+                                 "Gene": {"type": "string"},
+                                 "EnsemblID": {"type": "string"},
+                                 "HLA": {"type": "string"},
+                                 "Peptide_Sequence": {"type": "string"},
+                                 "Read_Depth": {"type": "number"},
+                                 "DNA_VAF": {"type": "number"},
+                                 "Method": {"type": "string"},
+                                 "Score": {"type": "number"},
+                                 "WT_Score": {"type": "number"},
+                                 "Fold_Change": {"type": "number"}
+                           },
+                           "required": ["Gene","EnsemblID","HLA",
+                                        "Peptide_Sequence","Read_Depth",
+                                        "DNA_VAF","Method","Score","WT_Score",
+                                        "Fold_Change"]
+        },
+
+        "somatic_results": {
+            "type": "object",
+            "properties": {
+                "mutation_summary": {"$ref": "#/definitions/mutation_results" },
+                "functional_summary": {"$ref": "#/definitions/mutation_results"},
+                "ninety-six-matrix": {"type": "array", "items": { "type":"number"}},
+                "transition_matrix": {"type": "object",
+                                      "properties": {
+                                          "A": {"$ref": "#/definitions/transition_row"},
+                                          "C": {"$ref": "#/definitions/transition_row"},
+                                          "G": {"$ref": "#/definitions/transition_row"},
+                                          "T": {"$ref": "#/definitions/transition_row"}
+                                      },
+                                      "required": ["A","C","G","T"],
+                                      "$comment":"this is another comment"
+            },
+            "required": ["mutation_summary", "functional_summary","ninety-six-matrix", "transition_matrix"]
+        }
+    }
+    },
+
+    "type": "object",
+    "$comment": "RUN level object",
+    "properties": {
+        "tumor": { "$ref": "#/definitions/sample" },
+        "normal": { "$ref": "#/definitions/sample" },
+        "somatic": { "$ref": "#/definitions/somatic_results" },
+        "neoantigen": {"type": "array",
+                       "items": {"$ref": "#/definitions/neoantigen_row"}},
+        "cnv": {"type": "string"},
+        "clonality": {"type": "number"}, 
+        "germline": {"type": "number"},
+        "purity": {"type": "number"},
+        "$comment": "Q1: Can clonality be represented by a single #?; TODO: CNV"
+    },
+    "required": ["tumor","normal","somatic","neoantigen","cnv","clonality","germline","purity"]
+}
