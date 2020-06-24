@@ -9,6 +9,7 @@ _int = 777
 _float = 7.0
 _string = "TGBTG"
 _int_arr = [_int,_int,_int]
+_file_path = "/the/only/way"
 
 ###############################################################################
 # SAMPLE level definition
@@ -40,9 +41,13 @@ hla = { "A-1": _string,
         "DRB1-2": _string} #OPTIONAL
 
 sample = {'id': _string,
+          'raw_file1': _file_path, #bucket path, either fastq or bam
+          'raw_file2': _file_path, #bucket path, in case of PE
+          'dedup_bam_file': _file_path,
           'alignment': alignment,
           'coverage': coverage,
-          'hla': hla}
+          'hla': hla,
+          'msi_sensor': _float}
 
 ###############################################################################
 # END SAMPLE level definition
@@ -63,7 +68,10 @@ transition_row = {"A": _int,
                   "T": _int}
 
 
-somatic_results = {'mutation_summary': mutation_results,
+somatic_results = {'filtered_vcf_file': _file_path,
+                   'filtered_maf_file': _file_path,
+                   'tmb': _int, #Total mutation burden
+                   'mutation_summary': mutation_results,
                    'functional_summary': mutation_results,
                    'trinucleotide_matrix': _int_arr,
                    'transition_matrix': {'A': transition_row,
@@ -94,9 +102,10 @@ run = {'id': _string,
        'normal': sample,
        'somatic': somatic_results,
        'neoantigen': [neoantigen_row, neoantigen_row, neoantigen_row],
-       "cnv": _string, #TODO
-       "clonality": _float, #Q: can clonality be represented by a single #?
-       "germline": _float,
+       'neoantigen_file': _file_path, #path to pvacseq filtered.tsv file
+       "cnv_file": _file_path, #path to sequenza result txt file
+       "clonality": _float, 
+       "germline": _float, #Tumor/normal % mutation overlap
        "purity": _float,
        }
 
