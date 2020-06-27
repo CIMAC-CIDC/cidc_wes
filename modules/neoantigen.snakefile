@@ -46,15 +46,18 @@ def neoantigen_output_files(wildcards):
     ls = []
     run = wildcards.run
     tumor = config['runs'][run][1]
+    ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run,tumor))
     ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.tsv" % (run,tumor))
     ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.all_epitopes.tsv" % (run,tumor))
 
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         #return classII results and combined
+        ls.append("analysis/neoantigen/%s/MHC_Class_II/%s.filtered.tsv" % (run,tumor))
         ls.append("analysis/neoantigen/%s/MHC_Class_II/%s.filtered.condensed.ranked.tsv" % (run,tumor))
         ls.append("analysis/neoantigen/%s/MHC_Class_II/%s.all_epitopes.tsv" % (run,tumor))
 
         #Also combined
+        ls.append("analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run,tumor))
         ls.append("analysis/neoantigen/%s/combined/%s.filtered.condensed.ranked.tsv" % (run,tumor))
         ls.append("analysis/neoantigen/%s/combined/%s.all_epitopes.tsv" % (run,tumor))
     return ls
@@ -70,6 +73,7 @@ def neoantigen_getNeoantigenList_helper(wildcards):
     ls = []
     run = wildcards.run
     tumor = neoantigen_getTumor(wildcards)[0]
+
     if config.get('neoantigen_run_classII'):
         ls.append("analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run,tumor))
     else:
@@ -178,46 +182,67 @@ rule neoantigen_vep_annotate:
         """vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Downstream --plugin Wildtype --dir_plugins {params.vep_plugins} --pick"""
 
 
-rule neoantigen_pvacseq:
-    """NOTE: neoantigen's pvacseq is not available on CONDA
-    MUST either be installed in base system/docker container"""
-    input:
-        vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
-        hla=getTumorHLA,
-    output:
-        main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
-        #OTHERS:
-        filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
-        all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
-        #The output below causes a rule ambiguity with neoantigen_addSample's
-        #output file
-        #tsv="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.tsv",
-    
-        #NOTE: can't get this last one in b/c snakemake complains about
-        #a non-unique name
-        #input_log="analysis/neoantigen/{run}/MHC_Class_I/log/inputs.yml",
-    
-        #NOTE: the wildcard tumor is used b/c we can't actually pull in the
-        #tumor name 
+if not config.get('neoantigen_run_classII'):
+    rule neoantigen_pvacseq:
+        """NOTE: neoantigen's pvacseq is not available on CONDA
+        MUST either be installed in base system/docker container"""
+        input:
+            vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+            hla=getTumorHLA,
+        output:
+            main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
+            #OTHERS:
+            filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
+            all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
+        params:
+            normal = lambda wildcards: config['runs'][wildcards.run][0],
+            tumor = lambda wildcards: config['runs'][wildcards.run][1],
+            iedb = config['neoantigen_iedb'],
+            HLA = lambda wildcards,input: parseHLA(input.hla),
+            callers=config.get('neoantigen_callers','NetMHCpan NetMHCcons MHCflurry NetMHCIIpan'),
+            epitope_lengths=config.get('neoantigen_epitope_lengths', '8,9,10,11'),
+            output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
+        threads: _neoantigen_threads
+        group: "neoantigen"
+        log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
+        benchmark:
+            "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
+        shell:
+            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
+else: #EXPECT class II output
+    rule neoantigen_pvacseq:
+        """NOTE: neoantigen's pvacseq is not available on CONDA
+        MUST either be installed in base system/docker container"""
+        input:
+            vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+            hla=getTumorHLA,
+        output:
+            main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
+            #OTHERS:
+            filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
+            all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
+            main2="analysis/neoantigen/{run}/MHC_Class_II/{tumor}.filtered.condensed.ranked.tsv",
+            filtered2="analysis/neoantigen/{run}/MHC_Class_II/{tumor}.filtered.tsv",
+            all_epitopes2="analysis/neoantigen/{run}/MHC_Class_II/{tumor}.all_epitopes.tsv",
+            main3="analysis/neoantigen/{run}/combined/{tumor}.filtered.condensed.ranked.tsv",
+            filtered3="analysis/neoantigen/{run}/combined/{tumor}.filtered.tsv",
+            all_epitopes3="analysis/neoantigen/{run}/combined/{tumor}.all_epitopes.tsv",
 
-        #NOTE: typically when HLA class I and HLA class II are both called
-        #the results are in combined/{inputname}.condensed.tsv
-        #Since we're only generating class I for now, no combined is generated
-    params:
-        normal = lambda wildcards: config['runs'][wildcards.run][0],
-        tumor = lambda wildcards: config['runs'][wildcards.run][1],
-        iedb = config['neoantigen_iedb'],
-        HLA = lambda wildcards,input: parseHLA(input.hla),
-        callers=config['neoantigen_callers'] if config['neoantigen_callers'] else "MHCflurry NetMHCcons MHCnuggetsII",
-        epitope_lengths=config['neoantigen_epitope_lengths'] if config['neoantigen_epitope_lengths'] else "8,9,10,11",
-        output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
-    threads: _neoantigen_threads
-    group: "neoantigen"
-    log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
-    benchmark:
-        "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
-    shell:
-        """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
+        params:
+            normal = lambda wildcards: config['runs'][wildcards.run][0],
+            tumor = lambda wildcards: config['runs'][wildcards.run][1],
+            iedb = config['neoantigen_iedb'],
+            HLA = lambda wildcards,input: parseHLA(input.hla),
+            callers=config.get('neoantigen_callers','NetMHCpan NetMHCcons MHCflurry NetMHCIIpan'),
+            epitope_lengths=config.get('neoantigen_epitope_lengths', '8,9,10,11'),
+            output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
+        threads: _neoantigen_threads
+        group: "neoantigen"
+        log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
+        benchmark:
+            "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
+        shell:
+            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 
   
 rule neoantigen_add_sample:
