@@ -94,7 +94,9 @@ rule targets_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         cov_thresh=50,
-        index2=config['target_Bed_input'],
+        #ERROR- should be set to center target bed file
+        #index2=config['target_Bed_input'],
+        index2= center_targets[config.get("center", "broad")] #default to broad
     threads: _coveragemetrics_threads
     group: "coverage"
     benchmark:
