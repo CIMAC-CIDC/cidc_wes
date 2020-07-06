@@ -125,6 +125,7 @@ def level2_sans_report(wildcards):
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(xhla_targets(wildcards))
     ls.extend(clonality_targets(wildcards))
+    ls.extend(msisensor2_targets(wildcards))
     return ls
 
 def level2_targets(wildcards):
@@ -164,4 +165,5 @@ include: "./modules/clonality.snakefile" # ...
 include: "./modules/optitype.snakefile" #...
 include: "./modules/xhla.snakefile" #....
 include: "./modules/neoantigen.snakefile"
+include: "./modules/msisensor2.snakefile"
 include: "./modules/report.snakefile" # report module

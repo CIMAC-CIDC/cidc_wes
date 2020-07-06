@@ -41,6 +41,9 @@ hg38:
   #copynumber
   gistic2: ./ref_files/hg38/gistic2/hg38.UCSC.add_miR.160920.refgene.mat
 
+  #msisensor2
+  msisensor2: ./ref_files/hg38/msisensor2/models_hg38/
+
   #The following are stale and marked deletion
   #target_Bed_input: ./ref_files/hg38/target_beds/mocha.liftover.hg38.noContigs.bed
   #positions_bamtovcf: ./ref_files/hg38/target_beds/pos_bamtovcf.bed
