@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to generate analysis/report/wes_level1.html"""
+"""Script to generate wes run information"""
 
 import os
 import sys
@@ -9,40 +9,45 @@ import subprocess
 import yaml
 
 from optparse import OptionParser
-import jinja2
-import pandas as pd
+#import jinja2
+#import pandas as pd
 
-################### THIS fn is copied from wes.snakefile ######################
-def getRuns(config):
-    """parse metasheet for Run groupings"""
-    ret = {}
+def getWESCommit():
+    """Tries to get the wes commit string by system calls"""
+    
+    #CHANGE to cidc_wes, but first store this
+    wd = os.getcwd()
+    os.chdir("cidc_wes")
+    #GET wes commit string--first six letters of this cmd
+    cmd = "git show --oneline -s".split(" ")
+    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    wes_commit = output[:6].decode("utf-8") 
 
-    #LEN: Weird, but using pandas to handle the comments in the file
-    #KEY: need skipinitialspace to make it fault tolerant to spaces!
-    metadata = pd.read_table(config['metasheet'], index_col=0, sep=',', comment='#', skipinitialspace=True)
-    f = metadata.to_csv().split() #make it resemble an actual file with lines
-    #SKIP the hdr
-    for l in f[1:]:
-        tmp = l.strip().split(",")
-        #print(tmp)
-        ret[tmp[0]] = tmp[1:]
+    #GET wes current tag
+    cmd = "git describe --tags".split(" ")
+    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    wes_tag = output.decode("utf-8").split("-")[0]
+    #wes_version = "WES %s (commit: %s)" % (wes_tag, wes_commit)
+    #CHANGE back to CWD
+    os.chdir(wd)
+    return (wes_tag, wes_commit)
 
-    #print(ret)
-    config['runs'] = ret
-    return config
-###############################################################################
 
-def getMetaInfo(config, wes_version_file):
+def getMetaInfo(config, wes_versions_file):
     """Gets and populates a dictionary with the values required for the 
     meta pg"""
 
-    #READ WES version from wes_version file
-    f = open(wes_version_file)
-    wes_version = f.read().strip()
-    f.close()
-    
-    #HARD_code
-    ref_version = "ver1.0 (build date: 20190911)"
+    #WES version
+    (wes_tag, wes_commit) = getWESCommit()
+    wes_version = "WES %s (commit: %s)" % (wes_tag, wes_commit)
+    wes_ref_version = config.get('wes_ref_version', None)
+    #if not defined, then get the default from wes_versions_file
+    if not wes_ref_version:
+        wes_ref_version = wes_versions_file.get('wes_ref_version','N/A')
+        
+    wes_image = config.get('wes_image', None)
+    if not wes_image:
+        wes_image = wes_versions_file.get('wes_image','N/A')
 
     #FROM CONFIG
     assembly_version = config['assembly']
@@ -50,47 +55,41 @@ def getMetaInfo(config, wes_version_file):
     somatic_caller = "%s (sentieon)" % config['somatic_caller']
 
 
-    #LEN: HARD code section
-    vep_version="ensemble-vep (91.3)"
-    facets_version="facets (0.5.14)"
-    optitype_version="optitype (1.3.2)"
-    neoantigen_caller = "pvactools (1.3.7)" #config['neoantigen_callers'] #LEN: hard-code
-    epitope_lengths = config['neoantigen_epitope_lengths']
-    vcftools_version="vcftools (0.1.16)"
-    bcftools_version="bcftools (1.9)"
+    #Tools versions
+    vep_version = wes_versions_file.get('vep_version',"N/A")
+    facets_version = wes_versions_file.get('facets_version',"N/A")
+    optitype_version = wes_versions_file.get('optitype_version',"N/A")
+    pvactools_version = wes_versions_file.get('pvactools_version',"N/A")
+    vcftools_version = wes_versions_file.get('vcftools_version',"N/A")
+    bcftools_version = wes_versions_file.get('bcftools_version',"N/A")
+    snakemake_version = wes_versions_file.get('snakemake_version',"N/A")
 
-    
-    #GET wes current tag
-    cmd = "snakemake -v".split(" ")
-    output, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    snakemake_version = "snakemake (%s)" % output.decode("utf-8").strip()
+    tmp = [('WES Version', wes_version),
+           ('WES Reference Files', wes_ref_version),
+           ('WES Tools Image', wes_image),
+           ('Assembly Version', assembly_version),
+           ('Sentieon Version', sentieon_version),
+           ('Somatic Caller', somatic_caller),
+           ('Ensembl VEP Version', vep_version),
+           ('Facets Version', facets_version),
+           ('Optitype Version (HLA caller)', optitype_version),
+           ('Pvactools Version (neoantigen caller)', pvactools_version),
+           ('Vcftools Version', vcftools_version),
+           ('Bcftools Version', bcftools_version),
+           ('Snakemake Version', snakemake_version)]
 
-    tmp = {'wes_version' : wes_version,
-           'ref_version' : ref_version,
-           'assembly_version': assembly_version,
-           'sentieon_version': sentieon_version,
-           'somatic_caller': somatic_caller,
-           'vep_version': vep_version,
-           'facets_version':facets_version,
-           'optitype_version':optitype_version,
-           'neoantigen_caller': neoantigen_caller,
-           'epitope_lengths': epitope_lengths,
-           'vcftools_version': vcftools_version,
-           'bcftools_version': bcftools_version,
-           'snakemake_version': snakemake_version,
-    }
     #print(tmp)
     return tmp
 
 def main():
-    usage = "USAGE: %prog -c [config.yaml file] -o [output html file]"
+    usage = "USAGE: %prog -c [config.yaml file] -o [output tsv file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-c", "--config", help="config.yaml file")
-    optparser.add_option("-v", "--wes_ver_file", help="file that stores the wes version")
-    optparser.add_option("-o", "--output", help="output html file")
+    optparser.add_option("-v", "--wes_ver_file", help="yaml file that stores wes software versions ")
+    optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.config or not options.output:
+    if not options.config or not options.wes_ver_file or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -101,29 +100,22 @@ def main():
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-    config = getRuns(config)
+
+    #PARSE wes version files
+    wes_ver_file = {}
+    with open(options.wes_ver_file, 'r') as stream:
+        try:
+            wes_ver_file = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    #get wes versions as a list of tuples
+    tmp = getMetaInfo(config, wes_ver_file)
+    #write output
+    out = open(options.output,'w')
+    for (k,v) in tmp:
+        out.write("%s\t%s\n" % (k,v))
+    out.close()
     
-    #ASSUMING it's being run as WES project level
-    templateLoader = jinja2.FileSystemLoader(searchpath="cidc_wes/report")
-    templateEnv = jinja2.Environment(loader=templateLoader)
-    template = templateEnv.get_template("wes_meta.html")
-
-    #STANDARD nav bar list
-    nav_list = [('wes_meta.html', 'WES_META'),
-                ('wes_level1.html','WES_Level1'),
-                ('wes_level2.html','WES_Level2')]
-
-    pg_name = "WES_META"
-    sidebar = [("meta", "META", [])]
-    
-    wes_report_vals = {'top_nav_list':nav_list, 'sidebar_nav': sidebar,
-                       'page_name': pg_name}
-
-    #META- get the dict and add it to wes_report_vals
-    meta = getMetaInfo(config, options.wes_ver_file)
-    wes_report_vals['meta'] = meta
-
-    template.stream(wes_report_vals).dump(options.output)  
-        
 if __name__ == '__main__':
     main()

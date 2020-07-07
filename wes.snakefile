@@ -167,3 +167,4 @@ include: "./modules/xhla.snakefile" #....
 include: "./modules/neoantigen.snakefile"
 include: "./modules/msisensor2.snakefile"
 include: "./modules/report.snakefile" # report module
+include: "./modules/report2.snakefile" # report module

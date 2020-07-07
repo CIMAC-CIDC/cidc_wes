@@ -1,0 +1,45 @@
+/* custom CSS for WES REPORT code below 
+ * copyright 2020 Len Taing (TGBTG)
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-simple-sidebar/blob/master/LICENSE)
+ */
+
+.wes_container {
+    padding: 3rem;
+}
+
+#sidebar-wrapper .sidebar-sub-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.0rem;
+  font-weight: bold;
+  background: #585778;
+  color: white;
+}
+
+#sidebar-wrapper .sidebar-heading {
+  background: #22204c;
+  height: 4.5rem;
+  color: white;
+}
+
+/* navbar */
+#topbar {
+  background: #22204c;
+}
+
+#cidc-brand{
+  color: white;
+}
+
+/* dropdown menu */
+#menu-toggle {
+  background: #585778;
+  border-color: #585778;
+}
+
+#navbarDropdown{
+  color: white;
+}
+
+#page-content-wrapper{
+  border-style: none;
+}

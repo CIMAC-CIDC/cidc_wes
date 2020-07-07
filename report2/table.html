@@ -1,0 +1,23 @@
+<div class="wes_table">
+  <h1 class="hidden-lg-down">{{ title }}</h1>
+  <table class="table table-striped">
+    {% if header %}
+    <thead>
+      <tr>
+	{% for c in header %}
+	<th scope="col">{{ c }}</th>
+	{% endfor %}
+      </tr>
+    </thead>
+    {% endif %}
+    <tbody>
+      {% for r in table %}
+      <tr>
+	{% for c in r %}
+	<td>{{ c }}</td>
+	{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

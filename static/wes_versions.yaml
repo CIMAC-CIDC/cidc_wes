@@ -1,0 +1,16 @@
+#A file of the latest versions of different tools and reference files
+#This is used by the report, namely in wes_meta to support default values
+# it's easier to store here than in the code
+#than in code
+wes_commit: e4b875
+wes_ref_version: wes-human-ref-ver1-3
+wes_image: wes-ver2-1
+
+#NOTE: tool versions are very unlikely to change
+vep_version: 91.3
+facets_version: 0.5.14
+optitype_version: 1.3.2
+pvactools_version: 1.3.7
+vcftools_version: 0.1.16
+bcftools_version: 1.9
+snakemake_version: 5.4.5
