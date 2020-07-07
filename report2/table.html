@@ -1,5 +1,5 @@
 <div class="wes_table">
-  <h1 class="hidden-lg-down">{{ title }}</h1>
+  <h3 class="hidden-lg-down">{{ title }}</h3>
   <table class="table table-striped">
     {% if header %}
     <thead>
@@ -14,7 +14,11 @@
       {% for r in table %}
       <tr>
 	{% for c in r %}
+	{% if loop.index == 1 %}
+	<th scope="row">{{ c }}</th>
+	{% else %}
 	<td>{{ c }}</td>
+	{% endif %}
 	{% endfor %}
       </tr>
       {% endfor %}

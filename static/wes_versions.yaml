@@ -7,6 +7,7 @@ wes_ref_version: wes-human-ref-ver1-3
 wes_image: wes-ver2-1
 
 #NOTE: tool versions are very unlikely to change
+sentieon_version: sentieon-genomics-201808.05
 vep_version: 91.3
 facets_version: 0.5.14
 optitype_version: 1.3.2

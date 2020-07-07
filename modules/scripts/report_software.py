@@ -43,26 +43,34 @@ def getWESCommit():
     return (wes_tag, wes_commit)
 
 
-def getMetaInfo(config, wes_versions_file):
+def getSoftwareInfo(config, wes_versions_file):
     """Gets and populates a dictionary with the values required for the 
     meta pg"""
 
-    #WES version
-    (wes_tag, wes_commit) = getWESCommit()
-    wes_version = "WES %s (commit: %s)" % (wes_tag, wes_commit)
-    wes_ref_version = config.get('wes_ref_version', None)
-    #if not defined, then get the default from wes_versions_file
-    if not wes_ref_version:
-        wes_ref_version = wes_versions_file.get('wes_ref_version','N/A')
-        
-    wes_image = config.get('wes_image', None)
-    if not wes_image:
-        wes_image = wes_versions_file.get('wes_image','N/A')
+    assembly_version = config['assembly']
+    sentieon_version = wes_versions_file.get('sentieon_version',"N/A")
+    somatic_caller = "%s (sentieon)" % config['somatic_caller']
 
-    tmp = [("WES","Version"), #hdr
-           ('WES Version', wes_version),
-           ('WES Reference Files', wes_ref_version),
-           ('WES Tools Image', wes_image),]
+    #Tools versions
+    vep_version = wes_versions_file.get('vep_version',"N/A")
+    facets_version = wes_versions_file.get('facets_version',"N/A")
+    optitype_version = wes_versions_file.get('optitype_version',"N/A")
+    pvactools_version = wes_versions_file.get('pvactools_version',"N/A")
+    vcftools_version = wes_versions_file.get('vcftools_version',"N/A")
+    bcftools_version = wes_versions_file.get('bcftools_version',"N/A")
+    snakemake_version = wes_versions_file.get('snakemake_version',"N/A")
+
+    tmp = [("Software", "Version"),
+           ('Assembly Version', assembly_version),
+           ('Sentieon Version', sentieon_version),
+           ('Somatic Caller', somatic_caller),
+           ('Ensembl VEP Version', vep_version),
+           ('Facets Version', facets_version),
+           ('Optitype Version (HLA caller)', optitype_version),
+           ('Pvactools Version (neoantigen caller)', pvactools_version),
+           ('Vcftools Version', vcftools_version),
+           ('Bcftools Version', bcftools_version),
+           ('Snakemake Version', snakemake_version)]
 
     #print(tmp)
     return tmp
@@ -86,7 +94,7 @@ def main():
     wes_ver_file = parseYaml(options.wes_ver_file)
 
     #get wes versions as a list of tuples
-    tmp = getMetaInfo(config, wes_ver_file)
+    tmp = getSoftwareInfo(config, wes_ver_file)
     #write output
     out = open(options.output,'w')
     for (k,v) in tmp:

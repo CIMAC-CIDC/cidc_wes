@@ -3,7 +3,8 @@
 def report2_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    ls.append("analysis/report2/wes_meta/wes_meta.tsv")
+    ls.append("analysis/report2/wes_meta/wes_run_version.tsv")
+    ls.append("analysis/report2/wes_meta/wes_software_versions.tsv")
     return ls
 
 rule report2_all:
@@ -18,12 +19,27 @@ rule report2_meta:
         config="config.yaml",
         wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report2/wes_meta/wes_meta.tsv"
+         "analysis/report2/wes_meta/wes_run_version.tsv"
     message:
-        "REPORT: creating WES META table"
+        "REPORT: creating WES version table"
     group: "report2"
     shell:
         """cidc_wes/modules/scripts/report_meta.py -c {input.config} -v {input.wes_versions} -o {output}"""
+
+rule report2_software:
+    """Gather's all the information required for the meta information and
+    outputs a csv file
+    """
+    input:
+        config="config.yaml",
+        wes_versions="cidc_wes/static/wes_versions.yaml"
+    output:
+         "analysis/report2/wes_meta/wes_software_versions.tsv"
+    message:
+        "REPORT: creating WES software table"
+    group: "report2"
+    shell:
+        """cidc_wes/modules/scripts/report_software.py -c {input.config} -v {input.wes_versions} -o {output}"""
 
 rule report2_slurp:
     """Generalized rule to dynamically generate the report BASED
