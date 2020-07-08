@@ -30,16 +30,30 @@ def prettyprint(s):
     s = s.replace("_"," ")
     return s.title()
 
+#NOTE: this can easily handle csv files too!
 def buildTable(tsv_file, section, jinjaEnv):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
     template = jinjaEnv.get_template("table.html")
     #Title is the filename prettyprinted
-    title = prettyprint(tsv_file.split("/")[-1].split(".")[0])
+    fname = tsv_file.split("/")[-1].split(".")[0]
+    path = "/".join(tsv_file.split("/")[:-1]) #drop the file
+    title = prettyprint(fname)
 
     vals = {'title':title,
             'section':section,
     }
+
+    #Check for a caption
+    caption = ''
+    if os.path.exists(os.path.join(path, "%s_caption.txt" % fname)):
+        f = open(os.path.join(path, "%s_caption.txt" % fname))
+        caption = f.read().strip()
+        f.close()    
+
+    if caption:
+        vals['caption'] = caption
+        
     table = []
     f = open(tsv_file)
     hdr = f.readline().strip().split("\t")
@@ -49,6 +63,8 @@ def buildTable(tsv_file, section, jinjaEnv):
         table.append(tmp)
     vals['header'] = hdr
     vals['table'] = table
+
+    #print(vals)
     return template.render(vals)
 
 def main():
@@ -75,10 +91,11 @@ def main():
     #sections = os.listdir(options.dir)
     sections = options.sections.split(",")
     wes_panels = {}
-
+    first_section = ""
     #ONLY sections so far--no further recursion
     
-    for sect in os.listdir(options.dir):
+    #for sect in os.listdir(options.dir):
+    for (i, sect) in enumerate(sections):
         if sect == "static": #SKIP static content if it's there
             continue
         #Check for {section}.yaml file for overrides
@@ -98,7 +115,12 @@ def main():
             ordering = sorted(os.listdir(path))
 
         #Build container
-        tmp = """<div id="%s" class="container wes_container">\n""" % sect
+        if i == 0: #first element is shown
+            first_section = sect
+            tmp = """<div id="%s" class="container wes_container">\n""" % sect
+        else:
+            tmp = """<div id="%s" class="container wes_container" style="display:none">\n""" % sect
+            
         for ffile in ordering:
             filepath = os.path.join(path, ffile)
             #CHECK for file existance
@@ -114,6 +136,7 @@ def main():
     wes_sections = [(s, prettyprint(s)) for s in sections]
     wes_report['sections'] = wes_sections
     wes_report['panels'] = wes_panels
+    wes_report['first_section'] = first_section
     template.stream(wes_report).dump(options.output)  
 
 if __name__ == '__main__':

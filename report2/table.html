@@ -1,5 +1,8 @@
 <div class="wes_table">
   <h3 class="hidden-lg-down">{{ title }}</h3>
+  {% if caption %}
+  <p class="text-justify">{{ caption }}</p>
+  {% endif %}
   <table class="table table-striped">
     {% if header %}
     <thead>
