@@ -14,6 +14,16 @@ from optparse import OptionParser
 import jinja2
 import pandas as pd
 
+def parseYaml(yaml_file):
+    """Parses a yaml file and returns a dictionary"""
+    ret = {}
+    with open(yaml_file, 'r') as stream:
+        try:
+            ret = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return ret
+
 def prettyprint(s):
     """Given a string, replaces underscores with spaces and uppercases the 
     first letter of each word"""
@@ -71,25 +81,35 @@ def main():
     for sect in os.listdir(options.dir):
         if sect == "static": #SKIP static content if it's there
             continue
+        #Check for {section}.yaml file for overrides
+        path = os.path.join(options.dir, sect)
+        overrides = {}
+        #check for .yaml and .yml
+        if os.path.exists(os.path.join(path, "%s.yaml" % sect)):
+            overrides = parseYaml(os.path.join(path, "%s.yaml" % sect))
+        elif os.path.exists(os.path.join(path, "%s.yml" % sect)):
+            overrides = parseYaml(os.path.join(path, "%s.yml" % sect))
+
+        #print(overrides)
+        #Determine panel ordering--either from user override or default
+        #which is sorted file list
+        ordering = overrides.get("order",None) if overrides else None
+        if not ordering:
+            ordering = sorted(os.listdir(path))
+
         #Build container
         tmp = """<div id="%s" class="container wes_container">\n""" % sect
-        path = os.path.join(options.dir, sect)
-        for ffile in os.listdir(path):
-            if ffile.endswith(".tsv"):
-                filepath = os.path.join(path, ffile)
+        for ffile in ordering:
+            filepath = os.path.join(path, ffile)
+            #CHECK for file existance
+            if not os.path.exists(filepath):
+                print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)
+                continue
+            if ffile.endswith(".tsv"): #MAKE a table
                 tmp += buildTable(filepath, sect, templateEnv)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp
-            
-    # for root, dirs, files in os.walk(options.dir, topdown=False):
-    #     #section is the last element of root
-    #     section = root.split("/")[-1]
-    #     for f in files:
-    #         if f.endswith(".tsv"):
-    #             filepath = os.path.join(root, f)
-    #             tmp = buildTable(filepath, section, templateEnv)
-    #             wes_panels[section] = tmp
 
     wes_sections = [(s, prettyprint(s)) for s in sections]
     wes_report['sections'] = wes_sections
