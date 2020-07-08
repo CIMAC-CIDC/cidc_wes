@@ -9,7 +9,10 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/wes_meta/wes_software_versions.tsv")
     ls.append("analysis/report2/wes_meta/wes_meta.yaml")
     #ALIGN
-    ls.append("analysis/report2/alignment/mapping_stats.tsv")    
+    ls.append("analysis/report2/alignment/mapping_stats.tsv")
+    for run in config['runs']:
+        ls.append("analysis/report2/somatic/%s_lego_plot.png" % run)
+
     return ls
 
 rule report2_all:
@@ -79,14 +82,40 @@ rule report2_alignment_table:
         """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_align_mappingStats.py -f {input} -o {output.tsv}"""
 
 ###############################################################################
-rule report2_slurp:
+def report_legoPlotInputFn(wildcards):
+    run = wildcards.run
+    caller = config['somatic_caller']
+    return "analysis/somatic/%s/%s_%s.filter.pdf" % (run, run, caller)
+
+rule report2_somatic_legoPlot:
+    """Add the lego plot to the somatic section of the report"""
+    input:
+        report_legoPlotInputFn
+    output:
+        png = "analysis/report2/somatic/{run}_lego_plot.png",
+        sub_cap = "analysis/report2/somatic/{run}_lego_plot_subcaption.txt",
+        cap = "analysis/report2/somatic/{run}_lego_plot_caption.txt",
+    params:
+        page = 1,
+        sub_caption = "This is a test caption"
+    message:
+        "REPORT: generating somatic lego plot"
+    group: "report"
+    shell:
+        """echo "{params.sub_caption}" > {output.sub_cap} && 
+        echo "{params.sub_caption}" > {output.cap} &&
+        Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.page}"""
+
+
+###############################################################################
+rule report2_auto_render:
     """Generalized rule to dynamically generate the report BASED
     on what is in the report directory"""
     input:
         report2_targets
     params:
         report_path = "analysis/report2",
-        sections_list=",".join(['wes_meta','alignment'])
+        sections_list=",".join(['wes_meta','alignment','somatic'])
     output:
         "analysis/report2/report.html"
     message:

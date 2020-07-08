@@ -30,13 +30,25 @@ def prettyprint(s):
     s = s.replace("_"," ")
     return s.title()
 
+def captionHelper(extension, path, basename):
+    """Given an extenstion like 'caption.txt' or 'sub_caption.txt', 
+    a base path and a base file name, tries to look to see if there is 
+    a caption/subcaption--returns the contents of the file if it exists
+    otherwise None"""
+    caption = None
+    if os.path.exists(os.path.join(path, "%s_%s" % (basename,extension))):
+        f = open(os.path.join(path, "%s_%s" % (basename,extension)))
+        caption = f.read().strip()
+        f.close()
+    return caption
+
 #NOTE: this can easily handle csv files too!
 def buildTable(tsv_file, section, jinjaEnv):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
     template = jinjaEnv.get_template("table.html")
     #Title is the filename prettyprinted
-    fname = tsv_file.split("/")[-1].split(".")[0]
+    fname = ".".join(tsv_file.split("/")[-1].split(".")[:-1])
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname)
 
@@ -45,14 +57,13 @@ def buildTable(tsv_file, section, jinjaEnv):
     }
 
     #Check for a caption
-    caption = ''
-    if os.path.exists(os.path.join(path, "%s_caption.txt" % fname)):
-        f = open(os.path.join(path, "%s_caption.txt" % fname))
-        caption = f.read().strip()
-        f.close()    
-
+    caption = captionHelper('caption.txt', path, fname)
     if caption:
         vals['caption'] = caption
+    #check for subcaption
+    sub_caption = captionHelper('subcaption.txt', path, fname)
+    if sub_caption:
+        vals['sub_caption'] = sub_caption
         
     table = []
     f = open(tsv_file)
@@ -67,6 +78,30 @@ def buildTable(tsv_file, section, jinjaEnv):
     #print(vals)
     return template.render(vals)
 
+def buildPlot(png_file, jinjaEnv):
+    """Given a png file displays the plot..simple!"""
+    template = jinjaEnv.get_template("plot.html")
+    fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
+    path = "/".join(png_file.split("/")[:-1]) #drop the file
+    title = prettyprint(fname)
+
+    #make the png file path REALITIVE to the report.html file!
+    png_file_relative = "/".join(png_file.split("/")[2:])
+    vals = {'title':title,
+            'png_file': png_file_relative
+    }
+    #Check for a caption
+    caption = captionHelper('caption.txt', path, fname)
+    if caption:
+        vals['caption'] = caption
+    #check for subcaption
+    sub_caption = captionHelper('subcaption.txt', path, fname)
+    if sub_caption:
+        vals['sub_caption'] = sub_caption
+        
+    #print(vals)
+    return template.render(vals)
+    
 def main():
     usage = "USAGE: %prog -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -129,6 +164,8 @@ def main():
                 continue
             if ffile.endswith(".tsv"): #MAKE a table
                 tmp += buildTable(filepath, sect, templateEnv)
+            elif ffile.endswith(".png"): #Make a plot
+                tmp += buildPlot(filepath, templateEnv)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp
