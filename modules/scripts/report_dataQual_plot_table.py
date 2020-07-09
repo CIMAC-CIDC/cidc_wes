@@ -37,8 +37,8 @@ def main():
                      "Insert Size"])
     out = open(options.output, "w")
     out.write("%s\n" % hdr)
-    out.write("%s\n" % composeRow(options.tumor, options.path, True))
     out.write("%s\n" % composeRow(options.normal, options.path, False))
+    out.write("%s\n" % composeRow(options.tumor, options.path, True))
     out.close()
 
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/wes_meta/wes_meta.yaml")
     #Data Quality
     ls.append("analysis/report2/data_quality/mapping_stats.tsv")
+    ls.append("analysis/report2/data_quality/coverage_statistics.tsv")
     ls.append("analysis/report2/data_quality/data_quality.yaml")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
@@ -170,6 +171,18 @@ rule report2_data_quality_plots_table:
     shell:
         """echo "{params.sub_caption}" > {output.sub_cap} && cidc_wes/modules/scripts/report_dataQual_plot_table.py -n {params.normal} -t {params.tumor} -p {params.image_paths} -o {output}"""
 
+rule report2_data_quality_coverage:
+    """Generate the coverage data table"""
+    input:
+        "analysis/metrics/all_sample_summaries.txt"
+    output:
+        tsv="analysis/report2/data_quality/coverage_statistics.tsv",
+        cap="analysis/report2/data_quality/coverage_statistics_caption.txt"
+    params:
+        caption="""The following table describes the read depth coverage statistics. With the exception of the "Total Reads" column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions."""
+    shell:
+        """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_dataQual_coverage.py -f {input} -o {output.tsv}"""
+    
 def report2_data_quality_orderInputFn(wildcards):
     """Returns the first run in config 
     NOTE: we're running WES with one run at a time
@@ -177,6 +190,7 @@ def report2_data_quality_orderInputFn(wildcards):
     ret = ["analysis/report2/data_quality/mapping_stats.tsv"]
     run = list(config['runs'].keys())[0]
     ret.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
+    ret.append("analysis/report2/data_quality/coverage_statistics.tsv")
     return ret
 
 rule report2_data_quality_order:
@@ -184,12 +198,13 @@ rule report2_data_quality_order:
     input:
         report2_data_quality_orderInputFn
     params:
-        order= yaml_dump({'order': ['mapping_stats.tsv', '%s-qc_plots.tsv' % list(config['runs'].keys())[0]]})
+        order= yaml_dump({'order': ['mapping_stats.tsv', '%s-qc_plots.tsv' % list(config['runs'].keys())[0], "coverage_statistics.tsv"]})
     output:
         "analysis/report2/data_quality/data_quality.yaml"
     group: "report2"
     shell:
         """echo '{params.order}' > {output}"""
+
 
 ###############################################################################
 def report_legoPlotInputFn(wildcards):
