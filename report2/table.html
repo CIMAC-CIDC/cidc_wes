@@ -21,7 +21,7 @@
 	<th scope="row">{{ c }}</th>
 	{% else %}
 	{% if c is imagefile %}
-	<td><img class="img-fluid img-thumbnail" src="{{ c|chopimagefile }}" alt=""></td>
+	<td><img class="img-fluid img-thumbnail wes-image-modal" src="{{ c|chopimagefile }}" alt="" style="cursor:pointer"></td>
 	{% else %}
 	<td>{{ c }}</td>
 	{% endif %}
