@@ -12,6 +12,7 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/alignment/mapping_stats.tsv")
     for run in config['runs']:
         ls.append("analysis/report2/somatic/%s_lego_plot.png" % run)
+        ls.append("analysis/report2/alignment/qc_plots-%s.tsv" % run)
 
     return ls
 
@@ -81,6 +82,93 @@ rule report2_alignment_table:
     shell:
         """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_align_mappingStats.py -f {input} -o {output.tsv}"""
 
+#------------------------------------------------------------------------------
+def report2_alignment_plotsInputFn(wildcards):
+    """Given a run, returns a list of the various sub plots to generate
+    """
+    ret = []
+    run = wildcards.run
+    for sample in config['runs'][wildcards.run]:
+        ret.append("analysis/report2/alignment/qc_plots-%s/%s_gcBias.png" % (run, sample))
+        ret.append("analysis/report2/alignment/qc_plots-%s/%s_qualityScore.png" % (run, sample))
+        ret.append("analysis/report2/alignment/qc_plots-%s/%s_qualityByCycle.png" % (run, sample))
+        ret.append("analysis/report2/alignment/qc_plots-%s/%s_insertSize.png" % (run, sample))
+    return ret
+
+rule report2_alignment_gcPlot:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report2/alignment/qc_plots-{run}/{sample}_gcBias.png"
+    params:
+        page = 1
+    message:
+        "REPORT: generating alignment gc bias plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report2_alignment_qualityScore:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report2/alignment/qc_plots-{run}/{sample}_qualityScore.png"
+    params:
+        page = 2
+    message:
+        "REPORT: generating alignment quality score plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report2_alignment_qualityByCycle:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report2/alignment/qc_plots-{run}/{sample}_qualityByCycle.png"
+    params:
+        page = 3
+    message:
+        "REPORT: generating alignment quality by cycle plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report2_alignment_insertSize:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report2/alignment/qc_plots-{run}/{sample}_insertSize.png"
+    params:
+        page = 4
+    message:
+        "REPORT: generating alignment insert size plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report2_alignment_plots_table:
+    """Generate the fastqc plots table for the report
+    The trick here is that the plot table shows BOTH samples, tumor and 
+    normal, for the run--so we need 1. an inpput fn to look up the samples
+    and 2. params to generate the correct plots
+    """
+    input:
+        report2_alignment_plotsInputFn
+    output:
+        tsv="analysis/report2/alignment/qc_plots-{run}.tsv",
+        sub_cap = "analysis/report2/alignment/qc_plots-{run}_subcaption.txt",
+        #cap=...
+    params:
+        normal= lambda wildcards: config['runs'][wildcards.run][0],
+        tumor = lambda wildcards: config['runs'][wildcards.run][1],
+        image_paths = lambda wildcards: "analysis/report2/alignment/qc_plots-%s/" % (wildcards.run),
+        sub_caption = "NOTE: (T) denotes tumor sample; (N) denotes normal sample",
+    message:
+        "REPORT: creating QC plots for alignment section"
+    group: "report2"
+    shell:
+        """echo "{params.sub_caption}" > {output.sub_cap} && cidc_wes/modules/scripts/report_align_plot_table.py -n {params.normal} -t {params.tumor} -p {params.image_paths} -o {output}"""
 ###############################################################################
 def report_legoPlotInputFn(wildcards):
     run = wildcards.run
@@ -105,7 +193,6 @@ rule report2_somatic_legoPlot:
         """echo "{params.sub_caption}" > {output.sub_cap} && 
         echo "{params.sub_caption}" > {output.cap} &&
         Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.page}"""
-
 
 ###############################################################################
 rule report2_auto_render:

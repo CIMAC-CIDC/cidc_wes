@@ -28,7 +28,15 @@ def prettyprint(s):
     """Given a string, replaces underscores with spaces and uppercases the 
     first letter of each word"""
     s = s.replace("_"," ")
-    return s.title()
+    #return s.title()
+    return s.upper()
+
+def is_image_file(s):
+    """Checks to see if the string starts with 'img:'"""
+    return s.startswith('img:')
+
+def chop_image_file(s):
+    return s[4:]
 
 def captionHelper(extension, path, basename):
     """Given an extenstion like 'caption.txt' or 'sub_caption.txt', 
@@ -46,6 +54,8 @@ def captionHelper(extension, path, basename):
 def buildTable(tsv_file, jinjaEnv):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
+    jinjaEnv.tests['imagefile'] = is_image_file
+    jinjaEnv.filters['chopimagefile'] = chop_image_file
     template = jinjaEnv.get_template("table.html")
     #Title is the filename prettyprinted
     fname = ".".join(tsv_file.split("/")[-1].split(".")[:-1])
@@ -156,14 +166,15 @@ def main():
             
         for ffile in ordering:
             filepath = os.path.join(path, ffile)
-            #CHECK for file existance
-            if not os.path.exists(filepath):
-                print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)
-                continue
-            if ffile.endswith(".tsv"): #MAKE a table
-                tmp += buildTable(filepath, templateEnv)
-            elif ffile.endswith(".png"): #Make a plot
-                tmp += buildPlot(filepath, templateEnv)
+            if os.path.isfile(filepath): #SKIP directories
+                #CHECK for file existance
+                if not os.path.exists(filepath):
+                    print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)
+                    continue
+                if ffile.endswith(".tsv"): #MAKE a table
+                    tmp += buildTable(filepath, templateEnv)
+                elif ffile.endswith(".png"): #Make a plot
+                    tmp += buildPlot(filepath, templateEnv)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp

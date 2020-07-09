@@ -20,7 +20,11 @@
 	{% if loop.index == 1 %}
 	<th scope="row">{{ c }}</th>
 	{% else %}
+	{% if c is imagefile %}
+	<td><img class="img-fluid img-thumbnail" src="{{ c|chopimagefile }}" alt=""></td>
+	{% else %}
 	<td>{{ c }}</td>
+	{% endif %}
 	{% endif %}
 	{% endfor %}
       </tr>

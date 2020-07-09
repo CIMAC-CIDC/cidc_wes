@@ -4,7 +4,11 @@
  */
 
 .wes_container {
-    padding: 3rem;
+  padding: 3rem;
+}
+
+.wes_table {
+  padding: 1rem;
 }
 
 #sidebar-wrapper .sidebar-sub-heading {
