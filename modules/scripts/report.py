@@ -24,12 +24,12 @@ def parseYaml(yaml_file):
             print(exc)
     return ret
 
-def prettyprint(s):
+def prettyprint(s, toUpper=False):
     """Given a string, replaces underscores with spaces and uppercases the 
     first letter of each word"""
     s = s.replace("_"," ")
-    #return s.title()
-    return s.upper()
+    s = s.upper() if toUpper else s.title()
+    return s
 
 def is_image_file(s):
     """Checks to see if the string starts with 'img:'"""
@@ -60,7 +60,7 @@ def buildTable(tsv_file, jinjaEnv):
     #Title is the filename prettyprinted
     fname = ".".join(tsv_file.split("/")[-1].split(".")[:-1])
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
-    title = prettyprint(fname)
+    title = prettyprint(fname, True)
 
     vals = {'title':title }
 
@@ -91,7 +91,7 @@ def buildPlot(png_file, jinjaEnv):
     template = jinjaEnv.get_template("plot.html")
     fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
     path = "/".join(png_file.split("/")[:-1]) #drop the file
-    title = prettyprint(fname)
+    title = prettyprint(fname, True)
 
     #make the png file path REALITIVE to the report.html file!
     png_file_relative = "/".join(png_file.split("/")[2:])
