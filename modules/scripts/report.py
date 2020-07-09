@@ -51,7 +51,7 @@ def captionHelper(extension, path, basename):
     return caption
 
 #NOTE: this can easily handle csv files too!
-def buildTable(tsv_file, jinjaEnv):
+def buildTable(tsv_file, jinjaEnv, separator):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
     jinjaEnv.tests['imagefile'] = is_image_file
@@ -75,10 +75,10 @@ def buildTable(tsv_file, jinjaEnv):
         
     table = []
     f = open(tsv_file)
-    hdr = f.readline().strip().split("\t")
+    hdr = f.readline().strip().split(separator)
     
     for l in f:
-        tmp = l.strip().split("\t")
+        tmp = l.strip().split(separator)
         table.append(tmp)
     vals['header'] = hdr
     vals['table'] = table
@@ -172,7 +172,9 @@ def main():
                     print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)
                     continue
                 if ffile.endswith(".tsv"): #MAKE a table
-                    tmp += buildTable(filepath, templateEnv)
+                    tmp += buildTable(filepath, templateEnv, '\t')
+                elif ffile.endswith(".csv"):
+                    tmp += buildTable(filepath, templateEnv, ',')
                 elif ffile.endswith(".png"): #Make a plot
                     tmp += buildPlot(filepath, templateEnv)
         #END container

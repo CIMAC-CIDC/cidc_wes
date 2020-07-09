@@ -12,6 +12,10 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/data_quality/mapping_stats.tsv")
     ls.append("analysis/report2/data_quality/coverage_statistics.tsv")
     ls.append("analysis/report2/data_quality/data_quality.yaml")
+    ls.append("analysis/report2/somatic_variants/summary_table.csv")
+    ls.append("analysis/report2/somatic_variants/functional_annotation.csv")
+    ls.append("analysis/report2/somatic_variants/SNV_statistics.csv")
+    ls.append("analysis/report2/somatic_variants/somatic_variants.yaml")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
@@ -207,6 +211,26 @@ rule report2_data_quality_order:
 
 
 ###############################################################################
+
+def report2_somatic_variants_summary_tblInputFn(wildcards):
+    ls = []
+    caller = config['somatic_caller']
+    run = list(config['runs'].keys())[0]
+    ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run, run, caller))
+    return ls
+
+rule report2_somatic_variants_summary_tbls:
+    input:
+        report2_somatic_variants_summary_tblInputFn
+    output:
+        csv1 = "analysis/report2/somatic_variants/summary_table.csv",
+        csv2 = "analysis/report2/somatic_variants/functional_annotation.csv",
+        csv3 = "analysis/report2/somatic_variants/SNV_statistics.csv",
+    shell:
+        "cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"
+
 def report_legoPlotInputFn(wildcards):
     run = wildcards.run
     caller = config['somatic_caller']
@@ -229,6 +253,21 @@ rule report2_somatic_variants_legoPlot:
     shell:
         #"""echo "{params.sub_caption}" > {output.sub_cap} &&
         """Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.page}"""
+
+rule report2_somatic_variants_order:
+    """Dictate the ordering of these parts"""
+    input:
+        "analysis/report2/somatic_variants/summary_table.csv",
+        "analysis/report2/somatic_variants/functional_annotation.csv",
+        "analysis/report2/somatic_variants/SNV_statistics.csv",
+        #Lego plot
+    params:
+        order= yaml_dump({'order': ['summary_table.csv', 'functional_annotation.csv', 'SNV_statistics.csv', "%s_lego_plot.png" % list(config['runs'].keys())[0]]})
+    output:
+        "analysis/report2/somatic_variants/somatic_variants.yaml"
+    group: "report2"
+    shell:
+        """echo '{params.order}' > {output}"""
 
 ###############################################################################
 rule report2_auto_render:
