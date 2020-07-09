@@ -21,7 +21,6 @@
 
 #sidebar-wrapper .sidebar-heading {
   background: #22204c;
-  height: 4.5rem;
   color: white;
 }
 
@@ -32,18 +31,4 @@
 
 #cidc-brand{
   color: white;
-}
-
-/* dropdown menu */
-#menu-toggle {
-  background: #585778;
-  border-color: #585778;
-}
-
-#navbarDropdown{
-  color: white;
-}
-
-#page-content-wrapper{
-  border-style: none;
 }
