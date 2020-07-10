@@ -16,6 +16,7 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/somatic_variants/functional_annotation.csv")
     ls.append("analysis/report2/somatic_variants/SNV_statistics.csv")
     ls.append("analysis/report2/somatic_variants/somatic_variants.yaml")
+    ls.append("analysis/report2/somatic_variants/tumor_mutational_burden.tsv")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
@@ -254,6 +255,23 @@ rule report2_somatic_variants_legoPlot:
         #"""echo "{params.sub_caption}" > {output.sub_cap} &&
         """Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.page}"""
 
+def report2_somatic_variants_germlineCompareInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/germline/%s/%s_vcfcompare.txt" % (run, run)
+
+rule report2_somatic_variants_germlineCompare:
+    """report germline overlap"""
+    input:
+        report2_somatic_variants_germlineCompareInputFn
+    params:
+        run = list(config['runs'].keys())[0],
+        sub = "NOTE: the % overlap was calculated using the Tumor TMB as the denominator",
+    output:
+        tsv = "analysis/report2/somatic_variants/tumor_mutational_burden.tsv",
+        subcap = "analysis/report2/somatic_variants/tumor_mutational_burden_subcaption.txt",
+    shell:
+        """echo "{params.sub}" > {output.subcap} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
+
 rule report2_somatic_variants_order:
     """Dictate the ordering of these parts"""
     input:
@@ -262,13 +280,12 @@ rule report2_somatic_variants_order:
         "analysis/report2/somatic_variants/SNV_statistics.csv",
         #Lego plot
     params:
-        order= yaml_dump({'order': ['summary_table.csv', 'functional_annotation.csv', 'SNV_statistics.csv', "%s_lego_plot.png" % list(config['runs'].keys())[0]]})
+        order= yaml_dump({'order': ['summary_table.csv', 'functional_annotation.csv', 'SNV_statistics.csv', 'tumor_mutational_burden.tsv', "%s_lego_plot.png" % list(config['runs'].keys())[0]]})
     output:
         "analysis/report2/somatic_variants/somatic_variants.yaml"
     group: "report2"
     shell:
         """echo '{params.order}' > {output}"""
-
 ###############################################################################
 rule report2_auto_render:
     """Generalized rule to dynamically generate the report BASED
