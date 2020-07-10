@@ -17,6 +17,9 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/somatic_variants/SNV_statistics.csv")
     ls.append("analysis/report2/somatic_variants/somatic_variants.yaml")
     ls.append("analysis/report2/somatic_variants/tumor_mutational_burden.tsv")
+
+    ls.append("analysis/report2/neoantigens/HLA_results.tsv")
+    ls.append("analysis/report2/neoantigens/neoantigen_list.tsv")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
@@ -287,6 +290,51 @@ rule report2_somatic_variants_order:
     shell:
         """echo '{params.order}' > {output}"""
 ###############################################################################
+def report2_neoantigens_HLAInputFn(wildcards):
+    runName = list(config['runs'].keys())[0]
+    run = config['runs'][runName]
+    normal = run[0]
+    tumor = run[1]
+    ls = []
+    if config.get('neoantigen_run_classII'):
+        #optitype and xhla results
+        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
+               "analysis/xhla/%s/report-%s-hla.json" % (normal, normal),
+              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor),
+               "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)]
+    else:
+        #optitype only
+        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
+              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)]
+    return ls
+
+rule report2_neoantigens_HLA:
+    """report HLA type"""
+    input:
+        report2_neoantigens_HLAInputFn
+    params:
+        normal = lambda wildcards, input: ",".join(input[:2]) if len(input) > 2 else input[0],
+        tumor = lambda wildcards, input: ",".join(input[2:4]) if len(input) > 2 else input[1],
+        names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
+    output:
+        "analysis/report2/neoantigens/HLA_results.tsv"
+    shell:
+        """cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output}"""
+
+def report2_neoantigens_neoantigen_listInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run, run)
+
+rule report2_neoantigens_neoantigen_list:
+    """report HLA type"""
+    input:
+        report2_neoantigens_neoantigen_listInputFn
+    output:
+        "analysis/report2/neoantigens/neoantigen_list.tsv"
+    shell:
+        "cut -f 1,3,4,5,6,7,8,8,10 {input} > {output}"
+
+###############################################################################
 rule report2_auto_render:
     """Generalized rule to dynamically generate the report BASED
     on what is in the report directory"""
@@ -294,7 +342,7 @@ rule report2_auto_render:
         report2_targets
     params:
         report_path = "analysis/report2",
-        sections_list=",".join(['wes_meta','data_quality','somatic_variants'])
+        sections_list=",".join(['wes_meta','data_quality','somatic_variants','neoantigens'])
     output:
         "analysis/report2/report.html"
     message:

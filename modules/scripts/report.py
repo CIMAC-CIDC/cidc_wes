@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generalized script to generate analysis/report/report.html
+"""Len Taing 2020 (TGBTG)
+Generalized script to generate analysis/report/report.html
 based on the contents of analysis/report sub-dirs: each sub-dir is a 'section'
 """
 

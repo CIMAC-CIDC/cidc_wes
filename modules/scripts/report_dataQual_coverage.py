@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Script to generate wes coverage information"""
+"""Len Taing 2020 (TGBTG)
+Script to generate wes coverage information"""
 
 import os
 import sys
