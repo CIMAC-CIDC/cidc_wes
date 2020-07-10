@@ -22,6 +22,7 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/neoantigens/neoantigen_list.tsv")
 
     ls.append("analysis/report2/copy_number/tumor_purity.tsv")
+    ls.append("analysis/report2/copy_number/tumor_clonality.tsv")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
@@ -192,21 +193,6 @@ rule report2_data_quality_coverage:
         caption="""The following table describes the read depth coverage statistics. With the exception of the "Total Reads" column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions."""
     shell:
         """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_dataQual_coverage.py -f {input} -o {output.tsv}"""
-
-def report2_data_quality_purityInputFn(wildcards):
-    run = list(config['runs'].keys())[0]
-    return "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
-
-rule report2_data_quality_purity:
-    """report tumor purity"""
-    input:
-        report2_data_quality_purityInputFn
-    params:
-        run = list(config['runs'].keys())[0]
-    output:
-        "analysis/report2/copy_number/tumor_purity.tsv"
-    shell:
-        """cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output}"""
     
 def report2_data_quality_orderInputFn(wildcards):
     """Returns the first run in config 
@@ -306,6 +292,37 @@ rule report2_somatic_variants_order:
     group: "report2"
     shell:
         """echo '{params.order}' > {output}"""
+###############################################################################
+def report2_data_quality_purityInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
+
+rule report2_data_quality_purity:
+    """report tumor purity"""
+    input:
+        report2_data_quality_purityInputFn
+    params:
+        run = list(config['runs'].keys())[0]
+    output:
+        "analysis/report2/copy_number/tumor_purity.tsv"
+    shell:
+        """cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output}"""
+
+def report2_data_quality_clonalityInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/clonality/%s/%s_table.tsv" % (run,run)
+
+rule report2_data_quality_clonality:
+    """report tumor clonality"""
+    input:
+        report2_data_quality_clonalityInputFn
+    params:
+        run = list(config['runs'].keys())[0]
+    output:
+        "analysis/report2/copy_number/tumor_clonality.tsv"
+    shell:
+        """cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output}"""
+
 ###############################################################################
 def report2_neoantigens_HLAInputFn(wildcards):
     runName = list(config['runs'].keys())[0]
