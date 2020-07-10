@@ -23,6 +23,7 @@ def report2_targets(wildcards):
 
     ls.append("analysis/report2/copy_number/tumor_purity.tsv")
     ls.append("analysis/report2/copy_number/tumor_clonality.tsv")
+    ls.append("analysis/report2/copy_number/copynumber_plot.png")
     for run in config['runs']:
         ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
@@ -293,6 +294,21 @@ rule report2_somatic_variants_order:
     shell:
         """echo '{params.order}' > {output}"""
 ###############################################################################
+def report2_data_quality_copynumberPlotInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/clonality/%s/%s_genome_view.pdf" % (run,run)
+
+rule report2_data_quality_copynumberPlot:
+    """report tumor copynumberPlot"""
+    input:
+        report2_data_quality_copynumberPlotInputFn
+    params:
+        pg = 3
+    output:
+        "analysis/report2/copy_number/copynumber_plot.png"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.pg}"
+
 def report2_data_quality_purityInputFn(wildcards):
     run = list(config['runs'].keys())[0]
     return "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
@@ -376,7 +392,7 @@ rule report2_auto_render:
         report2_targets
     params:
         report_path = "analysis/report2",
-        sections_list=",".join(['wes_meta','data_quality','somatic_variants','copy_number','neoantigens'])
+        sections_list=",".join(['wes_meta','data_quality','copy_number','somatic_variants','neoantigens'])
     output:
         "analysis/report2/report.html"
     message:
