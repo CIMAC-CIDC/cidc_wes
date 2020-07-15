@@ -130,11 +130,16 @@ rule align_from_fastq:
 rule map_stats:
     """Get the mapping stats for each aligment run"""
     input:
-        bam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+        sortedbam="analysis/align/{sample}/{sample}.sorted.bam",
+        dedupbam="analysis/align/{sample}/{sample}.sorted.dedup.bam",
+    params:
+        #cmd1 -read 1st and 5th line which corresponds with total and mapped
+        awk_cmd1 = "awk \'NR==1 || NR==5\'",
+        awk_cmd2 = "awk \'NR==5\'", #take just the 5th line
     output:
         "analysis/align/{sample}/{sample}_mapping.txt"
     threads: _align_threads
-    message: "ALIGN: get mapping stats for each bam"
+    message: "ALIGN: get mapping stats- Total, Mapped, Dedup mapped reads"
     log: "analysis/logs/align/{sample}/align.map_stats.{sample}.log"
     #CAN/should samtools view be multi-threaded--
     #UPDATE: tricky on how to do this right w/ compounded commands
@@ -142,10 +147,10 @@ rule map_stats:
     benchmark:
         "benchmarks/align/{sample}/{sample}.map_stats.txt"
     shell:
-        #FLAGSTATS is the top of the file, and we append the uniquely mapped
-        #reads to the end of the file
-        "sambamba flagstat -t {threads} {input.bam} > {output} 2>>{log}"
-        #" && sambamba view -c -t {threads} {input.uniq_bam} >> {output} 2>> {log}"
+        #Get total and mapped reads lines from sorted and the mapped reads line
+        #from dedup
+        "sambamba flagstat -t {threads} {input.sortedbam} | {params.awk_cmd1}>{output}"
+        " && sambamba flagstat -t {threads} {input.dedupbam} | {params.awk_cmd2} >> {output}"
 
 rule collect_map_stats:
     """Collect and parse out the mapping stats for the ALL of the samples"""

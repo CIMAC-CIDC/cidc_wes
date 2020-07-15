@@ -88,7 +88,7 @@ rule report2_data_quality_table:
         tsv="analysis/report2/data_quality/mapping_stats.tsv",
         cap="analysis/report2/data_quality/mapping_stats_caption.txt",
     params:
-        caption="This table shows the Total number reads in each sample and how many of those reads were mapped."
+        caption="This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads."
     message:
         "REPORT: creating mapping stats for data_quality section"
     group: "report2"

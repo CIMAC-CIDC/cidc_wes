@@ -37,10 +37,12 @@ def main():
     hdr = f.readline().strip().split(",")
     out.write("%s\n" % "\t".join(hdr))
     for l in f:
-        tmp = l.strip().split(",")
         #Millify numbers
+        tmp = l.strip().split(",")
         tmp[1] = millify(tmp[1])
         tmp[2] = millify(tmp[2])
+        tmp[3] = millify(tmp[3])
+
         out.write("%s\n" % "\t".join(tmp))
     f.close()
     out.close()

@@ -18,7 +18,7 @@ def main():
         optparser.print_help()
         sys.exit(-1)
 
-    print(",".join(["Sample","Total","Mapped"]))
+    print(",".join(["Sample","Total","Mapped","Dedup"]))
 
     for f in options.files:
         #UGH: this script is ugly!!
@@ -30,23 +30,10 @@ def main():
 
         f = open(f)
         total = int(f.readline().strip().split()[0])
-        #skip 3 lines
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
         mapped = int(f.readline().strip().split()[0])
-        #skip 8 lines
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        l = f.readline()
-        #uniq_mapped = int(f.readline().strip())
-        #print(",".join([sampleID,str(total),str(mapped),str(uniq_mapped)]))#"%.2f" % (float(mapped)/total *100)]))
-        print(",".join([sampleID,str(total),str(mapped)]))
+        dedup = int(f.readline().strip().split()[0])
+        print(",".join([sampleID,str(total),str(mapped),str(dedup)]))
+        f.close()
 
 if __name__=='__main__':
     main()
