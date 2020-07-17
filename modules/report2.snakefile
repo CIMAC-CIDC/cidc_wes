@@ -176,7 +176,7 @@ rule report2_data_quality_plots_table:
         normal= lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
         image_paths = lambda wildcards: "analysis/report2/data_quality/%s-qc_plots/" % (wildcards.run),
-        sub_caption = "NOTE: (T) denotes tumor sample; (N) denotes normal sample",
+        sub_caption = "NOTE: (T) denotes tumor sample; (N) denotes normal sample. a) GC Plot shows the distribution of %GC bases within a 100bp window.  In human, the mean GC content is approx. 40%. b) Quality Score shows the distribution of phred scores. c) Quality by Cycle shows the phred score across the sequencing cycles. d) Insert size shows the distribution of fragment lengths.",
     message:
         "REPORT: creating QC plots for data_quality section"
     group: "report2"
@@ -232,12 +232,15 @@ def report2_somatic_variants_summary_tblInputFn(wildcards):
 rule report2_somatic_variants_summary_tbls:
     input:
         report2_somatic_variants_summary_tblInputFn
+    params:
+        cap3 = "This table summarizes the number of transitions and transversions occuring within the set of SNPs."
     output:
         csv1 = "analysis/report2/somatic_variants/summary_table.csv",
         csv2 = "analysis/report2/somatic_variants/functional_annotation.csv",
         csv3 = "analysis/report2/somatic_variants/SNV_statistics.csv",
+        cap3 = "analysis/report2/somatic_variants/SNV_statistics_caption.txt",
     shell:
-        "cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"
+        """echo "{params.cap3}" > {output.cap3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
 
 def report_legoPlotInputFn(wildcards):
     run = wildcards.run
@@ -272,12 +275,14 @@ rule report2_somatic_variants_germlineCompare:
         report2_somatic_variants_germlineCompareInputFn
     params:
         run = list(config['runs'].keys())[0],
+        cap = "This table reports the tumor mutational burden (TMB) as well as the total mutational load of the normal sample, the number of mutations that they have in common, and their percent overlap. ",
         sub = "NOTE: the % overlap was calculated using the Tumor TMB as the denominator",
     output:
         tsv = "analysis/report2/somatic_variants/tumor_mutational_burden.tsv",
+        cap = "analysis/report2/somatic_variants/tumor_mutational_burden_caption.txt",
         subcap = "analysis/report2/somatic_variants/tumor_mutational_burden_subcaption.txt",
     shell:
-        """echo "{params.sub}" > {output.subcap} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
+        """echo "{params.cap}" > {output.cap} && echo "{params.sub}" > {output.subcap} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
 
 rule report2_somatic_variants_order:
     """Dictate the ordering of these parts"""
@@ -294,50 +299,56 @@ rule report2_somatic_variants_order:
     shell:
         """echo '{params.order}' > {output}"""
 ###############################################################################
-def report2_data_quality_copynumberPlotInputFn(wildcards):
+def report2_copynumberPlotInputFn(wildcards):
     run = list(config['runs'].keys())[0]
     return "analysis/clonality/%s/%s_genome_view.pdf" % (run,run)
 
-rule report2_data_quality_copynumberPlot:
+rule report2_copynumberPlot:
     """report tumor copynumberPlot"""
     input:
-        report2_data_quality_copynumberPlotInputFn
+        report2_copynumberPlotInputFn
     params:
-        pg = 3
+        pg = 3,
+        subcap = "Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)"
     output:
-        "analysis/report2/copy_number/copynumber_plot.png"
+        png="analysis/report2/copy_number/copynumber_plot.png",
+        subcap="analysis/report2/copy_number/copynumber_plot_subcaption.txt",
     shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.pg}"
+        """echo "{params.subcap}" > {output.subcap} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
 
-def report2_data_quality_purityInputFn(wildcards):
+def report2_copy_number_purityInputFn(wildcards):
     run = list(config['runs'].keys())[0]
     return "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
 
-rule report2_data_quality_purity:
+rule report2_copy_number_purity:
     """report tumor purity"""
     input:
-        report2_data_quality_purityInputFn
+        report2_copy_number_purityInputFn
     params:
-        run = list(config['runs'].keys())[0]
+        run = list(config['runs'].keys())[0],
+        cap = "This table reports the estimated tumor purity, ploidy, and diploid log ratio of the sample."
     output:
-        "analysis/report2/copy_number/tumor_purity.tsv"
+        tsv="analysis/report2/copy_number/tumor_purity.tsv",
+        cap="analysis/report2/copy_number/tumor_purity_caption.txt",
     shell:
-        """cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output}"""
+        """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output.tsv}"""
 
-def report2_data_quality_clonalityInputFn(wildcards):
+def report2_copy_number_clonalityInputFn(wildcards):
     run = list(config['runs'].keys())[0]
     return "analysis/clonality/%s/%s_table.tsv" % (run,run)
 
-rule report2_data_quality_clonality:
+rule report2_copy_number_clonality:
     """report tumor clonality"""
     input:
-        report2_data_quality_clonalityInputFn
+        report2_copy_number_clonalityInputFn
     params:
-        run = list(config['runs'].keys())[0]
+        run = list(config['runs'].keys())[0],
+        cap = "This table reports the estimated tumor clonaltiy of the sample."
     output:
-        "analysis/report2/copy_number/tumor_clonality.tsv"
+        tsv="analysis/report2/copy_number/tumor_clonality.tsv",
+        cap="analysis/report2/copy_number/tumor_clonality_caption.txt",
     shell:
-        """cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output}"""
+        """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
 
 ###############################################################################
 def report2_neoantigens_HLAInputFn(wildcards):
@@ -366,10 +377,12 @@ rule report2_neoantigens_HLA:
         normal = lambda wildcards, input: ",".join(input[:2]) if len(input) > 2 else input[0],
         tumor = lambda wildcards, input: ",".join(input[2:4]) if len(input) > 2 else input[1],
         names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
+        cap = "This table shows the HLA alleles for both tumor and normal samples.",
     output:
-        "analysis/report2/neoantigens/HLA_results.tsv"
+        tsv="analysis/report2/neoantigens/HLA_results.tsv",
+        cap="analysis/report2/neoantigens/HLA_results_caption.txt",
     shell:
-        """cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output}"""
+        """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output.tsv}"""
 
 def report2_neoantigens_neoantigen_listInputFn(wildcards):
     run = list(config['runs'].keys())[0]
@@ -379,10 +392,13 @@ rule report2_neoantigens_neoantigen_list:
     """report HLA type"""
     input:
         report2_neoantigens_neoantigen_listInputFn
+    params:
+        cap = "This table shows the list of predicted neoantigens.",
     output:
-        "analysis/report2/neoantigens/neoantigen_list.tsv"
+        tsv= "analysis/report2/neoantigens/neoantigen_list.tsv",
+        cap= "analysis/report2/neoantigens/neoantigen_list_caption.txt",
     shell:
-        "cut -f 1,3,4,5,6,7,8,8,10 {input} > {output}"
+        """echo "{params.cap}" > {output.cap} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
 
 ###############################################################################
 rule report2_auto_render:
