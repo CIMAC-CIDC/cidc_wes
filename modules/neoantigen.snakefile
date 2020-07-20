@@ -155,7 +155,11 @@ def parseHLA(hla_files):
     hla = ",".join(["%s" % a for a in classI if a])
     #print(hla)
     return hla
-    
+
+def getVCF_file(wildcards):
+    run = wildcards.run
+    caller = config.get("somatic_caller", "tnscope")
+    return "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf" % (run, run, caller)
     
 
 rule neoantigen_all:
@@ -164,9 +168,9 @@ rule neoantigen_all:
 
 rule neoantigen_vep_annotate:
     input:
-        "analysis/somatic/{run}/{run}_tnsnv.filter.vcf"
+        "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     output:
-        "analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf"
+        "analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf"
     params:
         index=config['genome_fasta'],
         vep_data=config['vep_data'],
@@ -177,7 +181,7 @@ rule neoantigen_vep_annotate:
     group: "neoantigen"
     conda: "../envs/somatic_vcftools.yml"
     benchmark:
-        "benchmarks/neoantigen/{run}/{run}.neoantigen_vep_annotate.txt"
+        "benchmarks/neoantigen/{run}/{run}_{caller}.neoantigen_vep_annotate.txt"
     shell:
         """vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Downstream --plugin Wildtype --dir_plugins {params.vep_plugins} --pick"""
 
@@ -187,7 +191,7 @@ if not config.get('neoantigen_run_classII'):
         """NOTE: neoantigen's pvacseq is not available on CONDA
         MUST either be installed in base system/docker container"""
         input:
-            vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+            vcf=getVCF_file,
             hla=getTumorHLA,
         output:
             main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
@@ -214,7 +218,7 @@ else: #EXPECT class II output
         """NOTE: neoantigen's pvacseq is not available on CONDA
         MUST either be installed in base system/docker container"""
         input:
-            vcf="analysis/somatic/{run}/{run}_tnsnv.filter.neoantigen.vep.vcf",
+            vcf=getVCF_file,
             hla=getTumorHLA,
         output:
             main="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.tsv",
