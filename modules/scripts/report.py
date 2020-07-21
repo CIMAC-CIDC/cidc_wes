@@ -55,11 +55,15 @@ def captionHelper(extension, path, basename):
 def buildTable(tsv_file, jinjaEnv, separator):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
+    #LOAD jinja2 test and filter for image processing
     jinjaEnv.tests['imagefile'] = is_image_file
     jinjaEnv.filters['chopimagefile'] = chop_image_file
     template = jinjaEnv.get_template("table.html")
+    
     #Title is the filename prettyprinted
     fname = ".".join(tsv_file.split("/")[-1].split(".")[:-1])
+    #REMOVE index from file name, e.g. 01_foo -> foo
+    fname = "_".join(fname.split("_")[1:])
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
 
@@ -81,9 +85,10 @@ def buildTable(tsv_file, jinjaEnv, separator):
     for l in f:
         tmp = l.strip().split(separator)
         table.append(tmp)
+    f.close()
+    
     vals['header'] = hdr
     vals['table'] = table
-
     #print(vals)
     return template.render(vals)
 
@@ -91,6 +96,8 @@ def buildPlot(png_file, jinjaEnv):
     """Given a png file displays the plot..simple!"""
     template = jinjaEnv.get_template("plot.html")
     fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
+    #REMOVE index from file name, e.g. 01_foo -> foo
+    fname = "_".join(fname.split("_")[1:])
     path = "/".join(png_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
 
@@ -144,19 +151,7 @@ def main():
             continue
         #Check for {section}.yaml file for overrides
         path = os.path.join(options.dir, sect)
-        overrides = {}
-        #check for .yaml and .yml
-        if os.path.exists(os.path.join(path, "%s.yaml" % sect)):
-            overrides = parseYaml(os.path.join(path, "%s.yaml" % sect))
-        elif os.path.exists(os.path.join(path, "%s.yml" % sect)):
-            overrides = parseYaml(os.path.join(path, "%s.yml" % sect))
-
-        #print(overrides)
-        #Determine panel ordering--either from user override or default
-        #which is sorted file list
-        ordering = overrides.get("order",None) if overrides else None
-        if not ordering:
-            ordering = sorted(os.listdir(path))
+        ordering = sorted(os.listdir(path))
 
         #Build container
         if i == 0: #first element is shown

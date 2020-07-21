@@ -5,28 +5,28 @@ def report2_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     #META
-    ls.append("analysis/report2/wes_meta/wes_run_version.tsv")
-    ls.append("analysis/report2/wes_meta/wes_software_versions.tsv")
-    ls.append("analysis/report2/wes_meta/wes_meta.yaml")
+    ls.append("analysis/report2/wes_meta/02_wes_run_version.tsv")
+    ls.append("analysis/report2/wes_meta/01_wes_software_versions.tsv")
     #Data Quality
-    ls.append("analysis/report2/data_quality/mapping_stats.tsv")
-    ls.append("analysis/report2/data_quality/coverage_statistics.tsv")
-    ls.append("analysis/report2/data_quality/data_quality.yaml")
-    ls.append("analysis/report2/somatic_variants/summary_table.csv")
-    ls.append("analysis/report2/somatic_variants/functional_annotation.csv")
-    ls.append("analysis/report2/somatic_variants/SNV_statistics.csv")
-    ls.append("analysis/report2/somatic_variants/somatic_variants.yaml")
-    ls.append("analysis/report2/somatic_variants/tumor_mutational_burden.tsv")
-
-    ls.append("analysis/report2/neoantigens/HLA_results.tsv")
-    ls.append("analysis/report2/neoantigens/neoantigen_list.tsv")
-
-    ls.append("analysis/report2/copy_number/tumor_purity.tsv")
-    ls.append("analysis/report2/copy_number/tumor_clonality.tsv")
-    ls.append("analysis/report2/copy_number/copynumber_plot.png")
+    ls.append("analysis/report2/data_quality/01_mapping_stats.tsv")
+    ls.append("analysis/report2/data_quality/03_coverage_statistics.tsv")
+    #SOMATIC
+    ls.append("analysis/report2/somatic_variants/01_summary_table.csv")
+    ls.append("analysis/report2/somatic_variants/02_functional_annotation.csv")
+    ls.append("analysis/report2/somatic_variants/03_SNV_statistics.csv")
+    ls.append("analysis/report2/somatic_variants/04_tumor_mutational_burden.tsv")
+    #COPYNUMBER
+    ls.append("analysis/report2/copy_number/01_copynumber_plot.png")
+    ls.append("analysis/report2/copy_number/02_tumor_clonality.tsv")
+    ls.append("analysis/report2/copy_number/03_tumor_purity.tsv")
+    
+    #NEOANTIGEN
+    ls.append("analysis/report2/neoantigens/01_HLA_results.tsv")
+    ls.append("analysis/report2/neoantigens/02_neoantigen_list.tsv")
+    
     for run in config['runs']:
-        ls.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
-        ls.append("analysis/report2/somatic_variants/%s_lego_plot.png" % run)
+        ls.append("analysis/report2/data_quality/02_%s-qc_plots.tsv" % run)
+        ls.append("analysis/report2/somatic_variants/05_%s_lego_plot.png" % run)
     return ls
 
 rule report2_all:
@@ -43,7 +43,7 @@ rule report2_meta_version:
         config="config.yaml",
         wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report2/wes_meta/wes_run_version.tsv"
+         "analysis/report2/wes_meta/02_wes_run_version.tsv"
     message:
         "REPORT: creating WES version table"
     group: "report2"
@@ -58,26 +58,13 @@ rule report2_meta_software:
         config="config.yaml",
         wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report2/wes_meta/wes_software_versions.tsv"
+         "analysis/report2/wes_meta/01_wes_software_versions.tsv"
     message:
         "REPORT: creating WES software table"
     group: "report2"
     shell:
         """cidc_wes/modules/scripts/report_software.py -c {input.config} -v {input.wes_versions} -o {output}"""
 
-rule report2_meta_order:
-    """Dictate the ordering of these parts"""
-    input:
-        "analysis/report2/wes_meta/wes_software_versions.tsv",
-        "analysis/report2/wes_meta/wes_run_version.tsv"
-    params:
-        #order= yaml_dump({'order': ['wes_run_version.tsv','wes_software_versions.tsv']})
-        order= yaml_dump({'order': ['wes_software_versions.tsv', 'wes_run_version.tsv']})
-    output:
-        "analysis/report2/wes_meta/wes_meta.yaml"
-    group: "report2"
-    shell:
-        """echo '{params.order}' > {output}"""
 ###############################################################################
 
 rule report2_data_quality_table:
@@ -85,7 +72,7 @@ rule report2_data_quality_table:
     input:
         "analysis/align/mapping.csv"
     output:
-        tsv="analysis/report2/data_quality/mapping_stats.tsv",
+        tsv="analysis/report2/data_quality/01_mapping_stats.tsv",
         cap="analysis/report2/data_quality/mapping_stats_caption.txt",
     params:
         caption="This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads."
@@ -102,17 +89,17 @@ def report2_data_quality_plotsInputFn(wildcards):
     ret = []
     run = wildcards.run
     for sample in config['runs'][wildcards.run]:
-        ret.append("analysis/report2/data_quality/%s-qc_plots/%s_gcBias.png" % (run, sample))
-        ret.append("analysis/report2/data_quality/%s-qc_plots/%s_qualityScore.png" % (run, sample))
-        ret.append("analysis/report2/data_quality/%s-qc_plots/%s_qualityByCycle.png" % (run, sample))
-        ret.append("analysis/report2/data_quality/%s-qc_plots/%s_insertSize.png" % (run, sample))
+        ret.append("analysis/report2/data_quality/plots/%s_gcBias.png" % (sample))
+        ret.append("analysis/report2/data_quality/plots/%s_qualityScore.png" % (sample))
+        ret.append("analysis/report2/data_quality/plots/%s_qualityByCycle.png" % (sample))
+        ret.append("analysis/report2/data_quality/plots/%s_insertSize.png" % (sample))
     return ret
 
 rule report2_data_quality_gcPlot:
     input:
         "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report2/data_quality/{run}-qc_plots/{sample}_gcBias.png"
+        "analysis/report2/data_quality/plots/{sample}_gcBias.png"
     params:
         page = 1
     message:
@@ -125,7 +112,7 @@ rule report2_data_quality_qualityScore:
     input:
         "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report2/data_quality/{run}-qc_plots/{sample}_qualityScore.png"
+        "analysis/report2/data_quality/plots/{sample}_qualityScore.png"
     params:
         page = 2
     message:
@@ -138,7 +125,7 @@ rule report2_data_quality_qualityByCycle:
     input:
         "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report2/data_quality/{run}-qc_plots/{sample}_qualityByCycle.png"
+        "analysis/report2/data_quality/plots/{sample}_qualityByCycle.png"
     params:
         page = 3
     message:
@@ -151,7 +138,7 @@ rule report2_data_quality_insertSize:
     input:
         "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report2/data_quality/{run}-qc_plots/{sample}_insertSize.png"
+        "analysis/report2/data_quality/plots/{sample}_insertSize.png"
     params:
         page = 4
     message:
@@ -169,13 +156,13 @@ rule report2_data_quality_plots_table:
     input:
         report2_data_quality_plotsInputFn
     output:
-        tsv="analysis/report2/data_quality/{run}-qc_plots.tsv",
+        tsv="analysis/report2/data_quality/02_{run}-qc_plots.tsv",
         sub_cap = "analysis/report2/data_quality/{run}-qc_plots_subcaption.txt",
         #cap=...
     params:
         normal= lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-        image_paths = lambda wildcards: "analysis/report2/data_quality/%s-qc_plots/" % (wildcards.run),
+        image_paths = lambda wildcards: "analysis/report2/data_quality/plots/",
         sub_caption = "NOTE: (T) denotes tumor sample; (N) denotes normal sample. a) GC Plot shows the distribution of %GC bases within a 100bp window.  In human, the mean GC content is approx. 40%. b) Quality Score shows the distribution of phred scores. c) Quality by Cycle shows the phred score across the sequencing cycles. d) Insert size shows the distribution of fragment lengths.",
     message:
         "REPORT: creating QC plots for data_quality section"
@@ -188,35 +175,12 @@ rule report2_data_quality_coverage:
     input:
         "analysis/metrics/all_sample_summaries.txt"
     output:
-        tsv="analysis/report2/data_quality/coverage_statistics.tsv",
+        tsv="analysis/report2/data_quality/03_coverage_statistics.tsv",
         cap="analysis/report2/data_quality/coverage_statistics_caption.txt"
     params:
         caption="""The following table describes the read depth coverage statistics. With the exception of the "Total Reads" column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions."""
     shell:
         """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_dataQual_coverage.py -f {input} -o {output.tsv}"""
-    
-def report2_data_quality_orderInputFn(wildcards):
-    """Returns the first run in config 
-    NOTE: we're running WES with one run at a time
-    """
-    ret = ["analysis/report2/data_quality/mapping_stats.tsv"]
-    run = list(config['runs'].keys())[0]
-    ret.append("analysis/report2/data_quality/%s-qc_plots.tsv" % run)
-    ret.append("analysis/report2/data_quality/coverage_statistics.tsv")
-    return ret
-
-rule report2_data_quality_order:
-    """Dictate the ordering of these parts"""
-    input:
-        report2_data_quality_orderInputFn
-    params:
-        order= yaml_dump({'order': ['mapping_stats.tsv', '%s-qc_plots.tsv' % list(config['runs'].keys())[0], "coverage_statistics.tsv"]})
-    output:
-        "analysis/report2/data_quality/data_quality.yaml"
-    group: "report2"
-    shell:
-        """echo '{params.order}' > {output}"""
-
 
 ###############################################################################
 
@@ -235,9 +199,9 @@ rule report2_somatic_variants_summary_tbls:
     params:
         cap3 = "This table summarizes the number of transitions and transversions occuring within the set of SNPs."
     output:
-        csv1 = "analysis/report2/somatic_variants/summary_table.csv",
-        csv2 = "analysis/report2/somatic_variants/functional_annotation.csv",
-        csv3 = "analysis/report2/somatic_variants/SNV_statistics.csv",
+        csv1 = "analysis/report2/somatic_variants/01_summary_table.csv",
+        csv2 = "analysis/report2/somatic_variants/02_functional_annotation.csv",
+        csv3 = "analysis/report2/somatic_variants/03_SNV_statistics.csv",
         cap3 = "analysis/report2/somatic_variants/SNV_statistics_caption.txt",
     shell:
         """echo "{params.cap3}" > {output.cap3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
@@ -252,7 +216,7 @@ rule report2_somatic_variants_legoPlot:
     input:
         report_legoPlotInputFn
     output:
-        png = "analysis/report2/somatic_variants/{run}_lego_plot.png",
+        png = "analysis/report2/somatic_variants/05_{run}_lego_plot.png",
         #sub_cap = "analysis/report2/somatic_variants/{run}_lego_plot_subcaption.txt",
         #cap = "analysis/report2/somatic_variants/{run}_lego_plot_caption.txt",
     params:
@@ -278,26 +242,12 @@ rule report2_somatic_variants_germlineCompare:
         cap = "This table reports the tumor mutational burden (TMB) as well as the total mutational load of the normal sample, the number of mutations that they have in common, and their percent overlap. ",
         sub = "NOTE: the % overlap was calculated using the Tumor TMB as the denominator",
     output:
-        tsv = "analysis/report2/somatic_variants/tumor_mutational_burden.tsv",
+        tsv = "analysis/report2/somatic_variants/04_tumor_mutational_burden.tsv",
         cap = "analysis/report2/somatic_variants/tumor_mutational_burden_caption.txt",
         subcap = "analysis/report2/somatic_variants/tumor_mutational_burden_subcaption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && echo "{params.sub}" > {output.subcap} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
 
-rule report2_somatic_variants_order:
-    """Dictate the ordering of these parts"""
-    input:
-        "analysis/report2/somatic_variants/summary_table.csv",
-        "analysis/report2/somatic_variants/functional_annotation.csv",
-        "analysis/report2/somatic_variants/SNV_statistics.csv",
-        #Lego plot
-    params:
-        order= yaml_dump({'order': ['summary_table.csv', 'functional_annotation.csv', 'SNV_statistics.csv', 'tumor_mutational_burden.tsv', "%s_lego_plot.png" % list(config['runs'].keys())[0]]})
-    output:
-        "analysis/report2/somatic_variants/somatic_variants.yaml"
-    group: "report2"
-    shell:
-        """echo '{params.order}' > {output}"""
 ###############################################################################
 def report2_copynumberPlotInputFn(wildcards):
     run = list(config['runs'].keys())[0]
@@ -311,7 +261,7 @@ rule report2_copynumberPlot:
         pg = 3,
         subcap = "Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)"
     output:
-        png="analysis/report2/copy_number/copynumber_plot.png",
+        png="analysis/report2/copy_number/01_copynumber_plot.png",
         subcap="analysis/report2/copy_number/copynumber_plot_subcaption.txt",
     shell:
         """echo "{params.subcap}" > {output.subcap} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
@@ -328,7 +278,7 @@ rule report2_copy_number_purity:
         run = list(config['runs'].keys())[0],
         cap = "This table reports the estimated tumor purity, ploidy, and diploid log ratio of the sample."
     output:
-        tsv="analysis/report2/copy_number/tumor_purity.tsv",
+        tsv="analysis/report2/copy_number/03_tumor_purity.tsv",
         cap="analysis/report2/copy_number/tumor_purity_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output.tsv}"""
@@ -345,7 +295,7 @@ rule report2_copy_number_clonality:
         run = list(config['runs'].keys())[0],
         cap = "This table reports the estimated tumor clonaltiy of the sample."
     output:
-        tsv="analysis/report2/copy_number/tumor_clonality.tsv",
+        tsv="analysis/report2/copy_number/02_tumor_clonality.tsv",
         cap="analysis/report2/copy_number/tumor_clonality_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
@@ -379,7 +329,7 @@ rule report2_neoantigens_HLA:
         names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         cap = "This table shows the HLA alleles for both tumor and normal samples.",
     output:
-        tsv="analysis/report2/neoantigens/HLA_results.tsv",
+        tsv="analysis/report2/neoantigens/01_HLA_results.tsv",
         cap="analysis/report2/neoantigens/HLA_results_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output.tsv}"""
@@ -395,7 +345,7 @@ rule report2_neoantigens_neoantigen_list:
     params:
         cap = "This table shows the list of predicted neoantigens.",
     output:
-        tsv= "analysis/report2/neoantigens/neoantigen_list.tsv",
+        tsv= "analysis/report2/neoantigens/02_neoantigen_list.tsv",
         cap= "analysis/report2/neoantigens/neoantigen_list_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
@@ -408,7 +358,7 @@ rule report2_auto_render:
         report2_targets
     params:
         report_path = "analysis/report2",
-        sections_list=",".join(['wes_meta','data_quality','copy_number','somatic_variants','neoantigens'])
+        sections_list=",".join(['wes_meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
     output:
         "analysis/report2/report.html"
     message:
