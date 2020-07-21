@@ -39,20 +39,8 @@ def is_image_file(s):
 def chop_image_file(s):
     return s[4:]
 
-def captionHelper(extension, path, basename):
-    """Given an extenstion like 'caption.txt' or 'sub_caption.txt', 
-    a base path and a base file name, tries to look to see if there is 
-    a caption/subcaption--returns the contents of the file if it exists
-    otherwise None"""
-    caption = None
-    if os.path.exists(os.path.join(path, "%s_%s" % (basename,extension))):
-        f = open(os.path.join(path, "%s_%s" % (basename,extension)))
-        caption = f.read().strip()
-        f.close()
-    return caption
-
 #NOTE: this can easily handle csv files too!
-def buildTable(tsv_file, jinjaEnv, separator):
+def buildTable(tsv_file, details, jinjaEnv, separator):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
     #LOAD jinja2 test and filter for image processing
@@ -71,11 +59,11 @@ def buildTable(tsv_file, jinjaEnv, separator):
     vals = {'title':title }
 
     #Check for a caption
-    caption = captionHelper('caption.txt', path, index)
+    caption = details.get('caption', None)
     if caption:
         vals['caption'] = caption
     #check for subcaption
-    sub_caption = captionHelper('subcaption.txt', path, index)
+    sub_caption = details.get('subcaption', None)
     if sub_caption:
         vals['sub_caption'] = sub_caption
         
@@ -93,7 +81,7 @@ def buildTable(tsv_file, jinjaEnv, separator):
     #print(vals)
     return template.render(vals)
 
-def buildPlot(png_file, jinjaEnv):
+def buildPlot(png_file, details, jinjaEnv):
     """Given a png file displays the plot..simple!"""
     template = jinjaEnv.get_template("plot.html")
     fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
@@ -109,11 +97,11 @@ def buildPlot(png_file, jinjaEnv):
             'png_file': png_file_relative
     }
     #Check for a caption
-    caption = captionHelper('caption.txt', path, index)
+    caption = details.get('caption', None)
     if caption:
         vals['caption'] = caption
     #check for subcaption
-    sub_caption = captionHelper('subcaption.txt', path, index)
+    sub_caption = details.get('subcaption', None)
     if sub_caption:
         vals['sub_caption'] = sub_caption
         
@@ -169,12 +157,19 @@ def main():
                 if not os.path.exists(filepath):
                     print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)
                     continue
+                #check for details
+                index = ffile.split("_")[0] #Get part index
+                if os.path.exists(os.path.join(path, "%s_details.yaml" % index)):
+                    details = parseYaml(os.path.join(path, "%s_details.yaml" % index))
+                else:
+                    details = {}
+
                 if ffile.endswith(".tsv"): #MAKE a table
-                    tmp += buildTable(filepath, templateEnv, '\t')
+                    tmp += buildTable(filepath, details, templateEnv, '\t')
                 elif ffile.endswith(".csv"):
-                    tmp += buildTable(filepath, templateEnv, ',')
+                    tmp += buildTable(filepath, details, templateEnv, ',')
                 elif ffile.endswith(".png"): #Make a plot
-                    tmp += buildPlot(filepath, templateEnv)
+                    tmp += buildPlot(filepath, details, templateEnv)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp
