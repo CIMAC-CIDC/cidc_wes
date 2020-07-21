@@ -9,6 +9,7 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/wes_meta/01_wes_software_versions.tsv")
     #Data Quality
     ls.append("analysis/report2/data_quality/01_mapping_stats.tsv")
+    ls.append("analysis/report2/data_quality/02_qc_plots.tsv")
     ls.append("analysis/report2/data_quality/03_coverage_statistics.tsv")
     #SOMATIC
     ls.append("analysis/report2/somatic_variants/01_summary_table.csv")
@@ -25,7 +26,6 @@ def report2_targets(wildcards):
     ls.append("analysis/report2/neoantigens/02_neoantigen_list.tsv")
     
     for run in config['runs']:
-        ls.append("analysis/report2/data_quality/02_%s-qc_plots.tsv" % run)
         ls.append("analysis/report2/somatic_variants/05_%s_lego_plot.png" % run)
     return ls
 
@@ -73,7 +73,7 @@ rule report2_data_quality_table:
         "analysis/align/mapping.csv"
     output:
         tsv="analysis/report2/data_quality/01_mapping_stats.tsv",
-        cap="analysis/report2/data_quality/mapping_stats_caption.txt",
+        cap="analysis/report2/data_quality/01_caption.txt",
     params:
         caption="This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads."
     message:
@@ -87,8 +87,9 @@ def report2_data_quality_plotsInputFn(wildcards):
     """Given a run, returns a list of the various sub plots to generate
     """
     ret = []
-    run = wildcards.run
-    for sample in config['runs'][wildcards.run]:
+    run_name = list(config['runs'].keys())[0]
+    run = config['runs'][run_name]
+    for sample in run:
         ret.append("analysis/report2/data_quality/plots/%s_gcBias.png" % (sample))
         ret.append("analysis/report2/data_quality/plots/%s_qualityScore.png" % (sample))
         ret.append("analysis/report2/data_quality/plots/%s_qualityByCycle.png" % (sample))
@@ -147,6 +148,10 @@ rule report2_data_quality_insertSize:
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
+def report2_getTumorNormal(index):
+    run = list(config['runs'].keys())[0]
+    return config['runs'][run][index]
+
 rule report2_data_quality_plots_table:
     """Generate the fastqc plots table for the report
     The trick here is that the plot table shows BOTH samples, tumor and 
@@ -156,12 +161,12 @@ rule report2_data_quality_plots_table:
     input:
         report2_data_quality_plotsInputFn
     output:
-        tsv="analysis/report2/data_quality/02_{run}-qc_plots.tsv",
-        sub_cap = "analysis/report2/data_quality/{run}-qc_plots_subcaption.txt",
+        tsv="analysis/report2/data_quality/02_qc_plots.tsv",
+        sub_cap = "analysis/report2/data_quality/02_subcaption.txt",
         #cap=...
     params:
-        normal= lambda wildcards: config['runs'][wildcards.run][0],
-        tumor = lambda wildcards: config['runs'][wildcards.run][1],
+        normal= lambda wildcards: report2_getTumorNormal(0),
+        tumor = lambda wildcards: report2_getTumorNormal(1),
         image_paths = lambda wildcards: "analysis/report2/data_quality/plots/",
         sub_caption = "NOTE: (T) denotes tumor sample; (N) denotes normal sample. a) GC Plot shows the distribution of %GC bases within a 100bp window.  In human, the mean GC content is approx. 40%. b) Quality Score shows the distribution of phred scores. c) Quality by Cycle shows the phred score across the sequencing cycles. d) Insert size shows the distribution of fragment lengths.",
     message:
@@ -176,9 +181,9 @@ rule report2_data_quality_coverage:
         "analysis/metrics/all_sample_summaries.txt"
     output:
         tsv="analysis/report2/data_quality/03_coverage_statistics.tsv",
-        cap="analysis/report2/data_quality/coverage_statistics_caption.txt"
+        cap="analysis/report2/data_quality/03_caption.txt"
     params:
-        caption="""The following table describes the read depth coverage statistics. With the exception of the "Total Reads" column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions."""
+        caption="""The following table describes the read depth coverage statistics. With the exception of the Total Reads column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions."""
     shell:
         """echo "{params.caption}" > {output.cap} && cidc_wes/modules/scripts/report_dataQual_coverage.py -f {input} -o {output.tsv}"""
 
@@ -202,7 +207,7 @@ rule report2_somatic_variants_summary_tbls:
         csv1 = "analysis/report2/somatic_variants/01_summary_table.csv",
         csv2 = "analysis/report2/somatic_variants/02_functional_annotation.csv",
         csv3 = "analysis/report2/somatic_variants/03_SNV_statistics.csv",
-        cap3 = "analysis/report2/somatic_variants/SNV_statistics_caption.txt",
+        cap3 = "analysis/report2/somatic_variants/03_caption.txt",
     shell:
         """echo "{params.cap3}" > {output.cap3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
 
@@ -243,8 +248,8 @@ rule report2_somatic_variants_germlineCompare:
         sub = "NOTE: the % overlap was calculated using the Tumor TMB as the denominator",
     output:
         tsv = "analysis/report2/somatic_variants/04_tumor_mutational_burden.tsv",
-        cap = "analysis/report2/somatic_variants/tumor_mutational_burden_caption.txt",
-        subcap = "analysis/report2/somatic_variants/tumor_mutational_burden_subcaption.txt",
+        cap = "analysis/report2/somatic_variants/04_caption.txt",
+        subcap = "analysis/report2/somatic_variants/04_subcaption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && echo "{params.sub}" > {output.subcap} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
 
@@ -262,7 +267,7 @@ rule report2_copynumberPlot:
         subcap = "Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)"
     output:
         png="analysis/report2/copy_number/01_copynumber_plot.png",
-        subcap="analysis/report2/copy_number/copynumber_plot_subcaption.txt",
+        subcap="analysis/report2/copy_number/01_subcaption.txt",
     shell:
         """echo "{params.subcap}" > {output.subcap} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
 
@@ -279,7 +284,7 @@ rule report2_copy_number_purity:
         cap = "This table reports the estimated tumor purity, ploidy, and diploid log ratio of the sample."
     output:
         tsv="analysis/report2/copy_number/03_tumor_purity.tsv",
-        cap="analysis/report2/copy_number/tumor_purity_caption.txt",
+        cap="analysis/report2/copy_number/03_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output.tsv}"""
 
@@ -296,7 +301,7 @@ rule report2_copy_number_clonality:
         cap = "This table reports the estimated tumor clonaltiy of the sample."
     output:
         tsv="analysis/report2/copy_number/02_tumor_clonality.tsv",
-        cap="analysis/report2/copy_number/tumor_clonality_caption.txt",
+        cap="analysis/report2/copy_number/02_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
 
@@ -330,7 +335,7 @@ rule report2_neoantigens_HLA:
         cap = "This table shows the HLA alleles for both tumor and normal samples.",
     output:
         tsv="analysis/report2/neoantigens/01_HLA_results.tsv",
-        cap="analysis/report2/neoantigens/HLA_results_caption.txt",
+        cap="analysis/report2/neoantigens/01_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output.tsv}"""
 
@@ -346,7 +351,7 @@ rule report2_neoantigens_neoantigen_list:
         cap = "This table shows the list of predicted neoantigens.",
     output:
         tsv= "analysis/report2/neoantigens/02_neoantigen_list.tsv",
-        cap= "analysis/report2/neoantigens/neoantigen_list_caption.txt",
+        cap= "analysis/report2/neoantigens/02_caption.txt",
     shell:
         """echo "{params.cap}" > {output.cap} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
 

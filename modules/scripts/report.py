@@ -63,6 +63,7 @@ def buildTable(tsv_file, jinjaEnv, separator):
     #Title is the filename prettyprinted
     fname = ".".join(tsv_file.split("/")[-1].split(".")[:-1])
     #REMOVE index from file name, e.g. 01_foo -> foo
+    index = fname.split("_")[0] #first save index
     fname = "_".join(fname.split("_")[1:])
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
@@ -70,11 +71,11 @@ def buildTable(tsv_file, jinjaEnv, separator):
     vals = {'title':title }
 
     #Check for a caption
-    caption = captionHelper('caption.txt', path, fname)
+    caption = captionHelper('caption.txt', path, index)
     if caption:
         vals['caption'] = caption
     #check for subcaption
-    sub_caption = captionHelper('subcaption.txt', path, fname)
+    sub_caption = captionHelper('subcaption.txt', path, index)
     if sub_caption:
         vals['sub_caption'] = sub_caption
         
@@ -97,6 +98,7 @@ def buildPlot(png_file, jinjaEnv):
     template = jinjaEnv.get_template("plot.html")
     fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
     #REMOVE index from file name, e.g. 01_foo -> foo
+    index = fname.split("_")[0] #first save index
     fname = "_".join(fname.split("_")[1:])
     path = "/".join(png_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
@@ -107,11 +109,11 @@ def buildPlot(png_file, jinjaEnv):
             'png_file': png_file_relative
     }
     #Check for a caption
-    caption = captionHelper('caption.txt', path, fname)
+    caption = captionHelper('caption.txt', path, index)
     if caption:
         vals['caption'] = caption
     #check for subcaption
-    sub_caption = captionHelper('subcaption.txt', path, fname)
+    sub_caption = captionHelper('subcaption.txt', path, index)
     if sub_caption:
         vals['sub_caption'] = sub_caption
         
