@@ -15,6 +15,9 @@ from optparse import OptionParser
 import jinja2
 import pandas as pd
 
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
 def parseYaml(yaml_file):
     """Parses a yaml file and returns a dictionary"""
     ret = {}
@@ -127,6 +130,28 @@ def buildPlot(png_file, details, jinjaEnv):
         
     #print(vals)
     return template.render(vals)
+
+def formatter(x, pos):
+    'The two args are the value and tick position'
+    return '%1.1fM' % (float(x)*1e-6)
+
+def plot(plot_f):
+    """Given a path to a csv file, generate a plot with the same name
+    NOTE: the last _ of the name gives the type of plot"""
+    #PARSE the filename
+    tmp = plot_f.split(".")[0].split("_")
+    name = "_".join(tmp[1:-1])
+
+    df = pd.read_csv(plot_f)
+    plot = getattr(df.plot, tmp[-1])
+    plot(x="Sample")
+    #df.plot.barh(x="Sample")
+    #plt.xlabel("Reads") # Text for Y-Axis
+    #plt.ylabel("Sample") # Text for Y-Axis
+    #plt.title("Mapping statistics plot")
+    ax = plt.gca()
+    ax.xaxis.set_major_formatter(FuncFormatter(formatter))
+    plt.savefig('%s.png' % "_".join(tmp))
     
 def main():
     usage = "USAGE: %prog -o [output html file]"
@@ -172,7 +197,14 @@ def main():
             
         for ffile in ordering:
             filepath = os.path.join(path, ffile)
-            if os.path.isfile(filepath): #SKIP directories
+            if ffile == 'plots' and os.path.isdir(filepath): #handle plots
+                #PLOT all csv files
+                csv_files = [a for a in os.listdir(filepath) if a.endswith('.csv')]
+                for f in csv_files:
+                    plot_f = os.path.join(filepath, f)
+                    plot(plot_f)
+                    
+            elif os.path.isfile(filepath): #SKIP directories
                 #CHECK for file existance
                 if not os.path.exists(filepath):
                     print("WARNING: report.py- file %s is not found. SKIPPED for rendering" % filepath)

@@ -10,7 +10,8 @@ def cohort_report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     #Data Quality
-    ls.append("analysis/cohort_report/data_quality/01_mapping_stats.csv")
+    ls.append("analysis/cohort_report/data_quality/01_mapping_plots.csv")
+    ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     return ls
 
 rule cohort_report_all:
@@ -25,13 +26,30 @@ def cohort_report_inputFn(wildcards):
     return ls
     
 ###############################################################################
+rule cohort_report_data_quality_plots:
+    """Generate the mapping stats plots for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/data_quality/01_mapping_plots.csv",
+        details="analysis/cohort_report/data_quality/01_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
+        section_dir="analysis/cohort_report/data_quality/",
+    message:
+        "REPORT: creating mapping plots for data_quality section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingPlots.py -f {params.files} -d {params.section_dir} -o {output.csv}"""
+
 rule cohort_report_data_quality_table:
     """Generate the mapping stats table for the report"""
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/01_mapping_stats.csv",
-        details="analysis/cohort_report/data_quality/01_details.yaml",
+        csv="analysis/cohort_report/data_quality/02_mapping_stats.csv",
+        details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'"""
