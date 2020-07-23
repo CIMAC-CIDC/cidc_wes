@@ -17,11 +17,13 @@
       {% for r in table %}
       <tr>
 	{% for c in r %}
-	{% if loop.index == 1 %}
+	{% if loop.index == 1 %} {# HANDLE hdr cells #}
 	<th scope="row">{{ c }}</th>
 	{% else %}
-	{% if c is imagefile %}
-	<td><img class="img-fluid img-thumbnail wes-image-modal" src="{{ c|chopimagefile }}" alt="" style="cursor:pointer"></td>
+	{% if c is imagefile %} {# HANDLE image cells #}
+	<td><img class="img-fluid img-thumbnail wes-image-modal" src="{{ c|get_value }}" alt="" style="cursor:pointer"></td>
+	{% elif c is color %} {# HANDLE red cells #}
+	<td style="color:{{ c|get_prefix }}">{{ c|get_value }}</td>
 	{% else %}
 	<td>{{ c }}</td>
 	{% endif %}

@@ -36,8 +36,26 @@ def is_image_file(s):
     """Checks to see if the string starts with 'img:'"""
     return s.startswith('img:')
 
-def chop_image_file(s):
-    return s[4:]
+def is_color(s):
+    """Checks to see if the string starts with 'red:' or hex html color"""
+    valid_colors = ['red','green','blue']
+    #reference for html hex color reg-ex
+    #ref: https://stackoverflow.com/questions/30241375/python-how-to-check-if-string-is-a-hex-color-code
+    prog = re.compile('^#(?:[0-9a-fA-F]{3}){1,2}$')
+
+    if ":" in s:
+        (prefix, val) = s.split(":")
+        return (prefix in valid_colors) or prog.match(prefix)
+    else:
+        return False
+
+def get_val(s):
+    (prefix, val) = s.split(":")
+    return val
+
+def get_prefix(s):
+    (prefix, val) = s.split(":")
+    return prefix
 
 #NOTE: this can easily handle csv files too!
 def buildTable(tsv_file, details, jinjaEnv, separator):
@@ -45,7 +63,9 @@ def buildTable(tsv_file, details, jinjaEnv, separator):
     assumes the first line is the hdr"""
     #LOAD jinja2 test and filter for image processing
     jinjaEnv.tests['imagefile'] = is_image_file
-    jinjaEnv.filters['chopimagefile'] = chop_image_file
+    jinjaEnv.tests['color'] = is_color
+    jinjaEnv.filters['get_value'] = get_val
+    jinjaEnv.filters['get_prefix'] = get_prefix
     template = jinjaEnv.get_template("table.html")
     
     #Title is the filename prettyprinted
