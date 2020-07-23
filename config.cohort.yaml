@@ -1,0 +1,7 @@
+#List the wes runs in the cohort and the path to their summary json file
+runs:
+  run_01:
+    - /path/to/wes/summary/json_file01.json
+  run_02:
+    - /path/to/wes/summary/json_file02.json
+  #...

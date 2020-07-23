@@ -1,0 +1,60 @@
+# Len Taing 2020 (TGBTG)
+#MODULE: wes cohort report module
+
+import os
+from yaml import dump as yaml_dump
+
+configfile: "config.cohort.yaml"
+
+def cohort_report_targets(wildcards):
+    """Generates the targets for this module"""
+    ls = []
+    #Data Quality
+    ls.append("analysis/cohort_report/data_quality/01_mapping_stats.csv")
+    return ls
+
+rule cohort_report_all:
+    input:
+        "analysis/cohort_report/report.html"
+
+def cohort_report_inputFn(wildcards):
+    """Returns a list of all of the json files"""
+    ls = []
+    for r in config['runs']:
+        ls.append(config['runs'][r][0])
+    return ls
+    
+###############################################################################
+rule cohort_report_data_quality_table:
+    """Generate the mapping stats table for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/data_quality/01_mapping_stats.csv",
+        details="analysis/cohort_report/data_quality/01_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'"""
+    message:
+        "REPORT: creating mapping stats for data_quality section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingStats.py -f {params.files} -o {output.csv}"""
+
+###############################################################################
+rule cohort_report_auto_render:
+    """Generalized rule to dynamically generate the report BASED
+    on what is in the report directory"""
+    input:
+        cohort_report_targets
+    params:
+        report_path = "analysis/cohort_report",
+        sections_list=",".join(['data_quality'])
+    output:
+        "analysis/cohort_report/report.html"
+    message:
+        "REPORT: Generating WES report"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -o {output} && cp -r cidc_wes/report2/static {params.report_path}"""
+
