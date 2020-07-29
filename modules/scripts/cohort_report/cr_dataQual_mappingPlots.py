@@ -80,11 +80,10 @@ def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-f", "--files", action="append", help="mapping stats .csv file")
-    optparser.add_option("-d", "--dir", help="section sub-dir")
     optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.files or not options.dir or not options.output:
+    if not options.files or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -93,44 +92,39 @@ def main():
 
     #get the col values and calculate mean and std-dev for each attr
     stats = {}
-    attrs = ['total_reads', 'mapped_reads', 'dedup_reads', 'mean_quality_score']
+    attrs = ['total_reads', 'mapped_reads', 'dedup_reads',]# 'mean_quality_score']
     for a in attrs:
         stats[a] = getCol_Stats(runs, a)
-
-    #Write plot files:
-    plots_dir = os.path.join(options.dir, 'plots')
-    if not os.path.exists(plots_dir):
-        os.mkdir(plots_dir)
 
     #MAIN output.tsv
     out = open(options.output, "w")
     hdr = map(lambda x: prettyprint(x), attrs)
-    hdr = ['&nbsp;'] + list(hdr)
+    hdr = ['Sample'] + list(hdr)
     out.write("%s\n" % ",".join(hdr))
-    row = []
-    for (i, a) in enumerate(attrs):
-        index = str(i).zfill(2)
-        plot_name = "%s_%s_barh" % (index, a)
-        csv_fname = "%s.csv" % plot_name
-        det_fname = "%s_details.yaml" % (index)
-        (ls, mean, std) = stats[a]
-        csv = open(os.path.join(plots_dir, csv_fname), "w")
-        hdr = ["Sample", prettyprint(a)]
-        csv.write("%s\n" % ",".join(hdr))
+    for r in runs:
+        #Print both tumor and normal rows
+        tmr = r['tumor']
+        #tmp = [millify(tmr.get(a)) for a in attrs]
+        tmp = [str(tmr[a]) for a in attrs]
+        #BASE: dedup reads--the mapped and total reads are deltas
+        #tmp = [str(tmr['total_reads'] - tmr['mapped_reads']),
+        #       str(tmr['mapped_reads'] - tmr['dedup_reads']),
+        #       str(tmr['dedup_reads'])]
+        first_row = [tmr['id']]
+        first_row.extend(tmp)
 
-        for (name, val) in ls:
-            csv.write("%s\n" % ",".join([name,str(val)]))
-        csv.close()
-        #add link to image- clean path first --
-        if options.dir.endswith("/"): #drop last /
-            options.dir = options.dir[:-1]
-        section = options.dir.split("/")[-1]
-        plot_path = "img:%s/plots/%s.png" % (section, plot_name)
-        if i == 0:
-            out.write("&nbsp;,%s" % plot_path)
-        else:
-            out.write(",%s" % plot_path)
-        #ALSO write details here!
+        nrm = r['normal']
+        #tmp = [millify(nrm.get(a)) for a in attrs]
+        tmp = [str(nrm[a]) for a in attrs]
+        #tmp = [str(nrm['total_reads'] - nrm['mapped_reads']),
+        #       str(nrm['mapped_reads'] - nrm['dedup_reads']),
+        #       str(nrm['dedup_reads'])]
+        secnd_row = [nrm['id']]
+        secnd_row.extend(tmp)
+        #print(first_row)
+        #print(secnd_row)
+        out.write("%s\n" % ",".join(first_row))
+        out.write("%s\n" % ",".join(secnd_row))
     out.close()
 
 if __name__ == '__main__':

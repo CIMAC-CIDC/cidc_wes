@@ -65,6 +65,7 @@ dependencies:
 - r-optparse
 - r-ggpubr
 - genson
+- multiqc #python setup install
 
 #msisensor2 plotting
 - r-beeswarm

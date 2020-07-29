@@ -12,6 +12,32 @@
     <!-- Bootstrap core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Multiqc -->
+    <script type="text/plain" id="mqc_compressed_plotdata">{{ plot_compressed_json }}</script>
+
+    <script type="application/json" id="mqc_config">{{
+      {
+      "num_datasets_plot_limit": config.num_datasets_plot_limit,
+      "sample_names_rename": config.sample_names_rename,
+      "show_hide_patterns": config.show_hide_patterns,
+      "show_hide_mode": config.show_hide_mode,
+      "decimalPoint_format": config.decimalPoint_format,
+      "thousandsSep_format": config.thousandsSep_format,
+      } | tojson
+      }}</script>
+    {% raw %}
+    <script type="text/javascript">
+      mqc_compressed_plotdata = document.getElementById('mqc_compressed_plotdata').innerHTML;
+      mqc_config = JSON.parse(document.getElementById('mqc_config').innerHTML);
+    </script>
+    {% endraw %}
+
+    <link rel="stylesheet" type="text/css" href="static/vendor/multiqc/css/default_multiqc.css">
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/multiqc/js/lz-string.min.js"></script>
+    <script src="static/vendor/multiqc/js/highcharts.js"></script>
+    <script src="static/vendor/multiqc/js/multiqc_plotting.js"></script>
+
     <!-- Custom styles for this template -->
     <link href="static/css/simple-sidebar.css" rel="stylesheet">
     <link href="static/css/wes.css" rel="stylesheet" type="text/css">
@@ -74,7 +100,6 @@
     </div>
 
     <!-- Bootstrap core JavaScript -->
-    <script src="static/vendor/jquery/jquery.min.js"></script>
     <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
       var last_section = '{{ first_section}}';

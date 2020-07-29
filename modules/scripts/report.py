@@ -18,6 +18,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
+#Multiqc stuff
+from multiqc.plots import bargraph, linegraph, table
+from multiqc.utils import report as mqc_report, config as mqc_config
+
 def parseYaml(yaml_file):
     """Parses a yaml file and returns a dictionary"""
     ret = {}
@@ -131,6 +135,51 @@ def buildPlot(png_file, details, jinjaEnv):
     #print(vals)
     return template.render(vals)
 
+def buildMqcPlot(plot_file, details, jinjaEnv):
+    """Given a plotfile which is a csv file with a .plot extension,
+    Tries to generate an (interactive) multiqc plot"""
+    template = jinjaEnv.get_template("mqc_plot.html")
+    #Dropping path and extension to get filename
+    fname = ".".join(plot_file.split("/")[-1].split(".")[:-1])
+    #REMOVE index from file name, e.g. 01_foo -> foo
+    index = fname.split("_")[0] #first save index
+    plot_type = fname.split("_")[-1] #and plot type
+    fname = "_".join(fname.split("_")[1:-1])
+    title = prettyprint(fname, True)
+
+    #READ in the file--for now assume it's of type bar and have other handlers
+    #later
+    #HERE we should check for plot type
+    f = open(plot_file)
+    hdr = f.readline().split(",")
+    data = {}
+    for l in f:
+        tmp = l.strip().split(",")
+        #Assume col 1 = Samples
+        data[tmp[0]] = dict(zip(hdr[1:],tmp[1:]))
+    f.close()
+    #Try to get plot details from details dict
+    cats = details.get("cats", None) #Categories
+    #pass the rest of details into the plotting fn
+    html_plot = table.plot(data, cats, details)
+
+    vals = {'title':title,
+            'plot': html_plot,
+    }
+
+    #Check for a caption
+    caption = details.get('caption', None)
+    if caption:
+        vals['caption'] = caption
+    #check for subcaption
+    sub_caption = details.get('subcaption', None)
+    if sub_caption:
+        vals['sub_caption'] = sub_caption
+
+    #print(vals)
+    return template.render(vals)
+
+
 def formatter(x, pos):
     'The two args are the value and tick position'
     return '%1.1fM' % (float(x)*1e-6)
@@ -152,7 +201,7 @@ def plot(plot_f):
     ax = plt.gca()
     ax.xaxis.set_major_formatter(FuncFormatter(formatter))
     plt.savefig('%s.png' % "_".join(tmp))
-    
+
 def main():
     usage = "USAGE: %prog -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -222,6 +271,8 @@ def main():
                     tmp += buildTable(filepath, details, templateEnv, ',')
                 elif ffile.endswith(".png"): #Make a plot
                     tmp += buildPlot(filepath, details, templateEnv)
+                elif ffile.endswith(".plot"): #Make a Multiqc plot
+                    tmp += buildMqcPlot(filepath, details, templateEnv)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp
@@ -230,6 +281,8 @@ def main():
     wes_report['sections'] = wes_sections
     wes_report['panels'] = wes_panels
     wes_report['first_section'] = first_section
+    wes_report['plot_compressed_json'] = mqc_report.compress_json(mqc_report.plot_data)
+    wes_report['config'] = mqc_config
     template.stream(wes_report).dump(options.output)  
 
 if __name__ == '__main__':
