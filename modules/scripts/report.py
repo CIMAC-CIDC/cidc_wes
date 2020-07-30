@@ -22,6 +22,7 @@ from matplotlib.ticker import FuncFormatter
 from multiqc.plots import bargraph, linegraph, table
 from multiqc.utils import report as mqc_report, config as mqc_config
 
+_mqc_plot_types = {'bar':bargraph, 'line':linegraph, 'table':table}
 def parseYaml(yaml_file):
     """Parses a yaml file and returns a dictionary"""
     ret = {}
@@ -135,6 +136,60 @@ def buildPlot(png_file, details, jinjaEnv):
     #print(vals)
     return template.render(vals)
 
+def readMqcData01(data_file):
+    """This file is like a typical csv, where the first line is 
+    the header and first col = Sample names
+    returns a dictionary where the keys are sample names and the 
+    values are dictionaries that represent the columns
+    ref: https://multiqc.info/docs/#bar-graphs
+    """
+    f = open(data_file)
+    hdr = f.readline().split(",")
+    data = {}
+    for l in f:
+        tmp = l.strip().split(",")
+        #Assume col 1 = Samples
+        data[tmp[0]] = dict(zip(hdr[1:],tmp[1:]))
+    f.close()
+    return data
+
+def readMqcData02(data_file):
+    """This file is like the other csv representation
+    the header = X, Sample1, Sample2, ..., SampleN
+    Each row represents the x-val, and then y-vals for each sample at
+    the x-val
+    returns a dictionary where the keys are sample names and the 
+    values x-y value pairs
+    ref: https://multiqc.info/docs/#line-graph
+    """
+    f = open(data_file)
+    hdr = f.readline().split(",")
+    #Init data to keys: [] for each header item
+    data = dict([(h,[]) for h in hdr])
+    for l in f:
+        tmp = zip(hdr, l.strip().split(","))
+        for (k, v) in tmp:
+            data[k].append(v)
+    f.close()
+    #Get x-axis and remove it from data
+    #x = map(lambda x: x.zfill(3), data['X'])
+    x = map(lambda x: int(x), data['X'])
+    #print(x)
+    del data['X']
+
+    #Reprocess each sample
+    for s in data:
+        #try to infer type
+        if '.' in data[s][0]: #float?
+            data[s] = map(float, data[s])
+        else:
+            data[s] = map(int, data[s])
+        tmp = dict(zip(x, data[s]))
+        data[s] = tmp
+        #print(data[s])
+
+    return data
+
 def buildMqcPlot(plot_file, details, jinjaEnv):
     """Given a plotfile which is a csv file with a .plot extension,
     Tries to generate an (interactive) multiqc plot"""
@@ -147,21 +202,23 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     fname = "_".join(fname.split("_")[1:-1])
     title = prettyprint(fname, True)
 
+    #Pickout the proper mqc plot module to use
+    mqc_plot = _mqc_plot_types[plot_type]
+    
     #READ in the file--for now assume it's of type bar and have other handlers
     #later
     #HERE we should check for plot type
-    f = open(plot_file)
-    hdr = f.readline().split(",")
-    data = {}
-    for l in f:
-        tmp = l.strip().split(",")
-        #Assume col 1 = Samples
-        data[tmp[0]] = dict(zip(hdr[1:],tmp[1:]))
-    f.close()
-    #Try to get plot details from details dict
-    cats = details.get("cats", None) #Categories
-    #pass the rest of details into the plotting fn
-    html_plot = table.plot(data, cats, details)
+    if plot_type == "bar" or plot_type == "table":
+        data = readMqcData01(plot_file)
+        #Try to get plot details from details dict
+        cats = details.get("cats", None) #Categories
+        #pass the rest of details into the plotting fn
+        html_plot = mqc_plot.plot(data, cats, details)
+
+    else: #line
+        data = readMqcData02(plot_file)
+        html_plot = mqc_plot.plot(data, details)
+    
 
     vals = {'title':title,
             'plot': html_plot,
