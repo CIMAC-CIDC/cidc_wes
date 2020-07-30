@@ -13,6 +13,7 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/data_quality/01_mapping_plots_table.plot")
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plot")
+    ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plot")
     return ls
 
 rule cohort_report_all:
@@ -95,6 +96,23 @@ rule cohort_report_data_quality_gc_plots:
     shell:
         """echo "{params.subcaption}" >> {output.details} && 
         cidc_wes/modules/scripts/cohort_report/cr_dataQual_gcPlots.py -f {params.files} -o {output.csv}"""
+
+rule cohort_report_data_quality_insertSize_plots:
+    """Generate the insert size plots for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/data_quality/04_insert_size_line.plot",
+        #details="analysis/cohort_report/data_quality/04_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        #subcaption="""subcaption: 'GC Plot shows the distribution of %GC bases within a 100bp window. In human, the mean GC content is approx. 40%.'""",
+    message:
+        "REPORT: creating insert size plots for data_quality section"
+    group: "cohort_report"
+    shell:
+        #"""echo "{params.subcaption}" >> {output.details} && 
+        """cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_auto_render:
