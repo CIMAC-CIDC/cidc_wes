@@ -163,7 +163,7 @@ def readMqcData02(data_file):
     ref: https://multiqc.info/docs/#line-graph
     """
     f = open(data_file)
-    hdr = f.readline().split(",")
+    hdr = f.readline().strip().split(",")
     #Init data to keys: [] for each header item
     data = dict([(h,[]) for h in hdr])
     for l in f:
@@ -173,21 +173,21 @@ def readMqcData02(data_file):
     f.close()
     #Get x-axis and remove it from data
     #x = map(lambda x: x.zfill(3), data['X'])
-    x = map(lambda x: int(x), data['X'])
-    #print(x)
+    xaxis = list(map(lambda x: int(x), data['X']))
     del data['X']
 
     #Reprocess each sample
     for s in data:
         #try to infer type
         if '.' in data[s][0]: #float?
-            data[s] = map(float, data[s])
+            data[s] = list(map(float, data[s])) #DON'T forget to list() map objs!
         else:
-            data[s] = map(int, data[s])
-        tmp = dict(zip(x, data[s]))
+            data[s] = list(map(int, data[s]))
+        tmp = dict(zip(xaxis, data[s]))
+        #print(tmp)
         data[s] = tmp
         #print(data[s])
-
+    #print(data)
     return data
 
 def buildMqcPlot(plot_file, details, jinjaEnv):

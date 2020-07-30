@@ -92,7 +92,7 @@ def main():
 
     #get the col values and calculate mean and std-dev for each attr
     stats = {}
-    attrs = ['total_reads', 'mapped_reads', 'dedup_reads',]# 'mean_quality_score']
+    attrs = ['total_reads', 'mapped_reads', 'dedup_reads', 'mean_quality_score']
     for a in attrs:
         stats[a] = getCol_Stats(runs, a)
 
