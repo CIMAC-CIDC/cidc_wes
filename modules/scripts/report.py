@@ -11,8 +11,8 @@ import re
 import subprocess
 import yaml
 
-from optparse import OptionParser
 import jinja2
+import markdown
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -21,6 +21,8 @@ from matplotlib.ticker import FuncFormatter
 #Multiqc stuff
 from multiqc.plots import bargraph, linegraph, table
 from multiqc.utils import report as mqc_report, config as mqc_config
+
+from optparse import OptionParser
 
 _mqc_plot_types = {'bar':bargraph, 'line':linegraph, 'table':table}
 def parseYaml(yaml_file):
@@ -89,11 +91,11 @@ def buildTable(tsv_file, details, jinjaEnv, separator):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = caption
+        vals['caption'] = markdown.markdown(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = sub_caption
+        vals['sub_caption'] = markdown.markdown(sub_caption)
         
     table = []
     f = open(tsv_file)
@@ -127,11 +129,11 @@ def buildPlot(png_file, details, jinjaEnv):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = caption
+        vals['caption'] = markdown.markdown(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = sub_caption
+        vals['sub_caption'] = markdown.markdown(sub_caption)
         
     #print(vals)
     return template.render(vals)
@@ -227,11 +229,11 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = caption
+        vals['caption'] = markdown.markdown(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = sub_caption
+        vals['sub_caption'] = markdown.markdown(sub_caption)
 
     #print(vals)
     return template.render(vals)
