@@ -46,6 +46,20 @@ def generateSample():
                 'percent_bases_gt_50': percent_bases}
     return {'alignment': alignment, 'coverage': coverage}
 
+def generateCopyNumber():
+    "returns a dictionary of simulated cnv fields"
+    clonality = round(random.random(), 3)
+    purity = round(random.random(), 3)
+    ploidy = random.gauss(2.5, 0.5) #mean 2.5, stdev 0.5
+    ploidy = round(ploidy, 4)
+    dipLogR = round(random.gauss(0, 1), 4)
+
+    return {'clonality': clonality, 'purity': purity, 'ploidy': ploidy,
+            'dipLogR': dipLogR,
+            #HARD-CODED FILES--Stil unclear how to handle them
+            'cnv_file': "analysis/clonality/CTTTP07T1.00/CTTTP07T1.00_pyclone.tsv",
+            'cnv_plot_file': "analysis/report2/copy_number/01_copynumber_plot.png"}
+
 def generateRunName():
     center = random.choice(['broad', 'mda', 'mocha'])
     sample = random.randint(0,1000)
@@ -68,9 +82,14 @@ def main():
     normal = generateSample()
     normal['id'] = "%s_N" % run_name
 
+    cnv = generateCopyNumber()
+    #print(cnv)
+
     run = {'id': run_name,
            'tumor': tumor,
-           'normal': normal}
+           'normal': normal,
+           'copy_number': cnv,
+    }
     
     if options.output:
         out = open(options.output,'w')

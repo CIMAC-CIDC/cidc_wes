@@ -303,6 +303,37 @@
             "raw_file2"
          ]
       },
+      "copy_number": {
+         "type": "object",
+         "properties": {
+            "clonality": {
+               "type": "number"
+            },
+            "purity": {
+               "type": "number"
+            },
+            "ploidy": {
+               "type": "number"
+            },
+            "dipLogR": {
+               "type": "number"
+            },
+            "cnv_file": {
+               "type": "string"
+            },
+            "cnv_plot_file": {
+               "type": "string"
+            }
+         },
+         "required": [
+            "clonality",
+            "cnv_file",
+            "cnv_plot_file",
+            "dipLogR",
+            "ploidy",
+            "purity"
+         ]
+      },
       "somatic": {
          "type": "object",
          "properties": {
@@ -533,29 +564,14 @@
       },
       "neoantigen_file": {
          "type": "string"
-      },
-      "cnv_file": {
-         "type": "string"
-      },
-      "clonality": {
-         "type": "number"
-      },
-      "germline": {
-         "type": "number"
-      },
-      "purity": {
-         "type": "number"
       }
    },
    "required": [
-      "clonality",
-      "cnv_file",
-      "germline",
+      "copy_number",
       "id",
       "neoantigen",
       "neoantigen_file",
       "normal",
-      "purity",
       "somatic",
       "tumor"
    ]

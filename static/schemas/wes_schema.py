@@ -97,16 +97,20 @@ neoantigen_row = {"Gene": _string,
                   "WT_Score": _float,
                   "Fold_Change": _float}
 
+copy_number = {'clonality': _float,
+               'purity': _float,
+               'ploidy': _float,
+               'dipLogR': _float,
+               'cnv_file': _file_path, #path to sequenza result txt file
+               'cnv_plot_file': _file_path}
+
 run = {'id': _string,
        'tumor': sample,
        'normal': sample,
+       'copy_number': copy_number,
        'somatic': somatic_results,
        'neoantigen': [neoantigen_row, neoantigen_row, neoantigen_row],
        'neoantigen_file': _file_path, #path to pvacseq filtered.tsv file
-       "cnv_file": _file_path, #path to sequenza result txt file
-       "clonality": _float, 
-       "germline": _float, #Tumor/normal % mutation overlap
-       "purity": _float,
        }
 
 ###############################################################################

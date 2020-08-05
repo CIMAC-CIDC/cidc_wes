@@ -15,6 +15,10 @@ def cohort_report_targets(wildcards):
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plot")
     ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plot")
+
+    #Copynumber
+    ls.append("analysis/cohort_report/copy_number/01_copy_number_table.plot")
+    
     return ls
 
 rule cohort_report_all:
@@ -48,7 +52,7 @@ rule cohort_report_data_quality_plots:
         echo "{params.plot_options}" >> {output.details} && 
         cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingPlots.py -f {params.files} -o {output.csv}"""
 
-rule cohort_report_coverate_table:
+rule cohort_report_coverage_table:
     """Generate the coverage table for the report"""
     input:
         cohort_report_inputFn
@@ -116,6 +120,23 @@ rule cohort_report_data_quality_insertSize_plots:
     shell:
         #"""echo "{params.subcaption}" >> {output.details} && 
         """cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
+###############################################################################
+rule cohort_report_copynumber_table:
+    """Generate the copynumber table for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/copy_number/01_copy_number_table.plot",
+        #details="analysis/cohort_report/data_quality/02_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        #plot_options = "cpswitch: False",
+    message:
+        "REPORT: creating copynumber table for copy_number section"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_auto_render:
@@ -125,7 +146,7 @@ rule cohort_report_auto_render:
         cohort_report_targets
     params:
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality'])
+        sections_list=",".join(['data_quality','copy_number'])
     output:
         "analysis/cohort_report/report.html"
     message:
