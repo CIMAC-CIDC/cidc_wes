@@ -146,13 +146,15 @@ def readMqcData01(data_file):
     ref: https://multiqc.info/docs/#bar-graphs
     """
     f = open(data_file)
-    hdr = f.readline().split(",")
+    hdr = f.readline().strip().split(",")
+    #print(hdr)
     data = {}
     for l in f:
         tmp = l.strip().split(",")
         #Assume col 1 = Samples
         data[tmp[0]] = dict(zip(hdr[1:],tmp[1:]))
     f.close()
+    #print(data)
     return data
 
 def readMqcData02(data_file):

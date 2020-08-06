@@ -3,6 +3,7 @@
 
 import os
 from yaml import dump as yaml_dump
+from collections import OrderedDict
 
 configfile: "config.cohort.yaml"
 
@@ -18,7 +19,10 @@ def cohort_report_targets(wildcards):
 
     #Copynumber
     ls.append("analysis/cohort_report/copy_number/01_copy_number_table.plot")
-    
+
+    #Neoantigen
+    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.plot")
+
     return ls
 
 rule cohort_report_all:
@@ -139,6 +143,47 @@ rule cohort_report_copynumber_table:
         """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -o {output.csv}"""
 
 ###############################################################################
+def getHLATable_categories():
+    #Actual
+    #classII = ['DPB1-1', 'DPB1-2', 'DQB1-1', 'DQB1-2', 'DRB1-1', 'DRB1-2']
+    #Prettyprint version
+    classI = list(map(lambda x: x.title(), ['A-1', 'A-2', 'B-1', 'B-2', 'C-1', 'C-2']))
+    classII = list(map(lambda x: x.title(), ['DPB1-1', 'DPB1-2', 'DQB1-1', 'DQB1-2', 'DRB1-1', 'DRB1-2']))
+    both = classI + classII
+    tmp = {}
+    for c in both:
+        if c in classI:
+            tmp[c] = {'hidden': False}
+        else:
+            tmp[c] = {'hidden': True}
+    ret = yaml_dump({'cats': tmp })
+    #print(ret)
+    return ret
+
+rule cohort_report_HLA_table:
+    """Generate the HLA table for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.plot",
+        details="analysis/cohort_report/neoantigen/01_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        #caption="""caption: 'Table of HLA Alleles.\n**NOTE: Click on Configure Table to show Class II alleles**'""",
+        caption="""caption: '**NOTE: Click on Configure Table to show Class II alleles**'""",
+        table_options = "table_title: 'HLA Alleles Table'",
+        #Turn off display of Class I Alleles
+        cats = getHLATable_categories(),
+    message:
+        "REPORT: creating HLA table for neoantigen section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && 
+        echo "{params.table_options}" >> {output.details} &&
+        echo "{params.cats}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaTable.py -f {params.files} -o {output.csv}"""
+
+###############################################################################
 rule cohort_report_auto_render:
     """Generalized rule to dynamically generate the report BASED
     on what is in the report directory"""
@@ -146,7 +191,7 @@ rule cohort_report_auto_render:
         cohort_report_targets
     params:
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number'])
+        sections_list=",".join(['data_quality','copy_number', 'neoantigen'])
     output:
         "analysis/cohort_report/report.html"
     message:
