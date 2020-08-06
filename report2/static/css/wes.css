@@ -33,6 +33,13 @@
   color: white;
 }
 
+/* mqc table additions */
+/* hidden class doesn't seem to be defined anywhere so we'll do it */
 .hidden {
+  display: none;
+}
+
+/* turn off 'Plot' btn in mqc tables b/c it doesn't work and isn't useful*/
+.mqc_table_makeScatter {
   display: none;
 }
