@@ -20,6 +20,10 @@ def cohort_report_targets(wildcards):
     #Copynumber
     ls.append("analysis/cohort_report/copy_number/01_copy_number_table.plot")
 
+    #Somatic
+    ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.plot")
+    ls.append("analysis/cohort_report/somatic/somatic_summary.json")
+
     #Neoantigen
     ls.append("analysis/cohort_report/neoantigen/01_HLA_table.plot")
 
@@ -141,6 +145,25 @@ rule cohort_report_copynumber_table:
     group: "cohort_report"
     shell:
         """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -o {output.csv}"""
+###############################################################################
+rule cohort_report_somatic_summary_table:
+    """Generate the somatic summary table for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/somatic/01_somatic_summary_table.plot",
+        json="analysis/cohort_report/somatic/somatic_summary.json",
+        #...other json here
+        #details="analysis/cohort_report/data_quality/02_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        #plot_options = "cpswitch: False",
+    message:
+        "REPORT: creating somatic summary table for somatic section"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticSummaryTable.py -f {params.files} -o {output.csv} -j {output.json}"""
 
 ###############################################################################
 def getHLATable_categories():
@@ -191,7 +214,8 @@ rule cohort_report_auto_render:
         cohort_report_targets
     params:
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number', 'neoantigen'])
+        sections_list=",".join(['data_quality','somatic', 'copy_number', 'neoantigen'])
+        #sections_list=",".join(['somatic'])
     output:
         "analysis/cohort_report/report.html"
     message:

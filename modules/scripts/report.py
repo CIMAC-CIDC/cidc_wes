@@ -10,6 +10,7 @@ import sys
 import re
 import subprocess
 import yaml
+import json
 
 import jinja2
 import markdown
@@ -25,6 +26,8 @@ from multiqc.utils import report as mqc_report, config as mqc_config
 from optparse import OptionParser
 
 _mqc_plot_types = {'bar':bargraph, 'line':linegraph, 'table':table}
+_resources = {}
+
 def parseYaml(yaml_file):
     """Parses a yaml file and returns a dictionary"""
     ret = {}
@@ -91,11 +94,11 @@ def buildTable(tsv_file, details, jinjaEnv, separator):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = markdown.markdown(caption)
+        vals['caption'] = renderMd(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = markdown.markdown(sub_caption)
+        vals['sub_caption'] = renderMd(sub_caption)
         
     table = []
     f = open(tsv_file)
@@ -129,16 +132,20 @@ def buildPlot(png_file, details, jinjaEnv):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = markdown.markdown(caption)
+        vals['caption'] = renderMd(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = markdown.markdown(sub_caption)
+        vals['sub_caption'] = renderMd(sub_caption)
         
     #print(vals)
     return template.render(vals)
 
-def readMqcData01(data_file):
+def renderMd(s):
+    """renders s as markdown text"""
+    return  markdown.markdown(s, extensions=['extra'])
+
+def readMqcData01(data_file, separator=","):
     """This file is like a typical csv, where the first line is 
     the header and first col = Sample names
     returns a dictionary where the keys are sample names and the 
@@ -146,18 +153,18 @@ def readMqcData01(data_file):
     ref: https://multiqc.info/docs/#bar-graphs
     """
     f = open(data_file)
-    hdr = f.readline().strip().split(",")
+    hdr = f.readline().strip().split(separator)
     #print(hdr)
     data = {}
     for l in f:
-        tmp = l.strip().split(",")
         #Assume col 1 = Samples
+        tmp = l.strip().split(separator)
         data[tmp[0]] = dict(zip(hdr[1:],tmp[1:]))
     f.close()
     #print(data)
     return data
 
-def readMqcData02(data_file):
+def readMqcData02(data_file, separator = ","):
     """This file is like the other csv representation
     the header = X, Sample1, Sample2, ..., SampleN
     Each row represents the x-val, and then y-vals for each sample at
@@ -167,11 +174,11 @@ def readMqcData02(data_file):
     ref: https://multiqc.info/docs/#line-graph
     """
     f = open(data_file)
-    hdr = f.readline().strip().split(",")
+    hdr = f.readline().strip().split(separator)
     #Init data to keys: [] for each header item
     data = dict([(h,[]) for h in hdr])
     for l in f:
-        tmp = zip(hdr, l.strip().split(","))
+        tmp = zip(hdr, l.strip().split(separator))
         for (k, v) in tmp:
             data[k].append(v)
     f.close()
@@ -197,6 +204,11 @@ def readMqcData02(data_file):
 def buildMqcPlot(plot_file, details, jinjaEnv):
     """Given a plotfile which is a csv file with a .plot extension,
     Tries to generate an (interactive) multiqc plot"""
+    #TRY to auto-detect if plot file is , or \t separated
+    f = open(plot_file)
+    tmp = f.readline() #take a peek at first line
+    sep = "," if "," in tmp else "\t"
+    f.close()
     template = jinjaEnv.get_template("mqc_plot.html")
     #Dropping path and extension to get filename
     fname = ".".join(plot_file.split("/")[-1].split(".")[:-1])
@@ -213,14 +225,14 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     #later
     #HERE we should check for plot type
     if plot_type == "bar" or plot_type == "table":
-        data = readMqcData01(plot_file)
+        data = readMqcData01(plot_file, sep)
         #Try to get plot details from details dict
         cats = details.get("cats", None) #Categories
         #pass the rest of details into the plotting fn
         html_plot = mqc_plot.plot(data, cats, details)
 
     else: #line
-        data = readMqcData02(plot_file)
+        data = readMqcData02(plot_file, sep)
         html_plot = mqc_plot.plot(data, details)
     
 
@@ -231,11 +243,11 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     #Check for a caption
     caption = details.get('caption', None)
     if caption:
-        vals['caption'] = markdown.markdown(caption)
+        vals['caption'] = renderMd(caption)
     #check for subcaption
     sub_caption = details.get('subcaption', None)
     if sub_caption:
-        vals['sub_caption'] = markdown.markdown(sub_caption)
+        vals['sub_caption'] = renderMd(sub_caption)
 
     #print(vals)
     return template.render(vals)
@@ -262,6 +274,16 @@ def plot(plot_f):
     ax = plt.gca()
     ax.xaxis.set_major_formatter(FuncFormatter(formatter))
     plt.savefig('%s.png' % "_".join(tmp))
+
+def loadJson(json_file):
+    """"Simply loads the json data into _resources which will be added
+    into the html directly for use"""
+    #get the filename, which will be the key in _resources
+    fname = ".".join(json_file.split("/")[-1].split(".")[:-1])
+    ffile = open(json_file)
+    tmp = json.load(ffile)
+    ffile.close()
+    _resources[fname] = tmp
 
 def main():
     usage = "USAGE: %prog -o [output html file]"
@@ -334,6 +356,8 @@ def main():
                     tmp += buildPlot(filepath, details, templateEnv)
                 elif ffile.endswith(".plot"): #Make a Multiqc plot
                     tmp += buildMqcPlot(filepath, details, templateEnv)
+                elif ffile.endswith(".json"): #Load json data
+                    loadJson(filepath)
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp
@@ -343,6 +367,7 @@ def main():
     wes_report['panels'] = wes_panels
     wes_report['first_section'] = first_section
     wes_report['plot_compressed_json'] = mqc_report.compress_json(mqc_report.plot_data)
+    wes_report['wes_resources'] = json.dumps(_resources)
     wes_report['config'] = mqc_config
     template.stream(wes_report).dump(options.output)  
 

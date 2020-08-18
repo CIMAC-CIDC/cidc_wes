@@ -88,6 +88,19 @@ def generateRunName():
     sample = random.randint(0,1000)
     return "%s_s%s" % (center, sample)
 
+def generateSomatic():
+    """returns a dictionary of simulated somatic fields
+    TODO: filtered_vcf_file, filtered_maf_file, tmb, functional_summary,
+    trinucleotide_matrix, transition_matrix
+    """
+    snp = round(random.gauss(1000, 150)) #mean 1k, stdev 150
+    insert = random.randint(5, 100)
+    delete = random.randint(10, 100)
+    total = snp + insert + delete
+
+    tmp = {'snp': snp, 'insertion': insert, 'deletion': delete, 'total': total}
+    return {'mutation_summary': tmp}
+
 def main():
     usage = "USAGE: %prog -s [seed] -o [output json file]"
     optparser = OptionParser(usage=usage)
@@ -107,11 +120,14 @@ def main():
 
     cnv = generateCopyNumber()
     #print(cnv)
+    somatic = generateSomatic()
+    #print(somatic)
 
     run = {'id': run_name,
            'tumor': tumor,
            'normal': normal,
            'copy_number': cnv,
+           'somatic': somatic,
     }
     
     if options.output:
