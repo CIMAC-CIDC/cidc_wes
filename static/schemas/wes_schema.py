@@ -67,12 +67,14 @@ transition_row = {"A": _int,
                   "G": _int,
                   "T": _int}
 tmb = {'tumor': _int, 'normal': _int, "common": _int, "overlap": _float}
+func_summary = {'missense': mutation_results, 'nonsense': mutation_results,
+                'silent': mutation_results}
 
 somatic_results = {'filtered_vcf_file': _file_path,
                    'filtered_maf_file': _file_path,
                    'tmb': tmb,
                    'mutation_summary': mutation_results,
-                   'functional_summary': mutation_results,
+                   'functional_summary': func_summary,
                    'trinucleotide_matrix': _int_arr,
                    'transition_matrix': {'A': transition_row,
                                          'C': transition_row,

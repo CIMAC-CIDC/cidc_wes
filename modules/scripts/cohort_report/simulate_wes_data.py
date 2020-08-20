@@ -107,7 +107,16 @@ def generateSomatic():
     common = round(tumor*overlap)
 
     tmb = {'tumor': tumor, 'normal': normal, 'common': common, 'overlap': overlap}
-    
+
+    ttypes = ['missense', 'nonsense', 'silent']
+    func_summary = {}
+    for t in ttypes:
+        snp = round(random.gauss(100, 25))
+        insert = random.randint(5, 50)
+        delete = random.randint(10, 100)
+        foo = {'snp': snp, 'insert': insert, 'delete': delete, 'total': snp + insert + delete}
+        func_summary[t] = foo
+        
     #Transition matrix
     ACGT = ["A","C","G","T"]
     trans_mat = {}
@@ -116,7 +125,7 @@ def generateSomatic():
         tmp[k] = 0
         trans_mat[k] = tmp
     #print(trans_mat)
-    return {'mutation_summary': mut_sum, 'transition_matrix': trans_mat, 'tmb':tmb}
+    return {'mutation_summary': mut_sum, 'transition_matrix': trans_mat, 'tmb':tmb, 'functional_summary': func_summary}
 
 def main():
     usage = "USAGE: %prog -s [seed] -o [output json file]"

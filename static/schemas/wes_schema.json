@@ -344,7 +344,27 @@
                "type": "string"
             },
             "tmb": {
-               "type": "integer"
+               "type": "object",
+               "properties": {
+                  "tumor": {
+                     "type": "integer"
+                  },
+                  "normal": {
+                     "type": "integer"
+                  },
+                  "common": {
+                     "type": "integer"
+                  },
+                  "overlap": {
+                     "type": "number"
+                  }
+               },
+               "required": [
+                  "common",
+                  "normal",
+                  "overlap",
+                  "tumor"
+               ]
             },
             "mutation_summary": {
                "type": "object",
@@ -372,24 +392,80 @@
             "functional_summary": {
                "type": "object",
                "properties": {
-                  "total": {
-                     "type": "integer"
+                  "missense": {
+                     "type": "object",
+                     "properties": {
+                        "total": {
+                           "type": "integer"
+                        },
+                        "snp": {
+                           "type": "integer"
+                        },
+                        "insertion": {
+                           "type": "integer"
+                        },
+                        "deletion": {
+                           "type": "integer"
+                        }
+                     },
+                     "required": [
+                        "deletion",
+                        "insertion",
+                        "snp",
+                        "total"
+                     ]
                   },
-                  "snp": {
-                     "type": "integer"
+                  "nonsense": {
+                     "type": "object",
+                     "properties": {
+                        "total": {
+                           "type": "integer"
+                        },
+                        "snp": {
+                           "type": "integer"
+                        },
+                        "insertion": {
+                           "type": "integer"
+                        },
+                        "deletion": {
+                           "type": "integer"
+                        }
+                     },
+                     "required": [
+                        "deletion",
+                        "insertion",
+                        "snp",
+                        "total"
+                     ]
                   },
-                  "insertion": {
-                     "type": "integer"
-                  },
-                  "deletion": {
-                     "type": "integer"
+                  "silent": {
+                     "type": "object",
+                     "properties": {
+                        "total": {
+                           "type": "integer"
+                        },
+                        "snp": {
+                           "type": "integer"
+                        },
+                        "insertion": {
+                           "type": "integer"
+                        },
+                        "deletion": {
+                           "type": "integer"
+                        }
+                     },
+                     "required": [
+                        "deletion",
+                        "insertion",
+                        "snp",
+                        "total"
+                     ]
                   }
                },
                "required": [
-                  "deletion",
-                  "insertion",
-                  "snp",
-                  "total"
+                  "missense",
+                  "nonsense",
+                  "silent"
                ]
             },
             "trinucleotide_matrix": {
