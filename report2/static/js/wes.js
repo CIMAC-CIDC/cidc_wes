@@ -41,6 +41,7 @@ function handlerFactory(colName, resource, handler) {
 }
 handlerFactory('Total_Mutations', 'somatic_summary', somaticSummary_submodal);
 handlerFactory('TiTv', 'ti_tv', tiTv_submodal);
+handlerFactory('TMB', 'tmb', somaticSummary_submodal);
 
 //Builds a table in the modal and displays it
 function somaticSummary_submodal(data, modal) {

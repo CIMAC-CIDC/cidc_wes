@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 #Attribs to read in
 #LEAVE off the plot for now
-_attrs = ['mutation_summary', 'transition_matrix']
+_attrs = ['mutation_summary', 'transition_matrix', 'tmb']
 
 def processJson(json_fpath):
     """Given a json file, returns a dictionary of that file with the values
@@ -60,9 +60,10 @@ def main():
     optparser.add_option("-o", "--output", help="output tsv file")
     optparser.add_option("-j", "--json_output1", help="json output - mutation summary table in json form")
     optparser.add_option("-k", "--json_output2", help="json output - transition matrix table in json form")
+    optparser.add_option("-l", "--json_output3", help="json output - tmb table in json form")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.files or not options.output or not options.json_output1 or not options.json_output2:
+    if not options.files or not options.output or not options.json_output1 or not options.json_output2 or not options.json_output3:
         optparser.print_help()
         sys.exit(-1)
 
@@ -73,6 +74,7 @@ def main():
     mutation_summaries = {}
     #transition matrices dict
     trans_mat = {}
+    tmb = {}
 
     ###########################################################################
     #KEY: need to make this tsv file b/c otherwise the arguments sent to
@@ -80,7 +82,7 @@ def main():
     ###########################################################################
     #MAIN output.tsv
     out = open(options.output, "w")
-    hdr = ['Run', 'Total Mutations', 'TiTv']
+    hdr = ['Run', 'Total Mutations', 'TiTv', 'TMB']
     out.write("%s\n" % "\t".join(hdr))
     for r in runs:
         tmp = [r['id']]
@@ -94,11 +96,15 @@ def main():
         ti_tv = calcTiTv(r['transition_matrix'])
         tmp.append(ti_tv)
 
+        #TMB: take Tumor
+        tmp.append(str(r['tmb']['tumor']))
+
         #tmp.append("<a href='http://www.yahoo.com'>ref1</a>")
         out.write("%s\n" % "\t".join(tmp))
 
         mutation_summaries[r['id']] = r['mutation_summary']
         trans_mat[r['id']] = r['transition_matrix']
+        tmb[r['id']] = r['tmb']
     out.close()
 
     json_out = open(options.json_output1, "w")
@@ -107,6 +113,10 @@ def main():
 
     json_out = open(options.json_output2, "w")
     json_out.write(json.dumps(trans_mat))
+    json_out.close()
+
+    json_out = open(options.json_output3, "w")
+    json_out.write(json.dumps(tmb))
     json_out.close()
 
 if __name__ == '__main__':

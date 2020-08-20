@@ -24,6 +24,7 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.plot")
     ls.append("analysis/cohort_report/somatic/somatic_summary.json")
     ls.append("analysis/cohort_report/somatic/ti_tv.json")
+    ls.append("analysis/cohort_report/somatic/tmb.json")
 
     #Neoantigen
     ls.append("analysis/cohort_report/neoantigen/01_HLA_table.plot")
@@ -153,8 +154,9 @@ rule cohort_report_somatic_summary_table:
         cohort_report_inputFn
     output:
         csv="analysis/cohort_report/somatic/01_somatic_summary_table.plot",
-        json1="analysis/cohort_report/somatic/somatic_summary.json",
-        json2="analysis/cohort_report/somatic/ti_tv.json",
+        ss="analysis/cohort_report/somatic/somatic_summary.json",
+        titv="analysis/cohort_report/somatic/ti_tv.json",
+        tmb="analysis/cohort_report/somatic/tmb.json",
         #...other json here
         #details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
@@ -165,7 +167,7 @@ rule cohort_report_somatic_summary_table:
         "REPORT: creating somatic summary table for somatic section"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticSummaryTable.py -f {params.files} -o {output.csv} -j {output.json1} -k {output.json2}"""
+        """cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticSummaryTable.py -f {params.files} -o {output.csv} -j {output.ss} -k {output.titv} -l {output.tmb}"""
 
 ###############################################################################
 def getHLATable_categories():

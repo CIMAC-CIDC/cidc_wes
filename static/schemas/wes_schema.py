@@ -66,11 +66,11 @@ transition_row = {"A": _int,
                   "C": _int,
                   "G": _int,
                   "T": _int}
-
+tmb = {'tumor': _int, 'normal': _int, "common": _int, "overlap": _float}
 
 somatic_results = {'filtered_vcf_file': _file_path,
                    'filtered_maf_file': _file_path,
-                   'tmb': _int, #Total mutation burden
+                   'tmb': tmb,
                    'mutation_summary': mutation_results,
                    'functional_summary': mutation_results,
                    'trinucleotide_matrix': _int_arr,
