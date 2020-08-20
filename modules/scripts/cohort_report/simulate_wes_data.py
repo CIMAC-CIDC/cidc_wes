@@ -98,8 +98,16 @@ def generateSomatic():
     delete = random.randint(10, 100)
     total = snp + insert + delete
 
-    tmp = {'snp': snp, 'insertion': insert, 'deletion': delete, 'total': total}
-    return {'mutation_summary': tmp}
+    mut_sum = {'snp': snp, 'insertion': insert,
+               'deletion': delete, 'total': total}
+    ACGT = ["A","C","G","T"]
+    trans_mat = {}
+    for k in ACGT:
+        tmp = dict([(l,random.randint(50,350)) for l in ACGT])
+        tmp[k] = 0
+        trans_mat[k] = tmp
+    #print(trans_mat)
+    return {'mutation_summary': mut_sum, 'transition_matrix': trans_mat}
 
 def main():
     usage = "USAGE: %prog -s [seed] -o [output json file]"

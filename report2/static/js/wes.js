@@ -25,27 +25,26 @@ $('.data-coloured.Total_Mutations').on('click', function() {
     console.log(tmp['somatic_summary'][sample_id]);
 });
 
-//HANDLE somatic_summaries
-$('.data-coloured.Total_Mutations').on('click', function() {
-    var table_id = this.closest('table').id;
-    var sample_id = $(this.closest('tr')).find('th').attr('data-original-sn');
-    var tmp = JSON.parse($("#wes_resources").text());
-    //console.log(table_id);
-    //console.log(sample_id);
-    //console.log(tmp['somatic_summary'][sample_id]);
+var wes_resources = JSON.parse($("#wes_resources").text());
 
-    var modal = $('#wesSubModal');
-    var data = new Object();
-    data[sample_id] = tmp['somatic_summary'][sample_id]
-    table_submodal(data, modal);
-
-});
-//Change roll-over cursor
-$('.data-coloured.Total_Mutations').css('cursor', 'pointer');
+//Should generalize this fn- ColName, resource, handler
+function handlerFactory(colName, resource, handler) {
+    $(".data-coloured."+colName).on("click", function() {
+	var table_id = this.closest('table').id;
+	var sample_id = $(this.closest('tr')).find('th').attr('data-original-sn');
+	var modal = $('#wesSubModal');
+	var data = new Object();
+	data[sample_id] = wes_resources[resource][sample_id];
+	handler(data, modal);
+    });
+    $(".data-coloured."+colName).css('cursor', 'pointer');   
+}
+handlerFactory('Total_Mutations', 'somatic_summary', somaticSummary_submodal);
+handlerFactory('TiTv', 'ti_tv', tiTv_submodal);
 
 //Builds a table in the modal and displays it
-function table_submodal(data, modal) {
-   console.log(data);
+function somaticSummary_submodal(data, modal) {
+   //console.log(data);
    var modal_body = $(modal).find('.modal-body');
    //Clear contents
    modal_body.empty()
@@ -73,4 +72,33 @@ function table_submodal(data, modal) {
    content += "</table>";
    modal_body.append(content);
    modal.modal({show:true});
+}
+
+function tiTv_submodal(data, modal) {
+    console.log(data);
+    var modal_body = $(modal).find('.modal-body');
+    //Clear contents
+    modal_body.empty()
+
+    //BUILD table
+    var content = "<table class=\"table table-condensed mqc_table\">";
+    //add header
+    content += "<thead><tr>";
+    content += "<th>&nbsp;</th>";
+    const ACGT = ["A","C","G","T"];
+    for (b of ACGT) { content += "<th>"+b+"</th>";}
+    content += "</tr></thead>";
+    //Add content
+   var first_elm = Object.values(data)[0];
+    for (b of ACGT) {
+        content += "<tr><th>"+b+"</th>";
+        console.log(b);
+        console.log(first_elm[b]);
+        var tmp = Object.values(first_elm[b]);
+        for (v of tmp) { content += "<td>"+v+"</td>";}
+    }
+    content += "</tr>";
+    content += "</table>";
+    modal_body.append(content);
+    modal.modal({show:true});
 }
