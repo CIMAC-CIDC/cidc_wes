@@ -354,7 +354,7 @@ def main():
                     tmp += buildTable(filepath, details, templateEnv, ',')
                 elif ffile.endswith(".png"): #Make a plot
                     tmp += buildPlot(filepath, details, templateEnv)
-                elif ffile.endswith(".plot"): #Make a Multiqc plot
+                elif ffile.endswith(".mqc"): #Make a Multiqc plot
                     tmp += buildMqcPlot(filepath, details, templateEnv)
                 elif ffile.endswith(".json"): #Load json data
                     loadJson(filepath)

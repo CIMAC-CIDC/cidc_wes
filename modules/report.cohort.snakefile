@@ -11,24 +11,24 @@ def cohort_report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     #Data Quality
-    ls.append("analysis/cohort_report/data_quality/01_mapping_plots_table.plot")
-    ls.append("analysis/cohort_report/data_quality/02_coverage_table.plot")
+    ls.append("analysis/cohort_report/data_quality/01_mapping_plots_table.mqc")
+    ls.append("analysis/cohort_report/data_quality/02_coverage_table.mqc")
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
-    ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plot")
-    ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plot")
+    ls.append("analysis/cohort_report/data_quality/03_gc_content_line.mqc")
+    ls.append("analysis/cohort_report/data_quality/04_insert_size_line.mqc")
 
     #Copynumber
-    ls.append("analysis/cohort_report/copy_number/01_copy_number_table.plot")
+    ls.append("analysis/cohort_report/copy_number/01_copy_number_table.mqc")
 
     #Somatic
-    ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.plot")
+    ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.mqc")
     ls.append("analysis/cohort_report/somatic/somatic_summary.json")
     ls.append("analysis/cohort_report/somatic/ti_tv.json")
     ls.append("analysis/cohort_report/somatic/tmb.json")
     ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #Neoantigen
-    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.plot")
+    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.mqc")
 
     return ls
 
@@ -49,7 +49,7 @@ rule cohort_report_data_quality_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/01_mapping_plots_table.plot",
+        csv="analysis/cohort_report/data_quality/01_mapping_plots_table.mqc",
         details="analysis/cohort_report/data_quality/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -68,7 +68,7 @@ rule cohort_report_coverage_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/02_coverage_table.plot",
+        csv="analysis/cohort_report/data_quality/02_coverage_table.mqc",
         details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -103,7 +103,7 @@ rule cohort_report_data_quality_gc_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/03_gc_content_line.plot",
+        csv="analysis/cohort_report/data_quality/03_gc_content_line.mqc",
         details="analysis/cohort_report/data_quality/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -120,7 +120,7 @@ rule cohort_report_data_quality_insertSize_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/04_insert_size_line.plot",
+        csv="analysis/cohort_report/data_quality/04_insert_size_line.mqc",
         #details="analysis/cohort_report/data_quality/04_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -137,7 +137,7 @@ rule cohort_report_copynumber_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number/01_copy_number_table.plot",
+        csv="analysis/cohort_report/copy_number/01_copy_number_table.mqc",
         #details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -154,7 +154,7 @@ rule cohort_report_somatic_summary_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/somatic/01_somatic_summary_table.plot",
+        csv="analysis/cohort_report/somatic/01_somatic_summary_table.mqc",
         ss="analysis/cohort_report/somatic/somatic_summary.json",
         titv="analysis/cohort_report/somatic/ti_tv.json",
         tmb="analysis/cohort_report/somatic/tmb.json",
@@ -194,7 +194,7 @@ rule cohort_report_HLA_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.plot",
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.mqc",
         details="analysis/cohort_report/neoantigen/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
