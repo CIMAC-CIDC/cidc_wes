@@ -22,7 +22,9 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/data_quality/04_insert_size_line.mqc")
 
     #Copynumber
-    ls.append("analysis/cohort_report/copy_number/01_copy_number_table.mqc")
+    ls.append("analysis/cohort_report/copy_number/01_clonality_bar.plotly")
+    ls.append("analysis/cohort_report/copy_number/02_purity_bar.plotly")
+    ls.append("analysis/cohort_report/copy_number/03_ploidy_line.plotly")
 
     #Somatic
     ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.mqc")
@@ -136,22 +138,60 @@ rule cohort_report_data_quality_insertSize_plots:
         #"""echo "{params.subcaption}" >> {output.details} && 
         """cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
 ###############################################################################
-rule cohort_report_copynumber_table:
-    """Generate the copynumber table for the report"""
+rule cohort_report_copynumber_clonality:
+    """Generate the clonality table for the report"""
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number/01_copy_number_table.mqc",
+        csv="analysis/cohort_report/copy_number/01_clonality_bar.plotly",
         #details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
+        attr="clonality",
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        #plot_options = "cpswitch: False",
+    message:
+        "REPORT: creating clonality plot for copy_number section"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+
+rule cohort_report_copynumber_purity:
+    """Generate the purity plot for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/copy_number/02_purity_bar.plotly",
+        #details="analysis/cohort_report/data_quality/02_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        attr="purity",
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
         #plot_options = "cpswitch: False",
     message:
         "REPORT: creating copynumber table for copy_number section"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -o {output.csv}"""
+        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+
+rule cohort_report_copynumber_ploidy:
+    """Generate the ploidy plot for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/copy_number/03_ploidy_line.plotly",
+        #details="analysis/cohort_report/data_quality/02_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        attr=" -a ".join(["ploidy","dipLogR"]),
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        #plot_options = "cpswitch: False",
+    message:
+        "REPORT: creating copynumber table for copy_number section"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+
 ###############################################################################
 rule cohort_report_somatic_summary_table:
     """Generate the somatic summary table for the report"""
@@ -225,7 +265,7 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report2/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','somatic', 'copy_number', 'neoantigen'])
+        sections_list=",".join(['data_quality','copy_number', 'somatic', 'neoantigen'])
         #sections_list=",".join(['somatic'])
     output:
         "analysis/cohort_report/report.html"

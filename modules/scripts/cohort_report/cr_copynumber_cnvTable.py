@@ -11,9 +11,9 @@ from optparse import OptionParser
 
 #Attribs to read in
 #LEAVE off the plot for now
-_attrs = ['clonality', 'purity', 'ploidy', 'dipLogR']#, 'cnv_plot_file', 'cnv_file']
+#_attrs = ['clonality', 'purity', 'ploidy', 'dipLogR']#, 'cnv_plot_file', 'cnv_file']
 
-def processJson(json_fpath):
+def processJson(json_fpath, attrs):
     """Given a json file, returns a dictionary of that file with the values
     needed for this script"""
     #READ in json
@@ -24,7 +24,7 @@ def processJson(json_fpath):
     #make samples
     cnv = tmp['copy_number']
     run = {'id': tmp['id']}
-    for a in _attrs:
+    for a in attrs:
         run[a] = cnv[a]
     #print(run)
     return run
@@ -36,30 +36,23 @@ def prettyprint(s, toUpper=False):
     s = s.upper() if toUpper else s.title()
     return s
 
-# def getCol_Stats(runs, attrib):
-#     """Returns the column values over all of the samples"""
-#     ls = []
-#     for r in runs:
-#         ls.append((r['tumor']['id'], r['tumor'][attrib]))
-#         ls.append((r['normal']['id'], r['normal'][attrib]))
-#     vals = [x[1] for x in ls]
-#     mean = sum(vals)/len(vals)
-#     std = np.std(vals)
-#     return (ls, mean, std)
-
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-f", "--files", action="append", help="mapping stats .csv file")
+    optparser.add_option("-a", "--attributes", action="append", help="attributes to select/output")
     optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.files or not options.output:
+    if not options.files or not options.attributes or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
+    #try to get attributes list
+    _attrs = options.attributes
+    
     #read in json data
-    runs = [processJson(f) for f in options.files]
+    runs = [processJson(f, _attrs) for f in options.files]
 
     #MAIN output.tsv
     out = open(options.output, "w")

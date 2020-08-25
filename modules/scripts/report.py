@@ -314,7 +314,10 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     #Colors: red, green, blue, purple, gray, gold
     colors = ['#e84118','#44bd32','#0097e6', '#8c7ae6', '#7f8fa6', '#e1b12c']
     #print(details)
-    details['plotly']['color_discrete_sequence'] = colors
+    if 'plotly' in details:
+        details['plotly']['color_discrete_sequence'] = colors
+    else:
+        details['plotly'] = {'color_discrete_sequence':colors}
     fig = plot(df, **details['plotly'])
     fig.update_layout(plot_bgcolor='#f6f6f6')
     html_plot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
