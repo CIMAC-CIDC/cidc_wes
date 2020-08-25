@@ -16,7 +16,7 @@ def cohort_report_targets(wildcards):
 
     #Data Quality
     ls.append("analysis/cohort_report/data_quality/01_mapping_plots_bar.plotly")
-    ls.append("analysis/cohort_report/data_quality/02_coverage_table.mqc")
+    ls.append("analysis/cohort_report/data_quality/02_coverage_bar.plotly")
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.mqc")
     ls.append("analysis/cohort_report/data_quality/04_insert_size_line.mqc")
@@ -88,12 +88,12 @@ rule cohort_report_coverage_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/02_coverage_table.mqc",
+        csv="analysis/cohort_report/data_quality/02_coverage_bar.plotly",
         details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        plot_options = "cpswitch: False",
+        plot_options = yaml_dump({'plotly': {'x':'Percent Bases >50', 'hover_data':['Q1 Depth','Mean Depth','Median Depth','Q3 Depth']}}),
     message:
         "REPORT: creating coverage table for data_quality section"
     group: "cohort_report"
@@ -101,22 +101,6 @@ rule cohort_report_coverage_table:
         """echo "{params.caption}" >> {output.details} && 
         echo "{params.plot_options}" >> {output.details} && 
         cidc_wes/modules/scripts/cohort_report/cr_dataQual_coverageTable.py -f {params.files} -o {output.csv}"""
-
-# rule cohort_report_data_quality_table:
-#     """Generate the mapping stats table for the report"""
-#     input:
-#         cohort_report_inputFn
-#     output:
-#         csv="analysis/cohort_report/data_quality/02_mapping_stats.csv",
-#         details="analysis/cohort_report/data_quality/02_details.yaml",
-#     params:
-#         files = lambda wildcards,input: " -f ".join(input),
-#         caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'"""
-#     message:
-#         "REPORT: creating mapping stats for data_quality section"
-#     group: "cohort_report"
-#     shell:
-#         """echo "{params.caption}" >> {output.details} && cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingStats.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_data_quality_gc_plots:
     """Generate the gc content plots for the report"""
