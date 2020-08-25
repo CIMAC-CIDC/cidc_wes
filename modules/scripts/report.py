@@ -323,6 +323,12 @@ def main():
         path = os.path.join(options.dir, sect)
         ordering = sorted(os.listdir(path))
 
+        #Check for meta files- runs_meta.json and samples_meta.json
+        if os.path.exists(os.path.join(options.dir, 'runs_meta.json')):
+            loadJson(os.path.join(options.dir, 'runs_meta.json'))
+        if os.path.exists(os.path.join(options.dir, 'samples_meta.json')):
+            loadJson(os.path.join(options.dir, 'samples_meta.json'))
+
         #Build container
         if i == 0: #first element is shown
             first_section = sect

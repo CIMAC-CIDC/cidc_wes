@@ -2,6 +2,88 @@
 
 var wes_resources = JSON.parse($("#wes_resources").text());
 
+//Toggle filterTable show/hide btn text
+$('[data-toggle="collapse"]').click(function() {
+  $(this).toggleClass( "active" );
+  if ($(this).hasClass("active")) {
+    $(this).text("Hide");
+  } else {
+    $(this).text("Show");
+  }
+});
+
+//Generate the filterTable-samples view first
+function makeFilterTable(use_samples) {
+    var dset = use_samples ? wes_resources['samples_meta'] : wes_resources['runs_meta'];
+    var cols = Object.keys(dset[0]);
+    //var columns = cols.map(function(x){ return {'data': x}});
+    var table = $('#filterTable');
+
+    //BUILD the table up
+    table.empty();
+    content = "<thead><tr><th></th>"
+    $.each(cols, function(i, col) { content += "<th>"+col+"</th>";});
+    content += "</tr></thead>"
+    $.each(dset, function(i, row) {
+        content += "<tr><td></td>"
+        for (v of Object.values(row)) {
+            content +="<td>"+v+"</td>";
+         }
+         content += "</tr>";
+    });
+    table.append(content);
+        let tbl = table.DataTable({columnDefs: [{orderable: false,
+                                   className: 'select-checkbox',
+                                   targets: 0
+                                  }],
+                     select: {
+                         style: 'multi',
+                         selector: 'td:first-child'
+                     },
+                     order: [
+                         //[1, 'asc'] //This breaks datatables
+                     ]});
+    tbl.on("click", "th.select-checkbox", function() {
+    if ($("th.select-checkbox").hasClass("selected")) {
+        tbl.rows().deselect();
+        $("th.select-checkbox").removeClass("selected");
+    } else {
+        tbl.rows().select();
+        $("th.select-checkbox").addClass("selected");
+    }
+}).on("select deselect", function() {
+    ("Some selection or deselection going on")
+    if (tbl.rows({
+            selected: true
+        }).count() !== tbl.rows().count()) {
+        $("th.select-checkbox").removeClass("selected");
+    } else {
+        $("th.select-checkbox").addClass("selected");
+    }
+
+    /*
+    //Version 2 -- Filter takes precedence over selections
+    $('#myButton').on("click", function() {
+        var searchTxt = $('.dataTables_filter input').val();
+        if (searchTxt.length > 0) { //filter was applied
+          //TRY to get filtered AND selected
+          var rows = tbl.rows({selected:true, filter:'applied'});
+          if (rows.count() == 0) {//None selected--revert to all
+              rows = tbl.rows({filter:'applied'});
+          }
+        } else {
+          //Selected only
+          rows = tbl.rows({selected:true});
+        }
+        console.log(rows.count());
+});
+        */
+
+});
+
+}
+makeFilterTable(true);
+
 //Should generalize this fn- ColName, resource, handler
 function handlerFactory(colName, resource, handler) {
     $(".data-coloured."+colName).on("click", function() {

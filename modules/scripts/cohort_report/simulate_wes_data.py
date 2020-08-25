@@ -127,6 +127,21 @@ def generateSomatic():
     #print(trans_mat)
     return {'mutation_summary': mut_sum, 'transition_matrix': trans_mat, 'tmb':tmb, 'functional_summary': func_summary}
 
+def generateMeta(run_name):
+    """returns a dictionary of simulated meta fields- e.g. age, sex, etc
+    NOTE: like viper, this can be any abitrary variable that can be added
+    to the cohort metasheet
+    """
+    #parse the runname to get the center
+    center = run_name.split("_")[0]
+
+    age = random.randint(20,75)
+    sex = random.choice(['M', 'F'])
+    treatment = random.choice(['A', 'B'])
+    response = random.choice(['Responder', 'Non-Responder'])
+    return {'center': center, 'sex': sex, 'age': age, 'treatment':treatment,
+            'response': response}
+    
 def main():
     usage = "USAGE: %prog -s [seed] -o [output json file]"
     optparser = OptionParser(usage=usage)
@@ -139,6 +154,7 @@ def main():
         random.seed(options.seed)
 
     run_name = generateRunName()
+    meta = generateMeta(run_name)
     tumor = generateSample()
     tumor['id'] = "%s_T" % run_name
     normal = generateSample()
@@ -150,6 +166,7 @@ def main():
     #print(somatic)
 
     run = {'id': run_name,
+           'meta': meta,
            'tumor': tumor,
            'normal': normal,
            'copy_number': cnv,

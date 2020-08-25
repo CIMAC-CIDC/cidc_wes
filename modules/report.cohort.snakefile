@@ -10,6 +10,10 @@ configfile: "config.cohort.yaml"
 def cohort_report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
+    #Meta information
+    ls.append("analysis/cohort_report/runs_meta.json")
+    ls.append("analysis/cohort_report/samples_meta.json")
+
     #Data Quality
     ls.append("analysis/cohort_report/data_quality/01_mapping_plots_table.mqc")
     ls.append("analysis/cohort_report/data_quality/02_coverage_table.mqc")
@@ -42,7 +46,23 @@ def cohort_report_inputFn(wildcards):
     for r in config['runs']:
         ls.append(config['runs'][r][0])
     return ls
-    
+
+###############################################################################
+rule cohort_report_meta:
+    """Generate the meta information for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        runs="analysis/cohort_report/runs_meta.json",
+        samples="analysis/cohort_report/samples_meta.json",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+    message:
+        "REPORT: creating meta json files"
+    group: "cohort_report"
+    shell:
+        """cidc_wes/modules/scripts/cohort_report/cr_meta.py -f {params.files} -r {output.runs} -s {output.samples}"""
+
 ###############################################################################
 rule cohort_report_data_quality_plots:
     """Generate the mapping stats plots for the report"""
