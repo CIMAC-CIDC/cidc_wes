@@ -23,6 +23,10 @@ from matplotlib.ticker import FuncFormatter
 from multiqc.plots import bargraph, linegraph, table
 from multiqc.utils import report as mqc_report, config as mqc_config
 
+#Plotly stuff
+import plotly
+import plotly.express as px
+
 from optparse import OptionParser
 
 _mqc_plot_types = {'bar':bargraph, 'line':linegraph, 'table':table}
@@ -285,6 +289,52 @@ def loadJson(json_file):
     ffile.close()
     _resources[fname] = tmp
 
+def buildPlotly(plotly_file, details, jinjaEnv):
+    """Given a plotfile which is a csv file with a .plotly extension,
+    Tries to generate an (interactive) plotly chart"""
+    #TRY to auto-detect if plot file is , or \t separated
+    f = open(plotly_file)
+    tmp = f.readline() #take a peek at first line
+    sep = "," if "," in tmp else "\t"
+    f.close()
+
+    #NOTE: it's simple enough to just use the same form
+    template = jinjaEnv.get_template("mqc_plot.html")
+    #Dropping path and extension to get filename
+    fname = ".".join(plotly_file.split("/")[-1].split(".")[:-1])
+    #REMOVE index from file name, e.g. 01_foo -> foo
+    index = fname.split("_")[0] #first save index
+    plot_type = fname.split("_")[-1] #and plot type
+    fname = "_".join(fname.split("_")[1:-1])
+    title = prettyprint(fname, True)
+
+    #Pickout the proper mqc plot module to use
+    plot = getattr(px, plot_type)
+    df = pd.read_csv(plotly_file, index_col=0)
+    #Colors: red, green, blue, purple, gray, gold
+    colors = ['#e84118','#44bd32','#0097e6', '#8c7ae6', '#7f8fa6', '#e1b12c']
+    #print(details)
+    details['plotly']['color_discrete_sequence'] = colors
+    fig = plot(df, **details['plotly'])
+    fig.update_layout(plot_bgcolor='#f6f6f6')
+    html_plot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
+
+    vals = {'title':title,
+            'plot': html_plot,
+    }
+
+    #Check for a caption
+    caption = details.get('caption', None)
+    if caption:
+        vals['caption'] = renderMd(caption)
+    #check for subcaption
+    sub_caption = details.get('subcaption', None)
+    if sub_caption:
+        vals['sub_caption'] = renderMd(sub_caption)
+
+    #print(vals)
+    return template.render(vals)
+
 def main():
     usage = "USAGE: %prog -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -367,6 +417,9 @@ def main():
                     tmp += buildMqcPlot(filepath, details, templateEnv)
                 elif ffile.endswith(".json"): #Load json data
                     loadJson(filepath)
+                elif ffile.endswith(".plotly"): #Make a plotly plot
+                    tmp += buildPlotly(filepath, details, templateEnv)
+
         #END container
         tmp += "\n</div>"
         wes_panels[sect] = tmp

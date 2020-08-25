@@ -15,7 +15,7 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/samples_meta.json")
 
     #Data Quality
-    ls.append("analysis/cohort_report/data_quality/01_mapping_plots_table.mqc")
+    ls.append("analysis/cohort_report/data_quality/01_mapping_plots_bar.plotly")
     ls.append("analysis/cohort_report/data_quality/02_coverage_table.mqc")
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.mqc")
@@ -69,12 +69,12 @@ rule cohort_report_data_quality_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/01_mapping_plots_table.mqc",
+        csv="analysis/cohort_report/data_quality/01_mapping_plots_bar.plotly",
         details="analysis/cohort_report/data_quality/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
-        plot_options = "cpswitch: False",
+        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
     message:
         "REPORT: creating mapping plots for data_quality section"
     group: "cohort_report"
