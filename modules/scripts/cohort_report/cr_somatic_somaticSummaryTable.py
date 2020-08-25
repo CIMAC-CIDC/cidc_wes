@@ -84,15 +84,16 @@ def main():
     ###########################################################################
     #MAIN output.tsv
     out = open(options.output, "w")
-    hdr = ['Run', 'Total Mutations', 'TiTv', 'TMB', 'Nonsyn Mutations']
+    #hdr = ['Run', 'Total Mutations', 'TiTv', 'TMB', 'Nonsyn Mutations']
+    hdr = ['Run', 'TiTv', 'TMB', 'Nonsyn Mutations']
     out.write("%s\n" % "\t".join(hdr))
     for r in runs:
         tmp = [r['id']]
 
-        #handle mutation summary - Show total
-        total = str(r['mutation_summary']['total'])
-        #tmp.append("""[%s](#){: onclick=\"wes_modal_helper(somatic_summary, %s, table);\" }""" % (total, r['id']))
-        tmp.append(total)
+        ##handle mutation summary - Show total
+        #total = str(r['mutation_summary']['total'])
+        ##tmp.append("""[%s](#){: onclick=\"wes_modal_helper(somatic_summary, %s, table);\" }""" % (total, r['id']))
+        #tmp.append(total)
 
         #Transition matrix
         ti_tv = calcTiTv(r['transition_matrix'])

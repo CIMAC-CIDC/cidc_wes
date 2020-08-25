@@ -27,7 +27,8 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/copy_number/03_ploidy_line.plotly")
 
     #Somatic
-    ls.append("analysis/cohort_report/somatic/01_somatic_summary_table.mqc")
+    ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
+    ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
     ls.append("analysis/cohort_report/somatic/somatic_summary.json")
     ls.append("analysis/cohort_report/somatic/ti_tv.json")
     ls.append("analysis/cohort_report/somatic/tmb.json")
@@ -193,12 +194,30 @@ rule cohort_report_copynumber_ploidy:
         """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 ###############################################################################
+rule cohort_report_somatic_mutationPlot:
+    """Generate the mutation summary plot for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/somatic/01_mutation_summary_bar.plotly",
+        details="analysis/cohort_report/somatic/01_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
+    message:
+        "REPORT: creating mutation plot for somatic section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.plot_options}" >> {output.details} && 
+        cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticMutationPlot.py -f {params.files} -o {output.csv}"""
+
 rule cohort_report_somatic_summary_table:
     """Generate the somatic summary table for the report"""
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/somatic/01_somatic_summary_table.mqc",
+        csv="analysis/cohort_report/somatic/02_somatic_summary_table.mqc",
         ss="analysis/cohort_report/somatic/somatic_summary.json",
         titv="analysis/cohort_report/somatic/ti_tv.json",
         tmb="analysis/cohort_report/somatic/tmb.json",
