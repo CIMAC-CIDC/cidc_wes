@@ -219,6 +219,7 @@ rule cohort_report_auto_render:
     input:
         cohort_report_targets
     params:
+        jinja2_template="cidc_wes/report2/index.cohort.html",
         report_path = "analysis/cohort_report",
         sections_list=",".join(['data_quality','somatic', 'copy_number', 'neoantigen'])
         #sections_list=",".join(['somatic'])
@@ -228,5 +229,5 @@ rule cohort_report_auto_render:
         "REPORT: Generating WES report"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -o {output} && cp -r cidc_wes/report2/static {params.report_path}"""
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -t {params.jinja2_template} -o {output} && cp -r cidc_wes/report2/static {params.report_path}"""
 

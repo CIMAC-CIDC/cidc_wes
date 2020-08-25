@@ -356,6 +356,7 @@ rule report2_auto_render:
     input:
         report2_targets
     params:
+        jinja2_template="cidc_wes/report2/index.sample.html",
         report_path = "analysis/report2",
         sections_list=",".join(['wes_meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
     output:
@@ -364,5 +365,5 @@ rule report2_auto_render:
         "REPORT: Generating WES report"
     group: "report2"
     shell:
-        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -o {output} && cp -r cidc_wes/report2/static {params.report_path}"""
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -t {params.jinja2_template} -o {output} && cp -r cidc_wes/report2/static {params.report_path}"""
 
