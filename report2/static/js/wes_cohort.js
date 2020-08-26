@@ -160,3 +160,6 @@ function complex_submodal(data, modal) {
     modal_body.append(content);
     modal.modal({show:true});
 }
+
+var neaontigenTbl = $('#neoantigen').find('table');
+neaontigenTbl.DataTable();

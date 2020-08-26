@@ -35,7 +35,7 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #Neoantigen
-    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.mqc")
+    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.csv")
     ls.append("analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly")
     return ls
 
@@ -237,50 +237,29 @@ rule cohort_report_somatic_summary_table:
         """cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticSummaryTable.py -f {params.files} -o {output.csv} -j {output.ss} -k {output.titv} -l {output.tmb} -m {output.func}"""
 
 ###############################################################################
-def getHLATable_categories():
-    #Actual
-    #classII = ['DPB1-1', 'DPB1-2', 'DQB1-1', 'DQB1-2', 'DRB1-1', 'DRB1-2']
-    #Prettyprint version
-    classI = list(map(lambda x: x.title(), ['A-1', 'A-2', 'B-1', 'B-2', 'C-1', 'C-2']))
-    classII = list(map(lambda x: x.title(), ['DPB1-1', 'DPB1-2', 'DQB1-1', 'DQB1-2', 'DRB1-1', 'DRB1-2']))
-    both = classI + classII
-    tmp = {}
-    for c in both:
-        if c in classI:
-            tmp[c] = {'hidden': False}
-        else:
-            tmp[c] = {'hidden': True}
-    ret = yaml_dump({'cats': tmp })
-    #print(ret)
-    return ret
-
 rule cohort_report_HLA_table:
     """Generate the HLA table for the report"""
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.mqc",
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.csv",
         details="analysis/cohort_report/neoantigen/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         #caption="""caption: 'Table of HLA Alleles.\n**NOTE: Click on Configure Table to show Class II alleles**'""",
-        caption="""caption: '**NOTE: Click on Configure Table to show Class II alleles**'""",
+        #caption="""caption: '**NOTE: Click on Configure Table to show Class II alleles**'""",
         table_options = "table_title: 'HLA Alleles Table'",
-        #Turn off display of Class I Alleles
-        cats = getHLATable_categories(),
     message:
         "REPORT: creating HLA table for neoantigen section"
     group: "cohort_report"
     shell:
-        """echo "{params.caption}" >> {output.details} && 
-        echo "{params.table_options}" >> {output.details} &&
-        echo "{params.cats}" >> {output.details} &&
+        """echo "{params.table_options}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaTable.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_HLA_histogram:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.mqc",
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.csv",
     output:
         csv="analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly",
         details="analysis/cohort_report/neoantigen/02_details.yaml",

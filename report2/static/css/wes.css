@@ -51,3 +51,15 @@ table.dataTable tr th.select-checkbox.selected::after {
    text-align: center;
    text-shadow: rgb(176, 190, 217) 1px 1px, rgb(176, 190, 217) -1px -1px, rgb(176, 190, 217) 1px -1px, rgb(176, 190, 217) -1px 1px;
 }
+
+/*scrolling-wrapper from https://codeburst.io/how-to-create-horizontal-scrolling-containers-d8069651e9c6*/
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  .card {
+    display: inline-block;
+  }
+}
+
