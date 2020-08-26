@@ -36,7 +36,7 @@ def cohort_report_targets(wildcards):
 
     #Neoantigen
     ls.append("analysis/cohort_report/neoantigen/01_HLA_table.mqc")
-
+    ls.append("analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly")
     return ls
 
 rule cohort_report_all:
@@ -274,6 +274,24 @@ rule cohort_report_HLA_table:
         echo "{params.table_options}" >> {output.details} &&
         echo "{params.cats}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaTable.py -f {params.files} -o {output.csv}"""
+
+rule cohort_report_HLA_histogram:
+    """Generate the HLA histogram plot for the report"""
+    input:
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.mqc",
+    output:
+        csv="analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly",
+        details="analysis/cohort_report/neoantigen/02_details.yaml",
+    params:
+        caption="""caption: 'Histogram of shared HLA-alleles'""",
+        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
+    message:
+        "REPORT: creating HLA table for neoantigen section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && 
+        echo "{params.plot_options}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaHistogram.py -f {input} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_auto_render:
