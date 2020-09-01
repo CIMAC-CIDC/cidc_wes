@@ -166,7 +166,7 @@ function buildTable(dataList) {
     var content = "<table class=\"table table-condensed\">";
     //add header
     content += "<thead><tr>";
-    content += "<th>&nbsp;</th>";
+    content += "<th></th>";
     var first_elm = dataList[0];
     var hdr = Object.keys(first_elm);
     $.each(hdr, function(i,val) { content += "<th>"+val+"</th>";})
@@ -199,15 +199,15 @@ showListBtn.on('click', function() {
     var row = neaontigenTbl.rows({selected:true, filter:'applied'});
     //console.log(row);
     if (row.count() > 0) {
-       var runId = row.data()[0][0];
-       var neoList = wes_resources['neoantigen_table'][runId];
-       //Write to file
-       var tbl = buildTable(neoList);
-       mb = $('#wesSubModal').find('.modal-body');
-       mb.empty();
-       mb.append(tbl);
-       var tmp = foo.DataTable({dom: 'Bfrtip', buttons: ['csvHtml5']});
-       //$('#wesSubModal').modal({show:true});
-       tmp.buttons().trigger('click');
+	var runId = row.data()[0][0];
+	var neoList = wes_resources['neoantigen_table'][runId];
+	//Write to file
+	var tbl = buildTable(neoList);
+	mb = $('#wesSubModal').find('.modal-body');
+	mb.empty();
+	mb.append(tbl);
+	var tmp = tbl.DataTable({dom: 'Bfrtip', buttons: [{extend:'csvHtml5',title:runId+"_neoantigens"}]});
+	//$('#wesSubModal').modal({show:true});
+	tmp.buttons().trigger('click');
     }
 });
