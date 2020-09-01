@@ -37,6 +37,8 @@ def cohort_report_targets(wildcards):
     #Neoantigen
     ls.append("analysis/cohort_report/neoantigen/01_HLA_table.csv")
     ls.append("analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly")
+    ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
+    ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
     return ls
 
 rule cohort_report_all:
@@ -273,6 +275,24 @@ rule cohort_report_HLA_histogram:
         """echo "{params.caption}" >> {output.details} && 
         echo "{params.plot_options}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaHistogram.py -f {input} -o {output.csv}"""
+
+rule cohort_report_neoantigen_table:
+    """Generate the neoantigen table for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/neoantigen/03_neoantigen_table.csv",
+        json="analysis/cohort_report/neoantigen/neoantigen_table.json",
+        details="analysis/cohort_report/neoantigen/03_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        caption="""caption: 'Table of neoantigens for each sample.  Only the top hit is shown.'""",
+    message:
+        "REPORT: creating neonatigen table for neoantigen section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_neoantigenTable.py -f {params.files} -o {output.csv} -j {output.json}"""
 
 ###############################################################################
 rule cohort_report_auto_render:

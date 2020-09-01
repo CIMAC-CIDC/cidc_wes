@@ -93,7 +93,7 @@ def buildTable(tsv_file, details, jinjaEnv, separator):
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
 
-    vals = {'title':title }
+    vals = {'id': fname, 'title':title}
 
     #Check for a caption
     caption = details.get('caption', None)

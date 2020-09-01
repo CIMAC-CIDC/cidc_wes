@@ -161,5 +161,53 @@ function complex_submodal(data, modal) {
     modal.modal({show:true});
 }
 
-var neaontigenTbl = $('#neoantigen').find('table');
-neaontigenTbl.DataTable();
+//returns table element
+function buildTable(dataList) {
+    var content = "<table class=\"table table-condensed\">";
+    //add header
+    content += "<thead><tr>";
+    content += "<th>&nbsp;</th>";
+    var first_elm = dataList[0];
+    var hdr = Object.keys(first_elm);
+    $.each(hdr, function(i,val) { content += "<th>"+val+"</th>";})
+    content += "</tr></thead>";
+    //Add content
+    $.each(dataList, function(i, row) {
+        content += "<tr><th>"+i+"</th>";
+        var tmp = Object.values(row);
+        for (v of tmp) { content += "<td>"+v+"</td>";}
+});
+    content += "</tr>";
+    content += "</table>";
+    return $(content);
+}
+
+var hlaTbl = $('#HLA_table').DataTable();
+var neaontigenTbl = $('#neoantigen_table').DataTable({select: {style: 'single'}});
+neoantigenTblRows = $('#neoantigen_table').find('tr');
+//style the cursor
+neoantigenTblRows.css({'cursor': 'pointer'});
+//Add a show list btn just after the caption
+var showListBtn = $('<button class=\"btn btn-primary btn-sm\">Download Full List</button>');
+var neoantigenTblCap = $('#neoantigen_table').closest('.wes_table').find('.text-justify');
+neoantigenTblCap.append(showListBtn);
+
+
+showListBtn.on('click', function() {
+    //Build a full DataTable but don't show it; invoke the save
+    //table button
+    var row = neaontigenTbl.rows({selected:true, filter:'applied'});
+    //console.log(row);
+    if (row.count() > 0) {
+       var runId = row.data()[0][0];
+       var neoList = wes_resources['neoantigen_table'][runId];
+       //Write to file
+       var tbl = buildTable(neoList);
+       mb = $('#wesSubModal').find('.modal-body');
+       mb.empty();
+       mb.append(tbl);
+       var tmp = foo.DataTable({dom: 'Bfrtip', buttons: ['csvHtml5']});
+       //$('#wesSubModal').modal({show:true});
+       tmp.buttons().trigger('click');
+    }
+});

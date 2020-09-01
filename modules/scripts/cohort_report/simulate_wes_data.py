@@ -141,7 +141,33 @@ def generateMeta(run_name):
     response = random.choice(['Responder', 'Non-Responder'])
     return {'center': center, 'sex': sex, 'age': age, 'treatment':treatment,
             'response': response}
-    
+
+_neoantigen_dir = "pilot2/neoantigen"
+_neoantigen_results = os.listdir(_neoantigen_dir)
+
+def generateNeoantigen():
+    """returns a dictionary of simulated neoantigen list using the 
+    pvacseq results in pilot2/neoantigen as examples to use. Will randomly 
+    choose one of the files in that dir and return list of dictionaries which
+    represent the rows of the file.
+    """
+    ls = []
+    f = open(os.path.join(_neoantigen_dir, random.choice(_neoantigen_results)))
+    hdr = f.readline().strip().split("\t")
+    #replace spaces with _
+    hdr = list(map(lambda s: s.replace(" ","_"), hdr))
+    #REMOVE Tumor_RNA_Depth,Tumor_RNA_VAF, Gene_Expression
+    del hdr[12:15]
+    for l in f:
+        tmp = l.strip().split("\t")
+        #REMOVE Tumor_RNA_Depth,Tumor_RNA_VAF, Gene_Expression
+        del tmp[12:15]
+        ls.append(dict(zip(hdr, tmp)))
+    f.close()
+    #print(ls)
+    return ls
+
+
 def main():
     usage = "USAGE: %prog -s [seed] -o [output json file]"
     optparser = OptionParser(usage=usage)
@@ -164,6 +190,7 @@ def main():
     #print(cnv)
     somatic = generateSomatic()
     #print(somatic)
+    neoantigen = generateNeoantigen()
 
     run = {'id': run_name,
            'meta': meta,
@@ -171,6 +198,7 @@ def main():
            'normal': normal,
            'copy_number': cnv,
            'somatic': somatic,
+           'neoantigen': neoantigen,
     }
     
     if options.output:

@@ -88,16 +88,19 @@ somatic_results = {'filtered_vcf_file': _file_path,
 # RUN level definition
 ###############################################################################
 
-neoantigen_row = {"Gene": _string,
-                  "EnsemblID": _string,
-                  "HLA": _string,
-                  "Peptide_Sequence": _string,
-                  "Read_Depth": _float,
-                  "DNA_VAF": _float,
-                  "Method": _string,
-                  "Score": _float,
-                  "WT_Score": _float,
-                  "Fold_Change": _float}
+neoantigen_row = {"Gene_Name": _string,
+                  "Mutation_Protein": _string,
+                  "Position": _int,
+                  "HGVSc": _string,
+                  "HGVSp": _string,
+                  "HLA_Allele": _string,
+                  "MT_Epitope_Seq": _string,
+                  "MT_IC50": _float,
+                  "WT_IC50": _float,
+                  "Fold_Change": _float,
+                  "Tumor_DNA_Depth": _int,
+                  "Tumor_DNA_VAF": _float,
+                  "Score": _float}
 
 copy_number = {'clonality': _float,
                'purity': _float,
@@ -112,7 +115,7 @@ run = {'id': _string,
        'copy_number': copy_number,
        'somatic': somatic_results,
        'neoantigen': [neoantigen_row, neoantigen_row, neoantigen_row],
-       'neoantigen_file': _file_path, #path to pvacseq filtered.tsv file
+       'neoantigen_file': _file_path, #path to pvacseq filtered.condensed.ranked.tsv file
        }
 
 ###############################################################################
