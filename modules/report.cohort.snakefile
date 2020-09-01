@@ -286,7 +286,7 @@ rule cohort_report_neoantigen_table:
         details="analysis/cohort_report/neoantigen/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        caption="""caption: 'Table of neoantigens for each sample.  Only the top hit is shown.'""",
+        caption="""caption: 'Table of neoantigens for each sample.  Only the top hit is shown.  Select a row and click the download button to save the full list to disk.'""",
     message:
         "REPORT: creating neonatigen table for neoantigen section"
     group: "cohort_report"
