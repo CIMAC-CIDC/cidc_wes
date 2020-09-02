@@ -81,7 +81,7 @@ def generateCopyNumber():
             'dipLogR': dipLogR,
             #HARD-CODED FILES--Stil unclear how to handle them
             'cnv_file': "analysis/clonality/CTTTP07T1.00/CTTTP07T1.00_pyclone.tsv",
-            'cnv_plot_file': "analysis/report2/copy_number/01_copynumber_plot.png"}
+            'cnv_plot_file': "analysis/report/copy_number/01_copynumber_plot.png"}
 
 def generateRunName():
     center = random.choice(['broad', 'mda', 'mocha'])

@@ -1,312 +1,369 @@
 #MODULE: wes report module 
+from yaml import dump as yaml_dump
 
-def pvacseq_plot_inputfn(wildcards):
-    """Will return analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.addSample.tsv, but will need to derefernce tumor
-    USES neoantigen_getTumor fn from neoantigen.snakefile
-    """
-    ls = []
-    run = wildcards.run
-    tumor = neoantigen_getTumor(wildcards)[0]
-    ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.addSample.tsv" % (run,tumor))
-    return ls
-    
 def report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    ls.append("analysis/report/wes_meta.html")
-    ls.append("analysis/report/wes_level1.html")
-    ls.append("analysis/report/wes_level2.html")
-    ls.append("analysis/report/static/done.txt")
-    ls.append("analysis/report/wes_images/align/mapping.png")
-    for sample in config['samples']:
-        ls.append("analysis/report/wes_images/align/%s/%s_gcBias.png" % (sample,sample))
-        ls.append("analysis/report/wes_images/align/%s/%s_qualityScore.png" % (sample,sample))
-        ls.append("analysis/report/wes_images/align/%s/%s_qualityByCycle.png" % (sample,sample))
-        ls.append("analysis/report/wes_images/align/%s/%s_insertSize.png" % (sample,sample))
-        
+    #META
+    ls.append("analysis/report/wes_meta/02_wes_run_version.tsv")
+    ls.append("analysis/report/wes_meta/01_wes_software_versions.tsv")
+    #Data Quality
+    ls.append("analysis/report/data_quality/01_mapping_stats.tsv")
+    ls.append("analysis/report/data_quality/02_qc_plots.tsv")
+    ls.append("analysis/report/data_quality/03_coverage_statistics.tsv")
+    #SOMATIC
+    ls.append("analysis/report/somatic_variants/01_summary_table.csv")
+    ls.append("analysis/report/somatic_variants/02_functional_annotation.csv")
+    ls.append("analysis/report/somatic_variants/03_SNV_statistics.csv")
+    ls.append("analysis/report/somatic_variants/04_tumor_mutational_burden.tsv")
+    #COPYNUMBER
+    ls.append("analysis/report/copy_number/01_copynumber_plot.png")
+    ls.append("analysis/report/copy_number/02_tumor_clonality.tsv")
+    ls.append("analysis/report/copy_number/03_tumor_purity.tsv")
+    
+    #NEOANTIGEN
+    ls.append("analysis/report/neoantigens/01_HLA_results.tsv")
+    ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
+    
     for run in config['runs']:
-        ls.append("analysis/report/wes_images/somatic/%s/%s_%s.legoPlot.png" % (run, run, config['somatic_caller']))
-        #pvacseq images
-        ls.append("analysis/report/wes_images/neoantigen/%s/HLA_epitopes_fraction_plot.png" % run)
-        ls.append("analysis/report/wes_images/neoantigen/%s/Patient_count_epitopes_plot.png" % run)
-        ls.append("analysis/report/wes_images/neoantigen/%s/epitopes_affinity_plot.png" % run)
-        #copynumber--MOVING from circos plot to sequenza plots
-        #ls.append("analysis/report/wes_images/copynumber/%s.%s/circos.png" % (run, config['somatic_caller']))
-
-        #split up the pdf into 3 different pages. see copynumber_sequenza_plots
-        for i in range(1,4): 
-            ls.append("analysis/report/wes_images/copynumber/%s/%s_cnv_genome.%s.pdf" % (run,run,i))
-
-        #COPY over the clonality plots
-        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.density.png" % (run,run))
-        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.scatter.png" % (run,run))
-        ls.append("analysis/report/wes_images/clonality/%s/%s_plot.coordinates.png" % (run,run))
-            
-    ls.append("analysis/report/wes_version.txt")
-    ls.append("analysis/report/wes_filemap.yaml")
+        ls.append("analysis/report/somatic_variants/05_%s_lego_plot.png" % run)
     return ls
-
-def report_output_files(wildcards):
-    """returns all of the output.yaml files from each module
-    """
-    ls = []
-    for sample in config['samples']:
-        ls.append("analysis/align/%s/%s.align.output.yaml" % (sample,sample))
-        ls.append("analysis/align/%s/%s.recalibration.output.yaml" % (sample,sample))
-        ls.append("analysis/metrics/%s/%s.coverage.output.yaml" % (sample,sample))
-        ls.append("analysis/optitype/%s/%s.optitype.output.yaml" % (sample, sample))
-    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        ls.append("analysis/xhla/%s/%s.xhla.output.yaml" % (sample,sample))
-        
-    for run in config['runs']:
-        ls.append("analysis/copynumber/%s/%s.copynumber.output.yaml"%(run,run))
-        ls.append("analysis/corealignments/%s/%s.corealignment.output.yaml" % (run,run)) #NOTE: this is in recalibration.snakefile
-        ls.append("analysis/germline/%s/%s.germline.output.yaml" % (run,run))
-        ls.append("analysis/neoantigen/%s/%s.neoantigen.output.yaml" % (run,run))
-        ls.append("analysis/purity/%s/%s.purity.output.yaml" % (run, run))
-        ls.append("analysis/somatic/%s/%s.somatic.output.yaml" % (run,run))
-    return ls
-
-rule report_make_file_map:
-    input:
-        version_txt="analysis/report/wes_version.txt",
-        metrics_summary="analysis/metrics/all_sample_summaries.txt",
-        yml_files=report_output_files,
-    output:
-        "analysis/report/wes_filemap.yaml"
-    params:
-        yml_files = lambda wildcards, input: " -y ".join(input.yml_files),
-    shell:
-        "cidc_wes/modules/scripts/report_wes_filemap.py -v {input.version_txt} -m {input.metrics_summary} -y {params.yml_files} > {output}"
-
 
 rule report_all:
     input:
-        report_targets
-    
-rule getWES_version:
-    output:
-        "analysis/report/wes_version.txt"
-    message: "REPORT: storing wes version being used"
-    group: "report"
-    shell:
-        "cidc_wes/modules/scripts/report_getWES_version.py -o {output}"
-    
-rule report_meta:
-    """Generate wes_meta.html"""
+        "analysis/report/report.html"
+
+###############################################################################
+#META information
+rule report_meta_version:
+    """Gather's all the information required for the meta information and
+    outputs a csv file
+    """
     input:
-        #NOTE: need to ensure that this runs AFTER everything is generated!
         config="config.yaml",
-        wes_version="analysis/report/wes_version.txt",
+        wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report/wes_meta.html"
+         "analysis/report/wes_meta/02_wes_run_version.tsv"
     message:
-        "REPORT: creating wes_meta.html"
+        "REPORT: creating WES version table"
     group: "report"
     shell:
-        """cidc_wes/modules/scripts/report_meta.py -c {input.config} -v {input.wes_version} -o {output}"""
+        """cidc_wes/modules/scripts/report_meta.py -c {input.config} -v {input.wes_versions} -o {output}"""
 
-rule report_level1_gcBiasPlot:
-    """Generate gcBiasPlot"""
+rule report_meta_software:
+    """Gather's all the information required for the meta information and
+    outputs a csv file
+    """
     input:
-        "analysis/metrics/{sample}/{sample}_metrics.pdf"
-    output:
-        "analysis/report/wes_images/align/{sample}/{sample}_gcBias.png"
-    params:
-        page = 1
-    message:
-        "REPORT: generating wes level1 gc bias plot"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
-
-rule report_level1_qualityScore:
-    input:
-        "analysis/metrics/{sample}/{sample}_metrics.pdf"
-    output:
-        "analysis/report/wes_images/align/{sample}/{sample}_qualityScore.png"
-    params:
-        page = 2
-    message:
-        "REPORT: generating wes level1 quality score plot"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
-
-rule report_level1_qualityByCycle:
-    input:
-        "analysis/metrics/{sample}/{sample}_metrics.pdf"
-    output:
-        "analysis/report/wes_images/align/{sample}/{sample}_qualityByCycle.png"
-    params:
-        page = 3
-    message:
-        "REPORT: generating wes level1 quality by cycle plot"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
-
-rule report_level1_insertSize:
-    input:
-        "analysis/metrics/{sample}/{sample}_metrics.pdf"
-    output:
-        "analysis/report/wes_images/align/{sample}/{sample}_insertSize.png"
-    params:
-        page = 4
-    message:
-        "REPORT: generating wes level1 insert size plot"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
-
-rule report_level1_somatic_legoPlot:
-    input:
-        "analysis/somatic/{run}/{run}_{caller}.filter.pdf"
-    output:
-        "analysis/report/wes_images/somatic/{run}/{run}_{caller}.legoPlot.png"
-    params:
-        page = 1
-    message:
-        "REPORT: generating wes level1 lego plot"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
-
-rule report_level1:
-    """Generate wes_level1.html"""
-    input:
-        #NOTE: need to ensure that this runs AFTER everything is generated!
         config="config.yaml",
-        lv1=level1_targets, #to ensure that all level1 targets are in place
+        wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report/wes_level1.html"
+         "analysis/report/wes_meta/01_wes_software_versions.tsv"
     message:
-        "REPORT: creating wes_level1.html"
+        "REPORT: creating WES software table"
     group: "report"
     shell:
-        """cidc_wes/modules/scripts/report_level1.py -c {input} -o {output}"""
+        """cidc_wes/modules/scripts/report_software.py -c {input.config} -v {input.wes_versions} -o {output}"""
 
-rule report_level2:
-    """Generate wes_level2.html"""
-    input:
-        #NOTE: need to ensure that this runs AFTER everything is generated!
-        config="config.yaml",
-        lv2=level2_sans_report, #to ensure that all level2 targets are in place
-    output:
-         "analysis/report/wes_level2.html"
-    message:
-        "REPORT: creating wes_level2.html"
-    group: "report"
-    shell:
-        """cidc_wes/modules/scripts/report_level2.py -c {input} -o {output}"""
+###############################################################################
 
-rule report_cp_static:
-    """Copy cidc_wes/reprt/static to analysis/report/static
-    HACK: need a 'done' file to indicate the job worked"""
-    input:
-    output:
-         "analysis/report/static/done.txt"
-    message:
-        "REPORT: copying static files"
-    group: "report"
-    shell:
-        "cp -r cidc_wes/report/static/ analysis/report/ && touch {output}"
-
-rule pvacseq_plot:
-    """Plot the three pvacseq images"""
-    input:
-        pvacseq_plot_inputfn
-    output:
-        hla="analysis/report/wes_images/neoantigen/{run}/HLA_epitopes_fraction_plot.png",
-        patient="analysis/report/wes_images/neoantigen/{run}/Patient_count_epitopes_plot.png",
-        epitope="analysis/report/wes_images/neoantigen/{run}/epitopes_affinity_plot.png",
-    params:
-        outdir = lambda wildcards: "analysis/report/wes_images/neoantigen/%s/" % wildcards.run
-    message:
-        "REPORT: generating pvacseq images"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/pvacseq_plot.R -i {input} -o {params.outdir}"
-
-rule mapping_plot:
-    """Plot the mapping stats"""
+rule report_data_quality_table:
+    """Generate the mapping stats table for the report"""
     input:
         "analysis/align/mapping.csv"
     output:
-        "analysis/report/wes_images/align/mapping.png"
-    group: "report"
-    shell:
-        "Rscript cidc_wes/modules/scripts/map_stats.R {input} {output}"
-
-#DEPRECATED: moving to sequenza plots
-# rule copynumber_circos_plot:
-#     """Generates the circos plot for a run"""
-#     input:
-#         cnv="analysis/copynumber/{run}/{run}_cnvcalls.circos.txt",
-#         indel="analysis/somatic/{run}/{run}_{caller}.indel.circos.txt",
-#         snp="analysis/somatic/{run}/{run}_{caller}.snp.circos.txt",
-#     params:
-#         output_dir = lambda wildcards, input, output: "/".join(output[0].split("/")[:-1])
-#     output:
-#         #NOTE: because the etc script generates a file called circos.png
-#         #we put the caller in the dir name--not pretty but i don't want to
-#         #dynamically generatethe etc/circos.conf
-#         "analysis/report/wes_images/copynumber/{run}.{caller}/circos.png"
-#     group: "report"
-#     shell:
-#         #FOR circos we need to do the following:
-#         #0. make a data sub-dir in the {output_dir}
-#         #1. copy/link in the input file as {output_dir}/data/data.*.txt
-#         #2. copy cidc_wes/static/circos/etc/ into {output_dir}
-#         #3. run circos (in that directory)
-#         """mkdir -p {params.output_dir}/data && \
-#         cp {input.cnv} {params.output_dir}/data/data.cnv.txt && \
-#         cp {input.indel} {params.output_dir}/data/data.indel.txt && \
-#         cp {input.snp} {params.output_dir}/data/data.snp.txt && \
-#         cp -r cidc_wes/static/circos/etc {params.output_dir} && \
-#         cd {params.output_dir} && circos"""
-
-rule copynumber_sequenza_plots:
-    """Get the copy number plots from sequenza output by splitting 
-    {run}_genome_view.pdf"""
-    input:
-        "analysis/clonality/{run}/{run}_genome_view.pdf"
+        tsv="analysis/report/data_quality/01_mapping_stats.tsv",
+        details="analysis/report/data_quality/01_details.yaml",
     params:
-        pg = lambda wildcards: wildcards.pg
-    output:
-        "analysis/report/wes_images/copynumber/{run}/{run}_cnv_genome.{pg}.pdf"
+        caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'"""
+    message:
+        "REPORT: creating mapping stats for data_quality section"
+    group: "report"
     shell:
-        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.pg}"
+        """echo "{params.caption}" >> {output.details} && cidc_wes/modules/scripts/report_dataQual_mappingStats.py -f {input} -o {output.tsv}"""
 
-rule report_level2_density_plot:
-    "convert the density.pdf to png"
-     input:
-         "analysis/clonality/{run}/{run}_plot.density.pdf",
+#------------------------------------------------------------------------------
+def report_data_quality_plotsInputFn(wildcards):
+    """Given a run, returns a list of the various sub plots to generate
+    """
+    ret = []
+    run_name = list(config['runs'].keys())[0]
+    run = config['runs'][run_name]
+    for sample in run:
+        ret.append("analysis/report/data_quality/plots/%s_gcBias.png" % (sample))
+        ret.append("analysis/report/data_quality/plots/%s_qualityScore.png" % (sample))
+        ret.append("analysis/report/data_quality/plots/%s_qualityByCycle.png" % (sample))
+        ret.append("analysis/report/data_quality/plots/%s_insertSize.png" % (sample))
+    return ret
+
+rule report_data_quality_gcPlot:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report/wes_images/clonality/{run}/{run}_plot.density.png",
-    params: page=1
+        "analysis/report/data_quality/plots/{sample}_gcBias.png"
+    params:
+        page = 1
+    message:
+        "REPORT: generating data_quality gc bias plot"
     group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-rule report_level2_scatter_plot:
-    "convert the density.pdf to png"
-     input:
-         "analysis/clonality/{run}/{run}_plot.scatter.pdf",
+rule report_data_quality_qualityScore:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report/wes_images/clonality/{run}/{run}_plot.scatter.png",
-    params: page=1
+        "analysis/report/data_quality/plots/{sample}_qualityScore.png"
+    params:
+        page = 2
+    message:
+        "REPORT: generating data_quality quality score plot"
     group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
 
-rule report_level2_coordinates_plot:
-    "convert the density.pdf to png"
-     input:
-         "analysis/clonality/{run}/{run}_plot.coordinates.pdf",
+rule report_data_quality_qualityByCycle:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
     output:
-        "analysis/report/wes_images/clonality/{run}/{run}_plot.coordinates.png"
-    params: page=1
+        "analysis/report/data_quality/plots/{sample}_qualityByCycle.png"
+    params:
+        page = 3
+    message:
+        "REPORT: generating data_quality quality by cycle plot"
     group: "report"
     shell:
         "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+rule report_data_quality_insertSize:
+    input:
+        "analysis/metrics/{sample}/{sample}_metrics.pdf"
+    output:
+        "analysis/report/data_quality/plots/{sample}_insertSize.png"
+    params:
+        page = 4
+    message:
+        "REPORT: generating data_quality insert size plot"
+    group: "report"
+    shell:
+        "Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output} {params.page}"
+
+def report_getTumorNormal(index):
+    run = list(config['runs'].keys())[0]
+    return config['runs'][run][index]
+
+rule report_data_quality_plots_table:
+    """Generate the fastqc plots table for the report
+    The trick here is that the plot table shows BOTH samples, tumor and 
+    normal, for the run--so we need 1. an inpput fn to look up the samples
+    and 2. params to generate the correct plots
+    """
+    input:
+        report_data_quality_plotsInputFn
+    output:
+        tsv="analysis/report/data_quality/02_qc_plots.tsv",
+        details = "analysis/report/data_quality/02_details.yaml",
+    params:
+        normal= lambda wildcards: report_getTumorNormal(0),
+        tumor = lambda wildcards: report_getTumorNormal(1),
+        image_paths = lambda wildcards: "analysis/report/data_quality/plots/",
+        sub_caption = """subcaption: 'NOTE: (T) denotes tumor sample; (N) denotes normal sample. a) GC Plot shows the distribution of %GC bases within a 100bp window.  In human, the mean GC content is approx. 40%. b) Quality Score shows the distribution of phred scores. c) Quality by Cycle shows the phred score across the sequencing cycles. d) Insert size shows the distribution of fragment lengths.' """,
+    message:
+        "REPORT: creating QC plots for data_quality section"
+    group: "report"
+    shell:
+        """echo "{params.sub_caption}" >> {output.details} && cidc_wes/modules/scripts/report_dataQual_plot_table.py -n {params.normal} -t {params.tumor} -p {params.image_paths} -o {output}"""
+
+rule report_data_quality_coverage:
+    """Generate the coverage data table"""
+    input:
+        "analysis/metrics/all_sample_summaries.txt"
+    output:
+        tsv="analysis/report/data_quality/03_coverage_statistics.tsv",
+        details="analysis/report/data_quality/03_details.yaml"
+    params:
+        caption="""caption: 'The following table describes the read depth coverage statistics. With the exception of the Total Reads column, which represents the total number of reads in each sample, all numbers represent reads in targeted regions.'"""
+    shell:
+        """echo "{params.caption}" >> {output.details} && cidc_wes/modules/scripts/report_dataQual_coverage.py -f {input} -o {output.tsv}"""
+
+###############################################################################
+
+def report_somatic_variants_summary_tblInputFn(wildcards):
+    ls = []
+    caller = config['somatic_caller']
+    run = list(config['runs'].keys())[0]
+    ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run, run, caller))
+    return ls
+
+rule report_somatic_variants_summary_tbls:
+    input:
+        report_somatic_variants_summary_tblInputFn
+    params:
+        cap3 = """caption: 'This table summarizes the number of transitions and transversions occuring within the set of SNPs.'"""
+    output:
+        csv1 = "analysis/report/somatic_variants/01_summary_table.csv",
+        csv2 = "analysis/report/somatic_variants/02_functional_annotation.csv",
+        csv3 = "analysis/report/somatic_variants/03_SNV_statistics.csv",
+        details3 = "analysis/report/somatic_variants/03_details.yaml",
+    shell:
+        """echo "{params.cap3}" >> {output.details3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
+
+def report_legoPlotInputFn(wildcards):
+    run = wildcards.run
+    caller = config['somatic_caller']
+    return "analysis/somatic/%s/%s_%s.filter.pdf" % (run, run, caller)
+
+rule report_somatic_variants_legoPlot:
+    """Add the lego plot to the somatic_variants section of the report"""
+    input:
+        report_legoPlotInputFn
+    output:
+        png = "analysis/report/somatic_variants/05_{run}_lego_plot.png",
+    params:
+        page = 1,
+    message:
+        "REPORT: generating somatic_variants lego plot"
+    group: "report"
+    shell:
+        """Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.page}"""
+
+def report_somatic_variants_germlineCompareInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/germline/%s/%s_vcfcompare.txt" % (run, run)
+
+rule report_somatic_variants_germlineCompare:
+    """report germline overlap"""
+    input:
+        report_somatic_variants_germlineCompareInputFn
+    params:
+        run = list(config['runs'].keys())[0],
+        cap = """caption: 'This table reports the tumor mutational burden (TMB) as well as the total mutational load of the normal sample, the number of mutations that they have in common, and their percent overlap.'""",
+        sub = """subcaption: 'NOTE: the % overlap was calculated using the Tumor TMB as the denominator'""",
+    output:
+        tsv = "analysis/report/somatic_variants/04_tumor_mutational_burden.tsv",
+        details = "analysis/report/somatic_variants/04_details.yaml",
+    shell:
+        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
+
+###############################################################################
+def report_copynumberPlotInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/clonality/%s/%s_genome_view.pdf" % (run,run)
+
+rule report_copynumberPlot:
+    """report tumor copynumberPlot"""
+    input:
+        report_copynumberPlotInputFn
+    params:
+        pg = 3,
+        subcap = """subcaption: 'Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)'"""
+    output:
+        png="analysis/report/copy_number/01_copynumber_plot.png",
+        details="analysis/report/copy_number/01_details.yaml",
+    shell:
+        """echo "{params.subcap}" >> {output.details} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
+
+def report_copy_number_purityInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
+
+rule report_copy_number_purity:
+    """report tumor purity"""
+    input:
+        report_copy_number_purityInputFn
+    params:
+        run = list(config['runs'].keys())[0],
+        cap = """caption: 'This table reports the estimated tumor purity, ploidy, and diploid log ratio of the sample.'"""
+    output:
+        tsv="analysis/report/copy_number/03_tumor_purity.tsv",
+        details="analysis/report/copy_number/03_details.yaml",
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output.tsv}"""
+
+def report_copy_number_clonalityInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/clonality/%s/%s_table.tsv" % (run,run)
+
+rule report_copy_number_clonality:
+    """report tumor clonality"""
+    input:
+        report_copy_number_clonalityInputFn
+    params:
+        run = list(config['runs'].keys())[0],
+        cap = """caption: 'This table reports the estimated tumor clonaltiy of the sample.'"""
+    output:
+        tsv="analysis/report/copy_number/02_tumor_clonality.tsv",
+        details="analysis/report/copy_number/02_details.yaml",
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
+
+###############################################################################
+def report_neoantigens_HLAInputFn(wildcards):
+    runName = list(config['runs'].keys())[0]
+    run = config['runs'][runName]
+    normal = run[0]
+    tumor = run[1]
+    ls = []
+    if config.get('neoantigen_run_classII'):
+        #optitype and xhla results
+        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
+               "analysis/xhla/%s/report-%s-hla.json" % (normal, normal),
+              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor),
+               "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)]
+    else:
+        #optitype only
+        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
+              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)]
+    return ls
+
+rule report_neoantigens_HLA:
+    """report HLA type"""
+    input:
+        report_neoantigens_HLAInputFn
+    params:
+        normal = lambda wildcards, input: ",".join(input[:2]) if len(input) > 2 else input[0],
+        tumor = lambda wildcards, input: ",".join(input[2:4]) if len(input) > 2 else input[1],
+        names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
+        cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
+    output:
+        tsv="analysis/report/neoantigens/01_HLA_results.tsv",
+        details="analysis/report/neoantigens/01_details.yaml",
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output.tsv}"""
+
+def report_neoantigens_neoantigen_listInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run, run)
+
+rule report_neoantigens_neoantigen_list:
+    """report HLA type"""
+    input:
+        report_neoantigens_neoantigen_listInputFn
+    params:
+        cap = """caption: 'This table shows the list of predicted neoantigens.'""",
+    output:
+        tsv= "analysis/report/neoantigens/02_neoantigen_list.tsv",
+        details= "analysis/report/neoantigens/02_details.yaml",
+    shell:
+        """echo "{params.cap}" >> {output.details} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
+
+###############################################################################
+rule report_auto_render:
+    """Generalized rule to dynamically generate the report BASED
+    on what is in the report directory"""
+    input:
+        report_targets
+    params:
+        jinja2_template="cidc_wes/report/index.sample.html",
+        report_path = "analysis/report",
+        sections_list=",".join(['wes_meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
+    output:
+        "analysis/report/report.html"
+    message:
+        "REPORT: Generating WES report"
+    group: "report"
+    shell:
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -t {params.jinja2_template} -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
+
