@@ -4,6 +4,7 @@ channels:
 - biobuilds
 - aroth85
 - conda-forge
+- plotly
 - defaults
 dependencies:
 #GENERAL
@@ -66,6 +67,7 @@ dependencies:
 - r-ggpubr
 - genson
 - multiqc #python setup install
+- plotly_express
 
 #msisensor2 plotting
 - r-beeswarm
