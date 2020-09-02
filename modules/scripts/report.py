@@ -315,7 +315,8 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     colors = ['#e84118','#44bd32','#0097e6', '#8c7ae6', '#7f8fa6', '#e1b12c']
     #print(details)
     if 'plotly' in details:
-        details['plotly']['color_discrete_sequence'] = colors
+        if not 'color_discrete_sequence' in details['plotly']:
+            details['plotly']['color_discrete_sequence'] = colors
     else:
         details['plotly'] = {'color_discrete_sequence':colors}
     fig = plot(df, **details['plotly'])

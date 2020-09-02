@@ -17,9 +17,9 @@ def cohort_report_targets(wildcards):
     #Data Quality
     ls.append("analysis/cohort_report/data_quality/01_mapping_bar.plotly")
     ls.append("analysis/cohort_report/data_quality/02_coverage_bar.plotly")
-    #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plotly")
     ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plotly")
+    ls.append("analysis/cohort_report/data_quality/05_mean_quality_bar.plotly")
 
     #Copynumber
     ls.append("analysis/cohort_report/copy_number/01_clonality_bar.plotly")
@@ -142,6 +142,24 @@ rule cohort_report_data_quality_insertSize_plots:
     shell:
         """echo "{params.plot_options}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
+
+rule cohort_report_data_quality_meanQual:
+    """Generate the mean quality plots for the report"""
+    input:
+        cohort_report_inputFn
+    output:
+        csv="analysis/cohort_report/data_quality/05_mean_quality_bar.plotly",
+        details="analysis/cohort_report/data_quality/05_details.yaml",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#44bd32"]}}), #make the bars green
+    message:
+        "REPORT: creating mean quality for data_quality section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.plot_options}" >> {output.details} && 
+        cidc_wes/modules/scripts/cohort_report/cr_dataQual_meanQual.py -f {params.files} -o {output.csv}"""
+
 ###############################################################################
 rule cohort_report_copynumber_clonality:
     """Generate the clonality table for the report"""
@@ -167,17 +185,17 @@ rule cohort_report_copynumber_purity:
         cohort_report_inputFn
     output:
         csv="analysis/cohort_report/copy_number/02_purity_bar.plotly",
-        #details="analysis/cohort_report/data_quality/02_details.yaml",
+        details="analysis/cohort_report/copy_number/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="purity",
-        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        #plot_options = "cpswitch: False",
+        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
     message:
         "REPORT: creating copynumber table for copy_number section"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """echo "{params.plot_options}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 rule cohort_report_copynumber_ploidy:
     """Generate the ploidy plot for the report"""
@@ -185,17 +203,17 @@ rule cohort_report_copynumber_ploidy:
         cohort_report_inputFn
     output:
         csv="analysis/cohort_report/copy_number/03_ploidy_line.plotly",
-        #details="analysis/cohort_report/data_quality/02_details.yaml",
+        details="analysis/cohort_report/copy_number/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr=" -a ".join(["ploidy","dipLogR"]),
-        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        #plot_options = "cpswitch: False",
+        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
     message:
         "REPORT: creating copynumber table for copy_number section"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """echo "{params.plot_options}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_somatic_mutationPlot:

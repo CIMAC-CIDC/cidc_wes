@@ -64,7 +64,7 @@ def main():
     neoantigens = {}
     #MAIN output.tsv
     out = open(options.output, "w")
-    hdr = _attrs
+    hdr = list(map(lambda a: prettyprint(a), _attrs))
     hdr = ['Run'] + list(hdr)
     out.write("%s\n" % ",".join(hdr))
     for r in runs:
