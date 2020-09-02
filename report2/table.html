@@ -3,7 +3,8 @@
   {% if caption %}
   <p class="text-justify">{{ caption }}</p>
   {% endif %}
-  <table id="{{ id }}" class="table table-striped">
+  <div class="scrolling-wrapper">
+  <table id="{{ id }}" class="table table-striped" >
     {% if header %}
     <thead>
       <tr>
@@ -36,4 +37,5 @@
   {% if sub_caption %}
   <p class="text-center font-weight-bold">{{ sub_caption }}</p>
   {% endif %}
+</div>
 </div>

@@ -15,7 +15,7 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/samples_meta.json")
 
     #Data Quality
-    ls.append("analysis/cohort_report/data_quality/01_mapping_plots_bar.plotly")
+    ls.append("analysis/cohort_report/data_quality/01_mapping_bar.plotly")
     ls.append("analysis/cohort_report/data_quality/02_coverage_bar.plotly")
     #ls.append("analysis/cohort_report/data_quality/02_mapping_stats.csv")
     ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plotly")
@@ -74,7 +74,7 @@ rule cohort_report_data_quality_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/01_mapping_plots_bar.plotly",
+        csv="analysis/cohort_report/data_quality/01_mapping_bar.plotly",
         details="analysis/cohort_report/data_quality/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -135,7 +135,7 @@ rule cohort_report_data_quality_insertSize_plots:
         details="analysis/cohort_report/data_quality/04_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        plot_options = yaml_dump({'plotly': {'labels':{'X':'% GC bases','value':''}}}),
+        plot_options = yaml_dump({'plotly': {'labels':{'X':'Insert Size','value':'Counts'}}}),
     message:
         "REPORT: creating insert size plots for data_quality section"
     group: "cohort_report"
@@ -248,8 +248,6 @@ rule cohort_report_HLA_table:
         details="analysis/cohort_report/neoantigen/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        #caption="""caption: 'Table of HLA Alleles.\n**NOTE: Click on Configure Table to show Class II alleles**'""",
-        #caption="""caption: '**NOTE: Click on Configure Table to show Class II alleles**'""",
         table_options = "table_title: 'HLA Alleles Table'",
     message:
         "REPORT: creating HLA table for neoantigen section"
