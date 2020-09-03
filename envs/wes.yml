@@ -68,6 +68,7 @@ dependencies:
 - genson
 - multiqc #python setup install
 - plotly_express
+- bioconductor-maftools
 
 #msisensor2 plotting
 - r-beeswarm

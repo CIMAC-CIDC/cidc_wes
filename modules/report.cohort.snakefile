@@ -27,12 +27,19 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/copy_number/03_ploidy_line.plotly")
 
     #Somatic
-    ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
-    ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
-    ls.append("analysis/cohort_report/somatic/somatic_summary.json")
-    ls.append("analysis/cohort_report/somatic/ti_tv.json")
-    ls.append("analysis/cohort_report/somatic/tmb.json")
-    ls.append("analysis/cohort_report/somatic/functional_summary.json")
+    ls.append("analysis/cohort_report/somatic/cohort.maf.gz")
+    ls.append("analysis/cohort_report/somatic/01_somatic_variants_summary.png")
+    ls.append("analysis/cohort_report/somatic/02_oncoplot.png")
+    ls.append("analysis/cohort_report/somatic/03_Ti-Tv.png")
+    ls.append("analysis/cohort_report/somatic/04_vaf.png")
+    ls.append("analysis/cohort_report/somatic/05_tcga_comparison.png")
+    ls.append("analysis/cohort_report/somatic/06_somatic_interactions.png")
+    # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
+    # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
+    # ls.append("analysis/cohort_report/somatic/somatic_summary.json")
+    # ls.append("analysis/cohort_report/somatic/ti_tv.json")
+    # ls.append("analysis/cohort_report/somatic/tmb.json")
+    # ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #Neoantigen
     ls.append("analysis/cohort_report/neoantigen/01_HLA_table.csv")
@@ -216,6 +223,42 @@ rule cohort_report_copynumber_ploidy:
         cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 ###############################################################################
+rule cohort_report_somatic_makeCohort:
+    """Collect the maf files and gzip them for mafTools input"""
+    input:
+        cohort_report_inputFn
+    output:
+        #LATER: make this a temp file
+        gz="analysis/cohort_report/somatic/cohort.maf.gz",
+    params:
+        files = lambda wildcards,input: " -f ".join(input),
+    message:
+        "REPORT: creating cohort maf bundle"
+    group: "cohort_report"
+    shell:
+        #NOTE: this code needs speedup!
+        """cidc_wes/modules/scripts/cohort_report/cr_somatic_bundleCohortMafs.py -f {params.files} -o {output.gz}"""
+
+rule cohort_report_somatic_mafTools:
+    """Generate the mafTools plots for the report"""
+    input:
+        "analysis/cohort_report/somatic/cohort.maf.gz"
+    output:
+        summary="analysis/cohort_report/somatic/01_somatic_variants_summary.png",
+        onco="analysis/cohort_report/somatic/02_oncoplot.png",
+        titv="analysis/cohort_report/somatic/03_Ti-Tv.png",
+        vaf="analysis/cohort_report/somatic/04_vaf.png",
+        tcga="analysis/cohort_report/somatic/05_tcga_comparison.png",
+        interact="analysis/cohort_report/somatic/06_somatic_interactions.png",
+        #details="analysis/cohort_report/somatic/01_details.yaml",
+    params:
+        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+    message:
+        "REPORT: creating mafTools plot for somatic section"
+    group: "cohort_report"
+    shell:
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact}"""
+
 rule cohort_report_somatic_mutationPlot:
     """Generate the mutation summary plot for the report"""
     input:

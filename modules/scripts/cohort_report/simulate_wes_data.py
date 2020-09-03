@@ -88,11 +88,14 @@ def generateRunName():
     sample = random.randint(0,1000)
     return "%s_s%s" % (center, sample)
 
+_maf_dir = "pilot2/somatic/maf"
+_maf_files = list(filter(lambda p: p.endswith(".filter.maf"), os.listdir(_maf_dir)))
+
 def generateSomatic():
     """returns a dictionary of simulated somatic fields
-    TODO: filtered_vcf_file, filtered_maf_file, tmb, functional_summary,
-    trinucleotide_matrix, transition_matrix
+    TODO: trinucleotide_matrix, filtered_vcf_file
     """
+    filtered_maf_file = os.path.abspath(os.path.join(_maf_dir, random.choice(_maf_files)))
     snp = round(random.gauss(1000, 150)) #mean 1k, stdev 150
     insert = random.randint(5, 100)
     delete = random.randint(10, 100)
@@ -125,7 +128,11 @@ def generateSomatic():
         tmp[k] = 0
         trans_mat[k] = tmp
     #print(trans_mat)
-    return {'mutation_summary': mut_sum, 'transition_matrix': trans_mat, 'tmb':tmb, 'functional_summary': func_summary}
+    return {'filtered_maf_file': filtered_maf_file,
+            'mutation_summary': mut_sum,
+            'transition_matrix': trans_mat,
+            'tmb':tmb,
+            'functional_summary': func_summary}
 
 def generateMeta(run_name):
     """returns a dictionary of simulated meta fields- e.g. age, sex, etc

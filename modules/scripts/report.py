@@ -261,6 +261,7 @@ def formatter(x, pos):
     'The two args are the value and tick position'
     return '%1.1fM' % (float(x)*1e-6)
 
+#SOON to be deprecated!
 def plot(plot_f):
     """Given a path to a csv file, generate a plot with the same name
     NOTE: the last _ of the name gives the type of plot"""
@@ -392,6 +393,7 @@ def main():
             
         for ffile in ordering:
             filepath = os.path.join(path, ffile)
+            #I will soon deprecate these 'plots' sub-dir--is not currenlty used by either report
             if ffile == 'plots' and os.path.isdir(filepath): #handle plots
                 #PLOT all csv files
                 csv_files = [a for a in os.listdir(filepath) if a.endswith('.csv')]
