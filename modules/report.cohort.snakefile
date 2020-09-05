@@ -42,7 +42,7 @@ def cohort_report_targets(wildcards):
     # ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #Neoantigen
-    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.csv")
+    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.dt")
     ls.append("analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly")
     ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
     ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
@@ -259,6 +259,7 @@ rule cohort_report_somatic_mafTools:
     shell:
         """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact}"""
 
+#DEPRECATED
 rule cohort_report_somatic_mutationPlot:
     """Generate the mutation summary plot for the report"""
     input:
@@ -277,6 +278,7 @@ rule cohort_report_somatic_mutationPlot:
         """echo "{params.plot_options}" >> {output.details} && 
         cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticMutationPlot.py -f {params.files} -o {output.csv}"""
 
+#DEPRECATED
 rule cohort_report_somatic_summary_table:
     """Generate the somatic summary table for the report"""
     input:
@@ -305,7 +307,7 @@ rule cohort_report_HLA_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.csv",
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.dt",
         details="analysis/cohort_report/neoantigen/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -320,7 +322,7 @@ rule cohort_report_HLA_table:
 rule cohort_report_HLA_histogram:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.csv",
+        csv="analysis/cohort_report/neoantigen/01_HLA_table.dt",
     output:
         csv="analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly",
         details="analysis/cohort_report/neoantigen/02_details.yaml",
@@ -335,6 +337,7 @@ rule cohort_report_HLA_histogram:
         echo "{params.plot_options}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaHistogram.py -f {input} -o {output.csv}"""
 
+#DEPRECATED
 rule cohort_report_neoantigen_table:
     """Generate the neoantigen table for the report"""
     input:

@@ -16,3 +16,5 @@ $('.wes-image-modal').on('click',function(){
     $('#wesImageModal_img').attr("src", this.src);
 });
 
+//Create datatables
+$('.wes_datatable').DataTable();

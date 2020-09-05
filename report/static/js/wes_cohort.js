@@ -182,7 +182,7 @@ function buildTable(dataList) {
     return $(content);
 }
 
-var hlaTbl = $('#HLA_table').DataTable();
+//var hlaTbl = $('#HLA_table').DataTable();
 var neaontigenTbl = $('#neoantigen_table').DataTable({select: {style: 'single'}});
 neoantigenTblRows = $('#neoantigen_table').find('tr');
 //style the cursor

@@ -75,9 +75,15 @@ def get_prefix(s):
     return prefix
 
 #NOTE: this can easily handle csv files too!
-def buildTable(tsv_file, details, jinjaEnv, separator):
+def buildTable(tsv_file, details, jinjaEnv, cssClass=""):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
+    #TRY to auto-detect if plot file is , or \t separated
+    f = open(tsv_file)
+    tmp = f.readline() #take a peek at first line
+    separator = "," if "," in tmp else "\t"
+    f.close()
+
     #LOAD jinja2 test and filter for image processing
     jinjaEnv.tests['imagefile'] = is_image_file
     jinjaEnv.tests['color'] = is_color
@@ -93,7 +99,7 @@ def buildTable(tsv_file, details, jinjaEnv, separator):
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname, True)
 
-    vals = {'id': fname, 'title':title}
+    vals = {'id': fname, 'title':title, 'class': cssClass}
 
     #Check for a caption
     caption = details.get('caption', None)
@@ -413,10 +419,10 @@ def main():
                 else:
                     details = {}
 
-                if ffile.endswith(".tsv"): #MAKE a table
-                    tmp += buildTable(filepath, details, templateEnv, '\t')
-                elif ffile.endswith(".csv"):
-                    tmp += buildTable(filepath, details, templateEnv, ',')
+                if ffile.endswith(".tsv") or ffile.endswith(".csv"): #MAKE a table
+                    tmp += buildTable(filepath, details, templateEnv)
+                elif ffile.endswith(".dt"):
+                    tmp += buildTable(filepath, details, templateEnv, "wes_datatable")
                 elif ffile.endswith(".png"): #Make a plot
                     tmp += buildPlot(filepath, details, templateEnv)
                 elif ffile.endswith(".mqc"): #Make a Multiqc plot
