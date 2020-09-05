@@ -365,5 +365,5 @@ rule report_auto_render:
         "REPORT: Generating WES report"
     group: "report"
     shell:
-        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -t {params.jinja2_template} -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -j {params.jinja2_template} -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
 

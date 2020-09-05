@@ -229,7 +229,7 @@ rule cohort_report_somatic_makeCohort:
         cohort_report_inputFn
     output:
         #LATER: make this a temp file
-        gz="analysis/cohort_report/somatic/cohort.maf.gz",
+        gz=temp("analysis/cohort_report/somatic/cohort.maf.gz"),
     params:
         files = lambda wildcards,input: " -f ".join(input),
     message:
@@ -365,7 +365,8 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number', 'somatic', 'neoantigen'])
+        sections_list=",".join(['data_quality','copy_number', 'somatic', 'neoantigen']),
+        title="WES Cohort Report",
         #sections_list=",".join(['somatic'])
     output:
         "analysis/cohort_report/report.html"
@@ -373,5 +374,5 @@ rule cohort_report_auto_render:
         "REPORT: Generating WES report"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -t {params.jinja2_template} -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
+        """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -j {params.jinja2_template} -t "{params.title}" -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
 

@@ -22,6 +22,7 @@
 #sidebar-wrapper .sidebar-heading {
   background: #22204c;
   color: white;
+  height: 4.75rem; /*to match the navbar*/
 }
 
 /* navbar */

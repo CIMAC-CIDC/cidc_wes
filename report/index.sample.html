@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="WES Summary Report">
+    <meta name="description" content="{{ title }}">
     <meta name="author" content="Len Taing 2020 (TGBTG)">
 
-    <title>WES Summary Report</title>
+    <title>{{ title }}</title>
 
     <!-- Bootstrap core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -65,7 +65,7 @@
 
       <!-- Sidebar -->
       <div class="bg-light border-right" id="sidebar-wrapper">
-	<div class="sidebar-heading">WES Summary Report</div>
+	<div class="sidebar-heading">{{ title }}</div>
 	<div class="list-group list-group-flush">
 	  {% for section in sections %}
 	  <a href="#" onclick="toggler('{{ section[0] }}');" class="list-group-item list-group-item-action bg-light">{{ section[1] }}</a>

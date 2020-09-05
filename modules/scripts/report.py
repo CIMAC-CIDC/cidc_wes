@@ -351,14 +351,18 @@ def main():
     optparser = OptionParser(usage=usage)
     optparser.add_option("-d", "--dir", help="report directory path")
     optparser.add_option("-s", "--sections", help="sections list in order of appearance")
-    optparser.add_option("-t", "--template", help="path to jinja2 template")
+    optparser.add_option("-j", "--template", help="path to jinja2 template")
+    optparser.add_option("-t", "--title", help="report title", default="WES Summary Report")
     optparser.add_option("-o", "--output", help="output html file")
     (options, args) = optparser.parse_args(sys.argv)
     
     if not options.dir or not options.sections or not options.template or not options.output:
         optparser.print_help()
         sys.exit(-1)
-    
+
+    #SET report title-default to "WES Summary Report"
+    title = options.title
+
     #ASSUMING it's being run as WES project level
     template_dir = os.path.dirname(options.template)
     template_fname = os.path.basename(options.template)
@@ -367,7 +371,7 @@ def main():
     template = templateEnv.get_template(template_fname)
 
     #Build up this dictionary
-    wes_report = {}
+    wes_report = {'title':title}
     
     #infer sections from the analysis/report dir structure
     #sections = os.listdir(options.dir)
