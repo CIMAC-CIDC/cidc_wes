@@ -26,6 +26,7 @@ from multiqc.utils import report as mqc_report, config as mqc_config
 #Plotly stuff
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 from optparse import OptionParser
 
@@ -316,7 +317,7 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     title = prettyprint(fname, True)
 
     #Pickout the proper mqc plot module to use
-    plot = getattr(px, plot_type)
+    plot = getattr(px, plot_type) if plot_type != "oncoplot" else oncoplot
     df = pd.read_csv(plotly_file, index_col=0)
     #Colors: red, green, blue, purple, gray, gold
     colors = ['#e84118','#44bd32','#0097e6', '#8c7ae6', '#7f8fa6', '#e1b12c']
@@ -345,6 +346,49 @@ def buildPlotly(plotly_file, details, jinjaEnv):
 
     #print(vals)
     return template.render(vals)
+
+def oncoplot(df, **kwargs):
+    """Given a dataframe returns a plotly oncoplot figure"""
+    #print(kwargs)
+    
+    #Sort samples by hits
+    #ref: https://stackoverflow.com/questions/20480238/getting-top-3-rows-that-have-biggest-sum-of-columns-in-pandas-dataframe
+    top_ngenes = min(kwargs['top_ngenes'], len(df.columns))
+    sample_idx = df.sum(axis=1).sort_values(ascending=False).index
+    df = df.reindex(sample_idx)
+
+    #Sort by genes/annotations by hits
+    #top_genes = df.sum(axis=0).sort_values(ascending=False).tail(top_ngenes)
+    top_genes = df.sum(axis=0).sort_values(ascending=False).head(top_ngenes)
+    #print(top_genes)
+    df = df.reindex(top_genes.index, axis=1)
+
+    #moving subplots closer-
+    #ref: https://stackoverflow.com/questions/31526045/remove-space-between-subplots-in-plotly
+    fig = plotly.subplots.make_subplots(rows=1, cols=2, column_widths=[0.9, 0.1], specs = [[{}, {}]], horizontal_spacing=0.005)
+    #Colors- 0 = lightgray, 1 = green
+    colors = kwargs.get('colors', ['#b5b5b5', '#44bd32'])
+    fig.add_trace(go.Heatmap(x=df.index,
+                             y=list(reversed(top_genes.index)),
+                             z = df.transpose().iloc[::-1], #KEY: NEED to transpose matrix and reverse rows
+                             type = 'heatmap',
+                             colorscale = colors,
+                             xgap = 3, ygap=3, #Add gridlines
+                             showscale=False, #turn off scale
+                             hoverinfo=["x",'y'], #turn off hover data
+    ), row=1, col=1)
+    fig.add_trace(go.Bar(x=list(reversed(top_genes)),
+                         orientation='h',
+                         texttemplate="%{x}",
+                         textposition='inside',
+                         textfont_color="white",
+                         marker_color= "#0097e6", #blue
+                         hoverinfo="skip"), row=1, col=2)
+    fig.update_xaxes(showticklabels=False, row=1, col=1) #turn off samplenames
+    fig.update_yaxes(showticklabels=False, row=1, col=2) #turn off percents
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
+    #fig.write_html("wes_oncoplot.html")
+    return fig
 
 def main():
     usage = "USAGE: %prog -o [output html file]"
