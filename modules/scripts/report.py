@@ -22,6 +22,8 @@ from matplotlib.ticker import FuncFormatter
 #Multiqc stuff
 from multiqc.plots import bargraph, linegraph, table
 from multiqc.utils import report as mqc_report, config as mqc_config
+import multiqc.modules as mqc_modules
+
 
 #Plotly stuff
 import plotly
@@ -229,40 +231,64 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     fname = "_".join(fname.split("_")[1:-1])
     title = prettyprint(fname, True)
 
-    #Pickout the proper mqc plot module to use
-    mqc_plot = _mqc_plot_types[plot_type]
+    #check to see if we're adding a module or a plot
+    if plot_type in _mqc_plot_types:
+        #Pickout the proper mqc plot module to use
+        mqc_plot = _mqc_plot_types[plot_type]
     
-    #READ in the file--for now assume it's of type bar and have other handlers
-    #later
-    #HERE we should check for plot type
-    if plot_type == "bar" or plot_type == "table":
-        data = readMqcData01(plot_file, sep)
-        #Try to get plot details from details dict
-        cats = details.get("cats", None) #Categories
-        #pass the rest of details into the plotting fn
-        html_plot = mqc_plot.plot(data, cats, details)
+        #READ in file--for now assume it's of type bar and have other handlers
+        #later
+        #HERE we should check for plot type
+        if plot_type == "bar" or plot_type == "table":
+            data = readMqcData01(plot_file, sep)
+            #Try to get plot details from details dict
+            cats = details.get("cats", None) #Categories
+            #pass the rest of details into the plotting fn
+            html_plot = mqc_plot.plot(data, cats, details)
+        else: #line
+            data = readMqcData02(plot_file, sep)
+            html_plot = mqc_plot.plot(data, details)
+                
 
-    else: #line
-        data = readMqcData02(plot_file, sep)
-        html_plot = mqc_plot.plot(data, details)
-    
 
-    vals = {'title':title,
-            'plot': html_plot,
-    }
+        vals = {'title':title,
+                'plot': html_plot,
+        }
 
-    #Check for a caption
-    caption = details.get('caption', None)
-    if caption:
-        vals['caption'] = renderMd(caption)
-    #check for subcaption
-    sub_caption = details.get('subcaption', None)
-    if sub_caption:
-        vals['sub_caption'] = renderMd(sub_caption)
+        #Check for a caption
+        caption = details.get('caption', None)
+        if caption:
+            vals['caption'] = renderMd(caption)
+        #check for subcaption
+        sub_caption = details.get('subcaption', None)
+        if sub_caption:
+            vals['sub_caption'] = renderMd(sub_caption)
 
-    #print(vals)
-    return template.render(vals)
+        #print(vals)
+        ret = template.render(vals)
 
+    else: #TRY incoporate MQC module-- plot_type should define which one
+        #NOTE: the plot_file itself is empty
+        #print(dir(mqc_modules))
+        #print(mqc_modules.__file__)
+        mod = __import__("multiqc.modules.%s" % plot_type)
+        klass = getattr(getattr(mqc_modules, plot_type), "MultiqcModule")
+        results_dir = details.get("results_dir", "./analysis")
+        #initialize where to search for MQC files
+        if results_dir not in mqc_config.analysis_dir:
+            mqc_config.analysis_dir.append(results_dir)
+        #initialize report.get_filelist
+        mqc_report.get_filelist([plot_type])
+        #TRY to render out each section
+        mqcKlass = klass()
+        ret = ""
+        for s in mqcKlass.sections:
+            vals = {'title': s['name'],
+                    'plot': s['plot'],
+                    'caption': s['description']}
+            ret += template.render(vals)
+
+    return ret
 
 def formatter(x, pos):
     'The two args are the value and tick position'
