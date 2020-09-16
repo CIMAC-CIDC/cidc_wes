@@ -16,6 +16,7 @@ def metrics_targets(wildcards):
 
         #JSON files
 	ls.append("analysis/report/json/gc_content/%s.gc.json" % sample)
+        ls.append("analysis/report/json/insert_size/%s.insert_size.json" % sample)
     #coverage metrics summaries
     ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
@@ -103,3 +104,16 @@ rule metrics_json_gc_content:
         "benchmarks/metrics/{sample}.metrics_json_gc_content.txt"
     shell:
         "cidc_wes/modules/scripts/json_gc_content.py -f {input} -o {output}"
+
+rule metrics_json_insert_size:
+    """jsonify the insert size contained in {sample}/{sample}_is_metrics.txt
+    """
+    input:
+        "analysis/metrics/{sample}/{sample}_is_metrics.txt",
+    output:
+        "analysis/report/json/insert_size/{sample}.insert_size.json"
+    group: "metrics"
+    benchmark:
+        "benchmarks/metrics/{sample}.metrics_json_insert_size.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_insert_size.py -f {input} -o {output}"
