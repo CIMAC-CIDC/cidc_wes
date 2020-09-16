@@ -13,7 +13,9 @@ def metrics_targets(wildcards):
 	ls.append("analysis/metrics/%s/%s_aln_metrics.txt" % (sample,sample))
 	ls.append("analysis/metrics/%s/%s_is_metrics.txt" % (sample,sample))
 	ls.append("analysis/metrics/%s/%s_metrics.pdf" % (sample,sample))
-	
+
+        #JSON files
+	ls.append("analysis/report/json/gc_content/%s.gc.json" % sample)
     #coverage metrics summaries
     ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
@@ -88,3 +90,16 @@ rule metrics_collect_target_summaries:
         "benchmarks/metrics/metrics_collect_target_summaries.txt"
     shell:
         "cidc_wes/modules/scripts/metrics_collect_target_summaries.py -f {params.cov_files} -a {params.align_files} > {output}"
+
+rule metrics_json_gc_content:
+    """jsonify the GC content contained in {sample}/{sample}_gc_metrics.txt
+    """
+    input:
+        "analysis/metrics/{sample}/{sample}_gc_metrics.txt",
+    output:
+        "analysis/report/json/gc_content/{sample}.gc.json"
+    group: "metrics"
+    benchmark:
+        "benchmarks/metrics/{sample}.metrics_json_gc_content.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_gc_content.py -f {input} -o {output}"
