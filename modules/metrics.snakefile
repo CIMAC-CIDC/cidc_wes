@@ -17,6 +17,8 @@ def metrics_targets(wildcards):
         #JSON files
 	ls.append("analysis/report/json/gc_content/%s.gc.json" % sample)
         ls.append("analysis/report/json/insert_size/%s.insert_size.json" % sample)
+        ls.append("analysis/report/json/coverage/%s.coverage.json" % sample)
+        ls.append("analysis/report/json/mean_quality/%s.mean_quality.json" % sample)
     #coverage metrics summaries
     ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
@@ -130,3 +132,16 @@ rule metrics_json_coverage:
         "benchmarks/metrics/{sample}.metrics_json_coverage.txt"
     shell:
         "cidc_wes/modules/scripts/json_coverage.py -f {input} -o {output}"
+
+rule metrics_json_mean_quality:
+    """jsonify the mean quality contained in {sample}/{sample}_mq_metrics.txt
+    """
+    input:
+        "analysis/metrics/{sample}/{sample}_mq_metrics.txt", 
+    output:
+        "analysis/report/json/mean_quality/{sample}.mean_quality.json"
+    group: "metrics"
+    benchmark:
+        "benchmarks/metrics/{sample}.metrics_json_mean_quality.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_mean_quality.py -f {input} -o {output}"
