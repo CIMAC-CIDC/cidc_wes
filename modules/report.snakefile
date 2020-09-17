@@ -18,9 +18,14 @@ def report_targets(wildcards):
     ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
     ls.append("analysis/report/somatic_variants/05_SNV_statistics.csv")
 
-    #somatic - MAFtools plots
+    #somatic - MAFtools plots---REALLY need to reorganize the somatic section
     ls.append("analysis/report/somatic_variants/01_somatic_variants_summary.png")
     ls.append("analysis/report/somatic_variants/02_vaf.png")
+
+    ls.append("analysis/report/somatic_variants/09_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/10_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/11_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/12_lollipop_plot.png")
 
     ls.append("analysis/report/somatic_variants/07_tumor_mutational_burden.tsv")
     #COPYNUMBER
@@ -206,13 +211,17 @@ rule report_somatic_variants_maftoolsPlots:
     output:
         summary="analysis/report/somatic_variants/01_somatic_variants_summary.png",
         vaf="analysis/report/somatic_variants/02_vaf.png",
+        lolli1="analysis/report/somatic_variants/09_lollipop_plot.png",
+        lolli2="analysis/report/somatic_variants/10_lollipop_plot.png",
+        lolli3="analysis/report/somatic_variants/11_lollipop_plot.png",
+        lolli4="analysis/report/somatic_variants/12_lollipop_plot.png",
     params:
         #cap3 = """caption: 'This table summarizes the number of transitions and transversions occuring within the set of SNPs.'"""
     message:
         "REPORT: creating mafTools plot for somatic section"
     group: "report"
     shell:
-        """Rscript cidc_wes/modules/scripts//report_somatic_mafPlots.R {input} {output.summary} {output.vaf}"""
+        """Rscript cidc_wes/modules/scripts/report_somatic_mafPlots.R {input} {output.summary} {output.vaf} {output.lolli1} {output.lolli2} {output.lolli3} {output.lolli4}"""
 
 
 def report_somatic_variants_summary_tblInputFn(wildcards):
