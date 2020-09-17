@@ -374,7 +374,7 @@ rule report_neoantigens_neoantigen_list:
         tsv= "analysis/report/neoantigens/02_neoantigen_list.tsv",
         details= "analysis/report/neoantigens/02_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
 ###############################################################################
 rule report_copy_runInfoFiles:
     input:

@@ -75,9 +75,9 @@ def neoantigen_getNeoantigenList_helper(wildcards):
     tumor = neoantigen_getTumor(wildcards)[0]
 
     if config.get('neoantigen_run_classII'):
-        ls.append("analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run,tumor))
+        ls.append("analysis/neoantigen/%s/combined/%s.filtered.condensed.ranked.tsv" % (run,tumor))
     else:
-        ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run,tumor))
+        ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.condensed.ranked.tsv" % (run,tumor))
     return ls
 
 rule neoantigen_make_file_map:

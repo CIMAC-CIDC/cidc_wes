@@ -20,10 +20,9 @@ def main():
         
     f = open(options.file)
     #Fields we want to pick out from the pvacseq filtered output file
-    fields = ['Gene Name', 'Ensembl Gene ID', 'HLA Allele', 'MT Epitope Seq',
-              'Tumor DNA Depth', 'Tumor DNA VAF', 'Best MT Score Method',
-              'Best MT Score', 'Corresponding WT Score',
-              'Corresponding Fold Change']
+    fields = ['Gene Name', 'Mutation', 'Protein Position', 'HGVSc', 'HGVSp',
+              'HLA Allele', 'MT Epitope Seq', 'MT IC50', 'WT IC50',
+              'Fold Change', 'Tumor DNA VAF', 'Score']
     hdr = f.readline().strip().split("\t")
     results = []
     for l in f:
@@ -35,9 +34,7 @@ def main():
 
     out = open(options.out, 'w')
     #print out the header
-    out.write("%s\n" % "\t".join(['Gene','EnsembleID','HLA','Peptide Sequence',
-                                  'Read Depth', 'DNA VAF', 'Method', 'Score',
-                                  'WT Score', 'FoldCahge']))
+    out.write("%s\n" % "\t".join(fields))
     for row in results:
         out.write("%s\n" % "\t".join(row))
     out.close()
