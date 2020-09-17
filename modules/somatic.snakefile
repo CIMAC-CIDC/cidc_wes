@@ -290,6 +290,8 @@ rule vcfVEP:
 rule vcf2maf:
     """General rule to convert the different vcf files into maf"""
     input:
+        #NOTE: EVEN though this looks strange, it's correct
+        #the vcf is needed as input so vcf2maf won't try to run vep again
         vcf="analysis/somatic/{run}/{run}_{caller}.{type}.vcf",
         vep="analysis/somatic/{run}/{run}_{caller}.{type}.vep.vcf",
     output:
