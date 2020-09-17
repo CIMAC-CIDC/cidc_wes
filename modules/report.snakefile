@@ -5,6 +5,8 @@ def report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     #META
+    ls.append("analysis/report/config.yaml")
+    ls.append("analysis/report/metasheet.csv")
     ls.append("analysis/report/wes_meta/02_wes_run_version.tsv")
     ls.append("analysis/report/wes_meta/01_wes_software_versions.tsv")
     #Data Quality
@@ -36,7 +38,8 @@ def report_targets(wildcards):
 
 rule report_all:
     input:
-        "analysis/report/report.html"
+        "analysis/report/report.html",
+        "analysis/report.tar.gz"
 
 ###############################################################################
 #META information
@@ -372,6 +375,17 @@ rule report_neoantigens_neoantigen_list:
         details= "analysis/report/neoantigens/02_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cut -f 1,3,4,5,6,7,8,8,10 {input} > {output.tsv}"""
+###############################################################################
+rule report_copy_runInfoFiles:
+    input:
+        config="config.yaml",
+        metasheet= "metasheet.csv",
+    output:
+        conf="analysis/report/config.yaml",
+        meta="analysis/report/metasheet.csv",
+    shell:
+        """cp {input.config} {output.conf} &&
+        cp {input.metasheet} {output.meta}"""
 
 ###############################################################################
 rule report_auto_render:
@@ -391,3 +405,12 @@ rule report_auto_render:
     shell:
         """cidc_wes/modules/scripts/report.py -d {params.report_path} -s {params.sections_list} -j {params.jinja2_template} -o {output} && cp -r cidc_wes/report/static {params.report_path}"""
 
+rule report_gzipReport:
+    input:
+        "analysis/report/report.html"
+    output:
+        "analysis/report.tar.gz"
+    message: "REPORT: Zipping up report directory"
+    group: "report"
+    shell:
+        "tar -c analysis/report | gzip > {output}"
