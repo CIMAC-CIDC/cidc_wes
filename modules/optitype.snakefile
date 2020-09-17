@@ -53,11 +53,26 @@ rule optitype_extract_chr6:
         "benchmarks/optitype/{sample}/{sample}.optitype_extract_chr6.txt"
     shell:
         """sambamba view -t {threads} -f bam -h {input.in_sortbamfile} chr6 > {output.chr6sortbamfile}"""
-        
+
+rule optitype_index_chr6bam:
+    """index chr6bam"""
+    input:
+        "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
+    output:
+        "analysis/optitype/{sample}/{sample}.sorted.chr6.bam.bai"
+    threads:_optitype_threads
+    group: "optitype"
+    conda: "../envs/optitype.yml"
+    benchmark:
+        "benchmarks/optitype/{sample}/{sample}.optitype_index_chr6bam.txt"
+    shell:
+        """sambamba index -t {threads} {input}"""
+
 rule optitype_bamtofastq:
     """Convert the sorted.chr6.bam file to fastq by samtools"""
     input:
-        in_sortchr6bamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
+        in_sortchr6bamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam",
+        in_index = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam.bai"
     output:
         chr6fastqfile1 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end1.fastq",
         chr6fastqfile2 = "analysis/optitype/{sample}/{sample}.sorted.chr6.end2.fastq"

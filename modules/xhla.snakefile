@@ -39,7 +39,10 @@ rule xhla_all:
 rule xhla:
     """calculate hlatyping by xhla"""
     input:
-        in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.dedup.bam"
+        #in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.dedup.bam"
+        #LEN- changing this to use chrom6 as well
+        in_sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam",
+        in_index = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam.bai",
     output:
         chr6sortbamfile = "analysis/xhla/{sample}/report-{sample}-hla.json"
     threads:_xhla_threads
