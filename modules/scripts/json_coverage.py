@@ -9,19 +9,21 @@ from optparse import OptionParser
 
 
 def parseFile(in_file):
-    """Reads in a _gc_metrics.txt file- 4th col"""
+    """Reads in a coverage.txt file- 2nd line"""
     f = open(in_file)
-    #Burn first 5 lines
-    for i in range(5):
-        hdr = f.readline()
+    hdr = f.readline().strip().split()
+    l = f.readline().strip().split()
+    tmp = dict(zip(hdr, l))
 
-    ls = []
-    for l in f:
-        if l.strip():
-            tmp = l.strip().split("\t")
-            ls.append(tmp[1]) #grab 2nd col
+    ret = {'total_reads': tmp['total'], 'mean_depth': tmp['mean'],
+           'median_depth': tmp['granular_median'],
+           'q1_depth': tmp['granular_Q1'],
+           'q3_depth': tmp['granular_Q3'],
+           'percent_bases_gt_50': tmp['%_bases_above_50']}
+
+    #print(ret)
     f.close()
-    return ls
+    return ret
 
 def main():
     usage = "USAGE: %prog -f file -o output json file"
@@ -39,7 +41,7 @@ def main():
     #GET tumor sample name
     fname = options.in_file.split("/")[-1]
     sample_id = fname.split("_")[0]
-    js_out = {'id': sample_id, 'alignment': {'insert_size': contents}}
+    js_out = {'id': sample_id, 'coverage': contents}
 
     json_out = open(options.output, "w")
     json_out.write(json.dumps(js_out))

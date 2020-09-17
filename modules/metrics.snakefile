@@ -117,3 +117,16 @@ rule metrics_json_insert_size:
         "benchmarks/metrics/{sample}.metrics_json_insert_size.txt"
     shell:
         "cidc_wes/modules/scripts/json_insert_size.py -f {input} -o {output}"
+
+rule metrics_json_coverage:
+    """jsonify the coverage contained in {sample}/{sample}_coverage_metrics.sample_summary.txt
+    """
+    input:
+        "analysis/metrics/{sample}/{sample}_coverage_metrics.sample_summary.txt", 
+    output:
+        "analysis/report/json/coverage/{sample}.coverage.json"
+    group: "metrics"
+    benchmark:
+        "benchmarks/metrics/{sample}.metrics_json_coverage.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_coverage.py -f {input} -o {output}"

@@ -39,7 +39,7 @@ def main():
     #GET tumor sample name
     fname = options.gc_file.split("/")[-1]
     sample_id = fname.split("_")[0]
-    js_out = {'id': sample_id, 'gc_content': gc}
+    js_out = {'id': sample_id, 'alignment': {'gc_content': gc}}
 
     json_out = open(options.output, "w")
     json_out.write(json.dumps(js_out))
