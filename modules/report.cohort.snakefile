@@ -34,6 +34,13 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic/04_vaf.png")
     ls.append("analysis/cohort_report/somatic/05_tcga_comparison.png")
     ls.append("analysis/cohort_report/somatic/06_somatic_interactions.png")
+
+    ls.append("analysis/cohort_report/somatic/07_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/08_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/09_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/10_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/11_lollipop_plot.png")
+
     # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
     # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
     # ls.append("analysis/cohort_report/somatic/somatic_summary.json")
@@ -251,6 +258,13 @@ rule cohort_report_somatic_mafTools:
         vaf="analysis/cohort_report/somatic/04_vaf.png",
         tcga="analysis/cohort_report/somatic/05_tcga_comparison.png",
         interact="analysis/cohort_report/somatic/06_somatic_interactions.png",
+
+        lolli01= "analysis/cohort_report/somatic/07_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic/08_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic/09_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic/10_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic/11_lollipop_plot.png",
+
         #details="analysis/cohort_report/somatic/01_details.yaml",
     params:
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
@@ -258,7 +272,7 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
 #DEPRECATED
 rule cohort_report_somatic_mutationPlot:
