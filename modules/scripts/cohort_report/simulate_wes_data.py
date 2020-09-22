@@ -6,6 +6,7 @@ import sys
 
 import random
 import json
+import base64
 import math
 
 from optparse import OptionParser
@@ -88,14 +89,22 @@ def generateRunName():
     sample = random.randint(0,1000)
     return "%s_s%s" % (center, sample)
 
-_maf_dir = "pilot2/somatic/maf"
+_maf_dir = "pilot2/somatic/maf/raw_data"
 _maf_files = list(filter(lambda p: p.endswith(".filter.maf"), os.listdir(_maf_dir)))
+
+def encodeMafBase64(maf_file):
+    """Encode the maf file to base64"""
+    f = open(maf_file)
+    s = f.read()
+    s_byte = s.encode('utf-8')
+    s_b64 = base64.b64encode(s_byte).decode('utf-8')
+    return s_b64
 
 def generateSomatic():
     """returns a dictionary of simulated somatic fields
     TODO: trinucleotide_matrix, filtered_vcf_file
     """
-    filtered_maf_file = os.path.abspath(os.path.join(_maf_dir, random.choice(_maf_files)))
+    filtered_maf_file = encodeMafBase64(os.path.abspath(os.path.join(_maf_dir, random.choice(_maf_files))))
     snp = round(random.gauss(1000, 150)) #mean 1k, stdev 150
     insert = random.randint(5, 100)
     delete = random.randint(10, 100)

@@ -9,6 +9,7 @@ import json
 import numpy as np
 import gzip
 import subprocess
+import base64
 from optparse import OptionParser
 
 #Attribs to read in
@@ -56,16 +57,10 @@ def main():
 
     out = gzip.open(options.output, 'wb')
     for maf in [r['filtered_maf_file'] for r in runs]:
-        f = open(maf)
-        out.write(bytes(f.read(), 'utf-8'))
-        f.close()
+        #NOTE: we don't need to add .decode('utf-8') to end of base64 call b/c
+        #GZIP takes in bytes, not strings
+        out.write(base64.b64decode(maf))
     out.close()
-    # mafs = [r['filtered_maf_file'] for r in runs]
-    # cmd = "cat %s | gzip > %s" % (" ".join(mafs), options.output)
-    # #cmd = "gzip -c %s > %s" % (" ".join(mafs), options.output)
-    # #subprocess.run(cmd.split(" "))
-    # output, err = subprocess.Popen(cmd.split(" "), #stdout=subprocess.PIPE,
-    #                                stderr=subprocess.PIPE).communicate()
 
 if __name__ == '__main__':
     main()
