@@ -1,0 +1,11 @@
+gs://lens_bucket2/wes_automator/CTTTP03T1_00/analysis/clonality/CTTTP03T1.00/CTTTP03T1.00_genome_view.pdf
+gs://lens_bucket2/wes_automator/CTTTP03T1_00_noContigs/analysis/clonality/CTTTP03T1.00/CTTTP03T1.00_genome_view.pdf
+gs://lens_bucket2/wes_automator/CTTTP05T1_00/analysis/clonality/CTTTP05T1.00/CTTTP05T1.00_genome_view.pdf
+gs://lens_bucket2/wes_automator/fast_full_test_mda-r1-pt1_results/analysis/clonality/CTTTP07T1.00/CTTTP07T1.00_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-002/analysis/clonality/Pt-13240-002_run/Pt-13240-002_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-002/attic/analysis/analysis/clonality/Pt-13240-002_run/Pt-13240-002_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-002/attic/analysis/clonality/Pt-13240-002_run/Pt-13240-002_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-005/analysis/clonality/Pt-13240-005_run/Pt-13240-005_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-006/analysis/clonality/Pt-13240-006_run/Pt-13240-006_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-008/analysis/clonality/Pt-13240-008_run/Pt-13240-008_run_genome_view.pdf
+gs://lens_bucket2/wes_automator/wes-auto-sachet-pt-13240-011/analysis/clonality/Pt-13240-011_run/Pt-13240-011_run_genome_view.pdf
