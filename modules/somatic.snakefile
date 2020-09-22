@@ -98,95 +98,40 @@ def somatic_getNTumor_recal_bai(wildcards):
     sample = somatic_runsHelper(wildcards, 1)[0]
     return "analysis/align/%s/%s_recalibrated.bam.bai" % (sample,sample)
 
-def somatic_tnsnv_targets(wildcards):
+def somatic_helper_targets(wildcards, caller):
     ls = []
     for run in config['runs']:
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.vcf.gz" % (run,run))    
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.vcf.gz" % (run,run))
+        ls.append("analysis/somatic/%s/%s_%s.output.vcf.gz" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.vcf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.vcf.gz" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.exons.vcf.gz" % (run,run, caller))
         #next 3 for filter.maf/pdf
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.filter.stats.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_%s.filter.vep.vcf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.maf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.pdf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.stats.txt" % (run,run, caller))
         #next 2 for mutation load
-        ls.append("analysis/somatic/%s/%s_tnsnv.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.mutationload.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_%s.output.exon.maf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.mutationload.txt" % (run,run, caller))
         #next 2 for circos
-        ls.append("analysis/somatic/%s/%s_tnsnv.indel.circos.txt" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnsnv.snp.circos.txt" % (run,run))
+        ls.append("analysis/somatic/%s/%s_%s.indel.circos.txt" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.snp.circos.txt" % (run,run, caller))
 
-        ls.append("analysis/somatic/%s/%s_tnsnv_somatic_SNV_summaries.csv" % (run,run))
+        ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run,run, caller))
         for center in center_targets:
-            ls.append("analysis/somatic/%s/%s_tnsnv.filter.exons.%s.vcf.gz" % (run,run,center))
-    ls.append("analysis/somatic/somatic_mutation_summaries.tnsnv.csv")
-    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnsnv.csv")
-    return ls
+            ls.append("analysis/somatic/%s/%s_%s.filter.exons.%s.vcf.gz" % (run,run,center, caller))
+    ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
 
-def somatic_tnhaplotyper2_targets(wildcards):
-    ls = []
-    for run in config['runs']:
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.vcf.gz" % (run,run))
-        #next 3 for filter.maf/pdf
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.stats.txt" % (run,run))
-        #next 2 for mutation load
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.mutationload.txt" % (run,run))
-        #next 2 for circos
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.indel.circos.txt" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnhaplotyper2.snp.circos.txt" % (run,run))
-        ls.append("analysis/somatic/%s/%s_s_tnhaplotyper2_somatic_SNV_summaries.csv" % (run,run))
-        for center in center_targets:
-            ls.append("analysis/somatic/%s/%s_tnhaplotyper2.filter.exons.%s.vcf.gz" % (run,run,center))
-    ls.append("analysis/somatic/somatic_mutation_summaries.tnhaplotyper2.csv")
-    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnhaplotyper2.csv")
-    return ls
-
-def somatic_tnscope_targets(wildcards):
-    ls = []
-    for run in config['runs']:
-        ls.append("analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.vcf.gz" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.vcf.gz" % (run,run))
-        #next 3 for filter.maf/pdf
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.vep.vcf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.pdf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.filter.stats.txt" % (run,run))
-        #next 2 for mutation load
-        ls.append("analysis/somatic/%s/%s_tnscope.output.exon.maf" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.mutationload.txt" % (run,run))
-        #next 2 for circos
-        ls.append("analysis/somatic/%s/%s_tnscope.indel.circos.txt" % (run,run))
-        ls.append("analysis/somatic/%s/%s_tnscope.snp.circos.txt" % (run,run))
-
-        ls.append("analysis/somatic/%s/%s_tnscope_somatic_SNV_summaries.csv" % (run,run))
-        for center in center_targets:
-            ls.append("analysis/somatic/%s/%s_tnscope.filter.exons.%s.vcf.gz" % (run,run,center))
-    ls.append("analysis/somatic/somatic_mutation_summaries.tnscope.csv")
-    ls.append("analysis/somatic/somatic_functional_annot_summaries.tnscope.csv")
+    #json files
+    ls.append("analysis/report/json/somatic/%s_%s.filtered_maf.json" % (run, caller))
     return ls
 
 def somatic_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
-    if 'somatic_caller' in config:
-        if config['somatic_caller'] == 'tnsnv':
-            ls = somatic_tnsnv_targets(wildcards)
-        elif config['somatic_caller'] == 'tnscope':
-            ls = somatic_tnscope_targets(wildcards)
-        else: #default
-            ls = somatic_tnhaplotyper2_targets(wildcards)
-    else: #default
-        ls = somatic_tnhaplotyper2_targets(wildcards)
+    caller = config.get('somatic_caller', 'tnscope')
+    ls = somatic_helper_targets(wildcards, caller)
 
     #output file map
     for run in config['runs']:
@@ -494,3 +439,18 @@ rule summarize_processSNPcircos:
         "benchmarks/somatic/summarize_processSNPcircos.{run}.{caller}.txt"
     shell:
         "cidc_wes/modules/scripts/somatic_processSNP.py -m {input} > {output}"
+
+rule somatic_json_filtered_maf:
+    """json encode the filtered maf file; write out the filtered maf file as
+    base64 string"""
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
+    output:
+        "analysis/report/json/somatic/{run}_{caller}.filtered_maf.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/{run}_{caller}.somatic_json_filtered_maf.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_filtered_maf.py -r {params.run} -f {input} -o {output}"
