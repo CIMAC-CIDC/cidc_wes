@@ -34,12 +34,13 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic/04_vaf.png")
     ls.append("analysis/cohort_report/somatic/05_tcga_comparison.png")
     ls.append("analysis/cohort_report/somatic/06_somatic_interactions.png")
+    ls.append("analysis/cohort_report/somatic/07_variants_oncoplot_oncoplot.plotly")
 
-    ls.append("analysis/cohort_report/somatic/07_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/08_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/09_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/10_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/11_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/20_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/21_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/22_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/23_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/24_lollipop_plot.png")
 
     # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
     # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
@@ -259,11 +260,11 @@ rule cohort_report_somatic_mafTools:
         tcga="analysis/cohort_report/somatic/05_tcga_comparison.png",
         interact="analysis/cohort_report/somatic/06_somatic_interactions.png",
 
-        lolli01= "analysis/cohort_report/somatic/07_lollipop_plot.png",
-        lolli02= "analysis/cohort_report/somatic/08_lollipop_plot.png",
-        lolli03= "analysis/cohort_report/somatic/09_lollipop_plot.png",
-        lolli04= "analysis/cohort_report/somatic/10_lollipop_plot.png",
-        lolli05= "analysis/cohort_report/somatic/11_lollipop_plot.png",
+        lolli01= "analysis/cohort_report/somatic/20_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic/21_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic/22_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic/23_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic/24_lollipop_plot.png",
 
         #details="analysis/cohort_report/somatic/01_details.yaml",
     params:
@@ -274,47 +275,24 @@ rule cohort_report_somatic_mafTools:
     shell:
         """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
-#DEPRECATED
-rule cohort_report_somatic_mutationPlot:
-    """Generate the mutation summary plot for the report"""
+rule cohort_report_somatic_variants_oncoplot:
+    """Generate the variants based oncoplot for the report"""
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/somatic/01_mutation_summary_bar.plotly",
-        details="analysis/cohort_report/somatic/01_details.yaml",
+        csv="analysis/cohort_report/somatic/07_variants_oncoplot_oncoplot.plotly",
+        details="analysis/cohort_report/somatic/07_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
+        caption="""caption: 'Oncoplot of shared somatic variants'""",
+        plot_options = yaml_dump({'plotly': {'top_ngenes':25, 'colors': ['#b5b5b5', '#8c7ae6']}}),
     message:
-        "REPORT: creating mutation plot for somatic section"
+        "REPORT: creating variants based oncoplot for somatic section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticMutationPlot.py -f {params.files} -o {output.csv}"""
-
-#DEPRECATED
-rule cohort_report_somatic_summary_table:
-    """Generate the somatic summary table for the report"""
-    input:
-        cohort_report_inputFn
-    output:
-        csv="analysis/cohort_report/somatic/02_somatic_summary_table.mqc",
-        ss="analysis/cohort_report/somatic/somatic_summary.json",
-        titv="analysis/cohort_report/somatic/ti_tv.json",
-        tmb="analysis/cohort_report/somatic/tmb.json",
-        func="analysis/cohort_report/somatic/functional_summary.json",
-        #...other json here
-        #details="analysis/cohort_report/data_quality/02_details.yaml",
-    params:
-        files = lambda wildcards,input: " -f ".join(input),
-        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        #plot_options = "cpswitch: False",
-    message:
-        "REPORT: creating somatic summary table for somatic section"
-    group: "cohort_report"
-    shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_somatic_somaticSummaryTable.py -f {params.files} -o {output.csv} -j {output.ss} -k {output.titv} -l {output.tmb} -m {output.func}"""
+        """echo "{params.caption}" >> {output.details} && 
+          echo "{params.plot_options}" >> {output.details} && 
+        cidc_wes/modules/scripts/cohort_report/cr_somatic_variantOncoplot.py -f {params.files} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_HLA_table:
