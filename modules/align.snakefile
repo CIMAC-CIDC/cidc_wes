@@ -14,6 +14,7 @@ def align_targets(wildcards):
         ls.append("analysis/align/%s/%s.sorted.dedup.bam.bai" % (sample,sample))
         #Output file mapper
         ls.append("analysis/align/%s/%s.align.output.yaml" % (sample,sample))
+        ls.append("analysis/report/json/align/%s.mapping.json" % sample)
     ls.append("analysis/align/mapping.csv")
     return ls
 
@@ -212,3 +213,15 @@ rule dedupSortedUniqueBam:
         "benchmarks/align/{sample}/{sample}.dedupSortedUniqueBam.txt"
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
+
+rule align_json_mapping:
+    """encode sample mapping stats as json"""
+    input:
+        "analysis/align/{sample}/{sample}_mapping.txt"
+    output:
+        "analysis/report/json/align/{sample}.mapping.json"
+    group: "align"
+    benchmark:
+        "benchmarks/align/{sample}.align_json_mapping.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_align_mapping.py -f {input} -o {output}"
