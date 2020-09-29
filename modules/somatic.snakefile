@@ -235,9 +235,8 @@ rule vcfVEP:
 rule vcf2maf:
     """General rule to convert the different vcf files into maf"""
     input:
-        #NOTE: EVEN though this looks strange, it's correct
-        #the vcf is needed as input so vcf2maf won't try to run vep again
-        vcf="analysis/somatic/{run}/{run}_{caller}.{type}.vcf",
+        #NOTE: in vcf2maf.pl 1.6.18+ we can pass inhibit-vep which will
+        #skip calling vep on the file
         vep="analysis/somatic/{run}/{run}_{caller}.{type}.vep.vcf",
     output:
         "analysis/somatic/{run}/{run}_{caller}.{type}.maf"
@@ -257,7 +256,7 @@ rule vcf2maf:
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     shell:
-        """vcf2maf.pl --input-vcf {input} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} 2> {log}"""
+        """vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
 
 
 rule mutationSignature:
