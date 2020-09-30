@@ -36,7 +36,11 @@ def report_targets(wildcards):
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
-    
+
+    #HLA json
+    for sample in config['samples']:
+        ls.append("analysis/report/json/hla/%s.hla.json")
+        
     for run in config['runs']:
         ls.append("analysis/report/somatic_variants/08_%s_lego_plot.png" % run)
     return ls
@@ -384,6 +388,30 @@ rule report_neoantigens_neoantigen_list:
         details= "analysis/report/neoantigens/02_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
+###############################################################################
+def report_json_hla_inputFn(wildcards):
+    """if neoantigen_run_classII = True 
+    Returns the path to the optitype and xhla results
+    ELSE just optitype results"""
+    sample = wildcards.sample
+    ls = ["analysis/optitype/%s/%s_result.tsv" % (sample, sample)]
+    if config.get('neoantigen_run_classII', None):
+        ls.append("analysis/xhla/%s/report-%s-hla.json" % (sample, sample))
+    return ls
+
+rule report_json_hla:
+    """encode sample hla alleles as json"""
+    input:
+        report_json_hla_inputFn
+    output:
+        "analysis/report/json/hla/{sample}.hla.json"
+    params:
+        optitype = lambda wildcards, input: input[0],
+        xhla = lambda wildcards, input: input[1] if len(input) > 1 else "",
+    group: "report"
+    shell:
+        "cidc_wes/modules/scripts/json_report_hla.py -p {params.optitype} -x {params.xhla} -o {output}"
+
 ###############################################################################
 rule report_copy_runInfoFiles:
     input:
