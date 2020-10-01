@@ -8,6 +8,12 @@ import json
 from optparse import OptionParser
 
 
+def strToInt(s):
+    """Some of these fields are reported as >500--just return 500 in that case"""
+    if ">" in s:
+        s = s[1:]
+    return int(s)
+
 def parseFile(gc_file):
     """Reads in a _gc_metrics.txt file- 4th col"""
     f = open(gc_file)
@@ -15,11 +21,11 @@ def parseFile(gc_file):
     l = f.readline().strip().split()
     tmp = dict(zip(hdr, l))
 
-    ret = {'total_reads': tmp['total'], 'mean_depth': tmp['mean'],
-           'median_depth': tmp['granular_median'],
-           'q1_depth': tmp['granular_Q1'],
-           'q3_depth': tmp['granular_Q3'],
-           'percent_bases_gt_50': tmp['%_bases_above_50']}
+    ret = {'total_reads': int(tmp['total']), 'mean_depth': float(tmp['mean']),
+           'median_depth': strToInt(tmp['granular_median']),
+           'q1_depth': strToInt(tmp['granular_Q1']),
+           'q3_depth': strToInt(tmp['granular_Q3']),
+           'percent_bases_gt_50': float(tmp['%_bases_above_50'])}
     
     #print(ret)
     f.close()

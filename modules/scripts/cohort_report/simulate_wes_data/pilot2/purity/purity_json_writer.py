@@ -16,9 +16,9 @@ def parseFile(in_file):
     l = f.readline().strip().split()
     tmp = dict(zip(hdr, l))
 
-    ret = {'purity': tmp['purity'],
-           'plodiy': tmp['ploidy'],
-           'dipLogR': tmp['dipLogR']}
+    ret = {'purity': float(tmp['purity']),
+           'ploidy': float(tmp['ploidy']),
+           'dipLogR': float(tmp['dipLogR'])}
     #print(ret)
     f.close()
     return ret

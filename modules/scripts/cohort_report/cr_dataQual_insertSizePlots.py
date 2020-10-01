@@ -90,7 +90,7 @@ def main():
     #Where the first col, X represents the x vals, and the other cols repr
     #the Y-vals from each sample (at point x)
     samples = getCols(runs, "insert_size")
-        
+
     #MAIN output.tsv
     out = open(options.output, "w")
     hdr = ['X']
@@ -98,7 +98,10 @@ def main():
     out.write("%s\n" % ",".join(hdr))
 
     #The X axis for insert size runs from 2 to N inclusive
-    xaxis = [i+2 for (i, val) in enumerate(samples[0][1])]
+    #find min len
+    lens = list(map(lambda s: len(s[1]), samples))
+    minLen = min(lens)
+    xaxis = [i+2 for i in range(minLen - 2)]
     #print(xaxis)
     for (i,xval) in enumerate(xaxis):
         row = [str(xval)]

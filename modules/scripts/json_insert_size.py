@@ -19,7 +19,7 @@ def parseFile(in_file):
     for l in f:
         if l.strip():
             tmp = l.strip().split("\t")
-            ls.append(tmp[1]) #grab 2nd col
+            ls.append(int(tmp[1])) #grab 2nd col
     f.close()
     return ls
 

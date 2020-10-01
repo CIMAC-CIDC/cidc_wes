@@ -15,11 +15,11 @@ def parseFile(in_file):
     l = f.readline().strip().split()
     tmp = dict(zip(hdr, l))
 
-    ret = {'total_reads': tmp['total'], 'mean_depth': tmp['mean'],
-           'median_depth': tmp['granular_median'],
-           'q1_depth': tmp['granular_Q1'],
-           'q3_depth': tmp['granular_Q3'],
-           'percent_bases_gt_50': tmp['%_bases_above_50']}
+    ret = {'total_reads': int(tmp['total']), 'mean_depth': float(tmp['mean']),
+           'median_depth': strToInt(tmp['granular_median']),
+           'q1_depth': strToInt(tmp['granular_Q1']),
+           'q3_depth': strToInt(tmp['granular_Q3']),
+           'percent_bases_gt_50': float(tmp['%_bases_above_50'])}
 
     #print(ret)
     f.close()

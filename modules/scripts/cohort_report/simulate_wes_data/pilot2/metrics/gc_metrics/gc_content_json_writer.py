@@ -18,7 +18,7 @@ def parseGCContent(gc_file):
     for l in f:
         if l.strip():
             tmp = l.strip().split("\t")
-            ls.append(tmp[3]) #grab 4th col
+            ls.append(int(tmp[4])) #grab 5th col
     f.close()
     return ls
 

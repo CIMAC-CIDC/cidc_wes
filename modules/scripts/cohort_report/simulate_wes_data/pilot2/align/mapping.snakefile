@@ -2,7 +2,7 @@ def targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("json/%s.coverage.json" % run)
+        ls.append("json/%s.mapping.json" % run)
     return ls
 
 def getRuns(config):
@@ -35,7 +35,7 @@ rule mapping_json:
     input:
         unpack(getFiles)
     output:
-        "json/{run}.coverage.json"
+        "json/{run}.mapping.json"
     params:
         run = lambda wildcards: wildcards.run
     shell:
