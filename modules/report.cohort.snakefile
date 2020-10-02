@@ -251,7 +251,8 @@ rule cohort_report_somatic_makeCohort:
 rule cohort_report_somatic_mafTools:
     """Generate the mafTools plots for the report"""
     input:
-        "analysis/cohort_report/somatic/cohort.maf.gz"
+        mafs="analysis/cohort_report/somatic/cohort.maf.gz",
+        cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
     output:
         summary="analysis/cohort_report/somatic/01_somatic_variants_summary.png",
         onco="analysis/cohort_report/somatic/02_oncoplot.png",
@@ -273,7 +274,7 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
 rule cohort_report_somatic_variants_oncoplot:
     """Generate the variants based oncoplot for the report"""
