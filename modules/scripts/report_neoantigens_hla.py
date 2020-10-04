@@ -35,25 +35,27 @@ def parseXHLA(xhla_f):
 def main():
     usage = "USAGE: %prog -n [optitype/xhla result file for normal] -t [optitype/xhla result file for tumor] -s [sample names, normal first] -o [output tsv file]"
     optparser = OptionParser(usage=usage)
-    optparser.add_option("-n", "--normal", help="hla result file normal")
-    optparser.add_option("-t", "--tumor", help="hla result file tumor")
+    optparser.add_option("-n", "--normal_opti", help="hla result file normal")
+    optparser.add_option("-m", "--normal_xhla", help="hla result file normal")
+    optparser.add_option("-t", "--tumor_opti", help="hla result file tumor")
+    optparser.add_option("-u", "--tumor_xhla", help="hla result file tumor")
     optparser.add_option("-s", "--names", help="comma separated sample names, normal first")
     optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.normal or not options.tumor or not options.names or not options.output:
+    if not options.normal_opti or not options.tumor_opti or not options.names or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
-    normal_files = options.normal.split(",") if ',' in options.normal else [options.normal]
-    tumor_files = options.tumor.split(",") if ',' in options.tumor else [options.tumor]
+    #normal_files = options.normal.split(",") if ',' in options.normal else [options.normal]
+    #tumor_files = options.tumor.split(",") if ',' in options.tumor else [options.tumor]
     samples = options.names.split(",")
 
-    normal_classI = parseOptitype(normal_files[0])
-    normal_classII = parseXHLA(normal_files[1]) if len(normal_files) > 1 else None
+    normal_classI = parseOptitype(options.normal_opti)
+    normal_classII = parseXHLA(options.normal_xhla) if options.normal_xhla else None
 
-    tumor_classI = parseOptitype(tumor_files[0])
-    tumor_classII = parseXHLA(tumor_files[1]) if len(tumor_files) > 1 else None
+    tumor_classI = parseOptitype(options.tumor_opti)
+    tumor_classII = parseXHLA(options.tumor_xhla) if options.tumor_xhla else None
 
     out = open(options.output,"w")
     hdr = ["Sample", "A1", "A2", "B1", "B2", "C1", "C2"]

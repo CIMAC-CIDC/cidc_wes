@@ -15,10 +15,10 @@ def metrics_targets(wildcards):
 	ls.append("analysis/metrics/%s/%s_metrics.pdf" % (sample,sample))
 
         #JSON files
-	ls.append("analysis/report/json/gc_content/%s.gc.json" % sample)
-        ls.append("analysis/report/json/insert_size/%s.insert_size.json" % sample)
-        ls.append("analysis/report/json/coverage/%s.coverage.json" % sample)
-        ls.append("analysis/report/json/mean_quality/%s.mean_quality.json" % sample)
+	#ls.append("analysis/report/json/gc_content/%s.gc.json" % sample)
+        #ls.append("analysis/report/json/insert_size/%s.insert_size.json" % sample)
+        #ls.append("analysis/report/json/coverage/%s.coverage.json" % sample)
+        #ls.append("analysis/report/json/mean_quality/%s.mean_quality.json" % sample)
     #coverage metrics summaries
     ls.append("analysis/metrics/all_sample_summaries.txt")
     return ls
@@ -94,54 +94,101 @@ rule metrics_collect_target_summaries:
     shell:
         "cidc_wes/modules/scripts/metrics_collect_target_summaries.py -f {params.cov_files} -a {params.align_files} > {output}"
 
+def metric_getTumorNormal(wildcards):
+    run = wildcards.run
+    nrm = config['runs'][run][0]
+    tmr = config['runs'][run][1]
+    return (tmr, nrm)
+
+def metrics_json_gc_contentInputFn(wildcards):
+    (tmr, nrm) = metric_getTumorNormal(wildcards)
+    tmp = {}
+    tmp['tumor'] = "analysis/metrics/%s/%s_gc_metrics.txt" % (tmr, tmr)
+    tmp['normal'] = "analysis/metrics/%s/%s_gc_metrics.txt" % (nrm, nrm)
+    #print(tmp)
+    return tmp
+
 rule metrics_json_gc_content:
     """jsonify the GC content contained in {sample}/{sample}_gc_metrics.txt
     """
     input:
-        "analysis/metrics/{sample}/{sample}_gc_metrics.txt",
+        unpack(metrics_json_gc_contentInputFn)
+    params:
+        run = lambda wildcards: wildcards.run
     output:
-        "analysis/report/json/gc_content/{sample}.gc.json"
+        "analysis/report/json/gc_content/{run}.gc_content.json"
     group: "metrics"
     benchmark:
-        "benchmarks/metrics/{sample}.metrics_json_gc_content.txt"
+        "benchmarks/metrics/{run}.metrics_json_gc_content.txt"
     shell:
-        "cidc_wes/modules/scripts/json_gc_content.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_gc_content.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"
+
+def metrics_json_insert_sizeInputFn(wildcards):
+    (tmr, nrm) = metric_getTumorNormal(wildcards)
+    tmp = {}
+    tmp['tumor'] = "analysis/metrics/%s/%s_is_metrics.txt" % (tmr, tmr)
+    tmp['normal'] = "analysis/metrics/%s/%s_is_metrics.txt" % (nrm, nrm)
+    #print(tmp)
+    return tmp
 
 rule metrics_json_insert_size:
     """jsonify the insert size contained in {sample}/{sample}_is_metrics.txt
     """
     input:
-        "analysis/metrics/{sample}/{sample}_is_metrics.txt",
+        unpack(metrics_json_insert_sizeInputFn)
+    params:
+        run = lambda wildcards: wildcards.run
     output:
-        "analysis/report/json/insert_size/{sample}.insert_size.json"
+        "analysis/report/json/insert_size/{run}.insert_size.json"
     group: "metrics"
     benchmark:
-        "benchmarks/metrics/{sample}.metrics_json_insert_size.txt"
+        "benchmarks/metrics/{run}.metrics_json_insert_size.txt"
     shell:
-        "cidc_wes/modules/scripts/json_insert_size.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_insert_size.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"
+
+def metrics_json_coverageInputFn(wildcards):
+    (tmr, nrm) = metric_getTumorNormal(wildcards)
+    tmp = {}
+    tmp['tumor'] = "analysis/metrics/%s/%s_coverage_metrics.sample_summary.txt" % (tmr, tmr)
+    tmp['normal'] = "analysis/metrics/%s/%s_coverage_metrics.sample_summary.txt" % (nrm, nrm)
+    #print(tmp)
+    return tmp
 
 rule metrics_json_coverage:
     """jsonify the coverage contained in {sample}/{sample}_coverage_metrics.sample_summary.txt
     """
     input:
-        "analysis/metrics/{sample}/{sample}_coverage_metrics.sample_summary.txt", 
+        unpack(metrics_json_coverageInputFn)
+    params:
+        run = lambda wildcards: wildcards.run
     output:
-        "analysis/report/json/coverage/{sample}.coverage.json"
+        "analysis/report/json/coverage/{run}.coverage.json"
     group: "metrics"
     benchmark:
-        "benchmarks/metrics/{sample}.metrics_json_coverage.txt"
+        "benchmarks/metrics/{run}.metrics_json_coverage.txt"
     shell:
-        "cidc_wes/modules/scripts/json_coverage.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_coverage.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"
+
+def metrics_json_mean_qualityInputFn(wildcards):
+    (tmr, nrm) = metric_getTumorNormal(wildcards)
+    tmp = {}
+    tmp['tumor'] = "analysis/metrics/%s/%s_mq_metrics.txt" % (tmr, tmr)
+    tmp['normal'] = "analysis/metrics/%s/%s_mq_metrics.txt" % (nrm, nrm)
+    #print(tmp)
+    return tmp
 
 rule metrics_json_mean_quality:
     """jsonify the mean quality contained in {sample}/{sample}_mq_metrics.txt
     """
     input:
-        "analysis/metrics/{sample}/{sample}_mq_metrics.txt", 
+        unpack(metrics_json_mean_qualityInputFn)
+    params:
+        run = lambda wildcards: wildcards.run
     output:
-        "analysis/report/json/mean_quality/{sample}.mean_quality.json"
+        "analysis/report/json/mean_quality/{run}.mean_quality.json"
     group: "metrics"
     benchmark:
-        "benchmarks/metrics/{sample}.metrics_json_mean_quality.txt"
+        "benchmarks/metrics/{run}.metrics_json_mean_quality.txt"
     shell:
-        "cidc_wes/modules/scripts/json_mean_quality.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_mean_quality.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"
+

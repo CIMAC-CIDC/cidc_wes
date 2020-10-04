@@ -280,3 +280,17 @@ rule pyclone_parallelCoordinates_plot:
     shell:
         "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type parallel_coordinates --max_clusters 100"
 
+rule clonality_json:
+    """jsonify the tumor cloanlity
+    """
+    input:
+        "analysis/clonality/{run}/{run}_table.tsv"
+    output:
+        "analysis/report/json/clonality/{run}.clonality.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "clonality"
+    benchmark:
+        "benchmarks/clonality/{run}.clonality_json.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_clonality.py -r {params.run} -f {input} -o {output}"

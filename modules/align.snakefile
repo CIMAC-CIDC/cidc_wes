@@ -14,7 +14,7 @@ def align_targets(wildcards):
         ls.append("analysis/align/%s/%s.sorted.dedup.bam.bai" % (sample,sample))
         #Output file mapper
         ls.append("analysis/align/%s/%s.align.output.yaml" % (sample,sample))
-        ls.append("analysis/report/json/align/%s.mapping.json" % sample)
+
     ls.append("analysis/align/mapping.csv")
     return ls
 
@@ -214,14 +214,27 @@ rule dedupSortedUniqueBam:
     shell:
         """{params.index1}/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bamm}"""
 
+def align_json_mappingInputFn(wildcards):
+    run = wildcards.run
+    nrm = config['runs'][run][0]
+    tmr = config['runs'][run][1]
+
+    tmp = {}
+    tmp['tumor'] = "analysis/align/%s/%s_mapping.txt" % (tmr, tmr)
+    tmp['normal'] = "analysis/align/%s/%s_mapping.txt" % (nrm, nrm)
+    #print(tmp)
+    return tmp
+
 rule align_json_mapping:
     """encode sample mapping stats as json"""
     input:
-        "analysis/align/{sample}/{sample}_mapping.txt"
+        unpack(align_json_mappingInputFn)
+    params:
+        run = lambda wildcards: wildcards.run
     output:
-        "analysis/report/json/align/{sample}.mapping.json"
+        "analysis/report/json/align/{run}.mapping.json"
     group: "align"
     benchmark:
-        "benchmarks/align/{sample}.align_json_mapping.txt"
+        "benchmarks/align/{run}.align_json_mapping.txt"
     shell:
-        "cidc_wes/modules/scripts/json_align_mapping.py -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_align_mapping.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"

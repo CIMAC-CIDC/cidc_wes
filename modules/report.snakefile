@@ -36,10 +36,6 @@ def report_targets(wildcards):
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
-
-    #HLA json
-    for sample in config['samples']:
-        ls.append("analysis/report/json/hla/%s.hla.json")
         
     for run in config['runs']:
         ls.append("analysis/report/somatic_variants/08_%s_lego_plot.png" % run)
@@ -345,33 +341,31 @@ def report_neoantigens_HLAInputFn(wildcards):
     run = config['runs'][runName]
     normal = run[0]
     tumor = run[1]
-    ls = []
+
+    tmp = {}
     if config.get('neoantigen_run_classII'):
-        #optitype and xhla results
-        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
-               "analysis/xhla/%s/report-%s-hla.json" % (normal, normal),
-              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor),
-               "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)]
+        tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
+        tmp['normal_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (normal, normal)
+        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
+        tmp['tumor_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)
     else:
         #optitype only
-        ls = ["analysis/optitype/%s/%s_result.tsv" % (normal, normal),
-              "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)]
-    return ls
+        tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
+        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
+    return tmp
 
 rule report_neoantigens_HLA:
     """report HLA type"""
     input:
-        report_neoantigens_HLAInputFn
+        unpack(report_neoantigens_HLAInputFn)
     params:
-        normal = lambda wildcards, input: ",".join(input[:2]) if len(input) > 2 else input[0],
-        tumor = lambda wildcards, input: ",".join(input[2:4]) if len(input) > 2 else input[1],
         names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
     output:
         tsv="analysis/report/neoantigens/01_HLA_results.tsv",
         details="analysis/report/neoantigens/01_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {params.normal} -t {params.tumor} -s {params.names} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {input.normal_opti} -m {input.normal_xhla} -t {input.tumor_opti} -u {input.tumor_xhla} -s {params.names} -o {output.tsv}"""
 
 def report_neoantigens_neoantigen_listInputFn(wildcards):
     run = list(config['runs'].keys())[0]
@@ -389,28 +383,18 @@ rule report_neoantigens_neoantigen_list:
     shell:
         """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
 ###############################################################################
-def report_json_hla_inputFn(wildcards):
-    """if neoantigen_run_classII = True 
-    Returns the path to the optitype and xhla results
-    ELSE just optitype results"""
-    sample = wildcards.sample
-    ls = ["analysis/optitype/%s/%s_result.tsv" % (sample, sample)]
-    if config.get('neoantigen_run_classII', None):
-        ls.append("analysis/xhla/%s/report-%s-hla.json" % (sample, sample))
-    return ls
 
 rule report_json_hla:
     """encode sample hla alleles as json"""
     input:
-        report_json_hla_inputFn
+        unpack(report_neoantigens_HLAInputFn)
     output:
-        "analysis/report/json/hla/{sample}.hla.json"
+        "analysis/report/json/hla/{run}.hla.json"
     params:
-        optitype = lambda wildcards, input: input[0],
-        xhla = lambda wildcards, input: input[1] if len(input) > 1 else "",
+        run = lambda wildcards: wildcards.run
     group: "report"
     shell:
-        "cidc_wes/modules/scripts/json_report_hla.py -p {params.optitype} -x {params.xhla} -o {output}"
+        "cidc_wes/modules/scripts/json_report_hla.py -r {params.run} -n {input.normal_opti} -m {input.normal_xhla} -t {input.tumor_opti} -u {input.tumor_xhla} -o {output}"
 
 ###############################################################################
 rule report_copy_runInfoFiles:
@@ -423,6 +407,34 @@ rule report_copy_runInfoFiles:
     shell:
         """cp {input.config} {output.conf} &&
         cp {input.metasheet} {output.meta}"""
+
+def getJsonFiles(wildcards):
+    """Will return a list of the run's json files"""
+    run = wildcards.run
+    caller = config.get("somatic_caller", "tnscope")
+    tmp = {}
+    tmp['mapping'] = "analysis/report/json/align/%s.mapping.json" % run
+    tmp['coverage'] = "analysis/report/json/coverage/%s.coverage.json" % run
+    tmp['gc_content'] = "analysis/report/json/gc_content/%s.gc_content.json" % run
+    tmp['insert_size'] = "analysis/report/json/insert_size/%s.insert_size.json" % run
+    tmp['mean_quality'] = "analysis/report/json/mean_quality/%s.mean_quality.json" % run
+    tmp['hla'] = "analysis/report/json/hla/%s.hla.json" % run
+    tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
+    tmp['somatic'] = "analysis/report/json/somatic/%s_%s.filtered_maf.json" % (run, caller)
+    tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
+    return tmp
+
+rule report_generate_json:
+    input:
+        unpack(getJsonFiles)
+    params:
+        run = lambda wildcards: wildcards.run
+    output:
+        #NOTE: CANNOT name this {run}.json otherwise snakemake will have
+        #trouble ressolving the wildcard
+        "analysis/report/json/{run}.wes.json"
+    shell:
+        """cidc_wes/modules/scripts/json_stitcher.py -r {params.run} -m {input.mapping} -c {input.coverage} -g {input.gc_content} -i {input.insert_size} -q {input.mean_quality} -j {input.hla} -p {input.purity} -s {input.somatic} -t {input.clonality} -o {output}"""
 
 ###############################################################################
 rule report_auto_render:

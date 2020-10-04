@@ -146,7 +146,7 @@ rule purityplots_postprocessing:
         "Rscript --vanilla cidc_wes/modules/scripts/facets_plots.R {input} {params.output_dir} {params.name}"
 
 rule purity_json:
-    """jsonify the mean quality contained in {sample}/{sample}_mq_metrics.txt
+    """jsonify the purity/plodiy/diplogr
     """
     input:
         "analysis/purity/{run}/{run}.optimalpurityvalue.txt", 
@@ -154,7 +154,7 @@ rule purity_json:
         "analysis/report/json/purity/{run}.purity.json"
     params:
         run = lambda wildcards: wildcards.run
-    group: "metrics"
+    group: "purity"
     benchmark:
         "benchmarks/purity/{run}.purity_json.txt"
     shell:
