@@ -1,0 +1,7 @@
+broad-Run1-pt3-FF: {tumor: R1-3-F, normal: R1-3-N}
+broad-Run1-pt8-FF: {tumor: R1-8-F, normal: R1-8-N}
+
+mocha2-Run1-pt1-FF: {tumor: mocha-Run1-pt1-FF-Tumor, normal: mocha-Run1-pt1-Normal}
+mocha2-Run1-pt3-FF: {tumor: mocha-Run1-pt3-FF-Tumor, normal: mocha-Run1-pt3-Normal}
+mocha2-Run1-pt5-FF: {tumor: mocha-Run1-pt5-FF-Tumor, normal: mocha-Run1-pt5-Normal}
+mocha2-Run1-pt8-FF: {tumor: mocha-Run1-pt8-FF-Tumor, normal: mocha-Run1-pt8-Normal}
