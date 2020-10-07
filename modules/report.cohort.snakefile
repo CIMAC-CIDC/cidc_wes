@@ -35,12 +35,14 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic/05_tcga_comparison.png")
     ls.append("analysis/cohort_report/somatic/06_somatic_interactions.png")
     ls.append("analysis/cohort_report/somatic/07_variants_oncoplot_oncoplot.plotly")
-
-    ls.append("analysis/cohort_report/somatic/20_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/21_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/22_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/23_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/24_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/10_lollipop_plots.csv")
+    
+    ls.append("analysis/cohort_report/somatic/plots/20_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/plots/21_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/plots/22_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/plots/23_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/plots/24_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic/plots/25_lollipop_plot.png")
 
     # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
     # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
@@ -261,11 +263,12 @@ rule cohort_report_somatic_mafTools:
         tcga="analysis/cohort_report/somatic/05_tcga_comparison.png",
         interact="analysis/cohort_report/somatic/06_somatic_interactions.png",
 
-        lolli01= "analysis/cohort_report/somatic/20_lollipop_plot.png",
-        lolli02= "analysis/cohort_report/somatic/21_lollipop_plot.png",
-        lolli03= "analysis/cohort_report/somatic/22_lollipop_plot.png",
-        lolli04= "analysis/cohort_report/somatic/23_lollipop_plot.png",
-        lolli05= "analysis/cohort_report/somatic/24_lollipop_plot.png",
+        lolli01= "analysis/cohort_report/somatic/plots/20_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic/plots/21_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic/plots/22_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic/plots/23_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic/plots/24_lollipop_plot.png",
+        lolli06= "analysis/cohort_report/somatic/plots/25_lollipop_plot.png",
 
         #details="analysis/cohort_report/somatic/01_details.yaml",
     params:
@@ -274,8 +277,27 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05} {output.lolli06}"""
 
+rule cohort_report_somatic_lollipop_table:
+    """Generate the table of lollipop plots"""
+    input:
+        lolli01= "analysis/cohort_report/somatic/plots/20_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic/plots/21_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic/plots/22_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic/plots/23_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic/plots/24_lollipop_plot.png",
+        lolli06= "analysis/cohort_report/somatic/plots/25_lollipop_plot.png",
+    output:
+        csv = "analysis/cohort_report/somatic/10_lollipop_plots.csv",
+        details="analysis/cohort_report/somatic/10_details.yaml",
+    params:
+        caption="""caption: 'This table shows lollipop plots for the top 6 cancer driving genes.  The first row shows the top 3 genes while the second row shows genes 4 through 6.'""",
+        report_path = "analysis/cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} &&      
+        cidc_wes/modules/scripts/cohort_report/cr_somatic_lollipop_table.py -f {input.lolli01} -f {input.lolli02} -f {input.lolli03} -f {input.lolli04} -f {input.lolli05} -f {input.lolli06} -r {params.report_path} -o {output}"""
+    
 rule cohort_report_somatic_variants_oncoplot:
     """Generate the variants based oncoplot for the report"""
     input:
