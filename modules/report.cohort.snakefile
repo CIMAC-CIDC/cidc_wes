@@ -51,10 +51,10 @@ def cohort_report_targets(wildcards):
     # ls.append("analysis/cohort_report/somatic/tmb.json")
     # ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
-    #Neoantigen
-    ls.append("analysis/cohort_report/neoantigen/01_HLA_table.dt")
-    ls.append("analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly")
-    ls.append("analysis/cohort_report/neoantigen/03_HLA_oncoplot_oncoplot.plotly")
+    #HLA
+    ls.append("analysis/cohort_report/HLA/01_HLA_table.dt")
+    ls.append("analysis/cohort_report/HLA/02_HLA_histogram_histogram.plotly")
+    ls.append("analysis/cohort_report/HLA/03_HLA_oncoplot_oncoplot.plotly")
     #ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
     #ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
     return ls
@@ -323,53 +323,53 @@ rule cohort_report_HLA_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.dt",
-        details="analysis/cohort_report/neoantigen/01_details.yaml",
+        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
+        details="analysis/cohort_report/HLA/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         table_options = "table_title: 'HLA Alleles Table'",
     message:
-        "REPORT: creating HLA table for neoantigen section"
+        "REPORT: creating HLA table for HLA section"
     group: "cohort_report"
     shell:
         """echo "{params.table_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaTable.py -f {params.files} -o {output.csv}"""
-
-rule cohort_report_HLA_oncoplot:
-    """Generate the HLA histogram plot for the report"""
-    input:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.dt",
-    output:
-        csv="analysis/cohort_report/neoantigen/03_HLA_oncoplot_oncoplot.plotly",
-        details="analysis/cohort_report/neoantigen/03_details.yaml",
-    params:
-        caption="""caption: 'Oncoplot of shared HLA-alleles'""",
-        plot_options = yaml_dump({'plotly': {'top_ngenes':15, 'colors': ['#b5b5b5', '#e84118']}}),
-    message:
-        "REPORT: creating HLA oncoplot for neoantigen section"
-    group: "cohort_report"
-    shell:
-        """echo "{params.caption}" >> {output.details} && 
-          echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaOncoplot.py -f {input} -o {output.csv}"""
+        cidc_wes/modules/scripts/cohort_report/cr_hla_hlaTable.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_HLA_histogram:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/neoantigen/01_HLA_table.dt",
+        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
     output:
-        csv="analysis/cohort_report/neoantigen/02_HLA_histogram_histogram.plotly",
-        details="analysis/cohort_report/neoantigen/02_details.yaml",
+        csv="analysis/cohort_report/HLA/02_HLA_histogram_histogram.plotly",
+        details="analysis/cohort_report/HLA/02_details.yaml",
     params:
         caption="""caption: 'Histogram of shared HLA-alleles'""",
         plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
     message:
-        "REPORT: creating HLA table for neoantigen section"
+        "REPORT: creating HLA table for HLA section"
     group: "cohort_report"
     shell:
         """echo "{params.caption}" >> {output.details} && 
         echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_neoantigen_hlaHistogram.py -f {input} -o {output.csv}"""
+        cidc_wes/modules/scripts/cohort_report/cr_hla_hlaHistogram.py -f {input} -o {output.csv}"""
+
+rule cohort_report_HLA_oncoplot:
+    """Generate the HLA histogram plot for the report"""
+    input:
+        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
+    output:
+        csv="analysis/cohort_report/HLA/03_HLA_oncoplot_oncoplot.plotly",
+        details="analysis/cohort_report/HLA/03_details.yaml",
+    params:
+        caption="""caption: 'Oncoplot of shared HLA-alleles'""",
+        plot_options = yaml_dump({'plotly': {'top_ngenes':15, 'colors': ['#b5b5b5', '#e84118']}}),
+    message:
+        "REPORT: creating HLA oncoplot for HLA section"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && 
+          echo "{params.plot_options}" >> {output.details} && 
+        cidc_wes/modules/scripts/cohort_report/cr_hla_hlaOncoplot.py -f {input} -o {output.csv}"""
 
 #DEPRECATED
 rule cohort_report_neoantigen_table:
@@ -399,7 +399,7 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number', 'somatic', 'neoantigen']),
+        sections_list=",".join(['data_quality','copy_number', 'somatic', 'HLA']),
         title="WES Cohort Report",
         #sections_list=",".join(['somatic'])
     output:
