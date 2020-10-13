@@ -100,6 +100,7 @@ def somatic_getNTumor_recal_bai(wildcards):
 
 def somatic_helper_targets(wildcards, caller):
     ls = []
+    center = config.get('cimac_center', 'broad') #Try to get center, default broad
     for run in config['runs']:
         ls.append("analysis/somatic/%s/%s_%s.output.vcf.gz" % (run,run, caller))
         ls.append("analysis/somatic/%s/%s_%s.filter.vcf" % (run,run, caller))
@@ -118,8 +119,7 @@ def somatic_helper_targets(wildcards, caller):
         ls.append("analysis/somatic/%s/%s_%s.snp.circos.txt" % (run,run, caller))
 
         ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run,run, caller))
-        for center in center_targets:
-            ls.append("analysis/somatic/%s/%s_%s.filter.exons.%s.vcf.gz" % (run,run,center, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.exons.%s.vcf.gz" % (run,run, caller, center))
     ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
     ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
 
@@ -145,9 +145,9 @@ def somatic_output_files(wildcards):
     """
     ls = []
     caller = config['somatic_caller']
+    center = config.get('cimac_center', 'broad')
     run = wildcards.run
-    for center in sorted(center_targets):
-        ls.append("analysis/somatic/%s/%s_%s.filter.exons.%s.vcf.gz" % (run,run,caller,center))
+    ls.append("analysis/somatic/%s/%s_%s.filter.exons.%s.vcf.gz" % (run,run,caller,center))
     ls.append("analysis/somatic/%s/%s_%s.filter.maf" % (run,run,caller))
     ls.append("analysis/somatic/%s/%s_%s.filter.vcf" % (run,run,caller))
     ls.append("analysis/somatic/%s/%s_%s.output.maf" % (run,run,caller))
