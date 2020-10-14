@@ -155,6 +155,11 @@ def somatic_output_files(wildcards):
     
     return ls
 
+def somatic_make_file_map_makeKeys():
+    """Makes the keys for the yaml_writer"""
+    center = config.get('cimac_center', 'broad')
+    tmp = " -k ".join(['%s_filter_exon' % center,'filter_maf','filter_vcf','output_maf','output_vcf']),
+
 rule somatic_make_file_map:
     input:
         somatic_output_files
@@ -162,7 +167,8 @@ rule somatic_make_file_map:
         "analysis/somatic/{run}/{run}.somatic.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['broad_filter_exons','mda_filter_exons','mocha_filter_exon','filter_maf','filter_vcf','output_maf','output_vcf']),
+        #keys = " -k ".join(['broad_filter_exons','mda_filter_exons','mocha_filter_exon','filter_maf','filter_vcf','output_maf','output_vcf']),
+        keys = lambda wildcards: somatic_make_file_map_makeKeys(),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
         "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
