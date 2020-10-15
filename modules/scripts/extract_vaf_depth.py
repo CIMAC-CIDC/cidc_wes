@@ -35,8 +35,9 @@ def main():
         attribs = tmp[9].split(":") #take tumor column
         x = attribs[1].split(",") #take the 2nd attrib and split the parts
         depth = int(x[0]) + int(x[1])
-        vaf = float(int(x[1])/depth)
-        print("%s\t%s" % (vaf, depth))
+        if depth > 0:
+            vaf = float(int(x[1])/depth)
+            print("%s\t%s" % (vaf, depth))
     f.close()
 
 if __name__=='__main__':
