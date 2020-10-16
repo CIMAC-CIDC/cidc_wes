@@ -116,7 +116,7 @@ rule cohort_report_coverage_table:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        plot_options = yaml_dump({'plotly': {'x':'Percent Bases >50', 'hover_data':['Q1 Depth','Mean Depth','Median Depth','Q3 Depth']}}),
+        plot_options = yaml_dump({'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
     message:
         "REPORT: creating coverage table for data_quality section"
     group: "cohort_report"
