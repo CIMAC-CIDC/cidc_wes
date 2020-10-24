@@ -311,7 +311,7 @@ rule report_copy_number_purity:
         report_copy_number_purityInputFn
     params:
         run = list(config['runs'].keys())[0],
-        cap = """caption: 'This table reports the estimated tumor purity, ploidy, and diploid log ratio of the sample.'"""
+        cap = """caption: 'This table reports the estimated tumor purity and ploidy of the sample.'"""
     output:
         tsv="analysis/report/copy_number/03_tumor_purity.tsv",
         details="analysis/report/copy_number/03_details.yaml",

@@ -31,9 +31,9 @@ def main():
     f.close()
     
     out = open(options.output, 'w')
-    out.write("%s\n" % "\t".join(['Run','Tumor Purity', 'Tumor Ploidy', 'dipLogR']))
-    out.write("%s\n" % "\t".join([options.run,pp(tmp['purity']),
-                                  pp(tmp['ploidy']), pp(tmp['dipLogR'])]))
+    out.write("%s\n" % "\t".join(['Run','Tumor Purity', 'Tumor Ploidy']))
+    out.write("%s\n" % "\t".join([options.run, pp(tmp['purity']),
+                                  pp(tmp['ploidy'])]))
     out.close()
     
 if __name__ == '__main__':

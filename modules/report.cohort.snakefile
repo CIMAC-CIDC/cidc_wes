@@ -224,7 +224,7 @@ rule cohort_report_copynumber_ploidy:
         details="analysis/cohort_report/copy_number/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        attr=" -a ".join(["ploidy","dipLogR"]),
+        attr="ploidy", #-a ".join(["ploidy"]),
         plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
     message:
         "REPORT: creating copynumber table for copy_number section"
