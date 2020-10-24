@@ -7,20 +7,20 @@ def report_targets(wildcards):
     #META
     ls.append("analysis/report/config.yaml")
     ls.append("analysis/report/metasheet.csv")
-    ls.append("analysis/report/wes_meta/02_wes_run_version.tsv")
-    ls.append("analysis/report/wes_meta/01_wes_software_versions.tsv")
+    ls.append("analysis/report/WES_Meta/02_WES_Run_Version.tsv")
+    ls.append("analysis/report/WES_Meta/01_WES_Software_Versions.tsv")
     #Data Quality
     ls.append("analysis/report/data_quality/01_mapping_stats.tsv")
-    ls.append("analysis/report/data_quality/02_qc_plots.tsv")
+    ls.append("analysis/report/data_quality/02_QC_Plots.tsv")
     ls.append("analysis/report/data_quality/03_coverage_statistics.tsv")
     #SOMATIC
     ls.append("analysis/report/somatic_variants/03_summary_table.csv")
     ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
-    ls.append("analysis/report/somatic_variants/05_SNV_statistics.csv")
+    ls.append("analysis/report/somatic_variants/05_SNV_Statistics.csv")
 
     #somatic - MAFtools plots---REALLY need to reorganize the somatic section
     ls.append("analysis/report/somatic_variants/01_somatic_variants_summary.png")
-    ls.append("analysis/report/somatic_variants/02_vaf.png")
+    ls.append("analysis/report/somatic_variants/02_VAF.png")
 
     ls.append("analysis/report/somatic_variants/09_lollipop_plot.png")
     ls.append("analysis/report/somatic_variants/10_lollipop_plot.png")
@@ -29,16 +29,16 @@ def report_targets(wildcards):
 
     ls.append("analysis/report/somatic_variants/07_tumor_mutational_burden.tsv")
     #COPYNUMBER
-    ls.append("analysis/report/copy_number/01_copynumber_plot.png")
+    ls.append("analysis/report/copy_number/01_copy_number_plot.png")
     ls.append("analysis/report/copy_number/02_tumor_clonality.tsv")
     ls.append("analysis/report/copy_number/03_tumor_purity.tsv")
     
     #NEOANTIGEN
-    ls.append("analysis/report/neoantigens/01_HLA_results.tsv")
+    ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
         
     for run in config['runs']:
-        ls.append("analysis/report/somatic_variants/08_%s_lego_plot.png" % run)
+        ls.append("analysis/report/somatic_variants/08_%s_Lego_Plot.png" % run)
     return ls
 
 rule report_all:
@@ -56,7 +56,7 @@ rule report_meta_version:
         config="config.yaml",
         wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report/wes_meta/02_wes_run_version.tsv"
+         "analysis/report/WES_Meta/02_WES_Run_Version.tsv"
     message:
         "REPORT: creating WES version table"
     group: "report"
@@ -71,7 +71,7 @@ rule report_meta_software:
         config="config.yaml",
         wes_versions="cidc_wes/static/wes_versions.yaml"
     output:
-         "analysis/report/wes_meta/01_wes_software_versions.tsv"
+         "analysis/report/WES_Meta/01_WES_Software_Versions.tsv"
     message:
         "REPORT: creating WES software table"
     group: "report"
@@ -174,7 +174,7 @@ rule report_data_quality_plots_table:
     input:
         report_data_quality_plotsInputFn
     output:
-        tsv="analysis/report/data_quality/02_qc_plots.tsv",
+        tsv="analysis/report/data_quality/02_QC_Plots.tsv",
         details = "analysis/report/data_quality/02_details.yaml",
     params:
         normal= lambda wildcards: report_getTumorNormal(0),
@@ -210,7 +210,7 @@ rule report_somatic_variants_maftoolsPlots:
         report_maftoolsPlotsInput
     output:
         summary="analysis/report/somatic_variants/01_somatic_variants_summary.png",
-        vaf="analysis/report/somatic_variants/02_vaf.png",
+        vaf="analysis/report/somatic_variants/02_VAF.png",
         lolli1="analysis/report/somatic_variants/09_lollipop_plot.png",
         lolli2="analysis/report/somatic_variants/10_lollipop_plot.png",
         lolli3="analysis/report/somatic_variants/11_lollipop_plot.png",
@@ -241,7 +241,7 @@ rule report_somatic_variants_summary_tbls:
     output:
         csv1 = "analysis/report/somatic_variants/03_summary_table.csv",
         csv2 = "analysis/report/somatic_variants/04_functional_annotation.csv",
-        csv3 = "analysis/report/somatic_variants/05_SNV_statistics.csv",
+        csv3 = "analysis/report/somatic_variants/05_SNV_Statistics.csv",
         details3 = "analysis/report/somatic_variants/04_details.yaml",
     shell:
         """echo "{params.cap3}" >> {output.details3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
@@ -256,7 +256,7 @@ rule report_somatic_variants_legoPlot:
     input:
         report_legoPlotInputFn
     output:
-        png = "analysis/report/somatic_variants/08_{run}_lego_plot.png",
+        png = "analysis/report/somatic_variants/08_{run}_Lego_Plot.png",
     params:
         page = 1,
     message:
@@ -296,7 +296,7 @@ rule report_copynumberPlot:
         pg = 3,
         subcap = """subcaption: 'Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)'"""
     output:
-        png="analysis/report/copy_number/01_copynumber_plot.png",
+        png="analysis/report/copy_number/01_copy_number_plot.png",
         details="analysis/report/copy_number/01_details.yaml",
     shell:
         """echo "{params.subcap}" >> {output.details} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
@@ -362,7 +362,7 @@ rule report_neoantigens_HLA:
         names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
     output:
-        tsv="analysis/report/neoantigens/01_HLA_results.tsv",
+        tsv="analysis/report/neoantigens/01_HLA_Results.tsv",
         details="analysis/report/neoantigens/01_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {input.normal_opti} -m {input.normal_xhla} -t {input.tumor_opti} -u {input.tumor_xhla} -s {params.names} -o {output.tsv}"""
@@ -445,7 +445,7 @@ rule report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
-        sections_list=",".join(['wes_meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
+        sections_list=",".join(['WES_Meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
     output:
         "analysis/report/report.html"
     message:

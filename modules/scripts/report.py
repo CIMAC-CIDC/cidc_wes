@@ -47,9 +47,21 @@ def parseYaml(yaml_file):
 
 def prettyprint(s, toUpper=False):
     """Given a string, replaces underscores with spaces and uppercases the 
-    first letter of each word"""
+    first letter of each word ONLY if the string is composed of lowercased 
+    letters.  If the param, toUpper is given then s.upper is returned.
+    
+    Examples: "data_quality" -> "Data Quality"
+    "copy_number_123" -> "Copy Number 123"
+
+    "My_own_title" -> "My own title"
+    "Hla" -> "Hla"
+    """
     s = s.replace("_"," ")
-    s = s.upper() if toUpper else s.title()
+
+    if toUpper:
+        s = s.upper()
+    elif s.islower(): #ONLY modify IF all letters are lowercase
+        s = s.title()
     return s
 
 def is_image_file(s):
@@ -100,7 +112,7 @@ def buildTable(tsv_file, details, jinjaEnv, cssClass=""):
     index = fname.split("_")[0] #first save index
     fname = "_".join(fname.split("_")[1:])
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
-    title = prettyprint(fname, True)
+    title = prettyprint(fname)
 
     vals = {'id': fname, 'title':title, 'class': cssClass}
 
@@ -135,7 +147,7 @@ def buildPlot(png_file, details, jinjaEnv):
     index = fname.split("_")[0] #first save index
     fname = "_".join(fname.split("_")[1:])
     path = "/".join(png_file.split("/")[:-1]) #drop the file
-    title = prettyprint(fname, True)
+    title = prettyprint(fname)
 
     #make the png file path REALITIVE to the report.html file!
     png_file_relative = "/".join(png_file.split("/")[2:])
@@ -229,7 +241,7 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
     index = fname.split("_")[0] #first save index
     plot_type = fname.split("_")[-1] #and plot type
     fname = "_".join(fname.split("_")[1:-1])
-    title = prettyprint(fname, True)
+    title = prettyprint(fname)
 
     #check to see if we're adding a module or a plot
     if plot_type in _mqc_plot_types:
@@ -340,7 +352,7 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     index = fname.split("_")[0] #first save index
     plot_type = fname.split("_")[-1] #and plot type
     fname = "_".join(fname.split("_")[1:-1])
-    title = prettyprint(fname, True)
+    title = prettyprint(fname)
 
     #Pickout the proper mqc plot module to use
     plot = getattr(px, plot_type) if plot_type != "oncoplot" else oncoplot

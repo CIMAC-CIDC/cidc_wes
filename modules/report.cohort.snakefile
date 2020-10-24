@@ -17,7 +17,7 @@ def cohort_report_targets(wildcards):
     #Data Quality
     ls.append("analysis/cohort_report/data_quality/01_mapping_bar.plotly")
     ls.append("analysis/cohort_report/data_quality/02_coverage_bar.plotly")
-    ls.append("analysis/cohort_report/data_quality/03_gc_content_line.plotly")
+    ls.append("analysis/cohort_report/data_quality/03_GC_Content_line.plotly")
     ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plotly")
     ls.append("analysis/cohort_report/data_quality/05_mean_quality_bar.plotly")
 
@@ -27,22 +27,22 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/copy_number/03_ploidy_line.plotly")
 
     #Somatic
-    ls.append("analysis/cohort_report/somatic/cohort.maf.gz")
-    ls.append("analysis/cohort_report/somatic/01_somatic_variants_summary.png")
-    ls.append("analysis/cohort_report/somatic/02_oncoplot.png")
-    ls.append("analysis/cohort_report/somatic/03_Ti-Tv.png")
-    ls.append("analysis/cohort_report/somatic/04_vaf.png")
-    ls.append("analysis/cohort_report/somatic/05_tcga_comparison.png")
-    ls.append("analysis/cohort_report/somatic/06_somatic_interactions.png")
-    ls.append("analysis/cohort_report/somatic/07_variants_oncoplot_oncoplot.plotly")
-    ls.append("analysis/cohort_report/somatic/10_lollipop_plots.csv")
+    ls.append("analysis/cohort_report/somatic_variants/cohort.maf.gz")
+    ls.append("analysis/cohort_report/somatic_variants/01_somatic_variants_summary.png")
+    ls.append("analysis/cohort_report/somatic_variants/02_oncoplot.png")
+    ls.append("analysis/cohort_report/somatic_variants/03_Ti-Tv.png")
+    ls.append("analysis/cohort_report/somatic_variants/04_VAF.png")
+    ls.append("analysis/cohort_report/somatic_variants/05_TCGA_comparison.png")
+    ls.append("analysis/cohort_report/somatic_variants/06_somatic_interactions.png")
+    ls.append("analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly")
+    ls.append("analysis/cohort_report/somatic_variants/10_lollipop_plots.csv")
     
-    ls.append("analysis/cohort_report/somatic/plots/20_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/plots/21_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/plots/22_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/plots/23_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/plots/24_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic/plots/25_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png")
+    ls.append("analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png")
 
     # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
     # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
@@ -130,7 +130,7 @@ rule cohort_report_data_quality_gc_plots:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/03_gc_content_line.plotly",
+        csv="analysis/cohort_report/data_quality/03_GC_Content_line.plotly",
         details="analysis/cohort_report/data_quality/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -240,7 +240,7 @@ rule cohort_report_somatic_makeCohort:
         cohort_report_inputFn
     output:
         #LATER: make this a temp file
-        gz=temp("analysis/cohort_report/somatic/cohort.maf.gz"),
+        gz=temp("analysis/cohort_report/somatic_variants/cohort.maf.gz"),
     params:
         files = lambda wildcards,input: " -f ".join(input),
     message:
@@ -253,24 +253,24 @@ rule cohort_report_somatic_makeCohort:
 rule cohort_report_somatic_mafTools:
     """Generate the mafTools plots for the report"""
     input:
-        mafs="analysis/cohort_report/somatic/cohort.maf.gz",
+        mafs="analysis/cohort_report/somatic_variants/cohort.maf.gz",
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
     output:
-        summary="analysis/cohort_report/somatic/01_somatic_variants_summary.png",
-        onco="analysis/cohort_report/somatic/02_oncoplot.png",
-        titv="analysis/cohort_report/somatic/03_Ti-Tv.png",
-        vaf="analysis/cohort_report/somatic/04_vaf.png",
-        tcga="analysis/cohort_report/somatic/05_tcga_comparison.png",
-        interact="analysis/cohort_report/somatic/06_somatic_interactions.png",
+        summary="analysis/cohort_report/somatic_variants/01_somatic_variants_summary.png",
+        onco="analysis/cohort_report/somatic_variants/02_oncoplot.png",
+        titv="analysis/cohort_report/somatic_variants/03_Ti-Tv.png",
+        vaf="analysis/cohort_report/somatic_variants/04_VAF.png",
+        tcga="analysis/cohort_report/somatic_variants/05_TCGA_comparison.png",
+        interact="analysis/cohort_report/somatic_variants/06_somatic_interactions.png",
 
-        lolli01= "analysis/cohort_report/somatic/plots/20_lollipop_plot.png",
-        lolli02= "analysis/cohort_report/somatic/plots/21_lollipop_plot.png",
-        lolli03= "analysis/cohort_report/somatic/plots/22_lollipop_plot.png",
-        lolli04= "analysis/cohort_report/somatic/plots/23_lollipop_plot.png",
-        lolli05= "analysis/cohort_report/somatic/plots/24_lollipop_plot.png",
-        lolli06= "analysis/cohort_report/somatic/plots/25_lollipop_plot.png",
+        lolli01= "analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
+        lolli06= "analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png",
 
-        #details="analysis/cohort_report/somatic/01_details.yaml",
+        #details="analysis/cohort_report/somatic_variants/01_details.yaml",
     params:
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
     message:
@@ -282,15 +282,15 @@ rule cohort_report_somatic_mafTools:
 rule cohort_report_somatic_lollipop_table:
     """Generate the table of lollipop plots"""
     input:
-        lolli01= "analysis/cohort_report/somatic/plots/20_lollipop_plot.png",
-        lolli02= "analysis/cohort_report/somatic/plots/21_lollipop_plot.png",
-        lolli03= "analysis/cohort_report/somatic/plots/22_lollipop_plot.png",
-        lolli04= "analysis/cohort_report/somatic/plots/23_lollipop_plot.png",
-        lolli05= "analysis/cohort_report/somatic/plots/24_lollipop_plot.png",
-        lolli06= "analysis/cohort_report/somatic/plots/25_lollipop_plot.png",
+        lolli01= "analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png",
+        lolli02= "analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png",
+        lolli03= "analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png",
+        lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
+        lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
+        lolli06= "analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png",
     output:
-        csv = "analysis/cohort_report/somatic/10_lollipop_plots.csv",
-        details="analysis/cohort_report/somatic/10_details.yaml",
+        csv = "analysis/cohort_report/somatic_variants/10_lollipop_plots.csv",
+        details="analysis/cohort_report/somatic_variants/10_details.yaml",
     params:
         caption="""caption: 'This table shows lollipop plots for the top 6 cancer driving genes.  The first row shows the top 3 genes while the second row shows genes 4 through 6.'""",
         report_path = "analysis/cohort_report"
@@ -303,8 +303,8 @@ rule cohort_report_somatic_variants_oncoplot:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/somatic/07_variants_oncoplot_oncoplot.plotly",
-        details="analysis/cohort_report/somatic/07_details.yaml",
+        csv="analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly",
+        details="analysis/cohort_report/somatic_variants/07_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'Oncoplot of shared somatic variants'""",
@@ -399,9 +399,9 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number', 'somatic', 'HLA']),
+        sections_list=",".join(['data_quality','copy_number', 'somatic_variants', 'HLA']),
         title="WES Cohort Report",
-        #sections_list=",".join(['somatic'])
+        #sections_list=",".join(['somatic_variants'])
     output:
         "analysis/cohort_report/report.html"
     message:
