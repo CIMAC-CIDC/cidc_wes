@@ -14,20 +14,23 @@ def report_targets(wildcards):
     ls.append("analysis/report/data_quality/02_QC_Plots.tsv")
     ls.append("analysis/report/data_quality/03_coverage_statistics.tsv")
     #SOMATIC
-    ls.append("analysis/report/somatic_variants/03_summary_table.csv")
-    ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
-    ls.append("analysis/report/somatic_variants/05_SNV_Statistics.csv")
-
-    #somatic - MAFtools plots---REALLY need to reorganize the somatic section
     ls.append("analysis/report/somatic_variants/01_somatic_variants_summary.png")
     ls.append("analysis/report/somatic_variants/02_VAF.png")
 
-    ls.append("analysis/report/somatic_variants/09_lollipop_plot.png")
-    ls.append("analysis/report/somatic_variants/10_lollipop_plot.png")
-    ls.append("analysis/report/somatic_variants/11_lollipop_plot.png")
-    ls.append("analysis/report/somatic_variants/12_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/03_summary_table.csv")
+    ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
+    ls.append("analysis/report/somatic_variants/05_SNV_Statistics.csv")
+    ls.append("analysis/report/somatic_variants/06_tumor_mutational_burden.tsv")
+    ls.append("analysis/report/somatic_variants/07_lego_plot.png")
+    ls.append("analysis/report/somatic_variants/08_lollipop_plots.csv")
 
-    ls.append("analysis/report/somatic_variants/07_tumor_mutational_burden.tsv")
+    ls.append("analysis/report/somatic_variants/plots/20_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/plots/21_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/plots/22_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/plots/23_lollipop_plot.png")
+    ls.append("analysis/report/somatic_variants/plots/24_lollipop_plot.png")
+
+
     #COPYNUMBER
     ls.append("analysis/report/copy_number/01_copy_number_plot.png")
     ls.append("analysis/report/copy_number/02_tumor_clonality.tsv")
@@ -36,9 +39,7 @@ def report_targets(wildcards):
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
-        
-    for run in config['runs']:
-        ls.append("analysis/report/somatic_variants/08_%s_Lego_Plot.png" % run)
+
     return ls
 
 rule report_all:
@@ -211,17 +212,36 @@ rule report_somatic_variants_maftoolsPlots:
     output:
         summary="analysis/report/somatic_variants/01_somatic_variants_summary.png",
         vaf="analysis/report/somatic_variants/02_VAF.png",
-        lolli1="analysis/report/somatic_variants/09_lollipop_plot.png",
-        lolli2="analysis/report/somatic_variants/10_lollipop_plot.png",
-        lolli3="analysis/report/somatic_variants/11_lollipop_plot.png",
-        lolli4="analysis/report/somatic_variants/12_lollipop_plot.png",
+        lolli1="analysis/report/somatic_variants/plots/20_lollipop_plot.png",
+        lolli2="analysis/report/somatic_variants/plots/21_lollipop_plot.png",
+        lolli3="analysis/report/somatic_variants/plots/22_lollipop_plot.png",
+        lolli4="analysis/report/somatic_variants/plots/23_lollipop_plot.png",
+        lolli5="analysis/report/somatic_variants/plots/24_lollipop_plot.png",
     params:
         #cap3 = """caption: 'This table summarizes the number of transitions and transversions occuring within the set of SNPs.'"""
     message:
         "REPORT: creating mafTools plot for somatic section"
     group: "report"
     shell:
-        """Rscript cidc_wes/modules/scripts/report_somatic_mafPlots.R {input} {output.summary} {output.vaf} {output.lolli1} {output.lolli2} {output.lolli3} {output.lolli4}"""
+        """Rscript cidc_wes/modules/scripts/report_somatic_mafPlots.R {input} {output.summary} {output.vaf} {output.lolli1} {output.lolli2} {output.lolli3} {output.lolli4} {output.lolli5}"""
+
+rule report_somatic_variants_lollipop_table:
+    """Generate the table of lollipop plots"""
+    input:
+        lolli01= "analysis/report/somatic_variants/plots/20_lollipop_plot.png",
+        lolli02= "analysis/report/somatic_variants/plots/21_lollipop_plot.png",
+        lolli03= "analysis/report/somatic_variants/plots/22_lollipop_plot.png",
+        lolli04= "analysis/report/somatic_variants/plots/23_lollipop_plot.png",
+        lolli05= "analysis/report/somatic_variants/plots/24_lollipop_plot.png",
+    output:
+        csv = "analysis/report/somatic_variants/08_lollipop_plots.csv",
+        details="analysis/report/somatic_variants/08_details.yaml",
+    params:
+        caption="""caption: 'This table shows lollipop plots for the top 5 cancer driving genes.'""",
+        report_path = "analysis/report"
+    shell:
+        """echo "{params.caption}" >> {output.details} &&      
+        cidc_wes/modules/scripts/cohort_report/cr_somatic_lollipop_table.py -f {input.lolli01} -f {input.lolli02} -f {input.lolli03} -f {input.lolli04} -f {input.lolli05} -r {params.report_path} -o {output}"""
 
 
 def report_somatic_variants_summary_tblInputFn(wildcards):
@@ -247,7 +267,7 @@ rule report_somatic_variants_summary_tbls:
         """echo "{params.cap3}" >> {output.details3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
 
 def report_legoPlotInputFn(wildcards):
-    run = wildcards.run
+    run = list(config['runs'].keys())[0]
     caller = config['somatic_caller']
     return "analysis/somatic/%s/%s_%s.filter.pdf" % (run, run, caller)
 
@@ -256,7 +276,7 @@ rule report_somatic_variants_legoPlot:
     input:
         report_legoPlotInputFn
     output:
-        png = "analysis/report/somatic_variants/08_{run}_Lego_Plot.png",
+        png = "analysis/report/somatic_variants/07_lego_plot.png",
     params:
         page = 1,
     message:
@@ -278,8 +298,8 @@ rule report_somatic_variants_germlineCompare:
         cap = """caption: 'This table reports the tumor mutational burden (TMB) as well as the total mutational load of the normal sample, the number of mutations that they have in common, and their percent overlap.'""",
         sub = """subcaption: 'NOTE: the % overlap was calculated using the Tumor TMB as the denominator'""",
     output:
-        tsv = "analysis/report/somatic_variants/07_tumor_mutational_burden.tsv",
-        details = "analysis/report/somatic_variants/07_details.yaml",
+        tsv = "analysis/report/somatic_variants/06_tumor_mutational_burden.tsv",
+        details = "analysis/report/somatic_variants/06_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
 
