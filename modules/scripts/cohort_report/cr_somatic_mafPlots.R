@@ -1,6 +1,6 @@
 library(maftools)
 
-generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, titv_png_f, vaf_png_f, tcga_png_f, interact_png_f, lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f, lolli6_png_f) {
+generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, titv_png_f, vaf_png_f, tcga_png_f, interact_png_f, lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f) {
    png(summary_png_f);
    plotmafSummary(maf = mafs, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE);
    dev.off();
@@ -31,10 +31,11 @@ generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, 
    cncrGnList <- read.table(file=cancerGeneList_f, sep = '\t', header = TRUE);
    geneSummary <- getGeneSummary(mafs);
    topgenes <- unlist(geneSummary[,1]);
-   topCnrGenes <- head(topgenes[topgenes %in% cncrGnList$Hugo.Symbol], n=6);
+
+   lolli_f_names= c(lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f);
+   topCnrGenes <- head(topgenes[topgenes %in% cncrGnList$Hugo.Symbol], n=length(lolli_f_names));
    #print(topCnrGenes);
 
-   lolli_f_names= c(lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f, lolli6_png_f);
    i = 1;
    for (g in topCnrGenes) {
       png(lolli_f_names[i]);
@@ -60,9 +61,8 @@ arg_lolli2_png_f = args[10]
 arg_lolli3_png_f = args[11]
 arg_lolli4_png_f = args[12]
 arg_lolli5_png_f = args[13]
-arg_lolli6_png_f = args[14]
 
 mafs = read.maf(maf=arg_in)
 
 #this is starting to get ugly!
-generateMafPlots(mafs, args_geneList, arg_summary_png_f, arg_onco_png_f, arg_titv_png_f, arg_vaf_png_f, arg_tcga_png_f, arg_interact_png_f, arg_lolli1_png_f, arg_lolli2_png_f, arg_lolli3_png_f, arg_lolli4_png_f, arg_lolli5_png_f, arg_lolli6_png_f)
+generateMafPlots(mafs, args_geneList, arg_summary_png_f, arg_onco_png_f, arg_titv_png_f, arg_vaf_png_f, arg_tcga_png_f, arg_interact_png_f, arg_lolli1_png_f, arg_lolli2_png_f, arg_lolli3_png_f, arg_lolli4_png_f, arg_lolli5_png_f)

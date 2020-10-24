@@ -34,7 +34,8 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic_variants/04_VAF.png")
     ls.append("analysis/cohort_report/somatic_variants/05_TCGA_comparison.png")
     ls.append("analysis/cohort_report/somatic_variants/06_somatic_interactions.png")
-    ls.append("analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly")
+    #Removing this plot b/c it's looking strange
+    #ls.append("analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly")
     ls.append("analysis/cohort_report/somatic_variants/10_lollipop_plots.csv")
     
     ls.append("analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png")
@@ -42,7 +43,6 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png")
     ls.append("analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png")
     ls.append("analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png")
-    ls.append("analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png")
 
     # ls.append("analysis/cohort_report/somatic/01_mutation_summary_bar.plotly")
     # ls.append("analysis/cohort_report/somatic/02_somatic_summary_table.mqc")
@@ -268,7 +268,6 @@ rule cohort_report_somatic_mafTools:
         lolli03= "analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png",
         lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
         lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
-        lolli06= "analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png",
 
         #details="analysis/cohort_report/somatic_variants/01_details.yaml",
     params:
@@ -277,7 +276,7 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05} {output.lolli06}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
 rule cohort_report_somatic_lollipop_table:
     """Generate the table of lollipop plots"""
@@ -287,17 +286,17 @@ rule cohort_report_somatic_lollipop_table:
         lolli03= "analysis/cohort_report/somatic_variants/plots/22_lollipop_plot.png",
         lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
         lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
-        lolli06= "analysis/cohort_report/somatic_variants/plots/25_lollipop_plot.png",
     output:
         csv = "analysis/cohort_report/somatic_variants/10_lollipop_plots.csv",
         details="analysis/cohort_report/somatic_variants/10_details.yaml",
     params:
-        caption="""caption: 'This table shows lollipop plots for the top 6 cancer driving genes.  The first row shows the top 3 genes while the second row shows genes 4 through 6.'""",
+        caption="""caption: 'This table shows lollipop plots for the top 5 cancer driving genes.'""",
         report_path = "analysis/cohort_report"
     shell:
         """echo "{params.caption}" >> {output.details} &&      
-        cidc_wes/modules/scripts/cohort_report/cr_somatic_lollipop_table.py -f {input.lolli01} -f {input.lolli02} -f {input.lolli03} -f {input.lolli04} -f {input.lolli05} -f {input.lolli06} -r {params.report_path} -o {output}"""
-    
+        cidc_wes/modules/scripts/cohort_report/cr_somatic_lollipop_table.py -f {input.lolli01} -f {input.lolli02} -f {input.lolli03} -f {input.lolli04} -f {input.lolli05} -r {params.report_path} -o {output}"""
+
+#THIS RULE is DEPRECATED
 rule cohort_report_somatic_variants_oncoplot:
     """Generate the variants based oncoplot for the report"""
     input:
