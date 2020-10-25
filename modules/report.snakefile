@@ -38,7 +38,7 @@ def report_targets(wildcards):
     
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
-    ls.append("analysis/report/neoantigens/02_neoantigen_list.tsv")
+    ls.append("analysis/report/neoantigens/02_neoantigen_list.dt")
 
     return ls
 
@@ -398,7 +398,7 @@ rule report_neoantigens_neoantigen_list:
     params:
         cap = """caption: 'This table shows the list of predicted neoantigens.'""",
     output:
-        tsv= "analysis/report/neoantigens/02_neoantigen_list.tsv",
+        tsv= "analysis/report/neoantigens/02_neoantigen_list.dt",
         details= "analysis/report/neoantigens/02_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
