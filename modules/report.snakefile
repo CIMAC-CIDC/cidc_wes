@@ -32,9 +32,9 @@ def report_targets(wildcards):
 
 
     #COPYNUMBER
-    ls.append("analysis/report/copy_number/01_copy_number_plot.png")
-    ls.append("analysis/report/copy_number/02_tumor_clonality.tsv")
-    ls.append("analysis/report/copy_number/03_tumor_purity.tsv")
+    ls.append("analysis/report/copy_number_variation/01_copy_number_variation_plot.png")
+    ls.append("analysis/report/copy_number_variation/02_tumor_clonality.tsv")
+    ls.append("analysis/report/copy_number_variation/03_tumor_purity.tsv")
     
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
@@ -316,8 +316,8 @@ rule report_copynumberPlot:
         pg = 3,
         subcap = """subcaption: 'Genome-whide visualization of the allele-specific and absolute copy number results, and raw profile of the depth ratio and allele frequency. (ref: https://cran.r-project.org/web/packages/sequenza/vignettes/sequenza.html#plots-and-results)'"""
     output:
-        png="analysis/report/copy_number/01_copy_number_plot.png",
-        details="analysis/report/copy_number/01_details.yaml",
+        png="analysis/report/copy_number_variation/01_copy_number_variation_plot.png",
+        details="analysis/report/copy_number_variation/01_details.yaml",
     shell:
         """echo "{params.subcap}" >> {output.details} && Rscript cidc_wes/modules/scripts/wes_pdf2png.R {input} {output.png} {params.pg}"""
 
@@ -333,8 +333,8 @@ rule report_copy_number_purity:
         run = list(config['runs'].keys())[0],
         cap = """caption: 'This table reports the estimated tumor purity and ploidy of the sample.'"""
     output:
-        tsv="analysis/report/copy_number/03_tumor_purity.tsv",
-        details="analysis/report/copy_number/03_details.yaml",
+        tsv="analysis/report/copy_number_variation/03_tumor_purity.tsv",
+        details="analysis/report/copy_number_variation/03_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_purity.py -f {input} -r {params.run} -o {output.tsv}"""
 
@@ -350,8 +350,8 @@ rule report_copy_number_clonality:
         run = list(config['runs'].keys())[0],
         cap = """caption: 'This table reports the estimated tumor clonaltiy of the sample.'"""
     output:
-        tsv="analysis/report/copy_number/02_tumor_clonality.tsv",
-        details="analysis/report/copy_number/02_details.yaml",
+        tsv="analysis/report/copy_number_variation/02_tumor_clonality.tsv",
+        details="analysis/report/copy_number_variation/02_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
 
@@ -465,7 +465,7 @@ rule report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
-        sections_list=",".join(['WES_Meta','data_quality', 'copy_number','somatic_variants','neoantigens'])
+        sections_list=",".join(['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens'])
     output:
         "analysis/report/report.html"
     message:

@@ -22,9 +22,9 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/data_quality/05_mean_quality_bar.plotly")
 
     #Copynumber
-    ls.append("analysis/cohort_report/copy_number/01_clonality_bar.plotly")
-    ls.append("analysis/cohort_report/copy_number/02_purity_bar.plotly")
-    ls.append("analysis/cohort_report/copy_number/03_ploidy_line.plotly")
+    ls.append("analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly")
+    ls.append("analysis/cohort_report/copy_number_variation/02_purity_bar.plotly")
+    ls.append("analysis/cohort_report/copy_number_variation/03_ploidy_line.plotly")
 
     #Somatic
     ls.append("analysis/cohort_report/somatic_variants/cohort.maf.gz")
@@ -52,9 +52,9 @@ def cohort_report_targets(wildcards):
     # ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #HLA
-    ls.append("analysis/cohort_report/HLA/01_HLA_table.dt")
-    ls.append("analysis/cohort_report/HLA/02_HLA_histogram_histogram.plotly")
-    ls.append("analysis/cohort_report/HLA/03_HLA_oncoplot_oncoplot.plotly")
+    ls.append("analysis/cohort_report/HLA/01_HLA_Table.dt")
+    ls.append("analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly")
+    ls.append("analysis/cohort_report/HLA/03_HLA_Oncoplot_oncoplot.plotly")
     #ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
     #ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
     return ls
@@ -184,7 +184,7 @@ rule cohort_report_copynumber_clonality:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number/01_clonality_bar.plotly",
+        csv="analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly",
         #details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -192,7 +192,7 @@ rule cohort_report_copynumber_clonality:
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
         #plot_options = "cpswitch: False",
     message:
-        "REPORT: creating clonality plot for copy_number section"
+        "REPORT: creating clonality plot for copy_number_variation section"
     group: "cohort_report"
     shell:
         """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
@@ -202,14 +202,14 @@ rule cohort_report_copynumber_purity:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number/02_purity_bar.plotly",
-        details="analysis/cohort_report/copy_number/02_details.yaml",
+        csv="analysis/cohort_report/copy_number_variation/02_purity_bar.plotly",
+        details="analysis/cohort_report/copy_number_variation/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="purity",
         plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
     message:
-        "REPORT: creating copynumber table for copy_number section"
+        "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
     shell:
         """echo "{params.plot_options}" >> {output.details} &&
@@ -220,14 +220,14 @@ rule cohort_report_copynumber_ploidy:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number/03_ploidy_line.plotly",
-        details="analysis/cohort_report/copy_number/03_details.yaml",
+        csv="analysis/cohort_report/copy_number_variation/03_ploidy_line.plotly",
+        details="analysis/cohort_report/copy_number_variation/03_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="ploidy", #-a ".join(["ploidy"]),
         plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
     message:
-        "REPORT: creating copynumber table for copy_number section"
+        "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
     shell:
         """echo "{params.plot_options}" >> {output.details} &&
@@ -322,7 +322,7 @@ rule cohort_report_HLA_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
+        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
         details="analysis/cohort_report/HLA/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
@@ -337,9 +337,9 @@ rule cohort_report_HLA_table:
 rule cohort_report_HLA_histogram:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
+        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
     output:
-        csv="analysis/cohort_report/HLA/02_HLA_histogram_histogram.plotly",
+        csv="analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly",
         details="analysis/cohort_report/HLA/02_details.yaml",
     params:
         caption="""caption: 'Histogram of shared HLA-alleles'""",
@@ -355,9 +355,9 @@ rule cohort_report_HLA_histogram:
 rule cohort_report_HLA_oncoplot:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/HLA/01_HLA_table.dt",
+        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
     output:
-        csv="analysis/cohort_report/HLA/03_HLA_oncoplot_oncoplot.plotly",
+        csv="analysis/cohort_report/HLA/03_HLA_Oncoplot_oncoplot.plotly",
         details="analysis/cohort_report/HLA/03_details.yaml",
     params:
         caption="""caption: 'Oncoplot of shared HLA-alleles'""",
@@ -398,7 +398,7 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number', 'somatic_variants', 'HLA']),
+        sections_list=",".join(['data_quality','copy_number_variation', 'somatic_variants', 'HLA']),
         title="WES Cohort Report",
         #sections_list=",".join(['somatic_variants'])
     output:
