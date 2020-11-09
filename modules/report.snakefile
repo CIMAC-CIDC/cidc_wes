@@ -4,6 +4,8 @@ from yaml import dump as yaml_dump
 def report_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
+    #Take first element in runs
+    run = list(config['runs'].keys())[0]
     #META
     ls.append("analysis/report/config.yaml")
     ls.append("analysis/report/metasheet.csv")
@@ -39,6 +41,9 @@ def report_targets(wildcards):
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.dt")
+
+    #JSON
+    ls.append("analysis/report/json/%s.wes.json" % run)
 
     return ls
 
