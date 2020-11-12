@@ -12,9 +12,10 @@ rule somatic_calling_TNsnv:
         #JUST sample names - can also use the helper fns, e.g.
         normal = lambda wildcards: config['runs'][wildcards.run][0],
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
-    threads:96
+        trim_soft_clip = "--trim_soft_clip" if config.get("trim_soft_clip", False) else "",
+    threads:_somatic_threads,
     group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNsnv.txt"
     shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} --call_stats_out {output.statscall} {output.tnsnvvcf}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.corealignedbam} --algo TNsnv --tumor_sample {params.tumor} --normal_sample {params.normal} --dbsnp {params.dbsnp} {params.trim_soft_clip} --call_stats_out {output.statscall} {output.tnsnvvcf}"""

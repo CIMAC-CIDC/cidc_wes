@@ -15,8 +15,9 @@ rule somatic_calling_TNhaplotyper2:
 	#normal = lambda wildcards: getNormal_sample(wildcards)
 	normal = lambda wildcards: config['runs'][wildcards.run][0],
 	tumor = lambda wildcards: config['runs'][wildcards.run][1],
+        trim_soft_clip = "--trim_soft_clip" if config.get("trim_soft_clip", False) else "",
     threads:_somatic_threads
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper2.txt"
     shell:
-        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index}  -i {input.normalbam}  -i  {input.tumorbam}  --algo TNhaplotyper2 --pon {params.tnhaplotyper_pon}  --tumor_sample {params.tumor} --normal_sample {params.normal}   {output.tnhaplotyper2vcf}"""
+        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index}  -i {input.normalbam}  -i  {input.tumorbam}  --algo TNhaplotyper2 --pon {params.tnhaplotyper_pon}  --tumor_sample {params.tumor} --normal_sample {params.normal} {params.trim_soft_clip} {output.tnhaplotyper2vcf}"""
