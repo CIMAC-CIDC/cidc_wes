@@ -86,9 +86,11 @@ addCondaPaths_Config(config)
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
 loadRef(config)
 
-#Finally check for 'remote_path'
+#Finally check for 'remote_path' and 'expressions'
 if 'remote_path' not in config:
     config['remote_path'] = ""
+if 'expression_files' not in config:
+    config['expression_files'] = {}
 #-----------------------------------------
 
 

@@ -157,9 +157,22 @@ def parseHLA(hla_files):
     return hla
 
 def getVCF_file(wildcards):
+    """IF there is expression data available, return the expression-added VCF
+    otherwise return the neoantigen prepared vcf"""
+    
     run = wildcards.run
+    tumor_sample = config['runs'][run][1]
     caller = config.get("somatic_caller", "tnscope")
-    return "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf" % (run, run, caller)
+
+    #Default return
+    ret = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf" % (run, run, caller)
+
+    expression_files = config['expression_files']
+    
+    if expression_files.get(tumor_sample, None):
+        ret = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.rna.vcf" % (run, run, caller)
+
+    return ret
     
 
 rule neoantigen_all:
@@ -185,6 +198,43 @@ rule neoantigen_vep_annotate:
     shell:
         """vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Downstream --plugin Wildtype --dir_plugins {params.vep_plugins} --pick"""
 
+def getExpressionFile(wildcards):
+    run = wildcards.run
+    tumor_sample = config['runs'][run][1]
+    return config['expression_files'][tumor_sample]
+
+rule neoantigen_formatIds:
+    """Changes ensembl transcript ids in the salmon files from
+    ENST00000456328.2 to ENST00000456328--removing the suffix .X"""
+    input:
+        getExpressionFile,
+    output: #modified salmon expression file
+        "analysis/neoantigen/{run}/{run}.format.quant.sf"
+    params:
+        awk_cmd = "awk \'{gsub(/\\.[[:digit:]]/,\"\", $1)}1\'",
+    group: "neoantigen"
+    #conda: "../envs/somatic_vcftools.yml"
+    benchmark:
+        "benchmarks/neoantigen/{run}/{run}.neoantigen_formatiIds.txt"
+    shell:
+        """{params.awk_cmd} {input} > {output}"""
+
+rule neoantigen_expression_annotator:
+    input:
+        vcf="analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf",
+        salmon="analysis/neoantigen/{run}/{run}.format.quant.sf",
+    output:
+        "analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.rna.vcf"
+    params:
+        iid = "Name", #id col = 'Name'
+        tumorName = lambda wildcards: config['runs'][wildcards.run][1],
+        exprCol = "TPM", #expression col = 'TPM
+    group: "neoantigen"
+    #conda: ...
+    benchmark:
+        "benchmarks/neoantigen/{run}/{run}_{caller}.neoantigen_expression_annotator.txt"
+    shell:
+        """vcf-expression-annotator -i {params.iid} -s {params.tumorName} -e {params.exprCol} -o {output} {input.vcf} {input.salmon} custom transcript"""
 
 if not config.get('neoantigen_run_classII'):
     rule neoantigen_pvacseq:
