@@ -73,12 +73,9 @@ rule germline_make_file_map:
 def getTargetBed(config):
     """USES center_targets in wes.snakefile to return the path to the
     center's targets"""
-    
-    if 'cimac_center' in config and config['cimac_center'] in center_targets:
-        center = config['cimac_center']
-        return center_targets[center]
-    else:
-        return center_targets['broad']
+    center = config.get('cimac_center', 'broad')
+    targetBed = center_targets.get(center)
+    return targetBed
 
 rule germline_all:
     input:

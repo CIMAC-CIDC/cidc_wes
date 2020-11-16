@@ -6,6 +6,7 @@ _coveragemetrics_threads=16
 def coveragemetrics_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
+    center = config.get('cimac_center', 'broad') #Try get center, default broad
     for sample in config["samples"]:
     	ls.append("analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample))
         ls.append("analysis/metrics/%s/%s_coverage_metrics.sample_summary.txt" % (sample,sample))
@@ -13,9 +14,8 @@ def coveragemetrics_targets(wildcards):
         ls.append("analysis/metrics/%s/%s_target_metrics.sample_summary.txt" % (sample,sample))
         ls.append("analysis/metrics/%s/%s.coverage.output.yaml" % (sample,sample))
         
-        for center in center_targets:
-            ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
-            ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
+        ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
+        ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
     return ls
 
 def coverage_output_files(wildcards):
@@ -23,9 +23,9 @@ def coverage_output_files(wildcards):
     in the CIDC for a given sample 
     """
     ls = []
+    center = config.get('cimac_center', 'broad') #Try get center, default broad
     sample = wildcards.sample
-    for center in sorted(center_targets):
-        ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
+    ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
     ls.append("analysis/metrics/%s/%s_coverage_metrics.txt" % (sample,sample))
     ls.append("analysis/metrics/%s/%s_target_metrics.txt" % (sample,sample))
     ls.append("analysis/metrics/%s/%s_target_metrics.sample_summary.txt" % (sample,sample))
@@ -96,7 +96,7 @@ rule targets_sentieon:
         cov_thresh=50,
         #ERROR- should be set to center target bed file
         #index2=config['target_Bed_input'],
-        index2= center_targets[config.get("center", "broad")] #default to broad
+        index2= center_targets[config.get("cimac_center", "broad")] #default to broad
     threads: _coveragemetrics_threads
     group: "coverage"
     benchmark:
