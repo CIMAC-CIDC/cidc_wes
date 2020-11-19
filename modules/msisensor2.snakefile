@@ -25,7 +25,7 @@ def msisensor2_targets(wildcards):
     """ Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/msisensor2/%s/%s_msisensor" % (run,run))
+        ls.append("analysis/msisensor2/%s/%s_msisensor.txt" % (run,run))
         #output file map
         ls.append("analysis/msisensor2/%s/%s.msisensor2.output.yaml" % (run,run))
     return ls
@@ -60,9 +60,21 @@ rule msisensor2_make_file_map:
         msisensor2_output_files
     output:
         "analysis/msisensor2/{run}/{run}.msisensor2.output.yaml"
+    group: "msisensor2"
     params:
         run = lambda wildcards: wildcards.run,
         keys = " -k ".join(['msisensor2_results']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
         "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+
+rule msisensor2_copy:
+    """Rename analysis/msisensor2/{run}/{run}_msisensor as 
+    analysis/msisensor2/{run}/{run}_msisensor.txt"""
+    input:
+        "analysis/msisensor2/{run}/{run}_msisensor",
+    output:
+        "analysis/msisensor2/{run}/{run}_msisensor.txt",
+    group: "msisensor2"
+    shell:
+        "cp {input} {output}"
