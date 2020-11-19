@@ -63,6 +63,8 @@ effective_size: 30000000
 # trim_soft_clip - When performing somatic variant calling, ignore soft clipped
 # reads
 # ref: https://support.sentieon.com/manual/usages/general/#tnhaplotyper2-algorithm
+# NOTE: only supported in TNscope and TNhaplotyper2; NOT in TNsnv
+# IF TNsnv is selected as somatic_caller, then this param will be ignored
 # Default: soft clipped reads are NOT ignored
 # to turn on this feature uncomment the following line
 #
