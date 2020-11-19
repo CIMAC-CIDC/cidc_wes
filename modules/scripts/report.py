@@ -114,7 +114,8 @@ def buildTable(tsv_file, details, jinjaEnv, cssClass=""):
     path = "/".join(tsv_file.split("/")[:-1]) #drop the file
     title = prettyprint(fname)
 
-    vals = {'id': fname, 'title':title, 'class': cssClass}
+    vals = {'container': fname+'_container',
+            'id': fname, 'title':title, 'class': cssClass}
 
     #Check for a caption
     caption = details.get('caption', None)
@@ -151,7 +152,8 @@ def buildPlot(png_file, details, jinjaEnv):
 
     #make the png file path REALITIVE to the report.html file!
     png_file_relative = "/".join(png_file.split("/")[2:])
-    vals = {'title':title,
+    vals = {'id': fname,
+            'title':title,
             'png_file': png_file_relative
     }
     #Check for a caption
@@ -263,7 +265,8 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
                 
 
 
-        vals = {'title':title,
+        vals = {'id': fname,
+                'title':title,
                 'plot': html_plot,
         }
 
@@ -295,7 +298,8 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
         mqcKlass = klass()
         ret = ""
         for s in mqcKlass.sections:
-            vals = {'title': s['name'],
+            vals = {'id': s['name'],
+                    'title': s['name'],
                     'plot': s['plot'],
                     'caption': s['description']}
             ret += template.render(vals)
@@ -369,7 +373,8 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     fig.update_layout(plot_bgcolor='#f6f6f6')
     html_plot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
 
-    vals = {'title':title,
+    vals = {'id': fname,
+            'title':title,
             'plot': html_plot,
     }
 
