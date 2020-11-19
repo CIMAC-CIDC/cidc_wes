@@ -1,0 +1,31 @@
+#sidebar-wrapper {
+   display: none;
+}
+
+.container {
+   display:block!important;
+   width:100%;
+}
+
+/* Add page breaks below */
+/* NOTE: there's page-break-before, page-break-after, page-break-inside */
+#GC_Content {
+   page-break-inside: avoid;
+}
+
+#ploidy {
+   page-break-inside: avoid;
+   page-break-after: always;
+}
+
+#Ti-Tv {
+   page-break-before: always;
+}
+
+#TCGA_comparison {
+   page-break-before: always;
+}
+
+#lollipop_plots_container {
+   page-break-before: always;
+}
