@@ -65,10 +65,10 @@ rule germline_make_file_map:
         "analysis/germline/{run}/{run}.germline.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['vcfcompare']),
+        kkeys = " -k ".join(['vcfcompare']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 def getTargetBed(config):
     """USES center_targets in wes.snakefile to return the path to the

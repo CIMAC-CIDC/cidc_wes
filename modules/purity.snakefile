@@ -81,10 +81,10 @@ rule purity_make_file_map:
         "analysis/purity/{run}/{run}.purity.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['purity_results']),
+        kkeys = " -k ".join(['purity_results']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 rule purity_all:
     input:

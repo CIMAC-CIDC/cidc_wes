@@ -63,10 +63,10 @@ rule msisensor2_make_file_map:
     group: "msisensor2"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['msisensor2_results']),
+        kkeys = " -k ".join(['msisensor2_results']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 rule msisensor2_copy:
     """Rename analysis/msisensor2/{run}/{run}_msisensor as 

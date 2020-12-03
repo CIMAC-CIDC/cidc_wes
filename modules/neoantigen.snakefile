@@ -87,10 +87,10 @@ rule neoantigen_make_file_map:
         "analysis/neoantigen/{run}/{run}.neoantigen.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = lambda wildcards: " -k ".join(neoantigen_get_output_keys(wildcards)),
+        kkeys = lambda wildcards: " -k ".join(neoantigen_get_output_keys(wildcards)),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 
 def getPvacseqOut(wildcards):

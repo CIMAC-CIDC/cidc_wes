@@ -68,10 +68,10 @@ rule copynumber_make_file_map:
         "analysis/copynumber/{run}/{run}.copynumber.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['cnvcalls','cnvcalls_tn_tsv']),
+        kkeys = " -k ".join(['cnvcalls','cnvcalls_tn_tsv']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 rule copynumber_all:
     input:

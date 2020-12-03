@@ -85,10 +85,10 @@ rule recalibration_make_file_map_sample:
         "analysis/align/{sample}/{sample}.recalibration.output.yaml"
     params:
         sample = lambda wildcards: wildcards.sample,
-        keys = " -k ".join(['recalibrated_bam','recalibrated_bam_index']),
+        kkeys = " -k ".join(['recalibrated_bam','recalibrated_bam_index']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.kkeys} -f {params.files} > {output}"
 
 rule recalibration_make_file_map_run:
     input:
@@ -97,10 +97,10 @@ rule recalibration_make_file_map_run:
         "analysis/corealignments/{run}/{run}.corealignment.output.yaml"
     params:
         run = lambda wildcards: wildcards.run,
-        keys = " -k ".join(['corealigned_bam']),
+        kkeys = " -k ".join(['corealigned_bam']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 rule recalibration_all:
     input:

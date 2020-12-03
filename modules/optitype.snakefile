@@ -30,10 +30,10 @@ rule optitype_make_file_map:
         "analysis/optitype/{sample}/{sample}.optitype.output.yaml"
     params:
         sample = lambda wildcards: wildcards.sample,
-        keys = " -k ".join(['optitype_results']),
+        kkeys = " -k ".join(['optitype_results']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.kkeys} -f {params.files} > {output}"
 
 
 rule optitype_all:

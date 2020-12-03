@@ -38,10 +38,10 @@ rule coverage_make_file_map:
         "analysis/metrics/{sample}/{sample}.coverage.output.yaml"
     params:
         sample = lambda wildcards: wildcards.sample,
-        keys = " -k ".join(['center_mosdepth','coverage_metrics', 'target_metrics', 'target_metrics_summary']),
+        kkeys = " -k ".join(['center_mosdepth','coverage_metrics', 'target_metrics', 'target_metrics_summary']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.kkeys} -f {params.files} > {output}"
 
 
 rule coverage_all:

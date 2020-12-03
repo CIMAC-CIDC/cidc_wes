@@ -35,10 +35,10 @@ rule align_make_file_map:
         "analysis/align/{sample}/{sample}.align.output.yaml"
     params:
         sample = lambda wildcards: wildcards.sample,
-        keys = " -k ".join(['dedup_bam','dedup_bam_index']),
+        kkeys = " -k ".join(['dedup_bam','dedup_bam_index']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.kkeys} -f {params.files} > {output}"
     
 def align_mapping_targets(wildcards):
     """Generates just the mapping targets for rule map_all"""

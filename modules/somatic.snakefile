@@ -168,10 +168,10 @@ rule somatic_make_file_map:
     params:
         run = lambda wildcards: wildcards.run,
         #keys = " -k ".join(['broad_filter_exons','mda_filter_exons','mocha_filter_exon','filter_maf','filter_vcf','output_maf','output_vcf']),
-        keys = lambda wildcards: somatic_make_file_map_makeKeys(),
+        kkeys = lambda wildcards: somatic_make_file_map_makeKeys(),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t runs -n {params.run} -k {params.kkeys} -f {params.files} > {output}"
 
 rule somatic_all:
     input:
@@ -195,7 +195,9 @@ rule filter_raw_vcf:
         tumor=lambda wildcards: somatic_getTumor(wildcards),
         normal= lambda wildcards: somatic_getNormal(wildcards),
     group: "somatic"
-    conda: "../envs/somatic_vcftools.yml"
+    #NOTE: b/c the rule uses a run instead of a shell, snkmk doesnt allow
+    #conda env defs (next line)
+    #conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_filter_raw_vcf.txt"
     run: #DISABLES the conda env

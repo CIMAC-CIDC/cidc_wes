@@ -26,10 +26,10 @@ rule xhla_make_file_map:
         "analysis/xhla/{sample}/{sample}.xhla.output.yaml"
     params:
         sample = lambda wildcards: wildcards.sample,
-        keys = " -k ".join(['xhla_results']),
+        kkeys = " -k ".join(['xhla_results']),
         files = lambda wildcards, input: " -f ".join(input),
     shell:
-        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.keys} -f {params.files} > {output}"
+        "cidc_wes/modules/scripts/yaml_writer.py -t samples -n {params.sample} -k {params.kkeys} -f {params.files} > {output}"
 
 
 rule xhla_all:

@@ -8,11 +8,12 @@ channels:
 - defaults
 dependencies:
 #GENERAL
-- snakemake=5.4.5
+- snakemake=5.30.1
 - samtools>=1.8
 - python>=3.5.2
 #- r>=3.4.1
 - numpy
+- slacker #for slack channel logging
 
 #align_*.snakefile
 - bwa>=0.7.15
