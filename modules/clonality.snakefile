@@ -108,22 +108,25 @@ rule sequenza_multibam2seqz:
     shell:
         "{params.sequenza_bin_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
 
+def clonality_mergeChroms_helper(wildcards):
+    run = wildcards.run
+    chroms=["chr%s" % str(i) for i in range(1,23)]
+    files = " ".join(["analysis/clonality/%s/%s.seqz_%s.txt.gz" % (run, run, chrom) for chrom in chroms])
+    return files
+
 rule mergeChroms:
     input:
         "analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt"
     output:
         temp("analysis/clonality/{run}/{run}.seqz.txt.gz")
     params:
-        chroms="\t".join(["chr%s" % str(i) for i in range(1,23)]),
+        files = lambda wildcards: clonality_mergeChroms_helper(wildcards),
         name= lambda wildcards: wildcards.run,
 	gawk_cmd= "gawk \'{if (NR!=1 && $1 != \"chromosome\") {print $0}}\'" 
     benchmark:
         "benchmarks/clonality/{run}/{run}_mergeChroms.txt"
-    run:
-        files=" ".join(["analysis/clonality/%s/%s.seqz_%s.txt.gz" % (params.name, params.name, chrom) for chrom in params.chroms.split("\t")])
-	#print(params.gawk_cmd)
-        #shell("echo zcat {files} |gawk '{if (NR!=1 && $1 != \"chromosome\") {print $0}}' | bgzip > {output}")
-	shell("zcat {files} | {params.gawk_cmd} | bgzip > {output}")
+    shell:
+        "zcat {params.files} | {params.gawk_cmd} | bgzip > {output}"
 
 
 rule clonality_sequenza_binning:

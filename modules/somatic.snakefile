@@ -197,15 +197,11 @@ rule filter_raw_vcf:
     group: "somatic"
     #NOTE: b/c the rule uses a run instead of a shell, snkmk doesnt allow
     #conda env defs (next line)
-    #conda: "../envs/somatic_vcftools.yml"
+    conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_filter_raw_vcf.txt"
-    run: #DISABLES the conda env
-        #SWITCH for tnhaplotyper2 filter
-        if (wildcards.caller == "tnhaplotyper2"):
-            shell("{params.sentieon_path}/sentieon tnhapfilter --tumor_sample {params.tumor} --normal_sample {params.normal} -v {input} {output}")
-        else:
-            shell("""vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}""")
+    shell:
+        """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
 
 
 rule gunzip_vcf:
