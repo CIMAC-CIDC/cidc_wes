@@ -115,6 +115,7 @@ def level1_targets(wildcards):
     ls.extend(recalibration_targets(wildcards))
     ls.extend(germline_targets(wildcards))
     ls.extend(somatic_targets(wildcards))
+    ls.extend(rna_targets(wildcards))
     return ls
 
 def level2_sans_report(wildcards):
@@ -168,5 +169,6 @@ include: "./modules/optitype.snakefile" #...
 include: "./modules/xhla.snakefile" #....
 include: "./modules/neoantigen.snakefile"
 include: "./modules/msisensor2.snakefile"
+include: "./modules/rna.snakefile"
 include: "./modules/report.snakefile" # report module
 #include: "./modules/report.cohort.snakefile" # cohort report module

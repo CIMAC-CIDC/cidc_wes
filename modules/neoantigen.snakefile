@@ -198,6 +198,19 @@ rule neoantigen_vep_annotate:
     shell:
         """vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Downstream --plugin Wildtype --dir_plugins {params.vep_plugins} --pick"""
 
+rule neoantigen_bzipAndtabix:
+    input:
+        "analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf"
+    output:
+        gz="analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf.gz",
+        tbi="analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf.gz.tbi",
+    group: "neoantigen"
+    benchmark:
+        "benchmarks/neoantigen/{run}/{run}_{caller}.neoantigen_bzipAndtabix.txt"
+    shell:
+        "bgzip -c {input} > {output.gz} && tabix -p vcf {output.gz}"
+
+
 def getExpressionFile(wildcards):
     run = wildcards.run
     tumor_sample = config['runs'][run][1]
