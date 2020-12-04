@@ -9,7 +9,7 @@ def msisensor2_getNormalInput(wildcards):
 
 def msisensor2_getTumorInput(wildcards):
     run = config['runs'][wildcards.run]
-    tumor = run[0]
+    tumor = run[1]
     return "analysis/align/%s/%s.sorted.dedup.bam" % (tumor, tumor)
 
 def msisensor2_output_files(wildcards):
