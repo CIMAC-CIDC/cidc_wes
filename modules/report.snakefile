@@ -300,13 +300,14 @@ rule report_somatic_variants_germlineCompare:
         report_somatic_variants_germlineCompareInputFn
     params:
         run = list(config['runs'].keys())[0],
-        cap = """caption: 'This table reports the tumor mutational burden (TMB) as well as the total mutational load of the normal sample, the number of mutations that they have in common, and their percent overlap.'""",
-        sub = """subcaption: 'NOTE: the % overlap was calculated using the Tumor TMB as the denominator'""",
+        targets = center_targets[config.get('cimac_center', 'broad')],
+        cap = """caption: 'This table reports the tumor mutational burden (TMB) which is defined by total number of tumor variants normalized by the number of megabases in the targeted regions. The table also reports the total number of variants in the tumor sample and normal sample, the number of mutations that they have in common, and their percent overlap.'""",
+        sub = """subcaption: 'NOTE: the % overlap was calculated using the number of tumor variants as the denominator'""",
     output:
         tsv = "analysis/report/somatic_variants/06_tumor_mutational_burden.tsv",
         details = "analysis/report/somatic_variants/06_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -t {params.targets} -o {output.tsv}"""
 
 ###############################################################################
 def report_copynumberPlotInputFn(wildcards):

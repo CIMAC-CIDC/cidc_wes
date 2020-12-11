@@ -8,28 +8,27 @@ import math
 
 from optparse import OptionParser
 
-def millify(n):
-    """Given a large int n, returns a string representation of n in human-
-    readable form
-    ref: https://stackoverflow.com/questions/3154460/python-human-readable-large-numbers
-    """
-    millnames = ['',' K',' M',' B',' T']
-
-    n = float(n)
-    millidx = max(0,min(len(millnames)-1,
-                    int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
-
-    return '{:.1f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+def countBedBases(ffile):
+    """Count the number of base pairs in a bed file"""
+    count = 0
+    f = open(ffile)
+    for l in f:
+        tmp = l.split("\t")
+        (start, end) = (int(tmp[1]), int(tmp[2]))
+        count = count + end - start
+    f.close()
+    return count
 
 def main():
     usage = "USAGE: %prog -f [vcf compare file from germline] -o [output tsv file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-f", "--file", help="vcf compare file")
     optparser.add_option("-r", "--run", help="run name")
+    optparser.add_option("-t", "--target", help="target region bed file")
     optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.file or not options.run or not options.output:
+    if not options.file or not options.run or not options.target or not options.output:
         optparser.print_help()
         sys.exit(-1)
     
@@ -48,12 +47,16 @@ def main():
     tumor_tmb = common + tumor_uniq
     #REPORT % tumor variants that are in germline
     overlap = "%.2f" % (float(common)/tumor_tmb*100.0)
+    #Get the total number of megabases in the targeted bed file
+    target_mb = round(countBedBases(options.target)/float(10**6), 1)
+    #TMB = total tumor variants (tumor_tmb)/number of megabases
+    tmb = round(tumor_tmb/target_mb, 1)
     f.close()
 
     out = open(options.output, 'w')
-    hdr = ['Run', 'Tumor', 'Normal', 'Common', '% overlap']
+    hdr = ['Run', 'TMB', 'Tumor', 'Normal', 'Common', '% overlap']
     out.write("%s\n" % "\t".join(hdr))
-    out.write("%s\n" % "\t".join([options.run, str(tumor_tmb), str(normal_tmb), str(common), overlap]))
+    out.write("%s\n" % "\t".join([options.run, str(tmb), str(tumor_tmb), str(normal_tmb), str(common), overlap]))
     out.close()
     
 if __name__ == '__main__':
