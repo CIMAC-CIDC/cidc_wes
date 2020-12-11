@@ -167,9 +167,10 @@ def getVCF_file(wildcards):
     #Default return
     ret = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf" % (run, run, caller)
 
-    expression_files = config['expression_files']
+    rna = config.get('rna', None)
     
-    if expression_files.get(tumor_sample, None):
+    if rna.get(tumor_sample, None):
+        #NOT to be confused with analysis/rna/{run}/{run}_{caller}...same!!
         ret = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.rna.vcf" % (run, run, caller)
 
     return ret
@@ -214,7 +215,9 @@ rule neoantigen_bzipAndtabix:
 def getExpressionFile(wildcards):
     run = wildcards.run
     tumor_sample = config['runs'][run][1]
-    return config['expression_files'][tumor_sample]
+    rna = config['rna']
+    expr_file = rna[tumor_sample]['expression_file']
+    return expr_file
 
 rule neoantigen_formatIds:
     """Changes ensembl transcript ids in the salmon files from
@@ -233,8 +236,10 @@ rule neoantigen_formatIds:
         """{params.awk_cmd} {input} > {output}"""
 
 rule neoantigen_expression_annotator:
+    """Add expression to intersect set of WES and RNA variants; only run
+    IF RNA is part of the WES run"""
     input:
-        vcf="analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.vcf",
+        vcf="analysis/rna/{run}/{run}_{caller}.filter.neoantigen.vep.rna.vcf",
         salmon="analysis/neoantigen/{run}/{run}.format.quant.sf",
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.neoantigen.vep.rna.vcf"
