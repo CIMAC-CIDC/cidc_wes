@@ -169,7 +169,7 @@ def getVCF_file(wildcards):
 
     rna = config.get('rna', None)
     
-    if rna.get(tumor_sample, None):
+    if rna and rna.get(tumor_sample, None):
         #NOT to be confused with analysis/rna/{run}/{run}_{caller}...same!!
         ret = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.rna.vcf" % (run, run, caller)
 
