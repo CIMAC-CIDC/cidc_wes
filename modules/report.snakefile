@@ -45,12 +45,15 @@ def report_targets(wildcards):
     #JSON
     ls.append("analysis/report/json/%s.wes.json" % run)
 
+    #REPORT
+    ls.append("analysis/report/report.html")
+    ls.append("analysis/report.tar.gz")
+
     return ls
 
 rule report_all:
     input:
-        "analysis/report/report.html",
-        "analysis/report.tar.gz"
+        report_targets
 
 ###############################################################################
 #META information
