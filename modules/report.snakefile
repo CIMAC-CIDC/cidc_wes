@@ -1,7 +1,7 @@
 #MODULE: wes report module 
 from yaml import dump as yaml_dump
 
-def report_targets(wildcards):
+def report_targets_sansHTML(wildcards):
     """Generates the targets for this module"""
     ls = []
     #Take first element in runs
@@ -45,10 +45,13 @@ def report_targets(wildcards):
     #JSON
     ls.append("analysis/report/json/%s.wes.json" % run)
 
+    return ls
+
+def report_targets(wildcards):
+    ls = report_targets_sansHTML(wildcards)
     #REPORT
     ls.append("analysis/report/report.html")
     ls.append("analysis/report.tar.gz")
-
     return ls
 
 rule report_all:
@@ -470,7 +473,7 @@ rule report_auto_render:
     """Generalized rule to dynamically generate the report BASED
     on what is in the report directory"""
     input:
-        report_targets
+        report_targets_sansHTML
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
