@@ -50,7 +50,7 @@ rule xhla:
     params:
         name=lambda wildcards: wildcards.sample,
         output_dir=lambda wildcards: "%sanalysis/xhla/%s/" % (config['remote_path'], wildcards.sample),
-        path="source activate %s" % config['xhla_root'],
+        path="set +u; source activate %s" % config['xhla_root'],
     #singularity: "docker://humanlongevity/hla"
     conda: "../envs/xhla_env.yml"
     benchmark:
