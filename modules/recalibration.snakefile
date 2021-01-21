@@ -83,6 +83,7 @@ rule recalibration_make_file_map_sample:
         recalibration_output_files_sample
     output:
         "analysis/align/{sample}/{sample}.recalibration.output.yaml"
+    benchmark: "benchmarks/recalibration/{sample}/{sample}.recalibration_make_file_map_sample.txt"
     params:
         sample = lambda wildcards: wildcards.sample,
         kkeys = " -k ".join(['recalibrated_bam','recalibrated_bam_index']),
@@ -95,6 +96,7 @@ rule recalibration_make_file_map_run:
         recalibration_output_files_run
     output:
         "analysis/corealignments/{run}/{run}.corealignment.output.yaml"
+    benchmark: "benchmarks/corealignment/{run}/{run}.recalibration_make_file_map_run.txt"
     params:
         run = lambda wildcards: wildcards.run,
         kkeys = " -k ".join(['corealigned_bam']),
@@ -105,6 +107,7 @@ rule recalibration_make_file_map_run:
 rule recalibration_all:
     input:
         recalibration_targets
+    benchmark: "benchmarks/recalibration/recalibration_all.txt"
     
 rule Indel_realigner_sentieon:
     """indel realigner for uniquely  mapped reads"""

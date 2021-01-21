@@ -57,6 +57,7 @@ def report_targets(wildcards):
 rule report_all:
     input:
         report_targets
+    benchmark: "benchmarks/report/report_all.txt"
 
 ###############################################################################
 #META information

@@ -26,6 +26,7 @@ def metrics_targets(wildcards):
 rule metrics_all:
     input:
         metrics_targets
+    benchmark: "benchmarks/metrics/metrics_all.txt"
 
 rule Metrics_sentieon:
     """Get the metrics calculations from  mapped reads"""

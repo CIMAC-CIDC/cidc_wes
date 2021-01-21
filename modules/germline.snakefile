@@ -63,6 +63,7 @@ rule germline_make_file_map:
         germline_output_files
     output:
         "analysis/germline/{run}/{run}.germline.output.yaml"
+    benchmark: "benchmarks/germline/{run}/{run}.germline_make_file_map.txt"
     params:
         run = lambda wildcards: wildcards.run,
         kkeys = " -k ".join(['vcfcompare']),
@@ -80,6 +81,7 @@ def getTargetBed(config):
 rule germline_all:
     input:
         germline_targets
+    benchmark: "benchmarks/germline/germline_all.txt"
 
 rule germline_haplotyper:
     input:

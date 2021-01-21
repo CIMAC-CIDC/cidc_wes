@@ -62,6 +62,7 @@ def cohort_report_targets(wildcards):
 rule cohort_report_all:
     input:
         "analysis/cohort_report/report.html"
+    benchmark: "benchmarks/cohort_report/cohort_report_all.txt"
 
 def cohort_report_inputFn(wildcards):
     """Returns a list of all of the json files"""

@@ -24,6 +24,7 @@ rule xhla_make_file_map:
         xhla_output_files
     output:
         "analysis/xhla/{sample}/{sample}.xhla.output.yaml"
+    benchmark: "benchmarks/xhla/{sample}/{sample}.xhla_make_file_map.txt"
     params:
         sample = lambda wildcards: wildcards.sample,
         kkeys = " -k ".join(['xhla_results']),
@@ -35,6 +36,7 @@ rule xhla_make_file_map:
 rule xhla_all:
     input:
         xhla_targets
+    benchmark: "benchmarks/xhla/xhla_all.txt"
 
 rule xhla:
     """calculate hlatyping by xhla"""

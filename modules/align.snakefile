@@ -33,6 +33,7 @@ rule align_make_file_map:
         align_output_files
     output:
         "analysis/align/{sample}/{sample}.align.output.yaml"
+    benchmark: "benchmarks/align/{sample}/{sample}.align_make_file_map.txt"
     params:
         sample = lambda wildcards: wildcards.sample,
         kkeys = " -k ".join(['dedup_bam','dedup_bam_index']),
@@ -58,10 +59,12 @@ def align_getBam(wildcards):
 rule align_all:
     input:
         align_targets
+    benchmark: "benchmarks/align/align_all.txt"
 
 rule map_all:
     input:
         align_mapping_targets
+    benchmark: "benchmarks/align/align_map_all.txt"
 
 #BASED on xindong's aggregate_align_input in CIDC_Chips
 def aggregate_align_input(wildcards):

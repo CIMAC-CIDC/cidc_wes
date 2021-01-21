@@ -36,6 +36,7 @@ rule coverage_make_file_map:
         coverage_output_files
     output:
         "analysis/metrics/{sample}/{sample}.coverage.output.yaml"
+    benchmark: "benchmarks/coverage/{sample}/{sample}.coverage_make_file_map.txt"
     params:
         sample = lambda wildcards: wildcards.sample,
         kkeys = " -k ".join(['center_mosdepth','coverage_metrics', 'target_metrics', 'target_metrics_summary']),
@@ -47,6 +48,7 @@ rule coverage_make_file_map:
 rule coverage_all:
     input:
         coveragemetrics_targets
+    benchmark: "benchmarks/coverage/coverage_all.txt"
 
 rule CoverageMetrics_sentieon:
     """Get the metrics calculations from  mapped reads"""

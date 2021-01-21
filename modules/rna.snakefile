@@ -25,6 +25,7 @@ def rna_targets(wildcards):
 rule rna_all:
     input:
         rna_targets
+    benchmark: "benchmarks/rna/rna_all.txt"
 
 def rna_addReadGroup_inputFn(wildcards):
     sample = config['rna'].get(wildcards.sample, None)

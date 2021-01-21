@@ -66,6 +66,8 @@ rule copynumber_make_file_map:
         copynumber_output_files
     output:
         "analysis/copynumber/{run}/{run}.copynumber.output.yaml"
+    benchmark:
+        "benchmarks/CNV/{run}/{run}.copynumber_make_file_map.txt"
     params:
         run = lambda wildcards: wildcards.run,
         kkeys = " -k ".join(['cnvcalls','cnvcalls_tn_tsv']),
@@ -76,6 +78,7 @@ rule copynumber_make_file_map:
 rule copynumber_all:
     input:
         copynumber_targets
+    benchmark: "benchmarks/CNV/copynumber_all.txt"
 
 #NOT NEEDED?--leave in for now just in case we want users to be able to do this
 rule copynumber_create_pon_sentieon:

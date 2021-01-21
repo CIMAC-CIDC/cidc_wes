@@ -81,6 +81,7 @@ def clonality_targets(wildcards):
 rule clonality_all:
     input:
         clonality_targets
+    benchmark: "benchmarks/clonality/clonality_all.txt"
 
 #------------------------------------------------------------------------------
 # START RULES from Clonalitymultithreads.snakefile

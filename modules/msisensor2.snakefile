@@ -33,6 +33,7 @@ def msisensor2_targets(wildcards):
 rule msisensor2_all:
     input:
         msisensor2_targets
+    benchmark: "benchmarks/msisensor2/msisensor2_all.txt"
 
 rule msisensor2:
     """calculate microsatellite instability with msisensor2"""
@@ -60,6 +61,7 @@ rule msisensor2_make_file_map:
         msisensor2_output_files
     output:
         "analysis/msisensor2/{run}/{run}.msisensor2.output.yaml"
+    benchmark: "benchmarks/msisensor2/{run}/{run}.msisensor2_make_file_map.txt"
     group: "msisensor2"
     params:
         run = lambda wildcards: wildcards.run,

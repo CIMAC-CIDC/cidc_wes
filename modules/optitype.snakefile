@@ -28,6 +28,7 @@ rule optitype_make_file_map:
         optitype_output_files
     output:
         "analysis/optitype/{sample}/{sample}.optitype.output.yaml"
+    benchmark: "benchmarks/optitype/{sample}/{sample}.optitype_make_file_map.txt"
     params:
         sample = lambda wildcards: wildcards.sample,
         kkeys = " -k ".join(['optitype_results']),
@@ -39,6 +40,7 @@ rule optitype_make_file_map:
 rule optitype_all:
     input:
         optitype_targets
+    benchmark: "benchmarks/optitype/optitype_all.txt"
         
 rule optitype_extract_chr6:
     """Extract chr6 by sambamba"""

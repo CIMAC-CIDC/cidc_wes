@@ -85,6 +85,7 @@ rule neoantigen_make_file_map:
         neoantigen_output_files
     output:
         "analysis/neoantigen/{run}/{run}.neoantigen.output.yaml"
+    benchmark: "benchmarks/neoantigen/{run}/{run}.neoantigen_make_file_map.txt"
     params:
         run = lambda wildcards: wildcards.run,
         kkeys = lambda wildcards: " -k ".join(neoantigen_get_output_keys(wildcards)),
@@ -179,6 +180,7 @@ def getVCF_file(wildcards):
 rule neoantigen_all:
     input:
         neoantigen_targets
+    benchmark: "benchmarks/neoantigen/neoantigen_all.txt"
 
 rule neoantigen_vep_annotate:
     input:
@@ -327,6 +329,8 @@ rule neoantigen_add_sample:
         "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.condensed.ranked.addSample.tsv"
     params:
         run_name = lambda wildcards: wildcards.run
+    benchmark:
+        "benchmarks/neoantigen/{run}/{tumor}.neoantigen_add_sample.txt"
     group: "neoantigen"
     shell:
         "cidc_wes/modules/scripts/neoantigen_addSample.py -f {input} -n {params.run_name} -o {output}"
@@ -338,6 +342,8 @@ rule neoantigen_getNeoantigenList:
         neoantigen_getNeoantigenList_helper
     output:
         "analysis/neoantigen/{run}/{run}_neoantigen_table.tsv"
+    benchmark:
+        "benchmarks/neoantigen/{run}/{run}.neoantigen_getNeoantigenList.txt"
     group: "neoantigen"
     shell:
         "cidc_wes/modules/scripts/neoantigen_getNeoantgnList.py -f {input} -o {output}"

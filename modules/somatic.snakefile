@@ -165,6 +165,7 @@ rule somatic_make_file_map:
         somatic_output_files
     output:
         "analysis/somatic/{run}/{run}.somatic.output.yaml"
+    benchmark: "benchmarks/somatic/{run}/{run}.somatic_make_file_map.txt"
     params:
         run = lambda wildcards: wildcards.run,
         #keys = " -k ".join(['broad_filter_exons','mda_filter_exons','mocha_filter_exon','filter_maf','filter_vcf','output_maf','output_vcf']),
@@ -176,6 +177,7 @@ rule somatic_make_file_map:
 rule somatic_all:
     input:
         somatic_targets
+    benchmark: "benchmarks/somatic/somatic_all.txt"
 
 ###############################################################################
 # PLEASE LOOK AT the different caller snakefiles,
@@ -325,6 +327,8 @@ rule somatic_gzip_filtered_vcf:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz",
+    benchmark:
+        "benchmarks/somatic/{run}/{run}_{caller}.gzip_filtered_vcf.txt"
     group: "somatic"
     shell:
         "bgzip -c {input} > {output}"
@@ -336,6 +340,8 @@ rule somatic_tabix_filtered_vcf_gz:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz"
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.vcf.gz.tbi",
+    benchmark:
+        "benchmarks/somatic/{run}/{run}_{caller}.tabix_filtered_vcf_gz.txt"
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     shell:
@@ -353,7 +359,7 @@ rule somatic_getExonic_mutations:
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     benchmark:
-        "benchmarks/somatic/{run}/{run}_{caller}.somatic_getExonic_mutations.txt"
+        "benchmarks/somatic/{run}/{run}_{caller}.getExonic_mutations.txt"
     shell:
         "bcftools view -R {params.exons} {input.vcf} | bcftools sort | bcftools view -Oz > {output}"
 
@@ -363,6 +369,8 @@ rule somatic_tabix_exonic_mutations:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz",
     output:
         "analysis/somatic/{run}/{run}_{caller}.filter.exons.vcf.gz.tbi",
+    benchmark:
+        "benchmarks/somatic/{run}/{run}_{caller}.tabix_exonic_mutations.txt"
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     shell:
@@ -380,7 +388,7 @@ rule somatic_getTarget_mutations:
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     benchmark:
-        "benchmarks/somatic/{run}/{run}_{caller}.somatic_getTarget_mutations.txt"
+        "benchmarks/somatic/{run}/{run}_{caller}.getTarget_mutations.txt"
     shell:
         "bcftools view -R {params.target} {input} | bcftools sort | bcftools view -Oz > {output}"
 

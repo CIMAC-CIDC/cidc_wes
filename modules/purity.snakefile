@@ -79,6 +79,7 @@ rule purity_make_file_map:
         purity_output_files
     output:
         "analysis/purity/{run}/{run}.purity.output.yaml"
+    benchmark: "benchmarks/purity/{run}/{run}.purity_make_file_map.txt"
     params:
         run = lambda wildcards: wildcards.run,
         kkeys = " -k ".join(['purity_results']),
@@ -89,6 +90,7 @@ rule purity_make_file_map:
 rule purity_all:
     input:
         purity_targets
+    benchmark: "benchmarks/purity/purity_all.txt"
 
 rule Puritycalls_Facets:
     """Get the  recalibrated bam files from  mapped reads"""
