@@ -65,7 +65,7 @@ rule CoverageMetrics_sentieon:
         index1=config['sentieon_path'],
         cov_thresh=50, #LT: put this in config.yaml
         index2=config['CDS_Bed_input'],
-    threads: _coveragemetrics_threads
+    threads: 10 #_coveragemetrics_threads
     group: "coverage"
     benchmark:
         "benchmarks/coverage/{sample}/{sample}.CoverageMetrics.txt"
@@ -99,7 +99,7 @@ rule targets_sentieon:
         #ERROR- should be set to center target bed file
         #index2=config['target_Bed_input'],
         index2= center_targets[config.get("cimac_center", "broad")] #default to broad
-    threads: _coveragemetrics_threads
+    threads: 10 #_coveragemetrics_threads
     group: "coverage"
     benchmark:
         "benchmarks/targetcoverage/{sample}/{sample}.targetMetrics.txt"
@@ -120,7 +120,7 @@ rule coverage_mosdepth:
         "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt",
     group: "coverage"
     conda: "../envs/coverage.yml"
-    threads: _coveragemetrics_threads
+    threads: 2 #_coveragemetrics_threads
     benchmark:
         "benchmarks/metrics/{sample}/{sample}.{center}.mosdepth.txt"
     shell:

@@ -47,7 +47,7 @@ rule xhla:
         in_index = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam.bai",
     output:
         chr6sortbamfile = "analysis/xhla/{sample}/report-{sample}-hla.json"
-    threads:_xhla_threads
+    threads: 4 #_xhla_threads
     group: "xhla"
     params:
         name=lambda wildcards: wildcards.sample,

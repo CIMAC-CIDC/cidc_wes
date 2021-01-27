@@ -14,7 +14,8 @@ rule somatic_calling_TNsnv:
         tumor = lambda wildcards: config['runs'][wildcards.run][1],
         #trim_soft_clip is NOT supported in tnsnv
         #trim_soft_clip = "--trim_soft_clip" if config.get("trim_soft_clip", False) else "",
-    threads:_somatic_threads,
+    threads: 18 #_somatic_threads,
+    priority: 50
     group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNsnv.txt"

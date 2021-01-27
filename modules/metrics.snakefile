@@ -70,7 +70,7 @@ rule Metrics_sentieon_plots:
     #log: _logfile
     params:
         index1=config['sentieon_path'],
-    threads: _metrics_threads
+    threads: 16 #_metrics_threads
     group: "metrics"
     benchmark:
         "benchmarks/metrics/{sample}/{sample}.Metrics_sentieon_plots.txt"

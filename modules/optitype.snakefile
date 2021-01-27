@@ -48,7 +48,7 @@ rule optitype_extract_chr6:
         in_sortbamfile = "analysis/align/{sample}/{sample}.sorted.dedup.bam"
     output:
         chr6sortbamfile = "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
-    threads:_optitype_threads
+    threads: 16 #_optitype_threads
     group: "optitype"
     conda: "../envs/optitype.yml"
     benchmark:
@@ -62,7 +62,7 @@ rule optitype_index_chr6bam:
         "analysis/optitype/{sample}/{sample}.sorted.chr6.bam"
     output:
         "analysis/optitype/{sample}/{sample}.sorted.chr6.bam.bai"
-    threads:_optitype_threads
+    threads: 1 #_optitype_threads
     group: "optitype"
     conda: "../envs/optitype.yml"
     benchmark:

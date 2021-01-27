@@ -276,7 +276,7 @@ if not config.get('neoantigen_run_classII'):
             callers=config.get('neoantigen_callers','NetMHCpan NetMHCcons MHCflurry NetMHCIIpan'),
             epitope_lengths=config.get('neoantigen_epitope_lengths', '8,9,10,11'),
             output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
-        threads: _neoantigen_threads
+        threads: 1 #_neoantigen_threads
         group: "neoantigen"
         log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
         benchmark:
@@ -310,7 +310,7 @@ else: #EXPECT class II output
             callers=config.get('neoantigen_callers','NetMHCpan NetMHCcons MHCflurry NetMHCIIpan'),
             epitope_lengths=config.get('neoantigen_epitope_lengths', '8,9,10,11'),
             output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
-        threads: _neoantigen_threads
+        threads: 1 #_neoantigen_threads
         group: "neoantigen"
         log: "analysis/logs/neoantigen/{run}/{tumor}.neoantigen_pvacseq.log"
         benchmark:

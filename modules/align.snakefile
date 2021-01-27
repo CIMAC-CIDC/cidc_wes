@@ -96,7 +96,8 @@ rule align_from_bam:
     output:
         bam="analysis/align/{sample}/{sample}.sorted.fromBam.bam",
         bai="analysis/align/{sample}/{sample}.sorted.fromBam.bam.bai"
-    threads: 32
+    threads: 32 #_bwa_threads
+    priority: 100
     params:
         sentieon_path=config['sentieon_path'],
         bwa_index=config['bwa_index'],
@@ -122,7 +123,8 @@ rule align_from_fastq:
         input_bases="10000000",
         #need to adjust threads for the other process
         tthreads=lambda wildcards, input, output, threads, resources: threads-1
-    threads: _bwa_threads
+    threads: 32 #_bwa_threads
+    priority: 100
     message: "ALIGN: Running sentieon BWA mem for alignment"
     log: "analysis/logs/align/{sample}/align.sentieon_bwa.{sample}.log"
     group: "align"
@@ -142,7 +144,7 @@ rule map_stats:
         awk_cmd2 = "awk \'NR==5\'", #take just the 5th line
     output:
         "analysis/align/{sample}/{sample}_mapping.txt"
-    threads: _align_threads
+    threads: 16 #_align_threads
     message: "ALIGN: get mapping stats- Total, Mapped, Dedup mapped reads"
     log: "analysis/logs/align/{sample}/align.map_stats.{sample}.log"
     #CAN/should samtools view be multi-threaded--
@@ -186,7 +188,7 @@ rule scoreSample:
         idx="analysis/align/{sample}/{sample}.sorted.score.txt.idx",
     message: "ALIGN: score sample"
     log: "analysis/logs/align/{sample}/align.scoreSample.{sample}.log"
-    threads: _align_threads
+    threads: 8 #_align_threads
     params:
         index1=config['sentieon_path'],
     group: "align"
@@ -208,7 +210,8 @@ rule dedupSortedUniqueBam:
         met="analysis/align/{sample}/{sample}.sorted.dedup.metric.txt",
     message: "ALIGN: dedup sorted unique bam file"
     log: "analysis/logs/align/{sample}/align.dedupSortedUniqueBam.{sample}.log"
-    threads: _align_threads
+    threads: 32 #_align_threads
+    priority: 75
     params:
         index1=config['sentieon_path'],
     group: "align"

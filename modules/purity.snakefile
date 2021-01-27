@@ -107,7 +107,7 @@ rule Puritycalls_Facets:
     params:
         index=config['genome_fasta'],
         index1=config['facets_vcftar']
-    threads: _puritycalls_threads
+    threads: 1 #_puritycalls_threads
     conda:
         "../envs/purity.yml"
     benchmark:

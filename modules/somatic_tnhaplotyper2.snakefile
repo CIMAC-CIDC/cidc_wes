@@ -16,7 +16,8 @@ rule somatic_calling_TNhaplotyper2:
 	normal = lambda wildcards: config['runs'][wildcards.run][0],
 	tumor = lambda wildcards: config['runs'][wildcards.run][1],
         trim_soft_clip = "--trim_soft_clip" if config.get("trim_soft_clip", False) else "",
-    threads:_somatic_threads
+    threads: 18 #_somatic_threads
+    priority: 50
     benchmark:
         "benchmarks/somatic/{run}/{run}.somatic_calling_TNhaplotyper2.txt"
     shell:

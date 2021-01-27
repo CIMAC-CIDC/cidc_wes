@@ -126,7 +126,7 @@ rule Indel_realigner_sentieon:
         mills=config['Mills_indels'],
         g1000=config['G1000_indels'],
     group: "recalibration"
-    threads: _realigner_threads
+    threads: 8 #_realigner_threads
     benchmark:
         "benchmarks/recalibration/{sample}/{sample}.Indel_realigner_sentieon.txt"
     shell:
@@ -148,7 +148,7 @@ rule Base_recalibration_precal_sentieon:
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
-    threads: _realigner_threads
+    threads: 4 #_realigner_threads
     group: "recalibration"
     benchmark:
         "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_precal_sentieon.txt"
@@ -171,7 +171,7 @@ rule Base_recalibration_postcal_sentieon:
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
-    threads: _realigner_threads
+    threads: 16 #_realigner_threads
     group: "recalibration"
     benchmark:
         "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_postcal_sentieon.txt"
@@ -190,7 +190,7 @@ rule Base_recalibration_sentieon:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: _realigner_threads
+    threads: 1 #_realigner_threads
     group: "recalibration"
     benchmark:
         "benchmarks/recalibration/{sample}/{sample}.Base_recalibration_sentieon.txt"

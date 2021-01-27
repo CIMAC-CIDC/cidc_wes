@@ -91,7 +91,7 @@ rule copynumber_create_pon_sentieon:
         index1=config['sentieon_path'],
         #target bed provided by user- not enabled for now
         #targetbed= config['pon_target_bed'],
-    threads: _cnvcall_threads
+    threads: _cnvcall_threads #Tune this!
     benchmark:
         "benchmarks/CNV/{run}/{run}.create_pon_sentieon.txt"
     shell:
@@ -112,7 +112,7 @@ rule copynumber_CNVcall:
         ponfile=config['pons'],
         target=config['pons_target'],
     group: "copynumber"
-    threads:_cnvcall_threads
+    threads: 4 #_cnvcall_threads
     benchmark:
         "benchmarks/copynumber/{run}/{sample}.CNVcall.txt"
     shell:

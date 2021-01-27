@@ -3,7 +3,9 @@
 # module: Sentieon RNAseq variant calling pipeline
 # ref: https://support.sentieon.com/manual/RNA_call/rna/
 
-_rna_threads=32
+# 2021-01-26 TODO: Tune the threads in this module!
+
+_rna_threads=8
 #map from tumor samples to runs
 _tumor_run_map = dict([(config['runs'][r][1], r) for r in config['runs']])
 
@@ -55,7 +57,7 @@ rule rna_indexRGbam:
         "analysis/rna/{run}/{sample}.RG.bam"
     output:
         "analysis/rna/{run}/{sample}.RG.bam.bai"
-    threads: _rna_threads
+    threads: 8 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.indexRGbam.txt"
@@ -75,7 +77,7 @@ rule rna_scoreBam:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: _rna_threads
+    threads: 8 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.scoreBam.txt"
@@ -93,7 +95,7 @@ rule rna_dedup:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: _rna_threads
+    threads: 32 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.dedup.txt"
@@ -112,7 +114,7 @@ rule rna_BQSR:
         dbsnp= config['dbsnp'],
         mills= config['Mills_indels'],
         g1000= config['G1000_indels'],
-    threads: _rna_threads
+    threads: 4 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.BQSR.txt"
@@ -127,7 +129,7 @@ rule rna_splitReadsAtJunct:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: _rna_threads
+    threads: 8 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.rna_splitReadsAtJunct.txt"
@@ -155,7 +157,7 @@ rule rna_variantCalling:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-    threads: _rna_threads
+    threads: 18 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{run}.variantCalling.txt"
