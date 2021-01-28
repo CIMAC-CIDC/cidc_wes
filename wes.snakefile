@@ -139,9 +139,10 @@ def level2_targets(wildcards):
 
 rule target:
     input: 
-        all_targets,
+        targets=all_targets,
+        benchmarks="benchmarks.tar.gz"
     message: "Compiling all outputs"
-    benchmark: "benchmarks/all_wes_targets.txt"
+    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping 
 
 rule level1:
     input: level1_targets
@@ -152,6 +153,11 @@ rule level2:
     input: level2_targets
     message: "Compiling all LEVEL2 outputs"
     benchmark: "benchmarks/wes_level2_targets.txt"
+
+rule tar_benchmarks:
+    input: all_targets
+    output: "benchmarks.tar.gz"
+    shell: "tar -c benchmarks | gzip > {output}"
 
 include: "./modules/align.snakefile"     # common align rules
 include: "./modules/metrics.snakefile"   # ...
