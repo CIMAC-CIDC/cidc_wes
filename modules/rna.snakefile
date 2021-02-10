@@ -3,8 +3,6 @@
 # module: Sentieon RNAseq variant calling pipeline
 # ref: https://support.sentieon.com/manual/RNA_call/rna/
 
-# 2021-01-26 TODO: Tune the threads in this module!
-
 _rna_threads=8
 #map from tumor samples to runs
 _tumor_run_map = dict([(config['runs'][r][1], r) for r in config['runs']])
@@ -20,14 +18,15 @@ def rna_targets(wildcards):
             if run:
                 ls.append("analysis/rna/%s/%s.RG.dedup.split.bam" % (run, tumor_sample))
                 ls.append("analysis/rna/%s/%s.RG.dedup.recal.csv" % (run, tumor_sample))
-                ls.append("analysis/rna/%s/%s.dnascope.rna.vcf.gz" % (run, run))
+                ls.append("analysis/rna/%s/%s.haplotyper.rna.vcf.gz" % (run, run))
                 ls.append("analysis/rna/%s/%s_%s.filter.neoantigen.vep.rna.vcf" % (run, run, caller))
+    #print(ls)
     return ls
 
 rule rna_all:
     input:
         rna_targets
-    benchmark: "benchmarks/rna/rna_all.txt"
+    #benchmark: "benchmarks/rna/rna_all.txt"
 
 def rna_addReadGroup_inputFn(wildcards):
     sample = config['rna'].get(wildcards.sample, None)
@@ -45,10 +44,10 @@ rule rna_addReadGroup:
         iid = lambda wildcards: "ID:%s" % wildcards.sample,
         sm = lambda wildcards: "SM:%s" % wildcards.sample,
         pl = "PL:ILLUMINA",
-    threads: 8
+    threads: 4
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{sample}.addReadGroup.txt"
+        "benchmarks/rna/{run}/{sample}.rna_addReadGroup.txt"
     shell:
         """samtools addreplacerg -r {params.iid} -r {params.sm} -r {params.pl} -@ {threads} -o {output} {input}"""
 
@@ -57,10 +56,10 @@ rule rna_indexRGbam:
         "analysis/rna/{run}/{sample}.RG.bam"
     output:
         "analysis/rna/{run}/{sample}.RG.bam.bai"
-    threads: 8 #_rna_threads
+    threads: 4 #_rna_threads
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{sample}.indexRGbam.txt"
+        "benchmarks/rna/{run}/{sample}.rna_indexRGbam.txt"
     shell:
         """sambamba index -t {threads} {input}"""
 
@@ -77,10 +76,10 @@ rule rna_scoreBam:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: 8 #_rna_threads
+    threads: 4 #_rna_threads
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{sample}.scoreBam.txt"
+        "benchmarks/rna/{run}/{sample}.rna_scoreBam.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.bam} --algo LocusCollector --fun score_info {output}"""
 
@@ -95,10 +94,10 @@ rule rna_dedup:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: 32 #_rna_threads
+    threads: 6 #_rna_threads
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{sample}.dedup.txt"
+        "benchmarks/rna/{run}/{sample}.rna_dedup.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.bam} --algo Dedup --rmdup --score_info {input.score} --metrics {output.met} {output.bam}"""
 #------------------------------------------------------------------------------
@@ -117,7 +116,7 @@ rule rna_BQSR:
     threads: 4 #_rna_threads
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{sample}.BQSR.txt"
+        "benchmarks/rna/{run}/{sample}.rna_BQSR.txt"
     shell:
         """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input} --algo QualCal -k {params.dbsnp} -k {params.mills} -k {params.g1000} {output}"""
 
@@ -129,7 +128,7 @@ rule rna_splitReadsAtJunct:
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
-    threads: 8 #_rna_threads
+    threads: 4 #_rna_threads
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{sample}.rna_splitReadsAtJunct.txt"
@@ -148,28 +147,35 @@ def rna_variantCalling_inputFn(wildcards):
     tmp['vcf'] = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf.gz" % (run, run, caller)
     return tmp
 
-rule rna_variantCalling:
+rule rna_haplotyper:
+    """Performs the sentieon haplotyper variant caller using the 
+    filter.neoantigen.vep.vcf.gz file as a list of given variants to check.
+    The shell call is the same as the rna pipeline found here:
+    https://support.sentieon.com/manual/RNA_call/rna/
+    """
     input:
         unpack(rna_variantCalling_inputFn)
     output:
-        "analysis/rna/{run}/{run}.dnascope.rna.vcf.gz"
+        "analysis/rna/{run}/{run}.haplotyper.rna.vcf.gz"
     params:
         index=config['genome_fasta'],
         sentieon_path=config['sentieon_path'],
         dbsnp= config['dbsnp'],
-    threads: 18 #_rna_threads
+    threads: 4 #_rna_threads
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{run}.variantCalling.txt"
+        "benchmarks/rna/{run}/{run}.rna_haplotyper.txt"
     shell:
-        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.bam} -q {input.bqsr}  --algo DNAscope --trim_soft_clip --call_conf 20 --emit_conf 20 -d {params.dbsnp} --given {input.vcf} {output}"""
+        """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.bam} -q {input.bqsr}  --algo Haplotyper  --trim_soft_clip --call_conf 20 --emit_conf 20 -d {params.dbsnp} --given {input.vcf} {output}"""
+        #DNASCOPE-
+        #"""{params.sentieon_path}/sentieon driver -r {params.index} -t {threads} -i {input.bam} -q {input.bqsr}  --algo DNAscope --trim_soft_clip --call_conf 20 --emit_conf 20 -d {params.dbsnp} --given {input.vcf} {output}"""
 
 def rna_intersect_inputFn(wildcards):
     run = wildcards.run
     caller = config.get('somatic_caller', 'tnscope')
     tmp = {}
     tmp['dna'] = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf.gz" % (run, run, caller)
-    tmp['rna'] = "analysis/rna/%s/%s.dnascope.rna.vcf.gz" % (run, run)
+    tmp['rna'] = "analysis/rna/%s/%s.haplotyper.rna.vcf.gz" % (run, run)
     return tmp
 
 rule rna_intersect:
@@ -181,7 +187,7 @@ rule rna_intersect:
         "analysis/rna/{run}/{run}_{caller}.filter.neoantigen.vep.rna.vcf"
     group: "rna"
     benchmark:
-        "benchmarks/rna/{run}/{run}_{caller}.intersect.txt"
+        "benchmarks/rna/{run}/{run}_{caller}.rna_intersect.txt"
     shell:
         """bcftools isec {input.dna} {input.rna} -n =2 -w 1 -O v > {output}"""
 
