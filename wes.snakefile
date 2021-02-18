@@ -113,7 +113,8 @@ def level1_targets(wildcards):
     ls.extend(align_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
-    ls.extend(germline_targets(wildcards))
+    if not config.get('tumor_only'): #Only run when we have normals
+        ls.extend(germline_targets(wildcards))
     ls.extend(somatic_targets(wildcards))
     ls.extend(rna_targets(wildcards))
     return ls
@@ -122,12 +123,13 @@ def level2_sans_report(wildcards):
     ls = []
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(copynumber_targets(wildcards))
-    ls.extend(purity_targets(wildcards))
+    if not config.get('tumor_only'): #Only run when we have normals
+        ls.extend(purity_targets(wildcards))
+        ls.extend(clonality_targets(wildcards))
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(xhla_targets(wildcards))
-    ls.extend(clonality_targets(wildcards))
     ls.extend(msisensor2_targets(wildcards))
     return ls
 

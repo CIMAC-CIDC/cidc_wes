@@ -22,7 +22,8 @@ def report_targets_sansHTML(wildcards):
     ls.append("analysis/report/somatic_variants/03_summary_table.csv")
     ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
     ls.append("analysis/report/somatic_variants/05_SNV_Statistics.csv")
-    ls.append("analysis/report/somatic_variants/06_tumor_mutational_burden.tsv")
+    if not config.get('tumor_only'): #Only run when we have normals
+        ls.append("analysis/report/somatic_variants/06_tumor_mutational_burden.tsv")
     ls.append("analysis/report/somatic_variants/07_lego_plot.png")
     ls.append("analysis/report/somatic_variants/08_lollipop_plots.csv")
 
@@ -34,9 +35,10 @@ def report_targets_sansHTML(wildcards):
 
 
     #COPYNUMBER
-    ls.append("analysis/report/copy_number_variation/01_copy_number_variation_plot.png")
-    ls.append("analysis/report/copy_number_variation/02_tumor_clonality.tsv")
-    ls.append("analysis/report/copy_number_variation/03_tumor_purity.tsv")
+    if not config.get('tumor_only'): #Only run when we have normals
+        ls.append("analysis/report/copy_number_variation/01_copy_number_variation_plot.png")
+        ls.append("analysis/report/copy_number_variation/02_tumor_clonality.tsv")
+        ls.append("analysis/report/copy_number_variation/03_tumor_purity.tsv")
     
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
@@ -115,6 +117,7 @@ def report_data_quality_plotsInputFn(wildcards):
     ret = []
     run_name = list(config['runs'].keys())[0]
     run = config['runs'][run_name]
+    if config.get('tumor_only'): run= run[1:] #if tumor_only drop normal sample
     for sample in run:
         ret.append("analysis/report/data_quality/plots/%s_gcBias.png" % (sample))
         ret.append("analysis/report/data_quality/plots/%s_qualityScore.png" % (sample))
@@ -377,28 +380,40 @@ def report_neoantigens_HLAInputFn(wildcards):
 
     tmp = {}
     if config.get('neoantigen_run_classII'):
-        tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
-        tmp['normal_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (normal, normal)
+        if not config.get('tumor_only'): #Only run when we have normals
+            tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
+            tmp['normal_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (normal, normal)
         tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
         tmp['tumor_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)
     else:
         #optitype only
-        tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
+        if not config.get('tumor_only'): #Only run when we have normals
+            tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
         tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
     return tmp
 
+def report_getSampleNames():
+    """returns the sample names associated with the run.  if tumor_only, 
+    returns only the tumor sample name"""
+    if config.get('tumor_only'):
+        return [report_getTumorNormal(1)]
+    else:
+        return [report_getTumorNormal(0), report_getTumorNormal(1)]
+    
 rule report_neoantigens_HLA:
     """report HLA type"""
     input:
         unpack(report_neoantigens_HLAInputFn)
     params:
-        names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
+        #names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
+        names = ",".join(report_getSampleNames()),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
+        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_xhla) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_xhla, input.tumor_opti, input.tumor_xhla)
     output:
         tsv="analysis/report/neoantigens/01_HLA_Results.tsv",
         details="analysis/report/neoantigens/01_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py -n {input.normal_opti} -m {input.normal_xhla} -t {input.tumor_opti} -u {input.tumor_xhla} -s {params.names} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_neoantigens_hla.py {params.in_files} -s {params.names} -o {output.tsv}"""
 
 def report_neoantigens_neoantigen_listInputFn(wildcards):
     run = list(config['runs'].keys())[0]
@@ -424,10 +439,11 @@ rule report_json_hla:
     output:
         "analysis/report/json/hla/{run}.hla.json"
     params:
-        run = lambda wildcards: wildcards.run
+        run = lambda wildcards: wildcards.run,
+        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_xhla) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_xhla, input.tumor_opti, input.tumor_xhla)
     group: "report"
     shell:
-        "cidc_wes/modules/scripts/json_report_hla.py -r {params.run} -n {input.normal_opti} -m {input.normal_xhla} -t {input.tumor_opti} -u {input.tumor_xhla} -o {output}"
+        "cidc_wes/modules/scripts/json_report_hla.py -r {params.run} {params.in_files} -o {output}"
 
 ###############################################################################
 rule report_copy_runInfoFiles:
@@ -452,22 +468,25 @@ def getJsonFiles(wildcards):
     tmp['insert_size'] = "analysis/report/json/insert_size/%s.insert_size.json" % run
     tmp['mean_quality'] = "analysis/report/json/mean_quality/%s.mean_quality.json" % run
     tmp['hla'] = "analysis/report/json/hla/%s.hla.json" % run
-    tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
     tmp['somatic'] = "analysis/report/json/somatic/%s_%s.filtered_maf.json" % (run, caller)
-    tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
+    if not config.get('tumor_only'): #Only run when we have normals
+        tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
+        tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
+        
     return tmp
 
 rule report_generate_json:
     input:
         unpack(getJsonFiles)
     params:
-        run = lambda wildcards: wildcards.run
+        run = lambda wildcards: wildcards.run,
+        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -t %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality),
     output:
         #NOTE: CANNOT name this {run}.json otherwise snakemake will have
         #trouble ressolving the wildcard
         "analysis/report/json/{run}.wes.json"
     shell:
-        """cidc_wes/modules/scripts/json_stitcher.py -r {params.run} -m {input.mapping} -c {input.coverage} -g {input.gc_content} -i {input.insert_size} -q {input.mean_quality} -j {input.hla} -p {input.purity} -s {input.somatic} -t {input.clonality} -o {output}"""
+        """cidc_wes/modules/scripts/json_stitcher.py -r {params.run} {params.in_files} -o {output}"""
 
 ###############################################################################
 rule report_auto_render:
@@ -478,7 +497,7 @@ rule report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
-        sections_list=",".join(['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens'])
+        sections_list=",".join(['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens']) if not config.get('tumor_only') else ",".join(['WES_Meta','data_quality','somatic_variants','neoantigens']) 
     output:
         "analysis/report/report.html"
     message:

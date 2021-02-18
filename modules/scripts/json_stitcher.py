@@ -39,7 +39,7 @@ def main():
 
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.run or not options.mapping or not options.coverage or not options.gc or not options.insert_size or not options.mean_quality or not options.hla or not options.purity or not options.somatic or not options.clonality or not options.output:
+    if not options.run or not options.mapping or not options.coverage or not options.gc or not options.insert_size or not options.mean_quality or not options.hla or not options.somatic or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -48,13 +48,15 @@ def main():
     for json_f in [options.mapping, options.coverage, options.gc,
                    options.insert_size, options.mean_quality, options.hla,
                    options.purity, options.somatic, options.clonality]:
-        #read in json
-        f = open(json_f)
-        tmp = json.load(f)
-        f.close()
 
-        #integrate tmp dict into js_out
-        integrate(tmp, js_out)
+        if json_f:
+            #read in json
+            f = open(json_f)
+            tmp = json.load(f)
+            f.close()
+
+            #integrate tmp dict into js_out
+            integrate(tmp, js_out)
         
     
     json_out = open(options.output, "w")

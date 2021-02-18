@@ -10,6 +10,9 @@
 #
 # **A minimal of 2 runs are required for each cohort set
 # As of now, runs can only belong to one cohort
+#
+# For Tumor-only runs, leave the normal sample empty, e.g.
+# Run1,,Tumor_sample1, group1
 RunName,Normal,Tumor,Cohort
 Run1,Normal_sample1,Tumor_sample1,group1
 Run2,Normal_sample2,Tumor_sample2,group1

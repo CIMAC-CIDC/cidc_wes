@@ -43,7 +43,7 @@ def main():
     optparser.add_option("-o", "--output", help="output tsv file")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.normal_opti or not options.tumor_opti or not options.names or not options.output:
+    if not options.tumor_opti or not options.names or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -51,7 +51,7 @@ def main():
     #tumor_files = options.tumor.split(",") if ',' in options.tumor else [options.tumor]
     samples = options.names.split(",")
 
-    normal_classI = parseOptitype(options.normal_opti)
+    normal_classI = parseOptitype(options.normal_opti) if options.normal_opti else None
     normal_classII = parseXHLA(options.normal_xhla) if options.normal_xhla else None
 
     tumor_classI = parseOptitype(options.tumor_opti)
@@ -60,8 +60,9 @@ def main():
     out = open(options.output,"w")
     hdr = ["Sample", "A1", "A2", "B1", "B2", "C1", "C2"]
     out.write("%s\n" % "\t".join(hdr))
-    normal_classI.insert(0, samples[0])
-    out.write("%s\n" % "\t".join(normal_classI))
+    if normal_classI:
+        normal_classI.insert(0, samples[0])
+        out.write("%s\n" % "\t".join(normal_classI))
     if normal_classII:
         normal_classII.insert(0, '&nbsp;')
         out.write("%s\n" % "\t".join(normal_classII))
