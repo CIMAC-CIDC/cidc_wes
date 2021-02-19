@@ -32,7 +32,7 @@ def main():
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.run or not options.tumor or not options.normal or not options.output:
+    if not options.run or not options.tumor or not options.output:
         optparser.print_help()
         sys.exit(-1)
 

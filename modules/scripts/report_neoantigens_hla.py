@@ -60,19 +60,28 @@ def main():
     out = open(options.output,"w")
     hdr = ["Sample", "A1", "A2", "B1", "B2", "C1", "C2"]
     out.write("%s\n" % "\t".join(hdr))
-    if normal_classI:
+
+    #Check if this is tumor-only--assume that if normal is None, then tmr only
+    if not options.normal_opti:
+        tumor_classI.insert(0, samples[0])
+        out.write("%s\n" % "\t".join(tumor_classI))
+        if tumor_classII:
+            tumor_classII.insert(0, '&nbsp;')
+            out.write("%s\n" % "\t".join(tumor_classII))
+        out.close()
+    else:
         normal_classI.insert(0, samples[0])
         out.write("%s\n" % "\t".join(normal_classI))
-    if normal_classII:
-        normal_classII.insert(0, '&nbsp;')
-        out.write("%s\n" % "\t".join(normal_classII))
+        if normal_classII:
+            normal_classII.insert(0, '&nbsp;')
+            out.write("%s\n" % "\t".join(normal_classII))
 
-    tumor_classI.insert(0, samples[1])
-    out.write("%s\n" % "\t".join(tumor_classI))
-    if tumor_classII:
-        tumor_classII.insert(0, '&nbsp;')
-        out.write("%s\n" % "\t".join(tumor_classII))
-    out.close()
+        tumor_classI.insert(0, samples[1])
+        out.write("%s\n" % "\t".join(tumor_classI))
+        if tumor_classII:
+            tumor_classII.insert(0, '&nbsp;')
+            out.write("%s\n" % "\t".join(tumor_classII))
+        out.close()
     
 if __name__ == '__main__':
     main()

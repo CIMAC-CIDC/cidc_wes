@@ -193,7 +193,7 @@ rule report_data_quality_plots_table:
         tsv="analysis/report/data_quality/02_QC_Plots.tsv",
         details = "analysis/report/data_quality/02_details.yaml",
     params:
-        normal= lambda wildcards: report_getTumorNormal(0),
+        normal= lambda wildcards: "-n %s" % report_getTumorNormal(0) if not config.get('tumor_only') else "",
         tumor = lambda wildcards: report_getTumorNormal(1),
         image_paths = lambda wildcards: "analysis/report/data_quality/plots/",
         sub_caption = """subcaption: 'NOTE: (T) denotes tumor sample; (N) denotes normal sample. a) GC Plot shows the distribution of %GC bases within a 100bp window.  In human, the mean GC content is approx. 40%. b) Quality Score shows the distribution of phred scores. c) Quality by Cycle shows the phred score across the sequencing cycles. d) Insert size shows the distribution of fragment lengths.' """,
@@ -201,7 +201,8 @@ rule report_data_quality_plots_table:
         "REPORT: creating QC plots for data_quality section"
     group: "report"
     shell:
-        """echo "{params.sub_caption}" >> {output.details} && cidc_wes/modules/scripts/report_dataQual_plot_table.py -n {params.normal} -t {params.tumor} -p {params.image_paths} -o {output}"""
+        """echo "{params.sub_caption}" >> {output.details} && cidc_wes/modules/scripts/report_dataQual_plot_table.py {params.normal} -t {params.tumor} -p {params.image_paths} -o {output}"""
+
 
 rule report_data_quality_coverage:
     """Generate the coverage data table"""

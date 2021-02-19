@@ -269,7 +269,7 @@ if not config.get('neoantigen_run_classII'):
             filtered="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv",
             all_epitopes="analysis/neoantigen/{run}/MHC_Class_I/{tumor}.all_epitopes.tsv",
         params:
-            normal = lambda wildcards: config['runs'][wildcards.run][0],
+            normal = lambda wildcards: "--normal-sample-name %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
             tumor = lambda wildcards: config['runs'][wildcards.run][1],
             iedb = config['neoantigen_iedb'],
             HLA = lambda wildcards,input: parseHLA(input.hla),
@@ -282,7 +282,7 @@ if not config.get('neoantigen_run_classII'):
         benchmark:
             "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
         shell:
-            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
+            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 else: #EXPECT class II output
     rule neoantigen_pvacseq:
         """NOTE: neoantigen's pvacseq is not available on CONDA
@@ -303,7 +303,7 @@ else: #EXPECT class II output
             all_epitopes3="analysis/neoantigen/{run}/combined/{tumor}.all_epitopes.tsv",
 
         params:
-            normal = lambda wildcards: config['runs'][wildcards.run][0],
+            normal = lambda wildcards: "--normal-sample-name %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
             tumor = lambda wildcards: config['runs'][wildcards.run][1],
             iedb = config['neoantigen_iedb'],
             HLA = lambda wildcards,input: parseHLA(input.hla),
@@ -316,7 +316,7 @@ else: #EXPECT class II output
         benchmark:
             "benchmarks/neoantigen/{run}/{tumor}.neoantigen_pvacseq.txt"
         shell:
-            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} --normal-sample-name {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
+            """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e {params.epitope_lengths} -t {threads} {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 
   
 rule neoantigen_add_sample:

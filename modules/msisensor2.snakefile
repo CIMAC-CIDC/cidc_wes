@@ -55,7 +55,7 @@ rule msisensor2:
         "analysis/msisensor2/{run}/{run}_msisensor",
         "analysis/msisensor2/{run}/{run}_msisensor_dis",
         "analysis/msisensor2/{run}/{run}_msisensor_somatic",
-        "analysis/msisensor2/{run}/{run}_msisensor_germline",
+        #"analysis/msisensor2/{run}/{run}_msisensor_germline",
     group: "msisensor2"
     params:
         #Change the files inputted depending on whether normal is available 
