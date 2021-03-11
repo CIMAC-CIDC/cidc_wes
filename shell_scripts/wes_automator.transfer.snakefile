@@ -27,6 +27,20 @@ rule transfer_analysis:
         """gsutil -m cp -r analysis/ {params.transfer_path} && 
         touch {output}"""
 
+#ALT- transfer sub-parts
+# rule transfer_analysis:
+#     #input:
+#     #    "analysis/align/mapping.csv" #stub file b/c snkmk doesn't allow dirs
+#     params:
+#         transfer_path=os.path.join(config['transfer_path'], "analysis/"),
+#     output:
+#         "wes_tx.analysis.txt"
+#     shell:
+#         """gsutil -m cp -r analysis/report.tar.gz {params.transfer_path} &&
+#         gsutil -m cp -r analysis/rna {params.transfer_path} &&
+#         touch {output}"""
+
+
 rule transfer_benchmarks:
     #input:
     #    "benchmarks/all_wes_targets.txt" #stub file b/c snkmk doesn't do dir
@@ -35,7 +49,7 @@ rule transfer_benchmarks:
     output:
         "wes_tx.benchmarks.txt"
     shell:
-        """gsutil -m cp -r benchmarks/ {params.transfer_path} && 
+        """gsutil -m cp -r benchmarks.tar.gz {params.transfer_path} &&
         touch {output}"""
 
 rule transfer_src:
@@ -58,7 +72,8 @@ rule transfer_config_meta:
     output:
         "wes_tx.config_meta.txt"
     shell:
-        """gsutil -m cp -r {input.conf} {params.transfer_path} && 
+        #NOTE: the *.yaml covers the config.yaml and the wes_auto config.yaml
+        """gsutil -m cp -r *.yaml {params.transfer_path} &&
         gsutil -m cp -r {input.meta} {params.transfer_path} && 
         touch {output}"""
 
