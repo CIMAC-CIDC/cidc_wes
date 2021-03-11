@@ -12,7 +12,9 @@ def parseFile(in_file):
     f = open(in_file)
     hdr = f.readline().strip().split()
     l = f.readline().strip().split()
-    tmp = dict(zip(hdr, l))
+    #check for 'NA'
+    foo = [e if e != 'NA' else "0.0" for e in l ]
+    tmp = dict(zip(hdr, foo))
 
     ret = {'purity': float(tmp['purity']),
            'ploidy': float(tmp['ploidy']),
