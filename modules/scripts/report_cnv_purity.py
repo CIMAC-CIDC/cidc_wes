@@ -10,6 +10,8 @@ from optparse import OptionParser
 
 def pp(s):
     """prettyprint numbers"""
+    if s == 'NA':
+        s = '0.0'
     return "%.4f" % float(s)
 
 def main():

@@ -393,7 +393,10 @@ def buildPlotly(plotly_file, details, jinjaEnv):
 def oncoplot(df, **kwargs):
     """Given a dataframe returns a plotly oncoplot figure"""
     #print(kwargs)
-    
+
+    #remove duplicate samples - can occur when normals are used more than once
+    df = df[~df.index.duplicated(keep='first')]
+
     #Sort samples by hits
     #ref: https://stackoverflow.com/questions/20480238/getting-top-3-rows-that-have-biggest-sum-of-columns-in-pandas-dataframe
     top_ngenes = min(kwargs['top_ngenes'], len(df.columns))
