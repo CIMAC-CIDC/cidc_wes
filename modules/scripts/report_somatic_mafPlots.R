@@ -16,8 +16,20 @@ generateMafPlots <- function(mafs, summary_png_f, vaf_png_f, lolli1_png_f, lolli
    topgenes <- head(geneSummary[,1], n=length(lolli_f_names));
    for (tp in topgenes) {
        for (i in 1:length(tp)) {
+          g <- tp[i];
           png(lolli_f_names[i]);
-	  lollipopPlot(maf=mafs, gene=tp[i], showMutationRate=T);
+	  out <- tryCatch(
+             { #TRY to generate the lollipop plot
+	       lollipopPlot(maf=mafs, gene=g, showMutationRate=T);
+	     }, error=function(cond) {
+	        #Error state: print out helpful message and generate blank png
+	        message(paste("WARNING: Lollipop plot call failed for gene", g));
+	        message(cond);
+		#Generate blank png
+		par(mar=c(0,0,0,0), xpd=NA, mgp=c(0,0,0), oma=c(0,0,0,0), ann=F)
+		plot.new()
+		plot.window(0:1, 0:1)
+	     });
 	  dev.off();
        }
    }

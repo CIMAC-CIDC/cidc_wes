@@ -39,7 +39,18 @@ generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, 
    i = 1;
    for (g in topCnrGenes) {
       png(lolli_f_names[i]);
-      lollipopPlot(maf=mafs, gene=g, showMutationRate=T);
+      out <- tryCatch(
+         { #TRY to generate the lollipop plot
+            lollipopPlot(maf=mafs, gene=g, showMutationRate=T);
+	 }, error=function(cond) {
+	    #Error state: print out helpful message and generate blank png
+	    message(paste("WARNING: Lollipop plot call failed for gene", g));
+	    message(cond);
+	    #Generate blank png
+	    par(mar=c(0,0,0,0), xpd=NA, mgp=c(0,0,0), oma=c(0,0,0,0), ann=F)
+	    plot.new()
+	    plot.window(0:1, 0:1)
+	 });
       dev.off();
       i = i + 1;
    }
