@@ -27,11 +27,11 @@ def main():
     optparser = OptionParser(usage=usage)
     optparser.add_option("-r", "--run", help="run name", default=None)
     optparser.add_option("-t", "--tumor", help="tumor file", default=None)
-    optparser.add_option("-n", "--normal", help="tumor file", default=None)
+    optparser.add_option("-n", "--normal", help="normal file", default=None)
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.run or not options.tumor or not options.normal or not options.output:
+    if not options.run or not options.tumor or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -41,14 +41,14 @@ def main():
     #GET tumor sample name
     fname = options.tumor.split("/")[-1]
     tmr_id = fname.split("_")[0]
-
-    nrm = parseGCFile(options.normal)
-    #GET normal sample name
-    fname = options.normal.split("/")[-1]
-    nrm_id = fname.split("_")[0]
-    
     js_out['tumor'] = {'id': tmr_id, 'alignment': {'gc_content': tmr}}
-    js_out['normal'] = {'id': nrm_id, 'alignment': {'gc_content': nrm}}
+
+    if options.normal:
+        nrm = parseGCFile(options.normal)
+        #GET normal sample name
+        fname = options.normal.split("/")[-1]
+        nrm_id = fname.split("_")[0]
+        js_out['normal'] = {'id': nrm_id, 'alignment': {'gc_content': nrm}}
 
     json_out = open(options.output, "w")
     json_out.write(json.dumps(js_out))

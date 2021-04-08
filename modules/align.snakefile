@@ -227,7 +227,9 @@ def align_json_mappingInputFn(wildcards):
 
     tmp = {}
     tmp['tumor'] = "analysis/align/%s/%s_mapping.txt" % (tmr, tmr)
-    tmp['normal'] = "analysis/align/%s/%s_mapping.txt" % (nrm, nrm)
+
+    if not config.get('tumor_only'): #Only run when we have normals
+        tmp['normal'] = "analysis/align/%s/%s_mapping.txt" % (nrm, nrm)
     #print(tmp)
     return tmp
 
@@ -236,11 +238,12 @@ rule align_json_mapping:
     input:
         unpack(align_json_mappingInputFn)
     params:
-        run = lambda wildcards: wildcards.run
+        run = lambda wildcards: wildcards.run,
+        in_files = lambda wildcards,input: "-t %s" % input.tumor if config.get('tumor_only', False) else "-t %s -n %s" % (input.tumor, input.normal),
     output:
         "analysis/report/json/align/{run}.mapping.json"
     group: "align"
     benchmark:
         "benchmarks/align/{run}.align_json_mapping.txt"
     shell:
-        "cidc_wes/modules/scripts/json_align_mapping.py -r {params.run} -t {input.tumor} -n {input.normal} -o {output}"
+        "cidc_wes/modules/scripts/json_align_mapping.py -r {params.run} {params.in_files} -o {output}"

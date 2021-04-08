@@ -61,7 +61,7 @@ def main():
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.run or not options.tumor_opti or not options.normal_opti or not options.output:
+    if not options.run or not options.tumor_opti or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -71,15 +71,14 @@ def main():
     #GET tumor sample name
     fname = options.tumor_opti.split("/")[-1]
     tmr_id = fname.split("_")[0]
-
-    nrm = parseFile(options.normal_opti, options.normal_xhla)
-    #GET normal sample name
-    fname = options.normal_opti.split("/")[-1]
-    nrm_id = fname.split("_")[0]
-
-
     js_out['tumor'] = {'id': tmr_id, 'hla': tmr}
-    js_out['normal'] = {'id': nrm_id, 'hla': nrm}
+    
+    if options.normal_opti:
+        nrm = parseFile(options.normal_opti, options.normal_xhla)
+        #GET normal sample name
+        fname = options.normal_opti.split("/")[-1]
+        nrm_id = fname.split("_")[0]
+        js_out['normal'] = {'id': nrm_id, 'hla': nrm}
     
     json_out = open(options.output, "w")
     json_out.write(json.dumps(js_out))
