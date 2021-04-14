@@ -14,8 +14,8 @@ from optparse import OptionParser
 #_attrs = ['mutation_summary', 'transition_matrix', 'tmb', 'functional_summary']
 
 def processJson(json_fpath):
-    """Given a json file, returns a dictionary of that file with the values
-    needed for this script"""
+    """Given a json file, returns 1. the entire json record and  
+    2. a dictionary of that file with the values needed for this script"""
     #READ in json
     f = open(json_fpath)
     tmp = json.load(f)
@@ -29,7 +29,7 @@ def processJson(json_fpath):
         run[a] = foo[a]
     #print(run)
     #sys.exit()
-    return run
+    return (tmp, run)
     
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
@@ -37,18 +37,27 @@ def main():
     optparser.add_option("-f", "--files", action="append", help="mapping stats .csv file")
     optparser.add_option("-r", "--runs_output", help="json output - runs in json form")
     optparser.add_option("-s", "--samples_output", help="json output - samples in json form")
+    optparser.add_option("-d", "--data_output", help="json output - sample json data")
     (options, args) = optparser.parse_args(sys.argv)
     
-    if not options.files or not options.runs_output or not options.samples_output:
+    if not options.files or not options.runs_output or not options.samples_output or not options.data_output:
         optparser.print_help()
         sys.exit(-1)
 
     #read in json data
-    runs = [processJson(f) for f in options.files]
+    #NOTE: using zip(*) to unpack the list of tuples
+    data, runs = zip(*[processJson(f) for f in options.files])
+    #print(runs)
+    #print(data)
 
     #write runs output
     json_out = open(options.runs_output, "w")
-    json_out.write(json.dumps(runs))
+    json_out.write(json.dumps(runs, indent=4))
+    json_out.close()
+
+    #write data output
+    json_out = open(options.data_output, "w")
+    json_out.write(json.dumps(data, indent=4))
     json_out.close()
 
     #Samples view:
@@ -63,7 +72,7 @@ def main():
         samples.append(tmr)
         samples.append(nrm)
     json_out = open(options.samples_output, "w")
-    json_out.write(json.dumps(samples))
+    json_out.write(json.dumps(samples, indent=4))
     json_out.close()
 
 if __name__ == '__main__':

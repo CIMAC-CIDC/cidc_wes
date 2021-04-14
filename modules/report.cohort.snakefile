@@ -13,6 +13,7 @@ def cohort_report_targets(wildcards):
     #Meta information
     ls.append("analysis/cohort_report/runs_meta.json")
     ls.append("analysis/cohort_report/samples_meta.json")
+    ls.append("analysis/cohort_report/wes_data.json")
 
     #Data Quality
     ls.append("analysis/cohort_report/data_quality/01_mapping_bar.plotly")
@@ -79,13 +80,14 @@ rule cohort_report_meta:
     output:
         runs="analysis/cohort_report/runs_meta.json",
         samples="analysis/cohort_report/samples_meta.json",
+        wes_data="analysis/cohort_report/wes_data.json",
     params:
         files = lambda wildcards,input: " -f ".join(input),
     message:
-        "REPORT: creating meta json files"
+        "REPORT: creating json files"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_meta.py -f {params.files} -r {output.runs} -s {output.samples}"""
+        """cidc_wes/modules/scripts/cohort_report/cr_meta.py -f {params.files} -r {output.runs} -s {output.samples} -d {output.wes_data}"""
 
 ###############################################################################
 rule cohort_report_data_quality_plots:

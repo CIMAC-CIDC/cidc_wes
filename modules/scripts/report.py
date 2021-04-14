@@ -469,7 +469,12 @@ def main():
     wes_panels = {}
     first_section = ""
     #ONLY sections so far--no further recursion
-    
+
+    #Check for meta files- runs_meta.json and samples_meta.json-
+    #load any file ending in .json in the top level report dir
+    for json_f in [f for f in os.listdir(options.dir) if f.endswith(".json")]:
+        loadJson(os.path.join(options.dir, json_f))
+
     #for sect in os.listdir(options.dir):
     for (i, sect) in enumerate(sections):
         if sect == "static": #SKIP static content if it's there
@@ -477,12 +482,6 @@ def main():
         #Check for {section}.yaml file for overrides
         path = os.path.join(options.dir, sect)
         ordering = sorted(os.listdir(path))
-
-        #Check for meta files- runs_meta.json and samples_meta.json
-        if os.path.exists(os.path.join(options.dir, 'runs_meta.json')):
-            loadJson(os.path.join(options.dir, 'runs_meta.json'))
-        if os.path.exists(os.path.join(options.dir, 'samples_meta.json')):
-            loadJson(os.path.join(options.dir, 'samples_meta.json'))
 
         #Build container
         if i == 0: #first element is shown
