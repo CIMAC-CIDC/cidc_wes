@@ -534,7 +534,11 @@ def main():
     wes_report['panels'] = wes_panels
     wes_report['first_section'] = first_section
     wes_report['plot_compressed_json'] = mqc_report.compress_json(mqc_report.plot_data)
-    wes_report['wes_resources'] = json.dumps(_resources)
+    #wes_report['wes_resources'] = json.dumps(_resources)
+    #write wes_resources.js
+    wes_resources_js = open(os.path.join(options.dir, "wes_resources.js"), "w")
+    for (k,v) in _resources.items():
+        wes_resources_js.write("var %s = %s;\n" % (k, json.dumps(v, indent=4)))
     wes_report['config'] = mqc_config
     template.stream(wes_report).dump(options.output)  
 

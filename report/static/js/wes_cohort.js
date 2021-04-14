@@ -1,6 +1,6 @@
 /* Len Taing 2020 (TGBTG) */
 
-var wes_resources = JSON.parse($("#wes_resources").text());
+//var wes_resources = JSON.parse($("#wes_resources").text());
 
 //Toggle filterTable show/hide btn text
 $('[data-toggle="collapse"]').click(function() {
@@ -14,7 +14,7 @@ $('[data-toggle="collapse"]').click(function() {
 
 //Generate the filterTable-samples view first
 function makeFilterTable(use_samples) {
-    var dset = use_samples ? wes_resources['samples_meta'] : wes_resources['runs_meta'];
+    var dset = use_samples ? samples_meta : runs_meta;
     var cols = Object.keys(dset[0]);
     //var columns = cols.map(function(x){ return {'data': x}});
     var table = $('#filterTable');
@@ -91,6 +91,7 @@ function handlerFactory(colName, resource, handler) {
 	var sample_id = $(this.closest('tr')).find('th').attr('data-original-sn');
 	var modal = $('#wesSubModal');
 	var data = new Object();
+	//#NOTE: wes_resources does not exist anymore
 	data[sample_id] = wes_resources[resource][sample_id];
 	handler(data, modal);
     });
