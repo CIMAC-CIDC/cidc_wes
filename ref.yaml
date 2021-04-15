@@ -28,6 +28,8 @@ hg38:
   pons_target: ./ref_files/hg38/pons/MDA_Broad_Miao.target.bed
 
   pons_haplotyper: ./ref_files/hg38/pons/TNhaplotyper_PoN.vcf.gz
+  pons_cidc: ./ref_files/hg38/pons/cidc.pon.vcf.gz
+  gnomad: ./ref_files/hg38/pons/af-only-gnomad.hg38.vcf.gz
   
   #Tumor purity
   facets_vcftar: ./ref_files/hg38/snp/00-common_all.vcf.gz
