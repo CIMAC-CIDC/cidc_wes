@@ -1,4 +1,5 @@
 library(maftools)
+options(bitmapType='cairo')
 
 generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, titv_png_f, vaf_png_f, tcga_png_f, interact_png_f, lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f) {
    png(summary_png_f);
