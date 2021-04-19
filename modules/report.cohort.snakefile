@@ -12,7 +12,7 @@ def cohort_report_targets(wildcards):
     ls = []
     #Meta information
     ls.append("analysis/cohort_report/runs_meta.json")
-    ls.append("analysis/cohort_report/samples_meta.json")
+    #ls.append("analysis/cohort_report/samples_meta.json")
     ls.append("analysis/cohort_report/wes_data.json")
 
     #Data Quality
@@ -76,18 +76,19 @@ def cohort_report_inputFn(wildcards):
 rule cohort_report_meta:
     """Generate the meta information for the report"""
     input:
-        cohort_report_inputFn
+        jsons=cohort_report_inputFn,
+        metasheet="metasheet.cohort.csv",
     output:
         runs="analysis/cohort_report/runs_meta.json",
-        samples="analysis/cohort_report/samples_meta.json",
+        #samples="analysis/cohort_report/samples_meta.json",
         wes_data="analysis/cohort_report/wes_data.json",
     params:
-        files = lambda wildcards,input: " -f ".join(input),
+        files = lambda wildcards,input: " -f ".join(input.jsons),
     message:
         "REPORT: creating json files"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_meta.py -f {params.files} -r {output.runs} -s {output.samples} -d {output.wes_data}"""
+        """cidc_wes/modules/scripts/cohort_report/cr_meta.py -f {params.files} -m {input.metasheet} -r {output.runs} -d {output.wes_data}"""
 
 ###############################################################################
 rule cohort_report_data_quality_plots:

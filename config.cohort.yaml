@@ -4,4 +4,6 @@ runs:
     - /path/to/wes/summary/json_file01.json
   run_02:
     - /path/to/wes/summary/json_file02.json
+  run_03:
+    - /path/to/wes/summary/json_file02.json
   #...

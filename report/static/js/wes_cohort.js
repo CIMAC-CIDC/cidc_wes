@@ -13,9 +13,10 @@ $('[data-toggle="collapse"]').click(function() {
 });
 
 //Generate the filterTable-samples view first
-function makeFilterTable(use_samples) {
-    var dset = use_samples ? samples_meta : runs_meta;
-    var cols = Object.keys(dset[0]);
+function makeFilterTable() {
+    var dset = runs_meta;
+    var cols = ['id'];
+    cols = cols.concat(Object.keys(dset[0]['annotations'])); //Add Annotation cols
     //var columns = cols.map(function(x){ return {'data': x}});
     var table = $('#filterTable');
 
@@ -26,7 +27,9 @@ function makeFilterTable(use_samples) {
     content += "</tr></thead>"
     $.each(dset, function(i, row) {
         content += "<tr><td></td>"
-        for (v of Object.values(row)) {
+	//Add id
+        content += "<td>"+row['id']+"</td>";
+        for (v of Object.values(row['annotations'])) {
             content +="<td>"+v+"</td>";
          }
          content += "</tr>";
@@ -82,7 +85,7 @@ function makeFilterTable(use_samples) {
 });
 
 }
-makeFilterTable(true);
+makeFilterTable();
 
 //Should generalize this fn- ColName, resource, handler
 function handlerFactory(colName, resource, handler) {
