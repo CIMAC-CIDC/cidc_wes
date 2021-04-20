@@ -64,3 +64,6 @@ table.dataTable tr th.select-checkbox.selected::after {
   }
 }
 
+div.dataTables_length {
+  margin-right: 1em;
+}

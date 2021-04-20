@@ -2,13 +2,15 @@
 
 //var wes_resources = JSON.parse($("#wes_resources").text());
 
+var current_samples = [];
+
 //Toggle filterTable show/hide btn text
 $('[data-toggle="collapse"]').click(function() {
   $(this).toggleClass( "active" );
   if ($(this).hasClass("active")) {
-    $(this).text("Hide");
+    $(this).text("Hide\xa0Sample\xa0Table");
   } else {
-    $(this).text("Show");
+    $(this).text("Show\xa0Sample\xa0Table");
   }
 });
 
@@ -35,23 +37,51 @@ function makeFilterTable() {
          content += "</tr>";
     });
     table.append(content);
-        let tbl = table.DataTable({columnDefs: [{orderable: false,
-                                   className: 'select-checkbox',
-                                   targets: 0
-                                  }],
-                     select: {
-                         style: 'multi',
-                         selector: 'td:first-child'
-                     },
-                     order: [
-                         //[1, 'asc'] //This breaks datatables
-                     ]});
+    let tbl = table.DataTable({
+        dom: 'PlBSfrtip',
+        searchPanes: {
+            dtOpts: {
+                select: {
+                    style: 'multi'
+                }
+            }
+        },
+        columnDefs: [{
+            orderable: false,
+            className: 'select-checkbox',
+            targets: 0
+        }],
+        select: {
+            style: 'multi',
+            selector: 'td:first-child'
+        },
+        order: [
+            //[1, 'asc'] //This breaks datatables
+        ],
+        buttons: [
+            {
+                text: 'Update Sample Selection',
+                action: function () {
+                    current_samples = tbl.rows({ selected: true }).data()
+                        .map(function (x) {
+                            return x[1];
+                        });
+
+                    document.getElementById("sample-array").innerHTML = "";
+
+                    for (i = 0; i < current_samples.length; i++) {
+                        document.getElementById("sample-array").innerHTML += "<b>" + (i + 1) + ": " + "</b>" + current_samples[i] + ' ';
+                    }
+                }
+            }
+        ]
+    });
     tbl.on("click", "th.select-checkbox", function() {
     if ($("th.select-checkbox").hasClass("selected")) {
         tbl.rows().deselect();
         $("th.select-checkbox").removeClass("selected");
     } else {
-        tbl.rows().select();
+        tbl.rows({search:'applied'}).select();
         $("th.select-checkbox").addClass("selected");
     }
 }).on("select deselect", function() {
