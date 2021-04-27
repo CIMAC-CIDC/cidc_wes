@@ -37,14 +37,21 @@ function makeFilterTable() {
          content += "</tr>";
     });
     table.append(content);
+    //Figure out number of searchPanes columns to use
+    searchpanes_cols = 'columns-6'
+    filter_num = $('#filterTable')[0].rows[0].cells.length-2
+    if (filter_num < 6){searchpanes_col = 'columns-'+String(filter_num)}
+
     let tbl = table.DataTable({
-        dom: 'PlBSfrtip',
+        dom: 'PSflBrtip',
         searchPanes: {
             dtOpts: {
                 select: {
                     style: 'multi'
                 }
-            }
+            },
+            layout: searchpanes_col,
+            controls: false
         },
         columnDefs: [{
             orderable: false,
