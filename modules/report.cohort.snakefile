@@ -101,7 +101,7 @@ rule cohort_report_data_quality_plots:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
-        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
+        plot_options = yaml_dump({'render': False, 'plotly': {'barmode':"overlay",'opacity':1.0}}),
     message:
         "REPORT: creating mapping plots for data_quality section"
     group: "cohort_report"
@@ -120,7 +120,7 @@ rule cohort_report_coverage_table:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        plot_options = yaml_dump({'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
+        plot_options = yaml_dump({'render': False, 'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
     message:
         "REPORT: creating coverage table for data_quality section"
     group: "cohort_report"
@@ -139,7 +139,7 @@ rule cohort_report_data_quality_gc_plots:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         subcaption="""subcaption: 'GC Plot shows the distribution of %GC bases within a 100bp window. In human, the mean GC content is approx. 40%.'""",
-        plot_options = yaml_dump({'plotly': {'labels':{'X':'% GC bases','value':''}}}),
+        plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'% GC bases','value':''}}}),
     message:
         "REPORT: creating gc content plots for data_quality section"
     group: "cohort_report"
@@ -157,7 +157,7 @@ rule cohort_report_data_quality_insertSize_plots:
         details="analysis/cohort_report/data_quality/04_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        plot_options = yaml_dump({'plotly': {'labels':{'X':'Insert Size','value':'Counts'}}}),
+        plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'Insert Size','value':'Counts'}}}),
     message:
         "REPORT: creating insert size plots for data_quality section"
     group: "cohort_report"
@@ -174,7 +174,7 @@ rule cohort_report_data_quality_meanQual:
         details="analysis/cohort_report/data_quality/05_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#44bd32"]}}), #make the bars green
+        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#44bd32"]}}), #make the bars green
     message:
         "REPORT: creating mean quality for data_quality section"
     group: "cohort_report"

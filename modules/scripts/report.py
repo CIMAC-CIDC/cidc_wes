@@ -359,19 +359,30 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     title = prettyprint(fname)
 
     #Pickout the proper mqc plot module to use
-    plot = getattr(px, plot_type) if plot_type != "oncoplot" else oncoplot
+    px_plot = getattr(px, plot_type) if plot_type != "oncoplot" else oncoplot
     df = pd.read_csv(plotly_file, index_col=0)
     #Colors: red, green, blue, purple, gray, gold
     colors = ['#e84118','#44bd32','#0097e6', '#8c7ae6', '#7f8fa6', '#e1b12c']
     #print(details)
+
+    #NOTE: plotly plots "delay" rednering to a client js script
+    #so if details['render'] = False, then instead of the js that would
+    #come from plotly.offline.plot, we instead place a div stub
+    render = details.get('render', True) #Default is to RENDER the plot
+
     if 'plotly' in details:
         if not 'color_discrete_sequence' in details['plotly']:
             details['plotly']['color_discrete_sequence'] = colors
     else:
         details['plotly'] = {'color_discrete_sequence':colors}
-    fig = plot(df, **details['plotly'])
-    fig.update_layout(plot_bgcolor='#f6f6f6')
-    html_plot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
+
+    if render:
+        fig = px_plot(df, **details['plotly'])
+        fig.update_layout(plot_bgcolor='#f6f6f6')
+        html_plot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
+    else:
+        #YUCK! i know it's html content, but it's just one string
+        html_plot = """<div id="{iid}_plot" class="plotly-graph-div" style="height:100%; width:100%;"></div>""".format(iid= fname.lower())
 
     vals = {'id': fname,
             'title':title,
