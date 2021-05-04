@@ -2,7 +2,9 @@
 
 //var wes_resources = JSON.parse($("#wes_resources").text());
 
-var current_samples = [];
+var current_samples = wes_data.map(function (x) {
+    return [x][0]['id'];
+});;
 
 //Toggle filterTable show/hide btn text
 $('[data-toggle="collapse"]').click(function() {
@@ -72,13 +74,21 @@ function makeFilterTable() {
                     current_samples = tbl.rows({ selected: true }).data()
                         .map(function (x) {
                             return x[1];
-                        });
+                        }).toArray();
 
                     document.getElementById("sample-array").innerHTML = "";
 
                     for (i = 0; i < current_samples.length; i++) {
                         document.getElementById("sample-array").innerHTML += "<b>" + (i + 1) + ": " + "</b>" + current_samples[i] + ' ';
                     }
+                    build_mapping_plot();
+                    build_coverage_plot();
+                    build_mean_quality_plot();
+                    build_gc_content_plot();
+                    build_insert_size_plot();
+                    build_clonality_plot();
+                    build_purity_plot();
+                    build_ploidy_plot();
                 }
             }
         ]
@@ -251,4 +261,15 @@ showListBtn.on('click', function() {
 	//$('#wesSubModal').modal({show:true});
 	tmp.buttons().trigger('click');
     }
+});
+
+$(document).ready(function () {
+    build_mapping_plot();
+    build_coverage_plot();
+    build_mean_quality_plot();
+    build_gc_content_plot();
+    build_insert_size_plot();
+    build_clonality_plot();
+    build_purity_plot();
+    build_ploidy_plot();
 });
