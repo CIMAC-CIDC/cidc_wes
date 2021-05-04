@@ -189,17 +189,18 @@ rule cohort_report_copynumber_clonality:
         cohort_report_inputFn
     output:
         csv="analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly",
-        #details="analysis/cohort_report/data_quality/02_details.yaml",
+        details="analysis/cohort_report/copy_number_variation/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="clonality",
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        #plot_options = "cpswitch: False",
+        plot_options = yaml_dump({'render': False}),
     message:
         "REPORT: creating clonality plot for copy_number_variation section"
     group: "cohort_report"
     shell:
-        """cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """echo "{params.plot_options}" >> {output.details} &&
+        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 rule cohort_report_copynumber_purity:
     """Generate the purity plot for the report"""
@@ -211,7 +212,7 @@ rule cohort_report_copynumber_purity:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="purity",
-        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
+        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
     message:
         "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
@@ -229,7 +230,7 @@ rule cohort_report_copynumber_ploidy:
     params:
         files = lambda wildcards,input: " -f ".join(input),
         attr="ploidy", #-a ".join(["ploidy"]),
-        plot_options = yaml_dump({'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
+        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
     message:
         "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
