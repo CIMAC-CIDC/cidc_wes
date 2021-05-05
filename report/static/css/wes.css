@@ -70,5 +70,5 @@ div.dataTables_length {
 }
 /*datatables searchpanes filters height*/
 div.dtsp-searchPane div.dataTables_scrollBody {
-  height: 160px !important;
+  height: 130px !important;
 }
