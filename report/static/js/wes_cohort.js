@@ -45,6 +45,15 @@ function makeFilterTable() {
     if (filter_num < 6){searchpanes_col = 'columns-'+String(filter_num)}
 
     let tbl = table.DataTable({
+        initComplete: function() {
+            this.api().rows().select();
+            $("th.select-checkbox").addClass("selected");
+          },
+          language: {
+            select: {
+                rows: ""
+            }
+        },
         dom: 'PSflBrtip',
         searchPanes: {
             dtOpts: {
@@ -71,16 +80,11 @@ function makeFilterTable() {
             {
                 text: 'Update Sample Selection',
                 action: function () {
-                    current_samples = tbl.rows({ selected: true }).data()
+                    current_samples = tbl.rows({ search:'applied', selected: true }).data()
                         .map(function (x) {
                             return x[1];
                         }).toArray();
 
-                    document.getElementById("sample-array").innerHTML = "";
-
-                    for (i = 0; i < current_samples.length; i++) {
-                        document.getElementById("sample-array").innerHTML += "<b>" + (i + 1) + ": " + "</b>" + current_samples[i] + ' ';
-                    }
                     build_mapping_plot();
                     build_coverage_plot();
                     build_mean_quality_plot();

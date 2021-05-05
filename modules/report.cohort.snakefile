@@ -100,7 +100,7 @@ rule cohort_report_data_quality_plots:
         details="analysis/cohort_report/data_quality/01_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        caption="""caption: 'This table shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
+        caption="""caption: 'This plot shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
         plot_options = yaml_dump({'render': False, 'plotly': {'barmode':"overlay",'opacity':1.0}}),
     message:
         "REPORT: creating mapping plots for data_quality section"
@@ -119,7 +119,7 @@ rule cohort_report_coverage_table:
         details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
-        caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        caption="""caption: 'This plot shows read depth coverage of each sample. Hover over each bar to see more coverage information for the associated sample.'""",
         plot_options = yaml_dump({'render': False, 'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
     message:
         "REPORT: creating coverage table for data_quality section"
