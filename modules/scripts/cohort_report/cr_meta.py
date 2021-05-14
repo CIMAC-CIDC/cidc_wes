@@ -23,7 +23,10 @@ def processJson(json_fpath, annotations):
     f.close()
 
     #make runs
-    run = {'id': tmp['id'], 'tumor': tmp['tumor']['id'], 'normal':tmp['normal']['id']}
+    run = {'id': tmp['id'], 'tumor': tmp['tumor']['id']}
+    if 'normal' in tmp:
+        run['normal'] = tmp['normal']['id']
+
     #Add annotations
     ann = annotations.get(tmp['id'])
     run['annotations'] = {}

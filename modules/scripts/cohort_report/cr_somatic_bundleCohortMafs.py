@@ -33,13 +33,6 @@ def processJson(json_fpath):
     #print(run)
     #sys.exit()
     return run
-
-def prettyprint(s, toUpper=False):
-    """Given a string, replaces underscores with spaces and uppercases the 
-    first letter of each word"""
-    s = s.replace("_"," ")
-    s = s.upper() if toUpper else s.title()
-    return s
     
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"

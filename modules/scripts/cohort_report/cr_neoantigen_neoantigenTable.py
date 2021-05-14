@@ -9,6 +9,8 @@ import json
 import numpy as np
 from optparse import OptionParser
 
+from cr_utils import prettyprint
+
 #Attribs to read in
 _attrs = ['Gene_Name', 'Mutation', 'Protein_Position', 'HGVSc', 'HGVSp', 'HLA_Allele', 'MT_Epitope_Seq', 'MT_IC50', 'WT_IC50', 'Fold_Change', 'Tumor_DNA_Depth', 'Tumor_DNA_VAF', 'Score']
 
@@ -36,13 +38,6 @@ def processJson(json_fpath):
     run = {'id': tmp['id'], 'neoantigen': ls}
     #print(run)
     return run
-
-def prettyprint(s, toUpper=False):
-    """Given a string, replaces underscores with spaces and uppercases the 
-    first letter of each word"""
-    s = s.replace("_"," ")
-    s = s.upper() if toUpper else s.title()
-    return s
 
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
