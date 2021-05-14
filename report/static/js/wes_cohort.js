@@ -10,9 +10,9 @@ var current_samples = wes_data.map(function (x) {
 $('[data-toggle="collapse"]').click(function() {
   $(this).toggleClass( "active" );
   if ($(this).hasClass("active")) {
-    $(this).text("Hide\xa0Sample\xa0Table");
+    $(this).text("Hide\xa0Sample\xa0Selection\xa0Table");
   } else {
-    $(this).text("Show\xa0Sample\xa0Table");
+    $(this).text("Show\xa0Sample\xa0Selection\xa0Table");
   }
 });
 
@@ -40,9 +40,8 @@ function makeFilterTable() {
     });
     table.append(content);
     //Figure out number of searchPanes columns to use
-    searchpanes_cols = 'columns-6'
-    filter_num = $('#filterTable')[0].rows[0].cells.length-2
-    if (filter_num < 6){searchpanes_col = 'columns-'+String(filter_num)}
+    filter_num = $('#filterTable')[0].rows[0].cells.length-3
+    if (filter_num < 6){searchpanes_col = 'columns-'+String(filter_num)} else {searchpanes_col = 'columns-6'}
 
     let tbl = table.DataTable({
         initComplete: function() {
@@ -85,14 +84,8 @@ function makeFilterTable() {
                             return x[1];
                         }).toArray();
 
-                    build_mapping_plot();
-                    build_coverage_plot();
-                    build_mean_quality_plot();
-                    build_gc_content_plot();
-                    build_insert_size_plot();
-                    build_clonality_plot();
-                    build_purity_plot();
-                    build_ploidy_plot();
+                        build_plot();
+
                 }
             }
         ]
@@ -268,12 +261,5 @@ showListBtn.on('click', function() {
 });
 
 $(document).ready(function () {
-    build_mapping_plot();
-    build_coverage_plot();
-    build_mean_quality_plot();
-    build_gc_content_plot();
-    build_insert_size_plot();
-    build_clonality_plot();
-    build_purity_plot();
-    build_ploidy_plot();
+    build_plot();
 });
