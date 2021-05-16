@@ -236,7 +236,7 @@ rule vcfVEP:
     group: "somatic"
     conda: "../envs/somatic_vcftools.yml"
     shell:
-        "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta}"
+        "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
     
 rule vcf2maf:
     """General rule to convert the different vcf files into maf"""
