@@ -38,8 +38,10 @@ function mafStringToDf(mafString) {
     
 //Convert all wes_data[i]['somatic']['filtered_maf_file'] into a danfo Df
 for (var i = 0; i < wes_data.length; i++) {
-    let tmp = atob(wes_data[0]['somatic']['filtered_maf_file']);
+    let tmp = atob(wes_data[i]['somatic']['filtered_maf_file']);
     wes_data[i]['somatic']['maf'] = mafStringToDf(tmp);
+    //delete filtered_maf_file
+    delete wes_data[i]['somatic']['filtered_maf_file']
 }
 
 //EXAMPLES:

@@ -2,17 +2,24 @@
 """Len Taing (TGBTG)
 Script to generate wes run plots information"""
 
+import io
 import os
 import sys
 import math
 import json
 import csv
 import numpy as np
+import pandas as pd
+import base64
 from optparse import OptionParser
 
 #Attribs to read in
 #LEAVE off the plot for now
 #_attrs = ['mutation_summary', 'transition_matrix', 'tmb', 'functional_summary']
+
+#NOTE: should centralize this so i don't repeat myself
+#ALSO in wes_loadMaf.js
+_maf_cols = ['Hugo_Symbol', 'Chromosome', 'Start_Position', 'End_Position', 'Reference_Allele', 'Tumor_Seq_Allele1', 'Tumor_Seq_Allele2', 'Variant_Classification', 'Variant_Type', 'Tumor_Sample_Barcode', 'Matched_Norm_Sample_Barcode', 't_ref_count', 't_alt_count', 'HGVSc', 'HGVSp', 'Transcript_ID']
 
 def processJson(json_fpath, annotations):
     """Given a json file, returns 1. the entire json record and  
@@ -27,13 +34,15 @@ def processJson(json_fpath, annotations):
     if 'normal' in tmp:
         run['normal'] = tmp['normal']['id']
 
-    #Add annotations
+    #Add annotations to runs
     ann = annotations.get(tmp['id'])
     run['annotations'] = {}
     if ann:
         for a in ann:
             run['annotations'][a] = ann[a]
 
+    #modify the maf file stored in the json to only contain the cols we want
+    tmp['somatic']['filtered_maf_file'] = cullMAF_cols(tmp['somatic']['filtered_maf_file'], _maf_cols)
     #print(run)
     return (tmp, run)
 
@@ -53,6 +62,34 @@ def parseMeta(metasheet):
     metasheet_f.close()
     #print(annotations)
     return annotations
+
+def cullMAF_cols(maf_b64, columns):
+    """given a maf file, encoded as a b64 string, this function will
+    DECODE the maf file (string) and reduce it to include only the columns in 
+    the 'columns' list
+    
+    returns a b64 encoding of the culled maf file
+    """
+    #DECODE maf file to string
+    maf_bytes = base64.b64decode(maf_b64)
+    maf = maf_bytes.decode('utf-8')
+    
+    #Convert to pandas df
+    #ref: https://www.kite.com/python/answers/how-to-create-a-pandas-dataframe-from-a-string-in-python
+    data = io.StringIO(maf)
+    df = pd.read_csv(data, sep="\t", comment="#")
+
+    #CULL COLUMNS
+    df = df[columns]
+    #Convert to df to b64 string
+    s = df.to_string(index=False).split('\n')
+    #make each line tab-delimited
+    lines = ["\t".join(l.split()) for l in s]
+    s = "\n".join(lines)
+    s_byte = s.encode('utf-8')
+    s_b64 = base64.b64encode(s_byte).decode('utf-8')
+    
+    return s_b64
 
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
