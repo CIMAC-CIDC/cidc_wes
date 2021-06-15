@@ -24,3 +24,7 @@ samples:
   # CNTZTZN93.01:
   #   - gs://10021_results/WES/CNTZTZN93.01/
 
+#tumor_only_samples:
+#  - CNTZ36P8Q.01
+#  - CNTZ3O0H0.01
+#  - CNTZ57IYA.01

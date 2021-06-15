@@ -30,6 +30,7 @@ def main():
     usage = "USAGE: %prog -b [google bucket path, e.g. gs://10021_results/WES/CNTZ36P8Q.01/; NOTE: this folder is assumed to have an 'analysis' subfolder]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-b", "--bucket_path", help="google bucket path to the where the WES results are stored", default=None)
+    optparser.add_option("-t", "--tumor_only", help="Is tumor-only sample", action="store_true", default=False)
     (options, args) = optparser.parse_args(sys.argv)
 
     if not options.bucket_path:
@@ -46,10 +47,13 @@ def main():
         bp = bp + "/"
 
     analysis_path = bp + "analysis/"
-    #Sub folders to delete
+    #BASE Sub folders to delete
     sub_folders = ['align', 'copynumber', 'metrics', 'msisensor2',
                    'neoantigen', 'optitype', 'report', 'somatic', 'xhla']
     
+    if not options.tumor_only: #For Tumor-Normal samples add these
+        sub_folders.extend(['clonality', 'corealignments', 'germline', 'purity'])
+
     for f in sub_folders:
         path = analysis_path + f
         cmd = "gsutil rm -r %s" % path
