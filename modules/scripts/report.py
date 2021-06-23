@@ -90,7 +90,7 @@ def get_prefix(s):
     return prefix
 
 #NOTE: this can easily handle csv files too!
-def buildTable(tsv_file, details, jinjaEnv, cssClass=""):
+def buildTable(tsv_file, details, jinjaEnv, firstPanel, cssClass=""):
     """Given a tsv file, and a section--converts the tsv file to a table
     assumes the first line is the hdr"""
     #TRY to auto-detect if plot file is , or \t separated
@@ -137,10 +137,11 @@ def buildTable(tsv_file, details, jinjaEnv, cssClass=""):
     
     vals['header'] = hdr
     vals['table'] = table
+    vals['isactive'] = "active" if firstPanel else ""
     #print(vals)
-    return template.render(vals)
+    return (template.render(vals), vals['container'], vals['title'])
 
-def buildPlot(png_file, details, jinjaEnv):
+def buildPlot(png_file, details, jinjaEnv, firstPanel):
     """Given a png file displays the plot..simple!"""
     template = jinjaEnv.get_template("plot.html")
     fname = ".".join(png_file.split("/")[-1].split(".")[:-1])
@@ -164,9 +165,9 @@ def buildPlot(png_file, details, jinjaEnv):
     sub_caption = details.get('subcaption', None)
     if sub_caption:
         vals['sub_caption'] = renderMd(sub_caption)
-        
+    vals['isactive'] = "active" if firstPanel else ""
     #print(vals)
-    return template.render(vals)
+    return (template.render(vals), vals['id'], vals['title'])
 
 def renderMd(s):
     """renders s as markdown text"""
@@ -228,7 +229,7 @@ def readMqcData02(data_file, separator = ","):
     #print(data)
     return data
 
-def buildMqcPlot(plot_file, details, jinjaEnv):
+def buildMqcPlot(plot_file, details, jinjaEnv, firstPanel):
     """Given a plotfile which is a csv file with a .plot extension,
     Tries to generate an (interactive) multiqc plot"""
     #TRY to auto-detect if plot file is , or \t separated
@@ -278,7 +279,7 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
         sub_caption = details.get('subcaption', None)
         if sub_caption:
             vals['sub_caption'] = renderMd(sub_caption)
-
+        vals['isactive'] = "active" if firstPanel else ""
         #print(vals)
         ret = template.render(vals)
 
@@ -304,7 +305,7 @@ def buildMqcPlot(plot_file, details, jinjaEnv):
                     'caption': s['description']}
             ret += template.render(vals)
 
-    return ret
+    return (ret, vals['id'], vals['title'])
 
 def formatter(x, pos):
     'The two args are the value and tick position'
@@ -339,7 +340,7 @@ def loadJson(json_file):
     ffile.close()
     _resources[fname] = tmp
 
-def buildPlotly(plotly_file, details, jinjaEnv):
+def buildPlotly(plotly_file, details, jinjaEnv, firstPanel):
     """Given a plotfile which is a csv file with a .plotly extension,
     Tries to generate an (interactive) plotly chart"""
     #TRY to auto-detect if plot file is , or \t separated
@@ -397,9 +398,9 @@ def buildPlotly(plotly_file, details, jinjaEnv):
     sub_caption = details.get('subcaption', None)
     if sub_caption:
         vals['sub_caption'] = renderMd(sub_caption)
-
+    vals['isactive'] = "active" if firstPanel else ""
     #print(vals)
-    return template.render(vals)
+    return (template.render(vals), vals['id'], vals['title'])
 
 def oncoplot(df, **kwargs):
     """Given a dataframe returns a plotly oncoplot figure"""
@@ -470,7 +471,8 @@ def main():
     templateLoader = jinja2.FileSystemLoader(searchpath=template_dir)
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template(template_fname)
-
+    sect_template = templateEnv.get_template("section.html")
+    
     #Build up this dictionary
     wes_report = {'title':title}
     
@@ -497,10 +499,13 @@ def main():
         #Build container
         if i == 0: #first element is shown
             first_section = sect
-            tmp = """<div id="%s" class="container wes_container">\n""" % sect
+            nodisplay = ""
         else:
-            tmp = """<div id="%s" class="container wes_container" style="display:none">\n""" % sect
-            
+            nodisplay = "style=\"display:none\""
+
+        firstPanel = True
+        tabs = []
+        panels = []
         for ffile in ordering:
             filepath = os.path.join(path, ffile)
             #I will soon deprecate these 'plots' sub-dir--is not currenlty used by either report
@@ -524,21 +529,37 @@ def main():
                     details = {}
 
                 if ffile.endswith(".tsv") or ffile.endswith(".csv"): #MAKE a table
-                    tmp += buildTable(filepath, details, templateEnv)
+                    (html, iid, title) = buildTable(filepath, details, templateEnv, firstPanel)
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
                 elif ffile.endswith(".dt"):
-                    tmp += buildTable(filepath, details, templateEnv, "wes_datatable")
+                    (html, iid, title) = buildTable(filepath, details, templateEnv, firstPanel, "wes_datatable")
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
                 elif ffile.endswith(".png"): #Make a plot
-                    tmp += buildPlot(filepath, details, templateEnv)
+                    (html, iid, title) = buildPlot(filepath, details, templateEnv, firstPanel)
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
                 elif ffile.endswith(".mqc"): #Make a Multiqc plot
-                    tmp += buildMqcPlot(filepath, details, templateEnv)
+                    (html, iid, title) = buildMqcPlot(filepath, details, templateEnv, firstPanel)
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
+                elif ffile.endswith(".plotly"): #Make a plotly plot
+                    (html, iid, title) = buildPlotly(filepath, details, templateEnv, firstPanel)
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
                 elif ffile.endswith(".json"): #Load json data
                     loadJson(filepath)
-                elif ffile.endswith(".plotly"): #Make a plotly plot
-                    tmp += buildPlotly(filepath, details, templateEnv)
 
         #END container
-        tmp += "\n</div>"
-        wes_panels[sect] = tmp
+        #tmp += "\n</div>"
+        vals = {'section': sect, 'nodisplay': nodisplay, 'tabs':tabs, 'panels': panels}
+        wes_panels[sect] = sect_template.render(vals)
 
     wes_sections = [(s, prettyprint(s)) for s in sections]
     wes_report['sections'] = wes_sections

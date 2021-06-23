@@ -2,6 +2,10 @@
    display: none;
 }
 
+.nav-tabs {
+    display: none;
+}
+
 .container {
    display:block!important;
    width:100%;
