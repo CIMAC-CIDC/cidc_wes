@@ -68,7 +68,8 @@ def cullMAF_cols(maf_b64, columns):
     DECODE the maf file (string) and reduce it to include only the columns in 
     the 'columns' list
     
-    returns a b64 encoding of the culled maf file
+    returns a dict that will be ready for fast DanFo.js conversion, i.e.
+    {'hdr': [ ...], 'mat': [[ ...], [...], ..., ]} where mat = the data matrx
     """
     #DECODE maf file to string
     maf_bytes = base64.b64decode(maf_b64)
@@ -81,15 +82,13 @@ def cullMAF_cols(maf_b64, columns):
 
     #CULL COLUMNS
     df = df[columns]
-    #Convert to df to b64 string
+    #Convert pandas datafram to list of strings
     s = df.to_string(index=False).split('\n')
     #make each line tab-delimited
     lines = ["\t".join(l.split()) for l in s]
-    s = "\n".join(lines)
-    s_byte = s.encode('utf-8')
-    s_b64 = base64.b64encode(s_byte).decode('utf-8')
-    
-    return s_b64
+
+    #Drop the hdr line by doing mat: lines[1:]
+    return {'hdr': columns, 'mat': lines[1:]}
 
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"

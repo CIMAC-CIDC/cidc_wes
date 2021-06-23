@@ -12,6 +12,7 @@
 
    ref: https://stackoverflow.com/questions/16177037/how-to-extract-information-in-a-tsv-file-and-save-it-in-an-array-in-javascript/16177134
 */
+/* OBSOLETE and inefficient!
 function mafStringToDf(mafString) {
     let lines = mafString.split("\n"); //split maf files into llines
     let mat = []; //matrix of maf contents
@@ -35,13 +36,17 @@ function mafStringToDf(mafString) {
 
     return subset_df;
 }
-    
+*/
+
 //Convert all wes_data[i]['somatic']['filtered_maf_file'] into a danfo Df
+//Assumes that each wes_data[i]['somatic']['filtered_maf_file'] object is
+// {'hdr' : [ ... ], 'mat': [[...], [ ...], ]}
 for (var i = 0; i < wes_data.length; i++) {
-    let tmp = atob(wes_data[i]['somatic']['filtered_maf_file']);
-    wes_data[i]['somatic']['maf'] = mafStringToDf(tmp);
+    let tmp = wes_data[i]['somatic']['filtered_maf_file'];
+    let df = new dfd.DataFrame(tmp['mat'], {'columns': tmp['hdr']});
+    wes_data[i]['somatic']['maf'] = df;
     //delete filtered_maf_file
-    delete wes_data[i]['somatic']['filtered_maf_file']
+    delete wes_data[i]['somatic']['filtered_maf_file'];
 }
 
 //EXAMPLES:
