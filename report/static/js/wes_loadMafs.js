@@ -41,11 +41,15 @@ function mafStringToDf(mafString) {
 //Convert all wes_data[i]['somatic']['filtered_maf_file'] into a danfo Df
 //Assumes that each wes_data[i]['somatic']['filtered_maf_file'] object is
 // {'hdr' : [ ... ], 'mat': [[...], [ ...], ]}
-for (var i = 0; i < wes_data.length; i++) {
+for (let i = 0; i < wes_data.length; i++) {
     let tmp = wes_data[i]['somatic']['filtered_maf_file'];
+    for (let j = 0; j < tmp['mat'].length; j++) {
+        tmp['mat'][j] = tmp['mat'][j].split('\t');
+    }
     let df = new dfd.DataFrame(tmp['mat'], {'columns': tmp['hdr']});
     wes_data[i]['somatic']['maf'] = df;
     //delete filtered_maf_file
+    wes_data[i]['somatic']['filtered_maf_file'] = null;
     delete wes_data[i]['somatic']['filtered_maf_file'];
 }
 
