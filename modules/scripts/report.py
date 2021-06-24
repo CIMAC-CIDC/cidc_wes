@@ -448,6 +448,37 @@ def oncoplot(df, **kwargs):
     #fig.write_html("wes_oncoplot.html")
     return fig
 
+def stub(stub_file, details, jinjaEnv, firstPanel):
+    """Will render a PLACEHOLDER DIV for js plotting, e.g. like 
+    buildPlotly when render is false!
+    Typically stub_files are empty so we don't even look into them
+    """
+    template = jinjaEnv.get_template("mqc_plot.html")
+    #Dropping path and extension to get filename
+    fname = ".".join(stub_file.split("/")[-1].split(".")[:-1])
+    #REMOVE index from file name, e.g. 01_foo -> foo
+    index = fname.split("_")[0] #first save index
+    fname = "_".join(fname.split("_")[1:])
+    title = prettyprint(fname)
+
+    html_plot = """<div id="{iid}_plot" class="plotly-graph-div" style="height:100%; width:100%;"></div>""".format(iid= fname.lower())
+    vals = {'id': fname,
+            'title':title,
+            'plot': html_plot,
+    }
+
+    #Check for a caption
+    caption = details.get('caption', None)
+    if caption:
+        vals['caption'] = renderMd(caption)
+    #check for subcaption
+    sub_caption = details.get('subcaption', None)
+    if sub_caption:
+        vals['sub_caption'] = renderMd(sub_caption)
+    vals['isactive'] = "active" if firstPanel else ""
+    #print(vals)
+    return (template.render(vals), vals['id'], vals['title'])
+
 def main():
     usage = "USAGE: %prog -o [output html file]"
     optparser = OptionParser(usage=usage)
@@ -550,6 +581,11 @@ def main():
                     panels.append(html)
                 elif ffile.endswith(".plotly"): #Make a plotly plot
                     (html, iid, title) = buildPlotly(filepath, details, templateEnv, firstPanel)
+                    firstPanel = False
+                    tabs.append((iid, title))
+                    panels.append(html)
+                elif ffile.endswith(".stub"): #Make a stub div for js plotting
+                    (html, iid, title) = stub(filepath, details, templateEnv, firstPanel)
                     firstPanel = False
                     tabs.append((iid, title))
                     panels.append(html)

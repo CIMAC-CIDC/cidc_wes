@@ -16,28 +16,35 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/wes_data.json")
 
     #Data Quality
-    ls.append("analysis/cohort_report/data_quality/01_mapping_bar.plotly")
-    ls.append("analysis/cohort_report/data_quality/02_coverage_bar.plotly")
-    ls.append("analysis/cohort_report/data_quality/03_GC_Content_line.plotly")
-    ls.append("analysis/cohort_report/data_quality/04_insert_size_line.plotly")
-    ls.append("analysis/cohort_report/data_quality/05_mean_quality_bar.plotly")
+    ls.append("analysis/cohort_report/data_quality/01_mapping.stub")
+    ls.append("analysis/cohort_report/data_quality/02_coverage.stub")
+    ls.append("analysis/cohort_report/data_quality/03_GC_Content.stub")
+    ls.append("analysis/cohort_report/data_quality/04_insert_size.stub")
+    ls.append("analysis/cohort_report/data_quality/05_mean_quality.stub")
 
     #Copynumber
-    ls.append("analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly")
-    ls.append("analysis/cohort_report/copy_number_variation/02_purity_bar.plotly")
-    ls.append("analysis/cohort_report/copy_number_variation/03_ploidy_line.plotly")
+    ls.append("analysis/cohort_report/copy_number_variation/01_clonality.stub")
+    ls.append("analysis/cohort_report/copy_number_variation/02_purity.stub")
+    ls.append("analysis/cohort_report/copy_number_variation/03_ploidy.stub")
 
     #Somatic
     ls.append("analysis/cohort_report/somatic_variants/cohort.maf.gz")
-    ls.append("analysis/cohort_report/somatic_variants/01_somatic_variants_summary.png")
-    ls.append("analysis/cohort_report/somatic_variants/02_oncoplot.png")
-    ls.append("analysis/cohort_report/somatic_variants/03_Ti-Tv.png")
-    ls.append("analysis/cohort_report/somatic_variants/04_VAF.png")
-    ls.append("analysis/cohort_report/somatic_variants/05_TCGA_comparison.png")
-    ls.append("analysis/cohort_report/somatic_variants/06_somatic_interactions.png")
+    #summary plots
+    ls.append("analysis/cohort_report/somatic_variants/01_variants_per_sample.stub")
+    ls.append("analysis/cohort_report/somatic_variants/02_top_10_genes.stub")
+    ls.append("analysis/cohort_report/somatic_variants/03_variant_class.stub")
+    ls.append("analysis/cohort_report/somatic_variants/04_variant_class_summary.stub")
+    ls.append("analysis/cohort_report/somatic_variants/05_variant_type.stub")
+    ls.append("analysis/cohort_report/somatic_variants/06_SNV_Class.stub")
+    
+    ls.append("analysis/cohort_report/somatic_variants/07_oncoplot.png")
+    ls.append("analysis/cohort_report/somatic_variants/08_Ti-Tv.png")
+    ls.append("analysis/cohort_report/somatic_variants/09_VAF.png")
+    ls.append("analysis/cohort_report/somatic_variants/10_TCGA_Comparison.png")
+    ls.append("analysis/cohort_report/somatic_variants/11_somatic_interactions.png")
     #Removing this plot b/c it's looking strange
     #ls.append("analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly")
-    ls.append("analysis/cohort_report/somatic_variants/10_lollipop_plots.csv")
+    ls.append("analysis/cohort_report/somatic_variants/12_lollipop_plots.csv")
     
     ls.append("analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png")
     ls.append("analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png")
@@ -93,150 +100,166 @@ rule cohort_report_meta:
 ###############################################################################
 rule cohort_report_data_quality_plots:
     """Generate the mapping stats plots for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/01_mapping_bar.plotly",
+        #csv="analysis/cohort_report/data_quality/01_mapping_bar.plotly",
+        csv="analysis/cohort_report/data_quality/01_mapping.stub",
         details="analysis/cohort_report/data_quality/01_details.yaml",
     params:
-        files = lambda wildcards,input: " -f ".join(input),
+        #files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This plot shows the total number reads in each sample, how many of those reads were mapped, and how many are de-duplicated reads.'""",
-        plot_options = yaml_dump({'render': False, 'plotly': {'barmode':"overlay",'opacity':1.0}}),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'barmode':"overlay",'opacity':1.0}}),
     message:
         "REPORT: creating mapping plots for data_quality section"
     group: "cohort_report"
     shell:
         """echo "{params.caption}" >> {output.details} && 
-        echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingPlots.py -f {params.files} -o {output.csv}"""
+        touch {output.csv}
+        """
+        #cidc_wes/modules/scripts/cohort_report/cr_dataQual_mappingPlots.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_coverage_table:
     """Generate the coverage table for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/02_coverage_bar.plotly",
+        #csv="analysis/cohort_report/data_quality/02_coverage_bar.plotly",
+        csv="analysis/cohort_report/data_quality/02_coverage.stub",
         details="analysis/cohort_report/data_quality/02_details.yaml",
     params:
-        files = lambda wildcards,input: " -f ".join(input),
+        #files = lambda wildcards,input: " -f ".join(input),
         caption="""caption: 'This plot shows read depth coverage of each sample. Hover over each bar to see more coverage information for the associated sample.'""",
-        plot_options = yaml_dump({'render': False, 'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'x':'Mean Depth', 'hover_data':['Q1 Depth','Median Depth','Q3 Depth', 'Percent Bases >50']}}),
     message:
         "REPORT: creating coverage table for data_quality section"
     group: "cohort_report"
     shell:
         """echo "{params.caption}" >> {output.details} && 
-        echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_dataQual_coverageTable.py -f {params.files} -o {output.csv}"""
+        touch {output.csv}
+        """
+        #cidc_wes/modules/scripts/cohort_report/cr_dataQual_coverageTable.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_data_quality_gc_plots:
     """Generate the gc content plots for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/03_GC_Content_line.plotly",
+        #csv="analysis/cohort_report/data_quality/03_GC_Content_line.plotly",
+        csv="analysis/cohort_report/data_quality/03_GC_Content.stub",
         details="analysis/cohort_report/data_quality/03_details.yaml",
     params:
-        files = lambda wildcards,input: " -f ".join(input),
+        #files = lambda wildcards,input: " -f ".join(input),
         subcaption="""subcaption: 'GC Plot shows the distribution of %GC bases within a 100bp window. In human, the mean GC content is approx. 40%.'""",
-        plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'% GC bases','value':''}}}),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'% GC bases','value':''}}}),
     message:
         "REPORT: creating gc content plots for data_quality section"
     group: "cohort_report"
     shell:
         """echo "{params.subcaption}" >> {output.details} && 
-        echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_dataQual_gcPlots.py -f {params.files} -o {output.csv}"""
+        touch {output.csv}"""
+        #echo "{params.plot_options}" >> {output.details} && 
+        #cidc_wes/modules/scripts/cohort_report/cr_dataQual_gcPlots.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_data_quality_insertSize_plots:
     """Generate the insert size plots for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/04_insert_size_line.plotly",
-        details="analysis/cohort_report/data_quality/04_details.yaml",
-    params:
-        files = lambda wildcards,input: " -f ".join(input),
-        plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'Insert Size','value':'Counts'}}}),
+        #csv="analysis/cohort_report/data_quality/04_insert_size_line.plotly",
+        csv="analysis/cohort_report/data_quality/04_insert_size.stub",
+        #details="analysis/cohort_report/data_quality/04_details.yaml",
+    #params:
+        #files = lambda wildcards,input: " -f ".join(input),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'labels':{'X':'Insert Size','value':'Counts'}}}),
     message:
         "REPORT: creating insert size plots for data_quality section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
+        """ touch {output.csv}
+        """
+        #echo "{params.plot_options}" >> {output.details} &&
+        #cidc_wes/modules/scripts/cohort_report/cr_dataQual_insertSizePlots.py -f {params.files} -o {output.csv}"""
 
 rule cohort_report_data_quality_meanQual:
     """Generate the mean quality plots for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/data_quality/05_mean_quality_bar.plotly",
-        details="analysis/cohort_report/data_quality/05_details.yaml",
+        #csv="analysis/cohort_report/data_quality/05_mean_quality_bar.plotly",
+        csv="analysis/cohort_report/data_quality/05_mean_quality.stub",
+        #details="analysis/cohort_report/data_quality/05_details.yaml",
     params:
-        files = lambda wildcards,input: " -f ".join(input),
-        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#44bd32"]}}), #make the bars green
+        #files = lambda wildcards,input: " -f ".join(input),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#44bd32"]}}), #make the bars green
     message:
         "REPORT: creating mean quality for data_quality section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} && 
-        cidc_wes/modules/scripts/cohort_report/cr_dataQual_meanQual.py -f {params.files} -o {output.csv}"""
+        """touch {output.csv}"""
+        #echo "{params.plot_options}" >> {output.details} && 
+        #cidc_wes/modules/scripts/cohort_report/cr_dataQual_meanQual.py -f {params.files} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_copynumber_clonality:
     """Generate the clonality table for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly",
-        details="analysis/cohort_report/copy_number_variation/01_details.yaml",
-    params:
-        files = lambda wildcards,input: " -f ".join(input),
-        attr="clonality",
+        #csv="analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly",
+        csv="analysis/cohort_report/copy_number_variation/01_clonality.stub",
+        #details="analysis/cohort_report/copy_number_variation/01_details.yaml",
+    #params:
+        #files = lambda wildcards,input: " -f ".join(input),
         #caption="""caption: 'This table shows read depth coverage of each sample.'""",
-        plot_options = yaml_dump({'render': False}),
+        #plot_options = yaml_dump({'render': False}),
     message:
         "REPORT: creating clonality plot for copy_number_variation section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """touch {output.csv}"""
+        #echo "{params.plot_options}" >> {output.details} &&
+        #cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 rule cohort_report_copynumber_purity:
     """Generate the purity plot for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number_variation/02_purity_bar.plotly",
-        details="analysis/cohort_report/copy_number_variation/02_details.yaml",
-    params:
-        files = lambda wildcards,input: " -f ".join(input),
-        attr="purity",
-        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
+        #csv="analysis/cohort_report/copy_number_variation/02_purity_bar.plotly",
+        csv="analysis/cohort_report/copy_number_variation/02_purity.stub",
+        #details="analysis/cohort_report/copy_number_variation/02_details.yaml",
+    #params:
+        #files = lambda wildcards,input: " -f ".join(input),
+        #attr="purity",
+        #plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#0097e6"]}}), #make the bars blue
     message:
         "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """touch {output.csv}"""
+        #echo "{params.plot_options}" >> {output.details} &&
+        #cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 rule cohort_report_copynumber_ploidy:
     """Generate the ploidy plot for the report"""
-    input:
-        cohort_report_inputFn
+    #input:
+    #    cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/copy_number_variation/03_ploidy_line.plotly",
-        details="analysis/cohort_report/copy_number_variation/03_details.yaml",
-    params:
-        files = lambda wildcards,input: " -f ".join(input),
-        attr="ploidy", #-a ".join(["ploidy"]),
-        plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
+        #csv="analysis/cohort_report/copy_number_variation/03_ploidy_line.plotly",
+        csv="analysis/cohort_report/copy_number_variation/03_ploidy.stub",
+        #details="analysis/cohort_report/copy_number_variation/03_details.yaml",
+    #params:
+        #files = lambda wildcards,input: " -f ".join(input),
+        #attr="ploidy", #-a ".join(["ploidy"]),
+        #plot_options = yaml_dump({'render': False, 'plotly': {'color_discrete_sequence':["#e1b12c",'#7f8fa6']}}), #make the lines yellow and gray
     message:
         "REPORT: creating copynumber table for copy_number_variation section"
     group: "cohort_report"
     shell:
-        """echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
+        """touch {output.csv}"""
+        #echo "{params.plot_options}" >> {output.details} &&
+        #cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 ###############################################################################
 rule cohort_report_somatic_makeCohort:
@@ -255,18 +278,36 @@ rule cohort_report_somatic_makeCohort:
         #NOTE: this code needs speedup!
         """cidc_wes/modules/scripts/cohort_report/cr_somatic_bundleCohortMafs.py -f {params.files} -o {output.gz}"""
 
+rule cohort_report_somatic_variant_summaries:
+    input:
+        mafs="analysis/cohort_report/somatic_variants/cohort.maf.gz",
+        cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
+    output: 
+        varPerSample="analysis/cohort_report/somatic_variants/01_variants_per_sample.stub",
+        top10="analysis/cohort_report/somatic_variants/02_top_10_genes.stub",
+        varClass="analysis/cohort_report/somatic_variants/03_variant_class.stub",
+        varClassSum="analysis/cohort_report/somatic_variants/04_variant_class_summary.stub",
+        varType="analysis/cohort_report/somatic_variants/05_variant_type.stub",
+        snvClass="analysis/cohort_report/somatic_variants/06_SNV_Class.stub",
+    message:
+        "REPORT: creating mafTools plot for somatic section"
+    group: "cohort_report"
+    shell:
+        """touch {output.varPerSample} && touch {output.top10} &&
+        touch {output.varClass} && touch {output.varClassSum} &&
+        touch {output.varType} && touch {output.snvClass}"""
+    
 rule cohort_report_somatic_mafTools:
     """Generate the mafTools plots for the report"""
     input:
         mafs="analysis/cohort_report/somatic_variants/cohort.maf.gz",
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
-    output:
-        summary="analysis/cohort_report/somatic_variants/01_somatic_variants_summary.png",
-        onco="analysis/cohort_report/somatic_variants/02_oncoplot.png",
-        titv="analysis/cohort_report/somatic_variants/03_Ti-Tv.png",
-        vaf="analysis/cohort_report/somatic_variants/04_VAF.png",
-        tcga="analysis/cohort_report/somatic_variants/05_TCGA_comparison.png",
-        interact="analysis/cohort_report/somatic_variants/06_somatic_interactions.png",
+    output:     
+        onco="analysis/cohort_report/somatic_variants/07_oncoplot.png",
+        titv="analysis/cohort_report/somatic_variants/08_Ti-Tv.png",
+        vaf="analysis/cohort_report/somatic_variants/09_VAF.png",
+        tcga="analysis/cohort_report/somatic_variants/10_TCGA_Comparison.png",
+        interact="analysis/cohort_report/somatic_variants/11_somatic_interactions.png",
 
         lolli01= "analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png",
         lolli02= "analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png",
@@ -281,7 +322,7 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.summary} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.onco} {output.titv} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
 rule cohort_report_somatic_lollipop_table:
     """Generate the table of lollipop plots"""
@@ -292,8 +333,8 @@ rule cohort_report_somatic_lollipop_table:
         lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
         lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
     output:
-        csv = "analysis/cohort_report/somatic_variants/10_lollipop_plots.csv",
-        details="analysis/cohort_report/somatic_variants/10_details.yaml",
+        csv = "analysis/cohort_report/somatic_variants/12_lollipop_plots.csv",
+        details="analysis/cohort_report/somatic_variants/12_details.yaml",
     params:
         caption="""caption: 'This table shows lollipop plots for the top 5 cancer driving genes.'""",
         report_path = "analysis/cohort_report"

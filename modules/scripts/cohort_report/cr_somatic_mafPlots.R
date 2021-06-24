@@ -1,10 +1,10 @@
 library(maftools)
 options(bitmapType='cairo')
 
-generateMafPlots <- function(mafs, cancerGeneList_f, summary_png_f, onco_png_f, titv_png_f, vaf_png_f, tcga_png_f, interact_png_f, lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f) {
-   png(summary_png_f);
-   plotmafSummary(maf = mafs, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE);
-   dev.off();
+generateMafPlots <- function(mafs, cancerGeneList_f, onco_png_f, titv_png_f, vaf_png_f, tcga_png_f, interact_png_f, lolli1_png_f, lolli2_png_f, lolli3_png_f, lolli4_png_f, lolli5_png_f) {
+   #png(summary_png_f);
+   #plotmafSummary(maf = mafs, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE);
+   #dev.off();
 
    png(onco_png_f);
    oncoplot(maf = mafs, top=25);
@@ -61,20 +61,20 @@ args <- commandArgs( trailingOnly = TRUE )
 arg_in= args[1]
 args_geneList = args[2]
 
-arg_summary_png_f = args[3]
-arg_onco_png_f = args[4]
-arg_titv_png_f = args[5]
-arg_vaf_png_f = args[6]
-arg_tcga_png_f = args[7]
-arg_interact_png_f = args[8]
+#arg_summary_png_f = args[3]
+arg_onco_png_f = args[3]
+arg_titv_png_f = args[4]
+arg_vaf_png_f = args[5]
+arg_tcga_png_f = args[6]
+arg_interact_png_f = args[7]
 
-arg_lolli1_png_f = args[9]
-arg_lolli2_png_f = args[10]
-arg_lolli3_png_f = args[11]
-arg_lolli4_png_f = args[12]
-arg_lolli5_png_f = args[13]
+arg_lolli1_png_f = args[8]
+arg_lolli2_png_f = args[9]
+arg_lolli3_png_f = args[10]
+arg_lolli4_png_f = args[11]
+arg_lolli5_png_f = args[12]
 
 mafs = read.maf(maf=arg_in)
 
 #this is starting to get ugly!
-generateMafPlots(mafs, args_geneList, arg_summary_png_f, arg_onco_png_f, arg_titv_png_f, arg_vaf_png_f, arg_tcga_png_f, arg_interact_png_f, arg_lolli1_png_f, arg_lolli2_png_f, arg_lolli3_png_f, arg_lolli4_png_f, arg_lolli5_png_f)
+generateMafPlots(mafs, args_geneList, arg_onco_png_f, arg_titv_png_f, arg_vaf_png_f, arg_tcga_png_f, arg_interact_png_f, arg_lolli1_png_f, arg_lolli2_png_f, arg_lolli3_png_f, arg_lolli4_png_f, arg_lolli5_png_f)
