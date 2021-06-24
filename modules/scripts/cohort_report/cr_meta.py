@@ -85,7 +85,7 @@ def cullMAF_cols(maf_b64, columns):
     #Convert pandas datafram to list of strings
     s = df.to_string(index=False).split('\n')
     #make each line tab-delimited
-    lines = ["\t".join(l.split()) for l in s]
+    lines = [l.split() for l in s]
 
     #Drop the hdr line by doing mat: lines[1:]
     return {'hdr': columns, 'mat': lines[1:]}

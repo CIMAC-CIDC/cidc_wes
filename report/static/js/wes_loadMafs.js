@@ -43,9 +43,6 @@ function mafStringToDf(mafString) {
 // {'hdr' : [ ... ], 'mat': [[...], [ ...], ]}
 for (let i = 0; i < wes_data.length; i++) {
     let tmp = wes_data[i]['somatic']['filtered_maf_file'];
-    for (let j = 0; j < tmp['mat'].length; j++) {
-        tmp['mat'][j] = tmp['mat'][j].split('\t');
-    }
     let df = new dfd.DataFrame(tmp['mat'], {'columns': tmp['hdr']});
     wes_data[i]['somatic']['maf'] = df;
     //delete filtered_maf_file
