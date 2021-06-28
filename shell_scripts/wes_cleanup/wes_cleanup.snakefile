@@ -1,3 +1,6 @@
+# Len Taing (2021) TGBTG
+# Script to cleaup on buckets of wes results
+
 configfile: "config.wes_cleanup.yaml"
 
 def targets(wildcards):

@@ -1,30 +1,36 @@
 # wes cleanup config file
+#List ALL sample bucket paths here
 samples:
-  CNTZ36P8Q.01:
-    - gs://lens_bucket2/del/CNTZ36P8Q.01/
+#  CNTZ36P8Q.01:
+#    - gs://10021_results/WES/CNTZ36P8Q.01/
+  CNTZ3O0H0.01:
+    - gs://10021_results/WES/CNTZ3O0H0.01/
+  CNTZ57IYA.01:
+    - gs://10021_results/WES/CNTZ57IYA.01/
+  CNTZDWL2L.01:
+    - gs://10021_results/WES/CNTZDWL2L.01/
+  CNTZGHX70.01:
+    - gs://10021_results/WES/CNTZGHX70.01/
+  CNTZQX4ID.01:
+    - gs://10021_results/WES/CNTZQX4ID.01/
+  CNTZRWR57.01:
+    - gs://10021_results/WES/CNTZRWR57.01/
+  CNTZS2C7U.01:
+    - gs://10021_results/WES/CNTZS2C7U.01/
+  CNTZT4BFY.01:
+    - gs://10021_results/WES/CNTZT4BFY.01/
+  CNTZTZN93.01:
+    - gs://10021_results/WES/CNTZTZN93.01/
 
-  # CNTZ36P8Q.01:
-  #   - gs://10021_results/WES/CNTZ36P8Q.01/
-  # CNTZ3O0H0.01:
-  #   - gs://10021_results/WES/CNTZ3O0H0.01/
-  # CNTZ57IYA.01:
-  #   - gs://10021_results/WES/CNTZ57IYA.01/
-  # CNTZDWL2L.01:
-  #   - gs://10021_results/WES/CNTZDWL2L.01/
-  # CNTZGHX70.01:
-  #   - gs://10021_results/WES/CNTZGHX70.01/
-  # CNTZQX4ID.01:
-  #   - gs://10021_results/WES/CNTZQX4ID.01/
-  # CNTZRWR57.01:
-  #   - gs://10021_results/WES/CNTZRWR57.01/
-  # CNTZS2C7U.01:
-  #   - gs://10021_results/WES/CNTZS2C7U.01/
-  # CNTZT4BFY.01:
-  #   - gs://10021_results/WES/CNTZT4BFY.01/
-  # CNTZTZN93.01:
-  #   - gs://10021_results/WES/CNTZTZN93.01/
-
-#tumor_only_samples:
-#  - CNTZ36P8Q.01
-#  - CNTZ3O0H0.01
-#  - CNTZ57IYA.01
+# List samples that are tumor only here
+tumor_only:
+  - CNTZ36P8Q.01
+  - CNTZ3O0H0.01
+  - CNTZ57IYA.01
+  - CNTZDWL2L.01
+  - CNTZGHX70.01
+  - CNTZQX4ID.01
+  - CNTZRWR57.01
+  - CNTZS2C7U.01
+  - CNTZT4BFY.01
+  - CNTZTZN93.01
