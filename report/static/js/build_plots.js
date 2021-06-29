@@ -466,7 +466,7 @@ function build_variant_classification_plot(){
         },
     };
 
-    Plotly.newPlot("sv_plot1", data, layout);
+    Plotly.newPlot("variant_class_plot", data, layout);
 
 }
 
@@ -517,7 +517,7 @@ function build_variant_type_plot(){
         },
     };
 
-    Plotly.newPlot("sv_plot2", data, layout);
+    Plotly.newPlot("variant_type_plot", data, layout);
 
 }
 
@@ -570,7 +570,7 @@ function build_snv_class_plot(){
         },
     };
 
-    Plotly.newPlot("sv_plot3", data, layout);
+    Plotly.newPlot("snv_class_plot", data, layout);
 
 }
 
@@ -607,7 +607,7 @@ function build_variant_per_sample_plot(){
         },
     };
 
-    Plotly.newPlot("sv_plot4", data, layout);
+    Plotly.newPlot("variants_per_sample_plot", data, layout);
 
 }
 
@@ -650,7 +650,7 @@ function build_variant_classification_summary_plot(){
         showlegend: false
     };
 
-    Plotly.newPlot("sv_plot5", data, layout);
+    Plotly.newPlot("variant_class_summary_plot", data, layout);
 
 }
 
@@ -712,6 +712,6 @@ function build_top_10_genes_plot(){
         },
     };
 
-    Plotly.newPlot("sv_plot6", data, layout);
+    Plotly.newPlot("top_10_genes_plot", data, layout);
 
 }
