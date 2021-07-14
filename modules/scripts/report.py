@@ -453,7 +453,7 @@ def stub(stub_file, details, jinjaEnv, firstPanel):
     buildPlotly when render is false!
     Typically stub_files are empty so we don't even look into them
     """
-    template = jinjaEnv.get_template("mqc_plot.html")
+    template = jinjaEnv.get_template("plot_stub.html")
     #Dropping path and extension to get filename
     fname = ".".join(stub_file.split("/")[-1].split(".")[:-1])
     #REMOVE index from file name, e.g. 01_foo -> foo
@@ -461,10 +461,8 @@ def stub(stub_file, details, jinjaEnv, firstPanel):
     fname = "_".join(fname.split("_")[1:])
     title = prettyprint(fname)
 
-    html_plot = """<div id="{iid}_plot" class="plotly-graph-div" style="height:100%; width:100%;"></div>""".format(iid= fname.lower())
     vals = {'id': fname,
             'title':title,
-            'plot': html_plot,
     }
 
     #Check for a caption
