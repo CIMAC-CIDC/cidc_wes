@@ -7,8 +7,9 @@ Tools to download public genomic data
 
 optional arguments:
   -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
+  -o OUTPUT, --output OUTPUT (Plot)
                         Output Path (default: None)
+  -j JSON OUTPUT --json_out output of trinucleotide context counts (json)
   -r REF, --ref REF     Reference Fasta file (default: None)
   -m MAF, --maf MAF     MAF File (default: None)
   -c CANCER, --cancer CANCER 
@@ -24,6 +25,7 @@ import sys
 import numpy as np
 import argparse
 import pybedtools
+import json
 
 def fetchMut(maf, only_protein=True, dna_alt_col="HGVSc", mut_type='snv'):
     """ Fetch the snv columns in maf file
@@ -195,7 +197,59 @@ def plot96Mtrx(df, height='Seq', neighbor='Neighbor', mut='Alt', title='', rows=
     return fig
 
 
-def main(sampleID, output,maf,ref_fasta,ref_cancer):
+def convertTriMatrix(df, height='Seq', neighbor='Neighbor', mut='Alt'):
+    '''Convert the Trtrinucleotide matrix from the pandas dataframe object 
+    created by genTrinucleotideMtrx into the following dictionary:
+    {‘CtoA’: {‘a_a’: 5, ‘a_c’:10, ‘a_g’: 0, …},
+     ‘CtoG’: {‘a_a’: 5, ‘a_c’:10, ‘a_g’: 0, …},
+    ...
+    }
+    Parameters
+    ----------
+    df : pandas.DataFrame
+       Frequency table, which can be obtained by genTrinucleotideMtrx.
+        - columns names: [height, mut, neighbor] 
+          - Neigbor: Nucleotide nearby snv. e.g A_C 
+          - mut: SNV
+          - height: frequency of mutation grouped by mut and neighbor
+        - index: SNV ["T>C", "T>C", "C>T", "C>T", "T>A", "T>A", "T>G", "T>G", "C>A", "C>A", "C>G", "C>G"]  
+    Returns
+    -------
+    dictionary where keys = ['C>A', 'C>G', 'C>T', 'A>G', 'A>C', 'A>T'] and the
+    values of each key is a dictionary of neighbor counts, e.g.
+    {‘a_a’: 5, ‘a_c’:10, ‘a_g’: 0, …}
+    '''
+    tri_n = OrderedDict([('A_A', 0), ('A_C', 0), ('A_G', 0), ('A_T', 0),
+                         ('C_A', 0), ('C_C', 0), ('C_G', 0), ('C_T', 0),
+                         ('G_A', 0), ('G_C', 0), ('G_G', 0), ('G_T', 0),
+                         ('T_A', 0), ('T_C', 0), ('T_G', 0), ('T_T', 0),
+    ])
+
+    mut_panel = ['C>A', 'C>G', 'C>T', 'A>G', 'A>C', 'A>T']
+
+    ret = {}
+    for c in mut_panel:
+        tmp_tri = pd.Series(tri_n)
+        determiner = (df[mut] == c)
+        #Get the un-normalized counts
+        neighbor_h = pd.Series(
+            df.loc[determiner, [neighbor, height]].set_index(neighbor).to_dict()[height])
+        tmp_tri.update(neighbor_h)
+
+        #Integrate them into the overall dictionary 'ret'
+        ret[c] = dict([(i, int(tmp_tri[i])) for i in tmp_tri.index])
+        #print(ret)
+        #sys.exit()
+    #HACK to match David's convention: instead of 'A>G', 'A>C', 'A>T'
+    #David is using T>C, T>G, T>A
+    conv = {'A>G':'T>C', 'A>C': 'T>G', 'A>T':'T>A'}
+    for c in conv:
+        new = conv[c]
+        ret[new] = ret.pop(c)
+    
+    return ret
+
+def main(sampleID, output,maf,ref_fasta,ref_cancer,json_output):
     tri_mtrx = genTrinucleotideMtrx(maf=maf, ref_fasta = ref_fasta)
     if ref_cancer and len(ref_cancer): #non-empty list of TCGA refs
         tri_mtrx['Group'] = sampleID
@@ -208,12 +262,21 @@ def main(sampleID, output,maf,ref_fasta,ref_cancer):
     fig.savefig('{}.pdf'.format(output),dpi=200)
     plt.clf()
 
+    #Save tri_mtrx as json--need to convert dataFrame to this format:
+    #{‘C>A’: {‘a_a’: 5, ‘a_c’:10, ‘a_g’: 0, …},
+    # ‘C>G’: {‘a_a’: 5, ‘a_c’:10, ‘a_g’: 0, …},
+    #}
+    tri_mtrx_dict = convertTriMatrix(tri_mtrx)
+    with open(json_output, 'w') as f:
+        json.dump(tri_mtrx_dict, f, indent=4)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Tools to download public genomic data", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-o', '--output', type=str,
                         required=True, help="Output Path")
+    parser.add_argument('-j', '--json_output', type=str,
+                        required=True, help="Json Output Path")
     parser.add_argument('-r', '--ref', type=str,
                         required=True, help="Reference Fasta file")
     parser.add_argument('-m', '--maf', type=str,
@@ -225,4 +288,4 @@ if __name__ == "__main__":
   
 
     args = parser.parse_args()
-    main(maf=args.maf,ref_fasta=args.ref,output=args.output,ref_cancer=args.cancer,sampleID=args.name)
+    main(maf=args.maf, ref_fasta=args.ref, output=args.output, ref_cancer=args.cancer, sampleID=args.name, json_output=args.json_output)
