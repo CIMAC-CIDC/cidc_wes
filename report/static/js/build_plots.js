@@ -18,6 +18,7 @@ function build_plot(){
     build_ploidy_plot();
     //somatic variants
     build_sv_summary_plots();
+    build_ti_tv_plot();
 }
 
 function build_sv_summary_plots(){
@@ -46,6 +47,16 @@ var snv_conv = {
     'C>G':'C>G',
     'G>C':'C>G'
   };
+
+var ti_tv_conv = {
+    "T>C":"Ti",
+    "C>T":"Ti",
+    "T>A":"Tv",
+    "T>G":"Tv",
+    "C>A":"Tv",
+    "C>G":"Tv"
+}
+  
 // find indices of top values
 function findIndicesOfMax(inp, count) {
     var outp = new Array();
@@ -216,7 +227,7 @@ function build_gc_content_plot() {
         legend: { title: { "text": "Sample" } }
     };
 
-    Plotly.newPlot("gc_content_plot", data, layout);
+    Plotly.newPlot("GC_Content_plot", data, layout);
 
 };
 
@@ -548,11 +559,11 @@ function build_snv_class_plot(){
         x: counts['index_arr'],
         y: counts['data'],
         type: 'bar',
-        transforms: [{
-            type: 'sort',
-            target: 'y',
-            order: 'descending'
-          }]
+        // transforms: [{
+        //     type: 'sort',
+        //     target: 'y',
+        //     order: 'descending'
+        //   }]
     };
 
     let data = [trace1];
@@ -562,7 +573,9 @@ function build_snv_class_plot(){
         barmode: 'overlay',
         xaxis: {
             title: { text: 'SNV Class' },
-            automargin: true
+            automargin: true,
+            categoryorder: "array",
+            categoryarray:  ['T>G','T>A','T>C','C>T','C>G','C>A']
         },
         yaxis: {
             title: { text: 'Count' },
@@ -570,7 +583,7 @@ function build_snv_class_plot(){
         },
     };
 
-    Plotly.newPlot("snv_class_plot", data, layout);
+    Plotly.newPlot("SNV_Class_plot", data, layout);
 
 }
 
@@ -713,5 +726,112 @@ function build_top_10_genes_plot(){
     };
 
     Plotly.newPlot("top_10_genes_plot", data, layout);
+
+}
+
+function build_ti_tv_plot(){
+
+    let snv = {'T>G':[],'T>A':[],'T>C':[],'C>T':[],'C>G':[],'C>A':[]}
+    let df_list = []
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            if (wes_data[i]['somatic']['maf'] != undefined) { 
+                let ref = wes_data[i]['somatic']['maf']['Reference_Allele']['data'];
+                let allele2 = wes_data[i]['somatic']['maf']['Tumor_Seq_Allele2']['data'];
+                let class_list = [];
+                // reference_allele > tumor_seq_allele2
+                for (let j=0;j<ref.length; ++j) {
+                    // bases only
+                    if (checkAvailability(bases, ref[j]) && checkAvailability(bases, allele2[j])) {
+                        // use snv_conv function to convert bases
+                        class_list.push(snv_conv[ref[j]+'>'+allele2[j]])
+                    }
+                }
+                df_list.push(new dfd.Series(class_list));
+            }
+        }
+    }
+
+    let ti_tv = {'Ti':Array(df_list.length).fill(0),'Tv':Array(df_list.length).fill(0)}
+
+    for (let i = 0; i < df_list.length; ++i) {
+        let counts = df_list[i].value_counts()
+        // for (let j = 0; j < counts['index_arr'].length; ++j) {
+        //     snv[counts['index_arr'][j]].push(counts['data'][j]);
+        //     //console.log(ti_tv[ti_tv_conv[counts['index_arr'][j]]])
+        //     ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + counts['data'][j];
+        // }
+        let counts_sum = counts['data'].reduce((a, b) => a + b, 0)
+        for (let j = 0; j < Object.keys(snv).length; ++j) {
+            if (checkAvailability(counts['index_arr'], Object.keys(snv)[j])) {
+                snv[counts['index_arr'][j]].push((counts['data'][j]/counts_sum)*100);
+                ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + (counts['data'][j]/counts_sum)*100;
+            } else {
+                snv[counts['index_arr'][j]].push(0);
+                ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + 0;
+            }
+        }
+    }
+    let data = [];
+
+    for (let i = 0; i < Object.keys(snv).length; ++i) {
+    data.push(
+        {
+            name: Object.keys(snv)[i],
+            y: Object.values(snv)[i],
+            type: 'box',
+            //xaxis: 'x1',
+            //yaxis: 'y1',
+        }
+    )
+    data.push(
+        {
+            name: Object.keys(snv)[i],
+            x: current_samples,
+            y: Object.values(snv)[i],
+            type: 'bar',
+            xaxis: 'x3',
+            yaxis: 'y3',
+        }
+    )
+    }
+
+    for (let i = 0; i < Object.keys(ti_tv).length; ++i) {
+        data.push(
+            {
+                name: Object.keys(ti_tv)[i],
+                y: Object.values(ti_tv)[i],
+                type: 'box',
+                xaxis: 'x2',
+                yaxis: 'y2',
+            }
+        )
+        }
+
+    let layout = {
+        title: 'Ti-Tv',
+        //barmode: 'overlay',
+        // xaxis: {
+        //     title: { text: 'SNV Class' },
+        //     automargin: true,
+        //     categoryorder: "array",
+        //     categoryarray:  ['T>G','T>A','T>C','C>T','C>G','C>A']
+        // },
+        // yaxis: {
+        //     title: { text: 'Count' },
+        //     automargin: true,
+        //     range: [0, 1]
+        // },
+        barmode: 'stack',
+        showlegend: false,
+        xaxis: {domain: [0, 0.7], anchor: 'y'},
+        yaxis: {domain: [0.55, 1], anchor: 'x', range: [0, 100], title: { text: '% Mutations' }},
+        yaxis2: {domain: [0.55, 1], anchor: 'x2', range: [0, 100]},
+        xaxis2: {domain: [0.8, 1], anchor: 'y2'},
+        xaxis3: {domain: [0, 1], anchor: 'y3'},
+        yaxis3: {domain: [0, 0.45], anchor: 'x3', range: [0, 100], title: { text: '% Mutations' }},
+    };
+
+    Plotly.newPlot("Ti-Tv_plot", data, layout);
 
 }
