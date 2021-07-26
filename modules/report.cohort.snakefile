@@ -39,12 +39,13 @@ def cohort_report_targets(wildcards):
     
     ls.append("analysis/cohort_report/somatic_variants/07_oncoplot.png")
     ls.append("analysis/cohort_report/somatic_variants/08_Ti-Tv.stub")
-    ls.append("analysis/cohort_report/somatic_variants/09_VAF.png")
-    ls.append("analysis/cohort_report/somatic_variants/10_TCGA_Comparison.png")
-    ls.append("analysis/cohort_report/somatic_variants/11_somatic_interactions.png")
+    ls.append("analysis/cohort_report/somatic_variants/09_lego_plot.stub")
+    ls.append("analysis/cohort_report/somatic_variants/10_VAF.png")
+    ls.append("analysis/cohort_report/somatic_variants/11_TCGA_Comparison.png")
+    ls.append("analysis/cohort_report/somatic_variants/12_somatic_interactions.png")
     #Removing this plot b/c it's looking strange
     #ls.append("analysis/cohort_report/somatic_variants/07_variants_oncoplot_oncoplot.plotly")
-    ls.append("analysis/cohort_report/somatic_variants/12_lollipop_plots.csv")
+    ls.append("analysis/cohort_report/somatic_variants/13_lollipop_plots.csv")
     
     ls.append("analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png")
     ls.append("analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png")
@@ -290,6 +291,7 @@ rule cohort_report_somatic_variant_stubs:
         varType="analysis/cohort_report/somatic_variants/05_variant_type.stub",
         snvClass="analysis/cohort_report/somatic_variants/06_SNV_Class.stub",
         titv="analysis/cohort_report/somatic_variants/08_Ti-Tv.stub",
+        lego="analysis/cohort_report/somatic_variants/09_lego_plot.stub",
     message:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
@@ -297,7 +299,7 @@ rule cohort_report_somatic_variant_stubs:
         """touch {output.varPerSample} && touch {output.top10} &&
         touch {output.varClass} && touch {output.varClassSum} &&
         touch {output.varType} && touch {output.snvClass} && 
-        touch {output.titv}
+        touch {output.titv} && touch {output.lego}
         """
     
 rule cohort_report_somatic_mafTools:
@@ -307,9 +309,9 @@ rule cohort_report_somatic_mafTools:
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
     output:     
         onco="analysis/cohort_report/somatic_variants/07_oncoplot.png",
-        vaf="analysis/cohort_report/somatic_variants/09_VAF.png",
-        tcga="analysis/cohort_report/somatic_variants/10_TCGA_Comparison.png",
-        interact="analysis/cohort_report/somatic_variants/11_somatic_interactions.png",
+        vaf="analysis/cohort_report/somatic_variants/10_VAF.png",
+        tcga="analysis/cohort_report/somatic_variants/11_TCGA_Comparison.png",
+        interact="analysis/cohort_report/somatic_variants/12_somatic_interactions.png",
 
         lolli01= "analysis/cohort_report/somatic_variants/plots/20_lollipop_plot.png",
         lolli02= "analysis/cohort_report/somatic_variants/plots/21_lollipop_plot.png",
@@ -335,8 +337,8 @@ rule cohort_report_somatic_lollipop_table:
         lolli04= "analysis/cohort_report/somatic_variants/plots/23_lollipop_plot.png",
         lolli05= "analysis/cohort_report/somatic_variants/plots/24_lollipop_plot.png",
     output:
-        csv = "analysis/cohort_report/somatic_variants/12_lollipop_plots.csv",
-        details="analysis/cohort_report/somatic_variants/12_details.yaml",
+        csv = "analysis/cohort_report/somatic_variants/13_lollipop_plots.csv",
+        details="analysis/cohort_report/somatic_variants/13_details.yaml",
     params:
         caption="""caption: 'This table shows lollipop plots for the top 5 cancer driving genes.'""",
         report_path = "analysis/cohort_report"
