@@ -469,7 +469,7 @@ def getJsonFiles(wildcards):
     tmp['insert_size'] = "analysis/report/json/insert_size/%s.insert_size.json" % run
     tmp['mean_quality'] = "analysis/report/json/mean_quality/%s.mean_quality.json" % run
     tmp['hla'] = "analysis/report/json/hla/%s.hla.json" % run
-    tmp['somatic'] = "analysis/report/json/somatic/%s_%s.filtered_maf.json" % (run, caller)
+    tmp['somatic'] = "analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller)
     if not config.get('tumor_only'): #Only run when we have normals
         tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
         tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run

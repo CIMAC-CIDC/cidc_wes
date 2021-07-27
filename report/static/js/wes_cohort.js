@@ -1,21 +1,26 @@
 /* Len Taing 2020 (TGBTG) */
 
-var wes_resources = JSON.parse($("#wes_resources").text());
+//var wes_resources = JSON.parse($("#wes_resources").text());
+
+var current_samples = wes_data.map(function (x) {
+    return [x][0]['id'];
+});;
 
 //Toggle filterTable show/hide btn text
 $('[data-toggle="collapse"]').click(function() {
   $(this).toggleClass( "active" );
   if ($(this).hasClass("active")) {
-    $(this).text("Hide");
+    $(this).text("Hide\xa0Sample\xa0Selection\xa0Table");
   } else {
-    $(this).text("Show");
+    $(this).text("Show\xa0Sample\xa0Selection\xa0Table");
   }
 });
 
 //Generate the filterTable-samples view first
-function makeFilterTable(use_samples) {
-    var dset = use_samples ? wes_resources['samples_meta'] : wes_resources['runs_meta'];
-    var cols = Object.keys(dset[0]);
+function makeFilterTable() {
+    var dset = runs_meta;
+    var cols = ['id'];
+    cols = cols.concat(Object.keys(dset[0]['annotations'])); //Add Annotation cols
     //var columns = cols.map(function(x){ return {'data': x}});
     var table = $('#filterTable');
 
@@ -26,29 +31,71 @@ function makeFilterTable(use_samples) {
     content += "</tr></thead>"
     $.each(dset, function(i, row) {
         content += "<tr><td></td>"
-        for (v of Object.values(row)) {
+	//Add id
+        content += "<td>"+row['id']+"</td>";
+        for (v of Object.values(row['annotations'])) {
             content +="<td>"+v+"</td>";
          }
          content += "</tr>";
     });
     table.append(content);
-        let tbl = table.DataTable({columnDefs: [{orderable: false,
-                                   className: 'select-checkbox',
-                                   targets: 0
-                                  }],
-                     select: {
-                         style: 'multi',
-                         selector: 'td:first-child'
-                     },
-                     order: [
-                         //[1, 'asc'] //This breaks datatables
-                     ]});
+    //Figure out number of searchPanes columns to use
+    filter_num = $('#filterTable')[0].rows[0].cells.length-3
+    if (filter_num < 6){searchpanes_col = 'columns-'+String(filter_num)} else {searchpanes_col = 'columns-6'}
+
+    let tbl = table.DataTable({
+        initComplete: function() {
+            this.api().rows().select();
+            $("th.select-checkbox").addClass("selected");
+          },
+          language: {
+            select: {
+                rows: ""
+            }
+        },
+        dom: 'PSflBrtip',
+        searchPanes: {
+            dtOpts: {
+                select: {
+                    style: 'multi'
+                }
+            },
+            layout: searchpanes_col,
+            controls: false
+        },
+        columnDefs: [{
+            orderable: false,
+            className: 'select-checkbox',
+            targets: 0
+        }],
+        select: {
+            style: 'multi',
+            selector: 'td:first-child'
+        },
+        order: [
+            //[1, 'asc'] //This breaks datatables
+        ],
+        buttons: [
+            {
+                text: 'Update Sample Selection',
+                action: function () {
+                    current_samples = tbl.rows({ search:'applied', selected: true }).data()
+                        .map(function (x) {
+                            return x[1];
+                        }).toArray();
+
+                        build_plot();
+
+                }
+            }
+        ]
+    });
     tbl.on("click", "th.select-checkbox", function() {
     if ($("th.select-checkbox").hasClass("selected")) {
         tbl.rows().deselect();
         $("th.select-checkbox").removeClass("selected");
     } else {
-        tbl.rows().select();
+        tbl.rows({search:'applied'}).select();
         $("th.select-checkbox").addClass("selected");
     }
 }).on("select deselect", function() {
@@ -82,7 +129,7 @@ function makeFilterTable(use_samples) {
 });
 
 }
-makeFilterTable(true);
+makeFilterTable();
 
 //Should generalize this fn- ColName, resource, handler
 function handlerFactory(colName, resource, handler) {
@@ -91,6 +138,7 @@ function handlerFactory(colName, resource, handler) {
 	var sample_id = $(this.closest('tr')).find('th').attr('data-original-sn');
 	var modal = $('#wesSubModal');
 	var data = new Object();
+	//#NOTE: wes_resources does not exist anymore
 	data[sample_id] = wes_resources[resource][sample_id];
 	handler(data, modal);
     });
@@ -210,4 +258,8 @@ showListBtn.on('click', function() {
 	//$('#wesSubModal').modal({show:true});
 	tmp.buttons().trigger('click');
     }
+});
+
+$(document).ready(function () {
+    build_plot();
 });

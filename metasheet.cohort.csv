@@ -1,0 +1,22 @@
+# metasheet.cohort.csv- This sheet allows you to add (clinical) annotations
+# to the wes cohort report.  Each annotation should have it's own separate 
+# column, for example the following header defines annotations "CDR4 Count",
+# "Tumor Purity", and "Treatment Response":
+#
+# Run,CDR4 Count,Tumor Purity,Treatment Response
+#
+# NOTE: the annotation names can be any arbitraty string, but cannot contain
+# the ',' characheter
+#
+# NOTE: there can an arbitrary number of annotations, but at least 1 annotation
+# column is required
+#
+# Run names in the 'Run' column MUST match the run names used in the
+# config.cohort.yaml
+#
+# The cohort report supports the followin value-types: integers, floats, and
+# string (categorical)
+Run,CDR4 Count,Tumor Purity,Treatment Response
+run_01,3400,0.5,Responder
+run_02,1500,0.26,Non-repsonder
+run_03,4600,0.73,Responder

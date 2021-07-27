@@ -109,7 +109,10 @@ def somatic_helper_targets(wildcards, caller):
         #next 3 for filter.maf/pdf
         ls.append("analysis/somatic/%s/%s_%s.filter.vep.vcf" % (run,run, caller))
         ls.append("analysis/somatic/%s/%s_%s.filter.maf" % (run,run, caller))
+        #lego plot script, mutProfile.py generates a plot (.pdf) and a counts
+        #file (.json)
         ls.append("analysis/somatic/%s/%s_%s.filter.pdf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.filter.tri_mtrx.json" % (run,run, caller))
         ls.append("analysis/somatic/%s/%s_%s.filter.stats.txt" % (run,run, caller))
         #next 2 for mutation load
         ls.append("analysis/somatic/%s/%s_%s.output.exon.maf" % (run,run, caller))
@@ -124,7 +127,7 @@ def somatic_helper_targets(wildcards, caller):
     ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
 
     #json files
-    ls.append("analysis/report/json/somatic/%s_%s.filtered_maf.json" % (run, caller))
+    ls.append("analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller))
     return ls
 
 def somatic_targets(wildcards):
@@ -268,20 +271,21 @@ rule vcf2maf:
 rule mutationSignature:
     """General rule to do mutation signature analysis using mutProfiler.py"""
     input:
-        "analysis/somatic/{run}/{run}_{caller}.{type}.maf"
+        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
     output:
-        "analysis/somatic/{run}/{run}_{caller}.{type}.pdf"
+        pdf="analysis/somatic/{run}/{run}_{caller}.filter.pdf",
+        json="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
         #BUILD up our tcga_panel using a helper fn
         tcga_panel = build_tcga_param(),
-        outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.%s" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller, wildcards.type),
+        outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.filter" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller),
         name = lambda wildcards: wildcards.run
     benchmark:
-        "benchmarks/somatic/{run}/{run}.{caller}.{type}_mutationSignature.txt"
+        "benchmarks/somatic/{run}/{run}.{caller}.mutationSignature.txt"
     group: "somatic"
     shell:
-        "cidc_wes/cidc-vs/mutProfile.py -c {params.tcga_panel} -m {input} -r {params.index} -o {params.outname} -n {params.name}"
+        "cidc_wes/cidc-vs/mutProfile.py -c {params.tcga_panel} -m {input} -r {params.index} -o {params.outname} -n {params.name} -j {output.json}"
 
 rule maf_exon_filter:
     """General rule to filter coding exon mutations"""
@@ -451,17 +455,18 @@ rule summarize_processSNPcircos:
     shell:
         "cidc_wes/modules/scripts/somatic_processSNP.py -m {input} > {output}"
 
-rule somatic_json_filtered_maf:
-    """json encode the filtered maf file; write out the filtered maf file as
+rule somatic_json:
+    """json encode the filtered maf file and the trinucleotide matrix
     base64 string"""
     input:
-        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
+        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
+        tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json"
     output:
-        "analysis/report/json/somatic/{run}_{caller}.filtered_maf.json"
+        "analysis/report/json/somatic/{run}_{caller}.somatic.json"
     params:
         run = lambda wildcards: wildcards.run
     group: "somatic"
     benchmark:
-        "benchmarks/somatic/{run}_{caller}.somatic_json_filtered_maf.txt"
+        "benchmarks/somatic/{run}_{caller}.somatic_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_filtered_maf.py -r {params.run} -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -o {output}"

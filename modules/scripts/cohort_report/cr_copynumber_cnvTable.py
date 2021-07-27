@@ -9,6 +9,7 @@ import json
 import numpy as np
 from optparse import OptionParser
 
+from cr_utils import prettyprint
 #Attribs to read in
 #LEAVE off the plot for now
 #_attrs = ['clonality', 'purity', 'ploidy', 'dipLogR']#, 'cnv_plot_file', 'cnv_file']
@@ -21,20 +22,15 @@ def processJson(json_fpath, attrs):
     tmp = json.load(f)
     f.close()
 
+    run = None
     #make samples
-    cnv = tmp['copy_number']
-    run = {'id': tmp['id']}
-    for a in attrs:
-        run[a] = cnv[a]
-    #print(run)
+    if 'copy_number' in tmp:
+        cnv = tmp['copy_number']
+        run = {'id': tmp['id']}
+        for a in attrs:
+            run[a] = cnv[a]
+        #print(run)
     return run
-
-def prettyprint(s, toUpper=False):
-    """Given a string, replaces underscores with spaces and uppercases the 
-    first letter of each word"""
-    s = s.replace("_"," ")
-    s = s.upper() if toUpper else s.title()
-    return s
 
 def main():
     usage = "USAGE: %prog -f [wes json file] -f [wes json file] ...  -o [output tsv file]"
@@ -53,6 +49,8 @@ def main():
     
     #read in json data
     runs = [processJson(f, _attrs) for f in options.files]
+    #NEED to remove samples without 'copy_number' section, ie tumor-only sample
+    runs = filter(lambda x: x, runs)
 
     #MAIN output.tsv
     out = open(options.output, "w")

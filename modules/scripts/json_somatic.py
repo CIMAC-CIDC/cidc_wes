@@ -13,11 +13,12 @@ def main():
     usage = "USAGE: %prog -f file -o output json file"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-r", "--run", help="run name", default=None)
-    optparser.add_option("-f", "--in_file", help="gc file", default=None)
+    optparser.add_option("-f", "--in_file", help="input maf file", default=None)
+    optparser.add_option("-j", "--tri_mtrx_file", help="input trinucleotid matrix file", default=None)
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.in_file or not options.output:
+    if not options.in_file or not options.tri_mtrx_file or  not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -29,7 +30,12 @@ def main():
     s_b64 = base64.b64encode(s_byte).decode('utf-8')
     f.close()
 
-    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64}}
+    #read in tri_nucleotide matrix file
+    f = open(options.tri_mtrx_file)
+    tri_mtrx= json.load(f)
+    f.close()
+
+    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx}}
 
     out = open(options.output, 'w')
     out.write(json.dumps(js_out))
