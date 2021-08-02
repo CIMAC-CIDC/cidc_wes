@@ -19,6 +19,7 @@ function build_plot(){
     //somatic variants
     build_sv_summary_plots();
     build_ti_tv_plot();
+    build_lego_plot();
 }
 
 function build_sv_summary_plots(){
@@ -69,6 +70,16 @@ function findIndicesOfMax(inp, count) {
     }
     return outp;
 }
+
+function sumObjectsByKey(...objs) {
+    return objs.reduce((a, b) => {
+      for (let k in b) {
+        if (b.hasOwnProperty(k))
+          a[k] = (a[k] || 0) + b[k];
+      }
+      return a;
+    }, {});
+  }
 
 // Data quality plots
 
@@ -733,6 +744,10 @@ function build_ti_tv_plot(){
 
     let snv = {'T>G':[],'T>A':[],'T>C':[],'C>T':[],'C>G':[],'C>A':[]}
     let df_list = []
+    let stack_colors = [
+        '#ff7f0e','#d62728','#8c564b','#7f7f7f','#17becf','#ff7f0e'
+
+      ];
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
@@ -780,6 +795,7 @@ function build_ti_tv_plot(){
             name: Object.keys(snv)[i],
             y: Object.values(snv)[i],
             type: 'box',
+            marker: {color: stack_colors[i]},
             //xaxis: 'x1',
             //yaxis: 'y1',
         }
@@ -833,5 +849,129 @@ function build_ti_tv_plot(){
     };
 
     Plotly.newPlot("Ti-Tv_plot", data, layout);
+
+}
+
+function build_lego_plot(){
+
+    tri_template = {
+        "A_A": 0,
+        "A_C": 0,
+        "A_G": 0,
+        "A_T": 0,
+        "C_A": 0,
+        "C_C": 0,
+        "C_G": 0,
+        "C_T": 0,
+        "G_A": 0,
+        "G_C": 0,
+        "G_G": 0,
+        "G_T": 0,
+        "T_A": 0,
+        "T_C": 0,
+        "T_G": 0,
+        "T_T": 0
+    }
+
+    tri_data = {
+        "C>A": { ...tri_template },
+        "C>G": { ...tri_template },
+        "C>T": { ...tri_template },
+        "T>A": { ...tri_template },
+        "T>C": { ...tri_template },
+        "T>G": { ...tri_template }
+    }
+
+    tri_count = 0
+
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            if (wes_data[i]['somatic']['tri_matrix'] != undefined) {
+                tri_count = tri_count+1
+                for (var prop in tri_data) {
+                    if (Object.prototype.hasOwnProperty.call(wes_data[i]['somatic']['tri_matrix'], prop)) {
+                        let tri_sum = Object.values(wes_data[i]['somatic']['tri_matrix'][prop]).reduce((a, b) => a + b, 0)
+                        let tri_norm = {}
+                        Object.keys(wes_data[i]['somatic']['tri_matrix'][prop])
+                            .forEach(function (key) {
+                                tri_norm[key] = (wes_data[i]['somatic']['tri_matrix'][prop][key] / tri_sum) * 100
+                            });
+                        tri_data[prop] = sumObjectsByKey(tri_data[prop],
+                            tri_norm)
+                    }
+                }
+            }
+        }
+    }
+
+    for (var prop in tri_data) {
+            Object.keys(tri_data[prop])
+                .forEach(function (key) {
+                    tri_data[prop][key] = tri_data[prop][key] / tri_count
+                });
+        }
+
+    let data = [{
+        x: Object.keys(tri_data['C>A']),
+        y: Object.values(tri_data['C>A']),
+        type: 'bar',
+        xaxis: 'x',
+        yaxis: 'y',
+        name: 'C>A'
+    }, {
+        x: Object.keys(tri_data['C>G']),
+        y: Object.values(tri_data['C>G']),
+        type: 'bar',
+        xaxis: 'x2',
+        yaxis: 'y2',
+        name: 'C>G'
+    }, {
+        x: Object.keys(tri_data['C>T']),
+        y: Object.values(tri_data['C>T']),
+        type: 'bar',
+        xaxis: 'x3',
+        yaxis: 'y3',
+        name: 'C>T'
+    }, {
+        x: Object.keys(tri_data['T>A']),
+        y: Object.values(tri_data['T>A']),
+        type: 'bar',
+        xaxis: 'x4',
+        yaxis: 'y4',
+        name: 'T>A'
+    }, {
+        x: Object.keys(tri_data['T>C']),
+        y: Object.values(tri_data['T>C']),
+        type: 'bar',
+        xaxis: 'x5',
+        yaxis: 'y5',
+        name: 'T>C'
+    }, {
+        x: Object.keys(tri_data['T>G']),
+        y: Object.values(tri_data['T>G']),
+        type: 'bar',
+        xaxis: 'x6',
+        yaxis: 'y6',
+        name: 'T>G'
+    },
+    ];
+
+    let layout = {
+        title: 'Lego Plot',
+        xaxis: {domain: [0, 0.3], anchor: 'y'},
+        yaxis: {domain: [0.58, 1], anchor: 'x', title: { text: '% Mutations' }},
+        yaxis2: {domain: [0.58, 1], anchor: 'x2'},
+        xaxis2: {domain: [0.35, .65], anchor: 'y2'},
+        xaxis3: {domain: [.7, 1], anchor: 'y3'},
+        yaxis3: {domain: [.58, 1], anchor: 'x3'},
+        xaxis4: {domain: [0, 0.3], anchor: 'y4'},
+        yaxis4: {domain: [0, .42], anchor: 'x4', title: { text: '% Mutations' }},
+        yaxis5: {domain: [0, .42], anchor: 'x5'},
+        xaxis5: {domain: [0.35, .65], anchor: 'y5'},
+        xaxis6: {domain: [.7, 1], anchor: 'y6'},
+        yaxis6: {domain: [0, .42], anchor: 'x6'},
+    };
+
+    Plotly.newPlot("lego_plot_plot", data, layout);
 
 }
