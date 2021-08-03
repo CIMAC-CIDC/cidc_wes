@@ -263,3 +263,8 @@ showListBtn.on('click', function() {
 $(document).ready(function () {
     build_plot();
 });
+
+$(document).on('click', '.btn-export', function () {
+    var plotlyDiv = $(this).parent().find('.js-plotly-plot').attr('id');
+    Plotly.downloadImage(plotlyDiv, {format: 'svg', filename: plotlyDiv});
+});
