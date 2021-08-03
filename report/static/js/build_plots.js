@@ -570,11 +570,6 @@ function build_snv_class_plot(){
         x: counts['index_arr'],
         y: counts['data'],
         type: 'bar',
-        // transforms: [{
-        //     type: 'sort',
-        //     target: 'y',
-        //     order: 'descending'
-        //   }]
     };
 
     let data = [trace1];
@@ -602,37 +597,46 @@ function build_snv_class_plot(){
 function build_variant_per_sample_plot(){
 
     let sample_ids = [];
+    let total_counts = [];
     let data = Array(vc_types.length).fill().map((u,v) => ({y: [], x: sample_ids, type: 'bar',name: vc_types[v]}));
 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
                 vc = wes_data[i]['somatic']['maf']['Variant_Classification'].value_counts();
+                let total_count = 0
                 // collect vc counts
                 for (let j = 0; j < vc_types.length; ++j) {
                     data[j]['y'].push(vc['data'][vc['index_arr'].indexOf(vc_types[j])]);
+                    if (typeof vc['data'][vc['index_arr'].indexOf(vc_types[j])] != 'undefined'){
+                        total_count = total_count + vc['data'][vc['index_arr'].indexOf(vc_types[j])];
+                    }
                 }
                 // sample by sample
-                sample_ids.push(wes_data[i]['id'])
+                sample_ids.push(wes_data[i]['id']);
+                total_counts.push(total_count);
             }
         }
     }
+    // sort sample ids by total counts
+    let indices = [...total_counts.keys()].sort((a, b) => total_counts[b] - total_counts[a]);
+    let sample_ids_reordered = [sample_ids].map(a => indices.map(i => a[i]))[0];
 
     let layout = {
         title: 'Variants Per Sample',
         barmode: 'stack',
         xaxis: {
             title: { text: 'Run' },
-            automargin: true
+            automargin: true,
+            categoryorder: 'array',
+            categoryarray: sample_ids_reordered
         },
         yaxis: {
             title: { text: 'Count' },
             automargin: true
         },
     };
-
     Plotly.newPlot("variants_per_sample_plot", data, layout);
-
 }
 
 
@@ -744,10 +748,7 @@ function build_ti_tv_plot(){
 
     let snv = {'T>G':[],'T>A':[],'T>C':[],'C>T':[],'C>G':[],'C>A':[]}
     let df_list = []
-    let stack_colors = [
-        '#ff7f0e','#d62728','#8c564b','#7f7f7f','#17becf','#ff7f0e'
-
-      ];
+    let stack_colors = ['#ff7f0e','#d62728','#8c564b','#7f7f7f','#17becf','#ff7f0e'];
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
@@ -771,11 +772,6 @@ function build_ti_tv_plot(){
 
     for (let i = 0; i < df_list.length; ++i) {
         let counts = df_list[i].value_counts()
-        // for (let j = 0; j < counts['index_arr'].length; ++j) {
-        //     snv[counts['index_arr'][j]].push(counts['data'][j]);
-        //     //console.log(ti_tv[ti_tv_conv[counts['index_arr'][j]]])
-        //     ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + counts['data'][j];
-        // }
         let counts_sum = counts['data'].reduce((a, b) => a + b, 0)
         for (let j = 0; j < Object.keys(snv).length; ++j) {
             if (checkAvailability(counts['index_arr'], Object.keys(snv)[j])) {
@@ -790,28 +786,28 @@ function build_ti_tv_plot(){
     let data = [];
 
     for (let i = 0; i < Object.keys(snv).length; ++i) {
-    data.push(
-        {
-            name: Object.keys(snv)[i],
-            y: Object.values(snv)[i],
-            type: 'box',
-            marker: {color: stack_colors[i]},
-            //xaxis: 'x1',
-            //yaxis: 'y1',
-        }
-    )
-    data.push(
-        {
-            name: Object.keys(snv)[i],
-            x: current_samples,
-            y: Object.values(snv)[i],
-            type: 'bar',
-            xaxis: 'x3',
-            yaxis: 'y3',
-        }
-    )
+        // snv box plot
+        data.push(
+            {
+                name: Object.keys(snv)[i],
+                y: Object.values(snv)[i],
+                type: 'box',
+                marker: { color: stack_colors[i] },
+            }
+        )
+        // ti-tv boxplot
+        data.push(
+            {
+                name: Object.keys(snv)[i],
+                x: current_samples,
+                y: Object.values(snv)[i],
+                type: 'bar',
+                xaxis: 'x3',
+                yaxis: 'y3',
+            }
+        )
     }
-
+// stacked barplot
     for (let i = 0; i < Object.keys(ti_tv).length; ++i) {
         data.push(
             {
@@ -822,24 +818,13 @@ function build_ti_tv_plot(){
                 yaxis: 'y2',
             }
         )
-        }
+    }
 
     let layout = {
         title: 'Ti-Tv',
-        //barmode: 'overlay',
-        // xaxis: {
-        //     title: { text: 'SNV Class' },
-        //     automargin: true,
-        //     categoryorder: "array",
-        //     categoryarray:  ['T>G','T>A','T>C','C>T','C>G','C>A']
-        // },
-        // yaxis: {
-        //     title: { text: 'Count' },
-        //     automargin: true,
-        //     range: [0, 1]
-        // },
         barmode: 'stack',
         showlegend: false,
+        // subplots
         xaxis: {domain: [0, 0.7], anchor: 'y'},
         yaxis: {domain: [0.55, 1], anchor: 'x', range: [0, 100], title: { text: '% Mutations' }},
         yaxis2: {domain: [0.55, 1], anchor: 'x2', range: [0, 100]},
@@ -853,7 +838,7 @@ function build_ti_tv_plot(){
 }
 
 function build_lego_plot(){
-
+// each tri
     tri_template = {
         "A_A": 0,
         "A_C": 0,
@@ -872,7 +857,7 @@ function build_lego_plot(){
         "T_G": 0,
         "T_T": 0
     }
-
+    // each snv
     tri_data = {
         "C>A": { ...tri_template },
         "C>G": { ...tri_template },
@@ -892,6 +877,7 @@ function build_lego_plot(){
                     if (Object.prototype.hasOwnProperty.call(wes_data[i]['somatic']['tri_matrix'], prop)) {
                         let tri_sum = Object.values(wes_data[i]['somatic']['tri_matrix'][prop]).reduce((a, b) => a + b, 0)
                         let tri_norm = {}
+                        // normalize tri_count in each sample
                         Object.keys(wes_data[i]['somatic']['tri_matrix'][prop])
                             .forEach(function (key) {
                                 tri_norm[key] = (wes_data[i]['somatic']['tri_matrix'][prop][key] / tri_sum) * 100
@@ -958,6 +944,7 @@ function build_lego_plot(){
 
     let layout = {
         title: 'Lego Plot',
+        // subplots
         xaxis: {domain: [0, 0.3], anchor: 'y'},
         yaxis: {domain: [0.58, 1], anchor: 'x', title: { text: '% Mutations' }},
         yaxis2: {domain: [0.58, 1], anchor: 'x2'},
