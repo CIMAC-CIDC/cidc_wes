@@ -76,8 +76,9 @@ def is_color(s):
     prog = re.compile('^#(?:[0-9a-fA-F]{3}){1,2}$')
 
     if ":" in s:
-        (prefix, val) = s.split(":")
-        return (prefix in valid_colors) or prog.match(prefix)
+        #(prefix, val) = s.split(":")
+        tmp = s.split(":")
+        return (tmp[0] in valid_colors) or prog.match(tmp[0])
     else:
         return False
 
