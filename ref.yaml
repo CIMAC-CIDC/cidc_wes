@@ -46,8 +46,7 @@ hg38:
   #msisensor2
   msisensor2: ./ref_files/hg38/msisensor2/models_hg38/
 
-  #The following are stale and marked deletion
-  #target_Bed_input: ./ref_files/hg38/target_beds/mocha.liftover.hg38.noContigs.bed
-  #positions_bamtovcf: ./ref_files/hg38/target_beds/pos_bamtovcf.bed
-  #positions_SNP92: ./ref_files/hg38/target_beds/pos_filtervcf.bed
-  #pons_tnsnv: ./ref_files/hg38/pons/TNsnv_PoN.vcf
+  #HLA-HD:
+  hlahd_freq_data: ./ref_files/hg38/hlahd.1.4.0/freq_data/
+  hlahd_split_file: ./ref_files/hg38/hlahd.1.4.0/HLA_gene.split.3.32.0.txt
+  hlahd_dictionary: ./ref_files/hg38/hlahd.1.4.0/dictionary/

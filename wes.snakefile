@@ -60,7 +60,8 @@ def addCondaPaths_Config(config):
     config['conda_root'] = conda_root
     config['wes_root'] = "%s/envs/wes" % conda_root
     config['optitype_root'] = "%s/envs/optitype" % conda_root
-    config['xhla_root'] = "%s/envs/xHLA" % conda_root
+    #Deprecated
+    #config['xhla_root'] = "%s/envs/xHLA" % conda_root
     config['sequenza_root'] = "%s/envs/sequenza" % conda_root
     config['pyclone_root'] = "%s/envs/pyclone" % conda_root
 
@@ -129,7 +130,8 @@ def level2_sans_report(wildcards):
     ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        ls.extend(xhla_targets(wildcards))
+        #ls.extend(xhla_targets(wildcards))
+        ls.extend(hlahd_targets(wildcards))
     ls.extend(msisensor2_targets(wildcards))
     return ls
 
@@ -174,7 +176,8 @@ include: "./modules/copynumber.snakefile" # ...
 include: "./modules/purity.snakefile" #...
 include: "./modules/clonality.snakefile" # ...
 include: "./modules/optitype.snakefile" #...
-include: "./modules/xhla.snakefile" #....
+#include: "./modules/xhla.snakefile" #....
+include: "./modules/hlahd.snakefile" #....
 include: "./modules/neoantigen.snakefile"
 include: "./modules/msisensor2.snakefile"
 include: "./modules/rna.snakefile"
