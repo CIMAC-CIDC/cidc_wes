@@ -838,8 +838,8 @@ function build_ti_tv_plot(){
 }
 
 function build_lego_plot(){
-// each tri
-    tri_template = {
+    // each tri
+    let tri_template = {
         "A_A": 0,
         "A_C": 0,
         "A_G": 0,
@@ -858,7 +858,7 @@ function build_lego_plot(){
         "T_T": 0
     }
     // each snv
-    tri_data = {
+    let tri_data = {
         "C>A": { ...tri_template },
         "C>G": { ...tri_template },
         "C>T": { ...tri_template },
@@ -867,33 +867,25 @@ function build_lego_plot(){
         "T>G": { ...tri_template }
     }
 
-    tri_count = 0
-
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['tri_matrix'] != undefined) {
-                tri_count = tri_count+1
-                for (var prop in tri_data) {
-                    if (Object.prototype.hasOwnProperty.call(wes_data[i]['somatic']['tri_matrix'], prop)) {
-                        let tri_sum = Object.values(wes_data[i]['somatic']['tri_matrix'][prop]).reduce((a, b) => a + b, 0)
-                        let tri_norm = {}
-                        // normalize tri_count in each sample
-                        Object.keys(wes_data[i]['somatic']['tri_matrix'][prop])
-                            .forEach(function (key) {
-                                tri_norm[key] = (wes_data[i]['somatic']['tri_matrix'][prop][key] / tri_sum) * 100
-                            });
-                        tri_data[prop] = sumObjectsByKey(tri_data[prop],
-                            tri_norm)
+                for (var snv in tri_data) {
+                    if (Object.prototype.hasOwnProperty.call(wes_data[i]['somatic']['tri_matrix'], snv)) {
+                        // add to tri_data
+                        tri_data[snv] = sumObjectsByKey({ ...tri_data[snv]},
+                            { ...wes_data[i]['somatic']['tri_matrix'][snv]})
                     }
                 }
             }
         }
     }
-
-    for (var prop in tri_data) {
-            Object.keys(tri_data[prop])
-                .forEach(function (key) {
-                    tri_data[prop][key] = tri_data[prop][key] / tri_count
+    // normalize tri_data in each snv
+    for (var snv in tri_data) {
+        let tri_sum = Object.values(tri_data[snv]).reduce((a, b) => a + b, 0)
+            Object.keys(tri_data[snv])
+                .forEach(function (tri) {
+                    tri_data[snv][tri] = (tri_data[snv][tri] / tri_sum) * 100
                 });
         }
 
@@ -944,6 +936,8 @@ function build_lego_plot(){
 
     let layout = {
         title: 'Lego Plot',
+        height: 450,
+        width: 1044,
         // subplots
         xaxis: {domain: [0, 0.3], anchor: 'y'},
         yaxis: {domain: [0.58, 1], anchor: 'x', title: { text: '% Mutations' }},
