@@ -19,10 +19,47 @@ def countBedBases(ffile):
     f.close()
     return count
 
+def getVariantStats(maf_f):
+    """Calculate summary statistics for SNP, INS, DEL, also 
+    Functional annotations"""
+    cts = {}
+    annot_cts = {'Missense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
+                 'Nonsense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
+                 'Silent':{"SNP": 0, "INS": 0, "DEL": 0},
+    }
+
+    f = open(maf_f)
+    #HACK: get run name from file
+    run_name = maf_f.split("/")[-1].split("_")[0]
+    #print(run_name)
+    run_ct = {"SNP": 0, "INS": 0, "DEL": 0}
+    for l in f:
+        if l.startswith("#"):
+            continue
+        tmp = l.strip().split("\t")
+        #variant classification is 9th col, e.g. Missense_Mutation, Nonsense_Mutation
+        #variant type is 10th col, e.g. SNP/INS/DEL
+        classification = tmp[8]
+        label = tmp[9]
+        if label in run_ct:
+            #print(label)
+            run_ct[label] += 1
+            #HANDLE annotation- i.e. count Missense,Nonsense,Silent
+            if classification in annot_cts:
+                annot_cts[classification][label] +=1
+    f.close()
+    run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['DEL']])
+    for k in annot_cts.keys():
+        annot_cts[k]['TOTAL']= sum([v for v in annot_cts[k].values()])
+        
+    cts[run_name] = run_ct
+
+    return (cts, annot_cts)
+
 def main():
     usage = "USAGE: %prog -m [filter.maf files list] -o [output csv file]"
     optparser = OptionParser(usage=usage)
-    optparser.add_option("-m", "--maf", action="append", help="filter.maf files")
+    optparser.add_option("-m", "--maf", help="filter.maf file")
     optparser.add_option("-t", "--target", help="target region bed file")
     optparser.add_option("-o", "--out", help="output mutation variant type count .csv file")
     optparser.add_option("-a", "--annot", help="output functional annotations count .csv file")
@@ -34,39 +71,7 @@ def main():
 
     #Calculate the number of target_Mbs
     target_mb = round(countBedBases(options.target)/float(10**6), 1)
-    
-    #READ in template file:
-    cts = {}
-    annot_cts = {'Missense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
-                 'Nonsense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
-                 'Silent':{"SNP": 0, "INS": 0, "DEL": 0},
-    }
-    for maf_f in options.maf:
-        f = open(maf_f)
-        #HACK: get run name from file
-        run_name = maf_f.split("/")[-1].split("_")[0]
-        #print(run_name)
-        run_ct = {"SNP": 0, "INS": 0, "DEL": 0}
-        for l in f:
-            if l.startswith("#"):
-                continue
-            tmp = l.strip().split("\t")
-            #variant classification is 9th col, e.g. Missense_Mutation, Nonsense_Mutation
-            #variant type is 10th col, e.g. SNP/INS/DEL
-            classification = tmp[8]
-            label = tmp[9]
-            if label in run_ct:
-                #print(label)
-                run_ct[label] += 1
-                #HANDLE annotation- i.e. count Missense,Nonsense,Silent
-                if classification in annot_cts:
-                    annot_cts[classification][label] +=1
-        f.close()
-        run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['DEL']])
-        for k in annot_cts.keys():
-            annot_cts[k]['TOTAL']= sum([v for v in annot_cts[k].values()])
-        
-        cts[run_name] = run_ct
+    (cts, annot_cts) = getVariantStats(options.maf)
 
     out = open(options.out, "w")
     out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE","TMB (mut/Mb)"]))

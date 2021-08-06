@@ -123,8 +123,9 @@ def somatic_helper_targets(wildcards, caller):
 
         ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run,run, caller))
         ls.append("analysis/somatic/%s/%s_%s.filter.exons.center_targets.vcf.gz" % (run,run, caller))
-    ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
-    ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
+        
+        ls.append("analysis/somatic/%s/%s_mutation_summaries.%s.csv" % (run,run,caller))
+        ls.append("analysis/somatic/%s/%s_functional_annot_summaries.%s.csv" % (run,run,caller))
 
     #json files
     ls.append("analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller))
@@ -400,18 +401,19 @@ rule summarize_somatic_mutations:
     """Use the filter.maf to generate summary statistics for SNPS, INS, DEL
     --used in the wes report"""
     input:
-        expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs']))
+        #expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs'])) #NO LONGER expecting multiple runs!
+        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf"
     output:
-        cts = "analysis/somatic/somatic_mutation_summaries.{caller}.csv",
-        annot = "analysis/somatic/somatic_functional_annot_summaries.{caller}.csv",
+        cts = "analysis/somatic/{run}/{run}_mutation_summaries.{caller}.csv",
+        annot = "analysis/somatic/{run}/{run}_functional_annot_summaries.{caller}.csv",
     params:
-        files = lambda wildcards, input: " -m ".join(input),
+        #files = lambda wildcards, input: " -m ".join(input),
         targets = center_targets[config.get('cimac_center', 'broad')],
     group: "somatic"
     benchmark:
-        "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
+        "benchmarks/somatic/{run}/{run}_summarize_somatic_mutations.{caller}.txt"
     shell:
-        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -t {params.targets} -o {output.cts} -a {output.annot}"
+        "cidc_wes/modules/scripts/somatic_genStats.py -m {input.maf} -t {params.targets} -o {output.cts} -a {output.annot}"
 
 rule summarize_SNV_mutations:
     """Use the filter.vep.vcf to generate summary table for transition count
@@ -462,7 +464,7 @@ rule somatic_json:
     input:
         maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
         tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
-        summary="analysis/somatic/somatic_mutation_summaries.{caller}.csv",
+        summary="analysis/somatic/{run}/{run}_mutation_summaries.{caller}.csv",
     output:
         "analysis/report/json/somatic/{run}_{caller}.somatic.json"
     params:

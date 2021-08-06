@@ -264,8 +264,8 @@ def report_somatic_variants_summary_tblInputFn(wildcards):
     ls = []
     caller = config['somatic_caller']
     run = list(config['runs'].keys())[0]
-    ls.append("analysis/somatic/somatic_mutation_summaries.%s.csv" % caller)
-    ls.append("analysis/somatic/somatic_functional_annot_summaries.%s.csv" % caller)
+    ls.append("analysis/somatic/%s/%s_mutation_summaries.%s.csv" % (run,run,caller))
+    ls.append("analysis/somatic/%s/%s_functional_annot_summaries.%s.csv" % (run,run,caller))
     ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run, run, caller))
     return ls
 
