@@ -471,4 +471,4 @@ rule somatic_json:
     benchmark:
         "benchmarks/somatic/{run}_{caller}.somatic_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -t {input.summary} -o {output}"
+        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -s {input.summary} -o {output}"
