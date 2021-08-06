@@ -7,19 +7,34 @@ import os
 import sys
 from string import Template
 from optparse import OptionParser
-            
+
+def countBedBases(ffile):
+    """Count the number of base pairs in a bed file"""
+    count = 0
+    f = open(ffile)
+    for l in f:
+        tmp = l.split("\t")
+        (start, end) = (int(tmp[1]), int(tmp[2]))
+        count = count + end - start
+    f.close()
+    return count
+
 def main():
     usage = "USAGE: %prog -m [filter.maf files list] -o [output csv file]"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-m", "--maf", action="append", help="filter.maf files")
+    optparser.add_option("-t", "--target", help="target region bed file")
     optparser.add_option("-o", "--out", help="output mutation variant type count .csv file")
     optparser.add_option("-a", "--annot", help="output functional annotations count .csv file")
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.maf or not options.out or not options.annot:
+    if not options.maf or not options.target or not options.out or not options.annot:
         optparser.print_help()
         sys.exit(-1)
 
+    #Calculate the number of target_Mbs
+    target_mb = round(countBedBases(options.target)/float(10**6), 1)
+    
     #READ in template file:
     cts = {}
     annot_cts = {'Missense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
@@ -54,11 +69,14 @@ def main():
         cts[run_name] = run_ct
 
     out = open(options.out, "w")
-    out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE"]))
+    out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE","TMB (mut/Mb)"]))
     for r in sorted(cts.keys()):
         tmp = cts[r]
+        #NOTE: TMB = total tumor variants (tumor_tmb)/number of target Mb
+        TMB = round(tmp['TOTAL']/target_mb, 1)
+        
         out.write("%s\n" % ",".join([r, str(tmp['TOTAL']), str(tmp["SNP"]),
-                                     str(tmp["INS"]), str(tmp["DEL"])]))
+                                     str(tmp["INS"]), str(tmp["DEL"]), str(TMB)]))
     out.close()
 
     #WRITE out annotation counts

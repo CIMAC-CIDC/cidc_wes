@@ -17,13 +17,13 @@ def report_targets_sansHTML(wildcards):
     ls.append("analysis/report/data_quality/03_coverage_statistics.tsv")
     #SOMATIC
     ls.append("analysis/report/somatic_variants/01_somatic_variants_summary.png")
-    ls.append("analysis/report/somatic_variants/02_VAF.png")
 
-    ls.append("analysis/report/somatic_variants/03_summary_table.csv")
-    ls.append("analysis/report/somatic_variants/04_functional_annotation.csv")
-    ls.append("analysis/report/somatic_variants/05_SNV_Statistics.csv")
+    ls.append("analysis/report/somatic_variants/02_summary_table.csv")
+    ls.append("analysis/report/somatic_variants/03_functional_annotation.csv")
+    ls.append("analysis/report/somatic_variants/04_SNV_Statistics.csv")
     if not config.get('tumor_only'): #Only run when we have normals
-        ls.append("analysis/report/somatic_variants/06_tumor_mutational_burden.tsv")
+        ls.append("analysis/report/somatic_variants/05_tumor_germline_overlap.tsv")
+    ls.append("analysis/report/somatic_variants/06_VAF.png")
     ls.append("analysis/report/somatic_variants/07_lego_plot.png")
     ls.append("analysis/report/somatic_variants/08_lollipop_plots.csv")
 
@@ -227,7 +227,7 @@ rule report_somatic_variants_maftoolsPlots:
         report_maftoolsPlotsInput
     output:
         summary="analysis/report/somatic_variants/01_somatic_variants_summary.png",
-        vaf="analysis/report/somatic_variants/02_VAF.png",
+        vaf="analysis/report/somatic_variants/06_VAF.png",
         lolli1="analysis/report/somatic_variants/plots/20_lollipop_plot.png",
         lolli2="analysis/report/somatic_variants/plots/21_lollipop_plot.png",
         lolli3="analysis/report/somatic_variants/plots/22_lollipop_plot.png",
@@ -275,9 +275,9 @@ rule report_somatic_variants_summary_tbls:
     params:
         cap3 = """caption: 'This table summarizes the number of transitions and transversions occuring within the set of SNPs.'"""
     output:
-        csv1 = "analysis/report/somatic_variants/03_summary_table.csv",
-        csv2 = "analysis/report/somatic_variants/04_functional_annotation.csv",
-        csv3 = "analysis/report/somatic_variants/05_SNV_Statistics.csv",
+        csv1 = "analysis/report/somatic_variants/02_summary_table.csv",
+        csv2 = "analysis/report/somatic_variants/03_functional_annotation.csv",
+        csv3 = "analysis/report/somatic_variants/04_SNV_Statistics.csv",
         details3 = "analysis/report/somatic_variants/04_details.yaml",
     shell:
         """echo "{params.cap3}" >> {output.details3} && cp {input[0]} {output.csv1} && cp {input[1]} {output.csv2} && cp {input[2]} {output.csv3}"""
@@ -311,14 +311,14 @@ rule report_somatic_variants_germlineCompare:
         report_somatic_variants_germlineCompareInputFn
     params:
         run = list(config['runs'].keys())[0],
-        targets = center_targets[config.get('cimac_center', 'broad')],
-        cap = """caption: 'This table reports the tumor mutational burden (TMB) which is defined by total number of tumor variants normalized by the number of megabases in the targeted regions. The table also reports the total number of variants in the tumor sample and normal sample, the number of mutations that they have in common, and their percent overlap.'""",
+        #targets = center_targets[config.get('cimac_center', 'broad')],
+        cap = """caption: 'The table reports the total number of UNFILTERED variants in the tumor sample and normal sample, the number of mutations that they have in common, and their percent overlap.'""",
         sub = """subcaption: 'NOTE: the % overlap was calculated using the number of tumor variants as the denominator'""",
     output:
-        tsv = "analysis/report/somatic_variants/06_tumor_mutational_burden.tsv",
-        details = "analysis/report/somatic_variants/06_details.yaml",
+        tsv = "analysis/report/somatic_variants/05_tumor_germline_overlap.tsv",
+        details = "analysis/report/somatic_variants/05_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_tmb.py -f {input} -r {params.run} -t {params.targets} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_overlap.py -f {input} -r {params.run} -o {output.tsv}"""
 
 ###############################################################################
 def report_copynumberPlotInputFn(wildcards):

@@ -405,12 +405,13 @@ rule summarize_somatic_mutations:
         cts = "analysis/somatic/somatic_mutation_summaries.{caller}.csv",
         annot = "analysis/somatic/somatic_functional_annot_summaries.{caller}.csv",
     params:
-        files = lambda wildcards, input: " -m ".join(input)
+        files = lambda wildcards, input: " -m ".join(input),
+        targets = center_targets[config.get('cimac_center', 'broad')],
     group: "somatic"
     benchmark:
         "benchmarks/somatic/summarize_somatic_mutations.{caller}.txt"
     shell:
-        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -o {output.cts} -a {output.annot}"
+        "cidc_wes/modules/scripts/somatic_genStats.py -m {params.files} -t {params.targets} -o {output.cts} -a {output.annot}"
 
 rule summarize_SNV_mutations:
     """Use the filter.vep.vcf to generate summary table for transition count
