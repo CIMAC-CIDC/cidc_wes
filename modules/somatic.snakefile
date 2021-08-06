@@ -457,11 +457,12 @@ rule summarize_processSNPcircos:
         "cidc_wes/modules/scripts/somatic_processSNP.py -m {input} > {output}"
 
 rule somatic_json:
-    """json encode the filtered maf file and the trinucleotide matrix
-    base64 string"""
+    """include the filtered maf file (base64 encoded), trinucleotide matrix, 
+    and TMB via summaries table"""
     input:
         maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
-        tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json"
+        tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
+        summary="analysis/somatic/somatic_mutation_summaries.{caller}.csv",
     output:
         "analysis/report/json/somatic/{run}_{caller}.somatic.json"
     params:
@@ -470,4 +471,4 @@ rule somatic_json:
     benchmark:
         "benchmarks/somatic/{run}_{caller}.somatic_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -o {output}"
+        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -t {input.summary} -o {output}"
