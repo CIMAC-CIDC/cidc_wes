@@ -126,7 +126,7 @@ def somatic_helper_targets(wildcards, caller):
         
         ls.append("analysis/somatic/%s/%s_mutation_summaries.%s.csv" % (run,run,caller))
         ls.append("analysis/somatic/%s/%s_functional_annot_summaries.%s.csv" % (run,run,caller))
-
+        ls.append("analysis/somatic/%s/%s_%s_onco_gene_list.tsv" % (run,run,caller))
     #json files
     ls.append("analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller))
     return ls
@@ -465,6 +465,7 @@ rule somatic_json:
         maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
         tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
         summary="analysis/somatic/{run}/{run}_mutation_summaries.{caller}.csv",
+        oncoGeneList="analysis/somatic/{run}/{run}_{caller}_onco_gene_list.tsv",
     output:
         "analysis/report/json/somatic/{run}_{caller}.somatic.json"
     params:
@@ -473,4 +474,20 @@ rule somatic_json:
     benchmark:
         "benchmarks/somatic/{run}_{caller}.somatic_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -s {input.summary} -o {output}"
+        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -s {input.summary} -l {input.oncoGeneList} -o {output}"
+
+rule somatic_get_top_oncogenes:
+    """Use the cancerGeneList.tsv and check to see which ones are represented
+    in the filtered maf file"""
+    input:
+        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
+        cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
+    output:
+        "analysis/somatic/{run}/{run}_{caller}_onco_gene_list.tsv",
+    #params:
+        #targets = center_targets[config.get('cimac_center', 'broad')],
+    group: "somatic"
+    benchmark:
+        "benchmarks/somatic/{run}/{run}_{caller}_somatic_get_top_oncogenes.txt"
+    shell:
+        "cidc_wes/modules/scripts/somatic_getTopOncoGenes.py -m {input.maf} -l {input.cancerGeneList} -o {output}"

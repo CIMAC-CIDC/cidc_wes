@@ -16,10 +16,11 @@ def main():
     optparser.add_option("-f", "--in_file", help="input maf file", default=None)
     optparser.add_option("-j", "--tri_mtrx_file", help="input trinucleotid matrix file", default=None)
     optparser.add_option("-s", "--summary_file", help="somatic mutation summary file which includes TMB as last col", default=None)
+    optparser.add_option("-l", "--gene_list_file", help="file containing the top onco genes represented in the sample", default=None)
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.in_file or not options.tri_mtrx_file or not options.summary_file or  not options.output:
+    if not options.in_file or not options.tri_mtrx_file or not options.summary_file or not options.gene_list_file  or  not options.output:
         optparser.print_help()
         sys.exit(-1)
 
@@ -46,7 +47,14 @@ def main():
                'delete': tmp[3], 'tmb': tmp[4]}
     f.close()
 
-    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary}}
+    #Include top onco driving gense that have somatic variants
+    geneList = []
+    f = open(options.gene_list_file)
+    for l in f:
+        geneList.append(l.strip())
+    f.close()
+
+    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary, 'geneList': geneList}}
 
     out = open(options.output, 'w')
     out.write(json.dumps(js_out))
