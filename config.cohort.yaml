@@ -7,3 +7,13 @@ runs:
   run_03:
     - /path/to/wes/summary/json_file02.json
   #...
+
+#BACKPORT configs:
+#01_mutation_signatur-
+#_bwa_index = './ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.CIDC.fa'
+#
+
+#02_somaticSummaries
+#The center from which the samples were processed (this will be associated
+#with the center's targeted bed file
+center: 'broad'

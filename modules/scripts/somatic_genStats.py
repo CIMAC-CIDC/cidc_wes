@@ -19,18 +19,24 @@ def countBedBases(ffile):
     f.close()
     return count
 
-def getVariantStats(maf_f):
+def getVariantStats(maf_f, run_name, maf_isString=False):
     """Calculate summary statistics for SNP, INS, DEL, also 
-    Functional annotations"""
+    Functional annotations
+    
+    Usuaully take in a maf file, but can also accept maf as string--
+    see 3rd parm
+    """
     cts = {}
     annot_cts = {'Missense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
                  'Nonsense_Mutation':{"SNP": 0, "INS": 0, "DEL": 0},
                  'Silent':{"SNP": 0, "INS": 0, "DEL": 0},
     }
 
-    f = open(maf_f)
-    #HACK: get run name from file
-    run_name = maf_f.split("/")[-1].split("_")[0]
+    if not maf_isString:
+        f = open(maf_f)
+    else:
+        f = maf_f
+        
     #print(run_name)
     run_ct = {"SNP": 0, "INS": 0, "DEL": 0}
     for l in f:
@@ -47,7 +53,8 @@ def getVariantStats(maf_f):
             #HANDLE annotation- i.e. count Missense,Nonsense,Silent
             if classification in annot_cts:
                 annot_cts[classification][label] +=1
-    f.close()
+    if not maf_isString:
+        f.close()
     run_ct['TOTAL']= sum([run_ct['SNP'], run_ct['INS'], run_ct['DEL']])
     for k in annot_cts.keys():
         annot_cts[k]['TOTAL']= sum([v for v in annot_cts[k].values()])
@@ -71,7 +78,9 @@ def main():
 
     #Calculate the number of target_Mbs
     target_mb = round(countBedBases(options.target)/float(10**6), 1)
-    (cts, annot_cts) = getVariantStats(options.maf)
+    #HACK: get run name from file
+    run_name = maf_f.split("/")[-1].split("_")[0]
+    (cts, annot_cts) = getVariantStats(options.maf, run_name)
 
     out = open(options.out, "w")
     out.write("%s\n" % ",".join(["Run","TOTAL", "SNP","INSERT","DELETE","TMB (mut/Mb)"]))
