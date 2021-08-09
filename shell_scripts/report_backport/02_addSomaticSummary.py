@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Len Taing 2020 (TGBTG)
+"""Len Taing 2021 (TGBTG)
 Given a version of the sample summary json that includes the full MAF file
 from somatic variant calling, this script will calculate the number of 
 Total, SNP, Insert, DELETE, and TMB and inject it into the json file

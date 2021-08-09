@@ -17,3 +17,14 @@ runs:
 #The center from which the samples were processed (this will be associated
 #with the center's targeted bed file
 center: 'broad'
+
+#04_addNeoantigen.py
+#Associate the filter.tsv file for each sample like this
+#neoantigen:
+#  CNTZ27E78.01:
+#  - /mnt/ssd/10021_trial_report/neoantigen/10021_wes_CNTZ27E78.01_analysis_combined_filtered.tsv
+#  CNTZ4ZJYN.01:
+#  - /mnt/ssd/10021_trial_report/neoantigen/10021_wes_CNTZ4ZJYN.01_analysis_combined_filtered.tsv
+#  CNTZ5KQEL.01:
+#  - /mnt/ssd/10021_trial_report/neoantigen/10021_wes_CNTZ5KQEL.01_analysis_combined_filtered.tsv
+# ...etc...

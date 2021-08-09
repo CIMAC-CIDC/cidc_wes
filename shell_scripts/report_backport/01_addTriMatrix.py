@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Len Taing 2020 (TGBTG)
+"""Len Taing 2021 (TGBTG)
 Given a version of the sample summary report that includes the full MAF file
 from somatic variant calling, this script will calculate the trinucleotide 
 matrix and inject it into the json file

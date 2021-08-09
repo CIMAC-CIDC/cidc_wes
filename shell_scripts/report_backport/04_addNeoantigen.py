@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """Len Taing 2021 (TGBTG)
-Given a version of the sample summary json that includes the full MAF file
-from somatic variant calling, AND a list of top onco driving genes, 
-this script will: 
+Given a version of the sample summary json 
+AND the {run}.filter.tsv file this script will: 
 
-Add a section 'geneList' to the somatic section where each gene represents
-a top onco gene that is mutated in the sample i.e. it's found in the maf
+Add a section 'neoantigen' to the json file.  The json section will have the 
+format: {'neoantigen_filter_file': <base64 encoding of entire filter.tsv file>}
+
 Output: saves the resulting json file to the specified output fname path
 
-NOTE: Many of these fns are taken directly from somatic_getTopOncoGenes.py 
+NOTE: Many of these fns are taken directly from json_neoantigen.py 
 """
 
 import os
@@ -28,25 +28,27 @@ _index=(os.path.abspath(__file__).split("/").index('cidc_wes'))
 _cidc_wes_path=os.path.sep.join(os.path.abspath(__file__).split("/")[:_index+1])
 sys.path.append(os.path.join(_cidc_wes_path, 'modules', 'scripts'))
 #print(sys.path)
-import somatic_getTopOncoGenes
+
+#import somatic_getTopOncoGenes
 
 def main():
     usage = "USAGE: %prog -j sample summary file (json) -r [ABSOLUTE PATH to .fasta reference] -o output json file"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-j", "--json_file", help="sample summary json file", default=None)
-    optparser.add_option("-l", "--oncoGeneList", help="list of top onco driving genes")
+    optparser.add_option("-f", "--filter_file", help="run_filter.tsv file from pvacseq")
     optparser.add_option("-o", "--output", help="output file", default=None)
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.json_file or not options.oncoGeneList or  not options.output:
+    if not options.json_file or not options.filter_file or  not options.output:
         optparser.print_help()
         sys.exit(-1)
 
-    #READ in the cancerGeneList
-    oncoGeneList = []
-    f = open(options.oncoGeneList)
-    for l in f:
-        oncoGeneList.append(l.strip())
+    #READ in the filter_file and convert to base64 string
+    f = open(options.filter_file)
+    s = f.read()
+    s_byte = s.encode('utf-8')
+    #NOTE: .decode is needed to convert the bytes back to a string
+    s_b64 = base64.b64encode(s_byte).decode('utf-8')
     f.close()
 
     #READ in the sample json file
@@ -54,15 +56,10 @@ def main():
     sample_json = json.load(f)
     f.close()
 
-    # decode somatic.filtered_maf_file
-    maf_bytes = base64.b64decode(sample_json['somatic']['filtered_maf_file'])
-    maf = maf_bytes.decode('utf-8').strip().split("\n")
-
-    #Calculate variant summaries
-    geneList = somatic_getTopOncoGenes.getOncoGeneList(maf, oncoGeneList, True)
+    neoantigen = {'neoantigen_filter_file': s_b64}
     
     #integrate this back into sample_json
-    sample_json['somatic']['geneList'] = geneList
+    sample_json['neoantigen'] = neoantigen
 
     #DUMP the output
     out = open(options.output, 'w')
