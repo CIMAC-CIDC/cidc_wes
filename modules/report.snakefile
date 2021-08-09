@@ -470,6 +470,7 @@ def getJsonFiles(wildcards):
     tmp['mean_quality'] = "analysis/report/json/mean_quality/%s.mean_quality.json" % run
     tmp['hla'] = "analysis/report/json/hla/%s.hla.json" % run
     tmp['somatic'] = "analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller)
+    tmp['neoantigen'] = "analysis/report/json/neoantigen/%s.neoantigen.json" % run
     if not config.get('tumor_only'): #Only run when we have normals
         tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
         tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
@@ -481,7 +482,7 @@ rule report_generate_json:
         unpack(getJsonFiles)
     params:
         run = lambda wildcards: wildcards.run,
-        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -t %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality),
+        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s -n %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic, input.neoantigen) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -t %s -n %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality, input.neoantigen),
     output:
         #NOTE: CANNOT name this {run}.json otherwise snakemake will have
         #trouble ressolving the wildcard

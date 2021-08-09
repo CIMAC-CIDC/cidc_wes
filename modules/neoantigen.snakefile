@@ -37,6 +37,8 @@ def neoantigen_targets(wildcards):
         #output file map
         ls.append("analysis/neoantigen/%s/%s.neoantigen.output.yaml" % (run,run))
         ls.append("analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run,run))
+        ls.append("analysis/report/json/neoantigen/%s.neoantigen.json" % (run))
+
     return ls
 
 def neoantigen_output_files(wildcards):
@@ -347,4 +349,30 @@ rule neoantigen_getNeoantigenList:
     group: "neoantigen"
     shell:
         "cidc_wes/modules/scripts/neoantigen_getNeoantgnList.py -f {input} -o {output}"
+
+def neoangient_json_helper(wildcards):
+    run = wildcards.run
+    tumor = config['runs'][run][1]
+
+    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
+        ls = ["analysis/neoantigen/%s/combined/%s.filtered.tsv" % (run,tumor)]
+    else:
+        ls = ["analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run,tumor)]
+    return ls
+    
+rule neoantigen_json:
+    """Generates the module's json section
+    Includes the filter.tsv results
+    """
+    input:
+        neoangient_json_helper
+    output:
+        "analysis/report/json/neoantigen/{run}.neoantigen.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "neoantigen"
+    benchmark:
+        "benchmarks/neoantigen/{run}.neoantigen_json.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_neoantigen.py -r {params.run} -f {input} -o {output}"
 
