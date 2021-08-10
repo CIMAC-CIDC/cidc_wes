@@ -80,7 +80,7 @@ def main():
     #Calculate the number of target_Mbs
     target_mb = round(countBedBases(options.target)/float(10**6), 1)
     #HACK: get run name from file
-    run_name = maf_f.split("/")[-1].split("_")[0]
+    run_name = options.maf.split("/")[-1].split("_")[0]
     (cts, annot_cts) = getVariantStats(options.maf, run_name)
 
     out = open(options.out, "w")
