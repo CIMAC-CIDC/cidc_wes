@@ -20,6 +20,10 @@ function build_plot(){
     build_sv_summary_plots();
     build_ti_tv_plot();
     build_lego_plot();
+    build_tmb_plot();
+    build_oncoplot_plot()
+    //hla
+    build_hla_oncoplot_plot()
 }
 
 function build_sv_summary_plots(){
@@ -29,6 +33,20 @@ function build_sv_summary_plots(){
     build_variant_per_sample_plot();
     build_variant_classification_summary_plot();
     build_top_10_genes_plot();
+}
+// sort by elements in array by frequency, remove duplicates
+function sortByFrequency(array) {
+    var frequency = {};
+
+    array.forEach(function(value) { frequency[value] = 0; });
+
+    var uniques = array.filter(function(value) {
+        return ++frequency[value] == 1;
+    });
+
+    return uniques.sort(function(a, b) {
+        return frequency[b] - frequency[a];
+    });
 }
 // variant classification types
 var vc_types = ['Missense_Mutation','Nonsense_Mutation','Frame_Shift_Del','Splice_Site','In_Frame_Del','Frame_Shift_Ins','In_Frame_Ins','Translation_Start_Site','Nonstop_Mutation'];
@@ -131,6 +149,8 @@ function build_mapping_plot() {
     let data = [trace1, trace2, trace3];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Sample' },
@@ -187,6 +207,8 @@ function build_coverage_plot() {
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Mean Depth' },
@@ -225,6 +247,8 @@ function build_gc_content_plot() {
     let data = gc_content;
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         hovermode: 'closest',
         xaxis: {
@@ -265,6 +289,8 @@ function build_insert_size_plot() {
     let data = insert_size;
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         hovermode: 'closest',
         xaxis: {
@@ -310,6 +336,8 @@ function build_mean_quality_plot() {
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Sample' },
@@ -349,6 +377,8 @@ function build_clonality_plot() {
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Run' },
@@ -386,6 +416,8 @@ function build_purity_plot() {
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Run' },
@@ -424,6 +456,8 @@ function build_ploidy_plot() {
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         barmode: 'overlay',
         xaxis: {
             title: { text: 'Run' },
@@ -476,6 +510,8 @@ function build_variant_classification_plot(){
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Variant Classificaiton',
         barmode: 'overlay',
         xaxis: {
@@ -527,6 +563,8 @@ function build_variant_type_plot(){
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Variant Type',
         barmode: 'overlay',
         xaxis: {
@@ -575,6 +613,8 @@ function build_snv_class_plot(){
     let data = [trace1];
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'SNV Class',
         barmode: 'overlay',
         xaxis: {
@@ -623,6 +663,8 @@ function build_variant_per_sample_plot(){
     let sample_ids_reordered = [sample_ids].map(a => indices.map(i => a[i]))[0];
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Variants Per Sample',
         barmode: 'stack',
         xaxis: {
@@ -664,6 +706,8 @@ function build_variant_classification_summary_plot(){
     }
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Variant Classification Summary',
         barmode: 'overlay',
         xaxis: {
@@ -728,6 +772,8 @@ function build_top_10_genes_plot(){
     }
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Top 10 Mutated Genes',
         barmode: 'stack',
         xaxis: {
@@ -748,7 +794,18 @@ function build_ti_tv_plot(){
 
     let snv = {'T>G':[],'T>A':[],'T>C':[],'C>T':[],'C>G':[],'C>A':[]}
     let df_list = []
-    let stack_colors = ['#ff7f0e','#d62728','#8c564b','#7f7f7f','#17becf','#ff7f0e'];
+    let stack_colors = [
+        '#1f77b4',  // muted blue
+        '#ff7f0e',  // safety orange
+        '#2ca02c',  // cooked asparagus green
+        '#d62728',  // brick red
+        '#9467bd',  // muted purple
+        '#8c564b',  // chestnut brown
+    ];
+    let ti_tv_colors = [
+        '#e377c2',  // raspberry yogurt pink
+        '#7f7f7f',  // middle gray
+    ]; 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
@@ -795,24 +852,26 @@ function build_ti_tv_plot(){
                 marker: { color: stack_colors[i] },
             }
         )
-        // ti-tv boxplot
+        // stacked barplot
         data.push(
             {
                 name: Object.keys(snv)[i],
                 x: current_samples,
                 y: Object.values(snv)[i],
+                marker: { color: stack_colors[i] },
                 type: 'bar',
                 xaxis: 'x3',
                 yaxis: 'y3',
             }
         )
     }
-// stacked barplot
+    // ti-tv boxplot
     for (let i = 0; i < Object.keys(ti_tv).length; ++i) {
         data.push(
             {
                 name: Object.keys(ti_tv)[i],
                 y: Object.values(ti_tv)[i],
+                marker: { color: ti_tv_colors[i] },
                 type: 'box',
                 xaxis: 'x2',
                 yaxis: 'y2',
@@ -821,6 +880,8 @@ function build_ti_tv_plot(){
     }
 
     let layout = {
+        height: 450,
+        width: 1044,
         title: 'Ti-Tv',
         barmode: 'stack',
         showlegend: false,
@@ -935,9 +996,9 @@ function build_lego_plot(){
     ];
 
     let layout = {
-        title: 'Lego Plot',
         height: 450,
         width: 1044,
+        title: 'Lego Plot',
         // subplots
         xaxis: {domain: [0, 0.3], anchor: 'y'},
         yaxis: {domain: [0.58, 1], anchor: 'x', title: { text: '% Mutations' }},
@@ -955,4 +1016,181 @@ function build_lego_plot(){
 
     Plotly.newPlot("lego_plot_plot", data, layout);
 
+}
+
+function build_tmb_plot() {
+
+    let tmb = [];
+    let sample_ids = [];
+
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+                tmb.push(wes_data[i]['somatic']['summary']['tmb'])
+                sample_ids.push(wes_data[i]['id'])
+        }
+    }
+
+    let trace1 = {
+        x: sample_ids,
+        y: tmb,
+        type: 'bar'
+    };
+
+    let data = [trace1];
+
+    let layout = {
+        height: 450,
+        width: 1044,
+        xaxis: {
+            title: { text: 'Sample' },
+            automargin: true
+        },
+        yaxis: {
+            title: { text: 'TMB (mut/Mb)' },
+            automargin: true
+        },
+    };
+
+    Plotly.newPlot("tumor_mutational_burden_plot", data, layout);
+
+};
+
+function build_oncoplot_plot() {
+
+    let top_genes = [];
+    // all samples genes list
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            if (wes_data[i]['somatic']['geneList'] != undefined) {
+                top_genes = top_genes.concat(wes_data[i]['somatic']['geneList'])
+            }
+        }
+    }
+    // top genes
+    top_genes = sortByFrequency(top_genes).slice(0, 25).reverse();
+    let heatmap_z = Array.from(Array(top_genes.length), () => []);
+    let sample_rank = [];
+    // generate heatmap
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+                // run through top genes list
+                for (let j = 0; j < top_genes.length; ++j) {
+                    // evaluate if top gene is listed in sample gene lsit
+                    if (checkAvailability(wes_data[i]['somatic']['geneList'], top_genes[j])) {
+                        heatmap_z[j].push(1)
+                        sample_rank.push(wes_data[i]['id'])
+                    } else {
+                        heatmap_z[j].push(0)
+                    }
+                }
+            }
+    }
+    //sample abundance ranking
+    sample_rank = sortByFrequency(sample_rank)
+    let data = [
+        {
+            z: heatmap_z,
+            x: current_samples,
+            y: top_genes,
+            type: 'heatmap',
+            hoverongaps: false,
+            showscale: false,
+            colorscale: [
+                ['0.0', 'rgb(180, 180, 180)'],
+                ['1.0', 'rgb(165,0,38)']
+            ],
+            xgap: 1,
+            ygap: 1
+        }
+    ];
+    let layout = {
+        height: 800,
+        width: 800,
+        title: 'Oncoplot',
+        xaxis: {
+            title: { text: 'Samples' },
+            automargin: true,
+            categoryorder: "array",
+            categoryarray: sample_rank
+        },
+        yaxis: {
+            title: { text: 'Genes' },
+            automargin: true
+        },
+    };
+    Plotly.newPlot('oncoplot_plot', data, layout);
+}
+
+function build_hla_oncoplot_plot() {
+
+    let top_hla = [];
+    let sample_ids = [];
+    // all samples hla list
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            for (let j = 0; j < sample_type.length; ++j) {
+                if (typeof wes_data[i][sample_type[j]] != 'undefined') {
+                    top_hla = top_hla.concat(Object.values(wes_data[i][sample_type[j]]['hla']))
+                }
+            }
+        }
+    }
+    // top hla
+    top_hla = sortByFrequency(top_hla).slice(0, 25).reverse();
+    let heatmap_z = Array.from(Array(top_hla.length), () => []);
+    let sample_rank = [];
+    // generate heatmap
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            for (let j = 0; j < sample_type.length; ++j) {
+                if (typeof wes_data[i][sample_type[j]] != 'undefined') {
+                    // run through top hla list
+                    for (let k = 0; k < top_hla.length; ++k) {
+                        // evaluate if top hla is listed in sample hla lsit
+                        if (checkAvailability(Object.values(wes_data[i][sample_type[j]]['hla']), top_hla[k])) {
+                            heatmap_z[k].push(1)
+                            sample_rank.push(wes_data[i]['id'] + sample_type_suffix[j])
+                        } else {
+                            heatmap_z[k].push(0)
+                        }
+                    }
+                    sample_ids.push(wes_data[i]['id'] + sample_type_suffix[j])
+                }
+            }
+        }
+    }
+    //sample abundance ranking
+    sample_rank = sortByFrequency(sample_rank)
+    let data = [
+        {
+            z: heatmap_z,
+            x: sample_ids,
+            y: top_hla,
+            type: 'heatmap',
+            hoverongaps: false,
+            showscale: false,
+            colorscale: [
+                ['0.0', 'rgb(180, 180, 180)'],
+                ['1.0', 'rgb(165,0,38)']
+            ],
+            xgap: 1,
+            ygap: 1
+        }
+    ];
+    let layout = {
+        height: 800,
+        width: 900,
+        title: 'HLA Oncoplot',
+        xaxis: {
+            title: { text: 'Samples' },
+            automargin: true,
+            categoryorder: "array",
+            categoryarray: sample_rank
+        },
+        yaxis: {
+            title: { text: 'HLA' },
+            automargin: true
+        },
+    };
+    Plotly.newPlot('hla_oncoplot_plot', data, layout);
 }
