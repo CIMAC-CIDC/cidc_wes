@@ -40,7 +40,7 @@ def cohort_report_targets(wildcards):
     
     ls.append("analysis/cohort_report/somatic_variants/08_Ti-Tv.stub")
     ls.append("analysis/cohort_report/somatic_variants/09_lego_plot.stub")
-    ls.append("analysis/cohort_report/somatic_variants/10_oncoplot.png")
+    ls.append("analysis/cohort_report/somatic_variants/10_oncoplot.stub")
     ls.append("analysis/cohort_report/somatic_variants/11_VAF.png")
     ls.append("analysis/cohort_report/somatic_variants/12_TCGA_Comparison.png")
     ls.append("analysis/cohort_report/somatic_variants/13_somatic_interactions.png")
@@ -294,6 +294,7 @@ rule cohort_report_somatic_variant_stubs:
         snvClass="analysis/cohort_report/somatic_variants/07_SNV_Class.stub",
         titv="analysis/cohort_report/somatic_variants/08_Ti-Tv.stub",
         lego="analysis/cohort_report/somatic_variants/09_lego_plot.stub",
+        onco="analysis/cohort_report/somatic_variants/10_oncoplot.stub",
     message:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
@@ -302,7 +303,7 @@ rule cohort_report_somatic_variant_stubs:
         touch {output.top10} &&
         touch {output.varClass} && touch {output.varClassSum} &&
         touch {output.varType} && touch {output.snvClass} && 
-        touch {output.titv} && touch {output.lego}
+        touch {output.titv} && touch {output.lego} && touch {output.onco}
         """
     
 rule cohort_report_somatic_mafTools:
@@ -310,8 +311,7 @@ rule cohort_report_somatic_mafTools:
     input:
         mafs="analysis/cohort_report/somatic_variants/cohort.maf.gz",
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
-    output:     
-        onco="analysis/cohort_report/somatic_variants/10_oncoplot.png",
+    output:
         vaf="analysis/cohort_report/somatic_variants/11_VAF.png",
         tcga="analysis/cohort_report/somatic_variants/12_TCGA_Comparison.png",
         interact="analysis/cohort_report/somatic_variants/13_somatic_interactions.png",
@@ -329,7 +329,7 @@ rule cohort_report_somatic_mafTools:
         "REPORT: creating mafTools plot for somatic section"
     group: "cohort_report"
     shell:
-        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.onco} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
+        """Rscript cidc_wes/modules/scripts/cohort_report/cr_somatic_mafPlots.R {input.mafs} {input.cancerGeneList} {output.vaf} {output.tcga} {output.interact} {output.lolli01} {output.lolli02} {output.lolli03} {output.lolli04} {output.lolli05}"""
 
 rule cohort_report_somatic_lollipop_table:
     """Generate the table of lollipop plots"""
