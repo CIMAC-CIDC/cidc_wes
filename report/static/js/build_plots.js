@@ -1,10 +1,16 @@
+// This script contains functions for building and displaying plotly.js plots
+// The functions tend to follow a similar foundational structure:
+// Loop through available samples, check if these samples aren't filtered out, populate data structures used in plotly plot
+// The functions vary in complexity, some of which use danfo.js to transform and extract data from maf tables
+// The build_mapping_plot() is an example of a more basic function which lays the groundwork for others and contains comments explaining basic steps
+
 // check if elemennt exists in array
 function checkAvailability(arr, val) {
     return arr.some(function (arrVal) {
         return val === arrVal;
     });
 }
-// build all plots
+// build all plots, called on page load and by update sample selection button
 function build_plot(){
     //data quality
     build_mapping_plot();
@@ -25,7 +31,7 @@ function build_plot(){
     //hla
     build_hla_oncoplot_plot()
 }
-
+// build somatic variant summary plots
 function build_sv_summary_plots(){
     build_variant_classification_plot();
     build_variant_type_plot();
@@ -66,7 +72,7 @@ var snv_conv = {
     'C>G':'C>G',
     'G>C':'C>G'
   };
-
+// snv to ti-tv conversion from maftools
 var ti_tv_conv = {
     "T>C":"Ti",
     "C>T":"Ti",
@@ -88,7 +94,7 @@ function findIndicesOfMax(inp, count) {
     }
     return outp;
 }
-
+// sum all values by key in an object
 function sumObjectsByKey(...objs) {
     return objs.reduce((a, b) => {
       for (let k in b) {
@@ -110,44 +116,48 @@ function build_mapping_plot() {
     let mapped_reads = [];
     let dedup_reads = [];
     let sample_ids = [];
-
+// for each sample in wes_data...
     for (let i = 0; i < wes_data.length; ++i) {
+        // check if sample hasn't been filtered out by user
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            // for normal and tumor type
             for (let j = 0; j < sample_type.length; ++j) {
+                // check if type exists
                 if (wes_data[i][sample_type[j]] != undefined) {
-                    // different types of reads - counts
+                    // push counts from different types of reads to arrays for plot
                     total_reads.push(wes_data[i][sample_type[j]]['alignment']['total_reads'])
                     mapped_reads.push(wes_data[i][sample_type[j]]['alignment']['mapped_reads'])
                     dedup_reads.push(wes_data[i][sample_type[j]]['alignment']['dedup_reads'])
+                    // push sample (+type) name for x-axis of plot
                     sample_ids.push(wes_data[i]['id'] + sample_type_suffix[j])
                 }
             }
         }
     }
-
+    // total reads trace
     let trace1 = {
         x: sample_ids,
         y: total_reads,
         name: 'Total Reads',
         type: 'bar'
     };
-
+    // mapped reads trace
     let trace2 = {
         x: sample_ids,
         y: mapped_reads,
         name: 'Mapped Reads',
         type: 'bar'
     };
-
+    // dedup reads trace
     let trace3 = {
         x: sample_ids,
         y: dedup_reads,
         name: 'Dedup Reads',
         type: 'bar'
     };
-
+    // array of different traces for plot
     let data = [trace1, trace2, trace3];
-
+    // layout object for defining appearance
     let layout = {
         height: 450,
         width: 1044,
@@ -161,7 +171,7 @@ function build_mapping_plot() {
             automargin: true
         },
     };
-
+    // plot to div name "mapping_plot"
     Plotly.newPlot("mapping_plot", data, layout);
 
 };
@@ -362,7 +372,9 @@ function build_clonality_plot() {
 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            // we don't differentiate between tumor and normal samples here
             if (wes_data[i]['copy_number'] != undefined) {
+                // clonality
                 clonality.push(wes_data[i]['copy_number']['clonality'])
                 sample_ids.push(wes_data[i]['id'])
             }
@@ -402,6 +414,7 @@ function build_purity_plot() {
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['copy_number'] != undefined) {
+                // purity
                 purity.push(wes_data[i]['copy_number']['purity'])
                 sample_ids.push(wes_data[i]['id'])
             }
@@ -441,6 +454,7 @@ function build_ploidy_plot() {
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['copy_number'] != undefined) {
+                // ploidy
                 ploidy.push(wes_data[i]['copy_number']['ploidy'])
                 sample_ids.push(wes_data[i]['id'])
             }
@@ -481,7 +495,7 @@ function build_variant_classification_plot(){
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
-                // keep entries pertaining to vc_list
+                // generate list of indexes in variant_classificaiton column which have values contained in vc_types array
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
                 for (let j=0;j<vc_list.length; ++j) {
@@ -489,6 +503,7 @@ function build_variant_classification_plot(){
                         keep_idx.push(j)
                     }
                 }
+                // utilizing danfo.js to keep only values in vc_types
                 df_list.push(wes_data[i]['somatic']['maf'].iloc({rows: Array.from(keep_idx)})['Variant_Classification']);
             }
         }
@@ -534,7 +549,7 @@ function build_variant_type_plot(){
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
-                // keep entries pertaining to vc_list
+                // generate list of indexes in variant_classificaiton column which have values contained in vc_types array
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
                 for (let j=0;j<vc_list.length; ++j) {
@@ -542,6 +557,7 @@ function build_variant_type_plot(){
                         keep_idx.push(j)
                     }
                 }
+                // utilizing danfo.js to keep only values in vc_types
                 df_list.push(wes_data[i]['somatic']['maf'].iloc({rows: Array.from(keep_idx)})['Variant_Type']);
             }
         }
@@ -592,7 +608,7 @@ function build_snv_class_plot(){
                 let class_list = [];
                 // reference_allele > tumor_seq_allele2
                 for (let j=0;j<ref.length; ++j) {
-                    // bases only
+                    // keep bases only from bases array
                     if (checkAvailability(bases, ref[j]) && checkAvailability(bases, allele2[j])) {
                         // use snv_conv function to convert bases
                         class_list.push(snv_conv[ref[j]+'>'+allele2[j]])
@@ -643,11 +659,13 @@ function build_variant_per_sample_plot(){
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['maf'] != undefined) { 
+                // generate variant counts
                 vc = wes_data[i]['somatic']['maf']['Variant_Classification'].value_counts();
                 let total_count = 0
-                // collect vc counts
+                // for each element in vc_types array, push variant count from sample
                 for (let j = 0; j < vc_types.length; ++j) {
                     data[j]['y'].push(vc['data'][vc['index_arr'].indexOf(vc_types[j])]);
+                    // add to total count
                     if (typeof vc['data'][vc['index_arr'].indexOf(vc_types[j])] != 'undefined'){
                         total_count = total_count + vc['data'][vc['index_arr'].indexOf(vc_types[j])];
                     }
@@ -692,12 +710,15 @@ function build_variant_classification_summary_plot(){
                 // vc count per sample
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
+                // indexes of variants from sample which are also in vc_types
                 for (let j=0;j<vc_list.length; ++j) {
                     if (checkAvailability(vc_types, vc_list[j])) {
                         keep_idx.push(j)
                     }
                 }
+                // variant type counts
                 let vc_counts = wes_data[i]['somatic']['maf'].iloc({rows: Array.from(keep_idx)})['Variant_Classification'].value_counts();
+                // push counts to data structure for plotly
                 for (let j = 0; j < vc_types.length; ++j) {
                     data[j]['y'].push(vc_counts['data'][vc_counts['index_arr'].indexOf(vc_types[j])]);
                 }
@@ -743,7 +764,7 @@ function build_top_10_genes_plot(){
             }
         }
     }
-    // count top 10 gene occurances, all samples pooled
+    // pool all samples with danfo, count top 10 gene occurances
     let combined_df = dfd.concat({ df_list: df_list, axis: 0 })
     let gene_counts = combined_df['Hugo_Symbol'].value_counts()
     let keep_idx = findIndicesOfMax(gene_counts['data'], 20);
@@ -824,7 +845,7 @@ function build_ti_tv_plot(){
             }
         }
     }
-
+    // ti-tv data structure
     let ti_tv = {'Ti':Array(df_list.length).fill(0),'Tv':Array(df_list.length).fill(0)}
 
     for (let i = 0; i < df_list.length; ++i) {
@@ -832,9 +853,11 @@ function build_ti_tv_plot(){
         let counts_sum = counts['data'].reduce((a, b) => a + b, 0)
         for (let j = 0; j < Object.keys(snv).length; ++j) {
             if (checkAvailability(counts['index_arr'], Object.keys(snv)[j])) {
+                // normalize and add snv and ti-tv values
                 snv[counts['index_arr'][j]].push((counts['data'][j]/counts_sum)*100);
                 ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + (counts['data'][j]/counts_sum)*100;
             } else {
+                // if snv doesnt exist in sample, add 0 to snv and ti-tv data structures
                 snv[counts['index_arr'][j]].push(0);
                 ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] = ti_tv[ti_tv_conv[counts['index_arr'][j]]][i] + 0;
             }
@@ -899,8 +922,9 @@ function build_ti_tv_plot(){
 }
 
 function build_lego_plot(){
-    // each tri
+
     let tri_template = {
+        // each tri
         "A_A": 0,
         "A_C": 0,
         "A_G": 0,
@@ -918,8 +942,9 @@ function build_lego_plot(){
         "T_G": 0,
         "T_T": 0
     }
-    // each snv
+
     let tri_data = {
+        // each snv
         "C>A": { ...tri_template },
         "C>G": { ...tri_template },
         "C>T": { ...tri_template },
@@ -933,7 +958,7 @@ function build_lego_plot(){
             if (wes_data[i]['somatic']['tri_matrix'] != undefined) {
                 for (var snv in tri_data) {
                     if (Object.prototype.hasOwnProperty.call(wes_data[i]['somatic']['tri_matrix'], snv)) {
-                        // add to tri_data
+                        // add counts from each snv to tri_data
                         tri_data[snv] = sumObjectsByKey({ ...tri_data[snv]},
                             { ...wes_data[i]['somatic']['tri_matrix'][snv]})
                     }
@@ -949,7 +974,7 @@ function build_lego_plot(){
                     tri_data[snv][tri] = (tri_data[snv][tri] / tri_sum) * 100
                 });
         }
-
+    // subplot traces
     let data = [{
         x: Object.keys(tri_data['C>A']),
         y: Object.values(tri_data['C>A']),
@@ -999,7 +1024,7 @@ function build_lego_plot(){
         height: 450,
         width: 1044,
         title: 'Lego Plot',
-        // subplots
+        // subplot layout
         xaxis: {domain: [0, 0.3], anchor: 'y'},
         yaxis: {domain: [0.58, 1], anchor: 'x', title: { text: '% Mutations' }},
         yaxis2: {domain: [0.58, 1], anchor: 'x2'},
@@ -1025,8 +1050,9 @@ function build_tmb_plot() {
 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-                tmb.push(wes_data[i]['somatic']['summary']['tmb'])
-                sample_ids.push(wes_data[i]['id'])
+            //add tmb
+            tmb.push(wes_data[i]['somatic']['summary']['tmb'])
+            sample_ids.push(wes_data[i]['id'])
         }
     }
 
@@ -1058,7 +1084,7 @@ function build_tmb_plot() {
 function build_oncoplot_plot() {
 
     let top_genes = [];
-    // all samples genes list
+    // compile genes list from all samples
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             if (wes_data[i]['somatic']['geneList'] != undefined) {
@@ -1066,7 +1092,7 @@ function build_oncoplot_plot() {
             }
         }
     }
-    // top genes
+    // obtain top genes
     top_genes = sortByFrequency(top_genes).slice(0, 25).reverse();
     let heatmap_z = Array.from(Array(top_genes.length), () => []);
     let sample_rank = [];
@@ -1075,17 +1101,20 @@ function build_oncoplot_plot() {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
                 // run through top genes list
                 for (let j = 0; j < top_genes.length; ++j) {
-                    // evaluate if top gene is listed in sample gene lsit
+                    // evaluate if top gene is listed in sample gene list
                     if (checkAvailability(wes_data[i]['somatic']['geneList'], top_genes[j])) {
+                        // hit
                         heatmap_z[j].push(1)
+                        // add to sample count for later sorting
                         sample_rank.push(wes_data[i]['id'])
                     } else {
+                        // non-hit
                         heatmap_z[j].push(0)
                     }
                 }
             }
     }
-    //sample abundance ranking
+    // sample overall abundance ranking
     sample_rank = sortByFrequency(sample_rank)
     let data = [
         {
@@ -1110,6 +1139,7 @@ function build_oncoplot_plot() {
         xaxis: {
             title: { text: 'Samples' },
             automargin: true,
+            // sort samples by abundance ranking
             categoryorder: "array",
             categoryarray: sample_rank
         },
@@ -1125,7 +1155,7 @@ function build_hla_oncoplot_plot() {
 
     let top_hla = [];
     let sample_ids = [];
-    // all samples hla list
+    // compile hla list from all samples
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             for (let j = 0; j < sample_type.length; ++j) {
@@ -1135,22 +1165,26 @@ function build_hla_oncoplot_plot() {
             }
         }
     }
-    // top hla
+    // obtain top hla counts
     top_hla = sortByFrequency(top_hla).slice(0, 25).reverse();
     let heatmap_z = Array.from(Array(top_hla.length), () => []);
     let sample_rank = [];
     // generate heatmap
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            // for normal and tumor type
             for (let j = 0; j < sample_type.length; ++j) {
                 if (typeof wes_data[i][sample_type[j]] != 'undefined') {
                     // run through top hla list
                     for (let k = 0; k < top_hla.length; ++k) {
                         // evaluate if top hla is listed in sample hla lsit
                         if (checkAvailability(Object.values(wes_data[i][sample_type[j]]['hla']), top_hla[k])) {
+                            // hit
                             heatmap_z[k].push(1)
+                            // add to sample count for later sorting
                             sample_rank.push(wes_data[i]['id'] + sample_type_suffix[j])
                         } else {
+                            // non-hit
                             heatmap_z[k].push(0)
                         }
                     }
@@ -1184,6 +1218,7 @@ function build_hla_oncoplot_plot() {
         xaxis: {
             title: { text: 'Samples' },
             automargin: true,
+            // sort samples by abundance ranking
             categoryorder: "array",
             categoryarray: sample_rank
         },
