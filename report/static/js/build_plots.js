@@ -1227,5 +1227,5 @@ function build_hla_oncoplot_plot() {
             automargin: true
         },
     };
-    Plotly.newPlot('hla_oncoplot_plot', data, layout);
+    Plotly.newPlot('HLA_Oncoplot_plot', data, layout);
 }
