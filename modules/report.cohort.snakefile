@@ -62,9 +62,10 @@ def cohort_report_targets(wildcards):
     # ls.append("analysis/cohort_report/somatic/functional_summary.json")
 
     #HLA
-    ls.append("analysis/cohort_report/HLA/01_HLA_Table.dt")
-    ls.append("analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly")
-    ls.append("analysis/cohort_report/HLA/03_HLA_Oncoplot.stub")
+    ls.append("analysis/cohort_report/HLA/01_HLA_Oncoplot.stub")
+    ls.append("analysis/cohort_report/HLA/02_HLA_Table.dt")
+    #ls.append("analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly")
+    
     #ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
     #ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
     return ls
@@ -375,8 +376,8 @@ rule cohort_report_HLA_table:
     input:
         cohort_report_inputFn
     output:
-        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
-        details="analysis/cohort_report/HLA/01_details.yaml",
+        csv="analysis/cohort_report/HLA/02_HLA_Table.dt",
+        details="analysis/cohort_report/HLA/02_details.yaml",
     params:
         files = lambda wildcards,input: " -f ".join(input),
         table_options = "table_title: 'HLA Alleles Table'",
@@ -387,31 +388,32 @@ rule cohort_report_HLA_table:
         """echo "{params.table_options}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_hla_hlaTable.py -f {params.files} -o {output.csv}"""
 
-rule cohort_report_HLA_histogram:
-    """Generate the HLA histogram plot for the report"""
-    input:
-        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
-    output:
-        csv="analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly",
-        details="analysis/cohort_report/HLA/02_details.yaml",
-    params:
-        caption="""caption: 'Histogram of shared HLA-alleles'""",
-        plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
-    message:
-        "REPORT: creating HLA table for HLA section"
-    group: "cohort_report"
-    shell:
-        """echo "{params.caption}" >> {output.details} && 
-        echo "{params.plot_options}" >> {output.details} &&
-        cidc_wes/modules/scripts/cohort_report/cr_hla_hlaHistogram.py -f {input} -o {output.csv}"""
+#REMOVED!
+# rule cohort_report_HLA_histogram:
+#     """Generate the HLA histogram plot for the report"""
+#     input:
+#         csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
+#     output:
+#         csv="analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly",
+#         details="analysis/cohort_report/HLA/02_details.yaml",
+#     params:
+#         caption="""caption: 'Histogram of shared HLA-alleles'""",
+#         plot_options = yaml_dump({'plotly': {'barmode':"overlay",'opacity':1.0}}),
+#     message:
+#         "REPORT: creating HLA table for HLA section"
+#     group: "cohort_report"
+#     shell:
+#         """echo "{params.caption}" >> {output.details} && 
+#         echo "{params.plot_options}" >> {output.details} &&
+#         cidc_wes/modules/scripts/cohort_report/cr_hla_hlaHistogram.py -f {input} -o {output.csv}"""
 
 rule cohort_report_HLA_oncoplot:
     """Generate the HLA histogram plot for the report"""
     input:
-        csv="analysis/cohort_report/HLA/01_HLA_Table.dt",
+        csv="analysis/cohort_report/HLA/02_HLA_Table.dt",
     output:
-        csv="analysis/cohort_report/HLA/03_HLA_Oncoplot.stub",
-        details="analysis/cohort_report/HLA/03_details.yaml",
+        csv="analysis/cohort_report/HLA/01_HLA_Oncoplot.stub",
+        details="analysis/cohort_report/HLA/01_details.yaml",
     params:
         caption="""caption: 'Oncoplot of shared HLA-alleles'""",
     message:
