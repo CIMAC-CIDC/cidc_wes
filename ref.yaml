@@ -46,6 +46,8 @@ hg38:
   #msisensor2
   msisensor2: ./ref_files/hg38/msisensor2/models_hg38/
 
+  twist_regions: ./ref_files/hg38/target_beds/twist.broad.mdacc.mocha.liftover.hg38.sorted.merged.bed
+
   #The following are stale and marked deletion
   #target_Bed_input: ./ref_files/hg38/target_beds/mocha.liftover.hg38.noContigs.bed
   #positions_bamtovcf: ./ref_files/hg38/target_beds/pos_bamtovcf.bed
