@@ -220,7 +220,7 @@ rule report_data_quality_coverage:
 def report_maftoolsPlotsInput(wildcards):
     run = list(config['runs'].keys())[0]
     caller = config.get('somatic_caller', "tnscope")
-    return "analysis/somatic/%s/%s_%s.filter.maf" % (run, run, caller)
+    return "analysis/somatic/%s/%s_%s.output.twist.maf" % (run, run, caller)
 
 rule report_somatic_variants_maftoolsPlots:
     input:
@@ -264,8 +264,8 @@ def report_somatic_variants_summary_tblInputFn(wildcards):
     ls = []
     caller = config['somatic_caller']
     run = list(config['runs'].keys())[0]
-    ls.append("analysis/somatic/%s/%s_mutation_summaries.%s.csv" % (run,run,caller))
-    ls.append("analysis/somatic/%s/%s_functional_annot_summaries.%s.csv" % (run,run,caller))
+    ls.append("analysis/somatic/%s/%s_%s.mutation_summaries.csv" % (run,run,caller))
+    ls.append("analysis/somatic/%s/%s_%s.functional_annot_summaries.csv" % (run,run,caller))
     ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run, run, caller))
     return ls
 
@@ -285,7 +285,7 @@ rule report_somatic_variants_summary_tbls:
 def report_legoPlotInputFn(wildcards):
     run = list(config['runs'].keys())[0]
     caller = config['somatic_caller']
-    return "analysis/somatic/%s/%s_%s.filter.pdf" % (run, run, caller)
+    return "analysis/somatic/%s/%s_%s.twist.pdf" % (run, run, caller)
 
 rule report_somatic_variants_legoPlot:
     """Add the lego plot to the somatic_variants section of the report"""

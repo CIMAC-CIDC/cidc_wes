@@ -19,7 +19,7 @@ def rna_targets(wildcards):
                 ls.append("analysis/rna/%s/%s.RG.dedup.split.bam" % (run, tumor_sample))
                 ls.append("analysis/rna/%s/%s.RG.dedup.recal.csv" % (run, tumor_sample))
                 ls.append("analysis/rna/%s/%s.haplotyper.rna.vcf.gz" % (run, run))
-                ls.append("analysis/rna/%s/%s_%s.filter.neoantigen.vep.rna.vcf" % (run, run, caller))
+                ls.append("analysis/rna/%s/%s_%s.output.twist.neoantigen.vep.rna.vcf" % (run, run, caller))
     #print(ls)
     return ls
 
@@ -142,9 +142,8 @@ def rna_variantCalling_inputFn(wildcards):
     tmp = {}
     tmp['bam'] = "analysis/rna/%s/%s.RG.dedup.split.bam" % (run, sample)
     tmp['bqsr'] = "analysis/rna/%s/%s.RG.dedup.recal.csv" % (run, sample)
-    #tmp['vcf'] = "analysis/somatic/%s/%s_%s.filter.vcf.gz" % (run, run, caller)
     #USE this instead
-    tmp['vcf'] = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf.gz" % (run, run, caller)
+    tmp['vcf'] = "analysis/somatic/%s/%s_%s.output.twist.neoantigen.vep.vcf.gz" % (run, run, caller)
     return tmp
 
 rule rna_haplotyper:
@@ -174,7 +173,7 @@ def rna_intersect_inputFn(wildcards):
     run = wildcards.run
     caller = config.get('somatic_caller', 'tnscope')
     tmp = {}
-    tmp['dna'] = "analysis/somatic/%s/%s_%s.filter.neoantigen.vep.vcf.gz" % (run, run, caller)
+    tmp['dna'] = "analysis/somatic/%s/%s_%s.output.twist.neoantigen.vep.vcf.gz" % (run, run, caller)
     tmp['rna'] = "analysis/rna/%s/%s.haplotyper.rna.vcf.gz" % (run, run)
     return tmp
 
@@ -184,7 +183,7 @@ rule rna_intersect:
     input:
         unpack(rna_intersect_inputFn)
     output:
-        "analysis/rna/{run}/{run}_{caller}.filter.neoantigen.vep.rna.vcf"
+        "analysis/rna/{run}/{run}_{caller}.output.twist.neoantigen.vep.rna.vcf"
     group: "rna"
     benchmark:
         "benchmarks/rna/{run}/{run}_{caller}.rna_intersect.txt"
