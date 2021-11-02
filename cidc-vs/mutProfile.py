@@ -63,6 +63,9 @@ def fetchMut(maf, only_protein=True, dna_alt_col="HGVSc", mut_type='snv'):
     # extend mutated region
     df['End_Position'] = df['End_Position'] + 1
     df['Start_Position'] = df['Start_Position']-2
+    #SOMETIMES we are ending up with floats in Start_Position and End_Position
+    df['End_Position'] = df['End_Position'].astype(int)
+    df['Start_Position'] = df['Start_Position'].astype(int) 
 
     if only_protein == True:
         return df.loc[~df["Variant_Classification"].isin(["3'Flank",

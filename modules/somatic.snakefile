@@ -115,12 +115,12 @@ def somatic_helper_targets(wildcards, caller):
         ls.append("analysis/somatic/%s/%s_%s.filter.maf" % (run,run, caller))
         #lego plot script, mutProfile.py generates a plot (.pdf) and a counts
         #file (.json)
-        ls.append("analysis/somatic/%s/%s_%s.filter.pdf" % (run,run, caller))
-        ls.append("analysis/somatic/%s/%s_%s.filter.tri_mtrx.json" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.twist.pdf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.twist.tri_mtrx.json" % (run,run, caller))
         #Sample summary report
         ls.append("analysis/somatic/%s/%s_%s_somatic_SNV_summaries.csv" % (run,run, caller))
-        ls.append("analysis/somatic/%s/%s_mutation_summaries.%s.csv" % (run,run,caller))
-        ls.append("analysis/somatic/%s/%s_functional_annot_summaries.%s.csv" % (run,run,caller))
+        ls.append("analysis/somatic/%s/%s_%s.mutation_summaries.csv" % (run,run,caller))
+        ls.append("analysis/somatic/%s/%s_%s.functional_annot_summaries.csv" % (run,run,caller))
         #Sample Json for cohort report
         ls.append("analysis/somatic/%s/%s_%s_onco_gene_list.tsv" % (run,run,caller))
     #json files
@@ -294,15 +294,15 @@ rule vcf2maf:
 rule mutationSignature:
     """General rule to do mutation signature analysis using mutProfiler.py"""
     input:
-        "analysis/somatic/{run}/{run}_{caller}.filter.maf"
+        "analysis/somatic/{run}/{run}_{caller}.output.twist.maf"
     output:
-        pdf="analysis/somatic/{run}/{run}_{caller}.filter.pdf",
-        json="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
+        pdf="analysis/somatic/{run}/{run}_{caller}.twist.pdf",
+        json="analysis/somatic/{run}/{run}_{caller}.twist.tri_mtrx.json",
     params:
         index= lambda wildcards: os.path.abspath(config['genome_fasta']),
         #BUILD up our tcga_panel using a helper fn
         tcga_panel = build_tcga_param(),
-        outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.filter" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller),
+        outname = lambda wildcards: "%sanalysis/somatic/%s/%s_%s.twist" % (config['remote_path'], wildcards.run, wildcards.run, wildcards.caller),
         name = lambda wildcards: wildcards.run
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.mutationSignature.txt"
@@ -429,10 +429,10 @@ rule summarize_somatic_mutations:
     --used in the wes report"""
     input:
         #expand("analysis/somatic/{run}/{run}_{{caller}}.filter.maf", run=sorted(config['runs'])) #NO LONGER expecting multiple runs!
-        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf"
+        maf="analysis/somatic/{run}/{run}_{caller}.output.twist.maf"
     output:
-        cts = "analysis/somatic/{run}/{run}_mutation_summaries.{caller}.csv",
-        annot = "analysis/somatic/{run}/{run}_functional_annot_summaries.{caller}.csv",
+        cts = "analysis/somatic/{run}/{run}_{caller}.mutation_summaries.csv",
+        annot = "analysis/somatic/{run}/{run}_{caller}.functional_annot_summaries.csv",
     params:
         #files = lambda wildcards, input: " -m ".join(input),
         targets = center_targets[config.get('cimac_center', 'broad')],
@@ -452,7 +452,7 @@ rule summarize_SNV_mutations:
     T
     --used in the wes report"""
     input:
-        "analysis/somatic/{run}/{run}_{caller}.filter.vep.vcf"
+        "analysis/somatic/{run}/{run}_{caller}.output.twist.vep.vcf"
     output:
         "analysis/somatic/{run}/{run}_{caller}_somatic_SNV_summaries.csv"
     group: "somatic"
@@ -490,12 +490,12 @@ rule summarize_SNV_mutations:
 # FOR cohort report
 ###############################################################################
 rule somatic_json:
-    """include the filtered maf file (base64 encoded), trinucleotide matrix, 
+    """include the twist maf file (base64 encoded), trinucleotide matrix, 
     and TMB via summaries table"""
     input:
-        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
-        tri_mtrx="analysis/somatic/{run}/{run}_{caller}.filter.tri_mtrx.json",
-        summary="analysis/somatic/{run}/{run}_mutation_summaries.{caller}.csv",
+        maf="analysis/somatic/{run}/{run}_{caller}.output.twist.maf",
+        tri_mtrx="analysis/somatic/{run}/{run}_{caller}.twist.tri_mtrx.json",
+        summary="analysis/somatic/{run}/{run}_{caller}.mutation_summaries.csv",
         oncoGeneList="analysis/somatic/{run}/{run}_{caller}_onco_gene_list.tsv",
     output:
         "analysis/report/json/somatic/{run}_{caller}.somatic.json"
@@ -505,13 +505,13 @@ rule somatic_json:
     benchmark:
         "benchmarks/somatic/{run}_{caller}.somatic_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -f {input.maf} -j {input.tri_mtrx} -s {input.summary} -l {input.oncoGeneList} -o {output}"
+        "cidc_wes/modules/scripts/json_somatic.py -r {params.run} -m {input.maf} -j {input.tri_mtrx} -s {input.summary} -l {input.oncoGeneList} -o {output}"
 
 rule somatic_get_top_oncogenes:
     """Use the cancerGeneList.tsv and check to see which ones are represented
-    in the filtered maf file"""
+    in the twist maf file"""
     input:
-        maf="analysis/somatic/{run}/{run}_{caller}.filter.maf",
+        maf="analysis/somatic/{run}/{run}_{caller}.twist.maf",
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
     output:
         "analysis/somatic/{run}/{run}_{caller}_onco_gene_list.tsv",

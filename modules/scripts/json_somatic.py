@@ -13,7 +13,7 @@ def main():
     usage = "USAGE: %prog -f file -o output json file"
     optparser = OptionParser(usage=usage)
     optparser.add_option("-r", "--run", help="run name", default=None)
-    optparser.add_option("-f", "--in_file", help="input maf file", default=None)
+    optparser.add_option("-m", "--in_file", help="input maf file", default=None)
     optparser.add_option("-j", "--tri_mtrx_file", help="input trinucleotid matrix file", default=None)
     optparser.add_option("-s", "--summary_file", help="somatic mutation summary file which includes TMB as last col", default=None)
     optparser.add_option("-l", "--gene_list_file", help="file containing the top onco genes represented in the sample", default=None)
@@ -54,7 +54,7 @@ def main():
         geneList.append(l.strip())
     f.close()
 
-    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary, 'geneList': geneList}}
+    js_out = {'id': options.run, 'somatic': {'twist_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary, 'geneList': geneList}}
 
     out = open(options.output, 'w')
     out.write(json.dumps(js_out))
