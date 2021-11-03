@@ -511,7 +511,7 @@ rule somatic_get_top_oncogenes:
     """Use the cancerGeneList.tsv and check to see which ones are represented
     in the twist maf file"""
     input:
-        maf="analysis/somatic/{run}/{run}_{caller}.twist.maf",
+        maf="analysis/somatic/{run}/{run}_{caller}.output.twist.maf",
         cancerGeneList = "cidc_wes/static/oncoKB/cancerGeneList.tsv",
     output:
         "analysis/somatic/{run}/{run}_{caller}_onco_gene_list.tsv",
