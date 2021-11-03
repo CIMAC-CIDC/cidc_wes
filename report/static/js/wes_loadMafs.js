@@ -1,5 +1,6 @@
 /* Len Taing 2021 (TGBTG) 
-   Script to decode the somatic.filtered_maf_file from base64 encoding 
+   Script to decode the somatic.twist_maf_file OR for older versions 
+   filtered_maf_file from base64 encoding 
    and also provide maf information for other js components
 */
 
@@ -38,16 +39,19 @@ function mafStringToDf(mafString) {
 }
 */
 
+//2021-11-02 UPDATE: now using twist_maf_file
 //Convert all wes_data[i]['somatic']['filtered_maf_file'] into a danfo Df
 //Assumes that each wes_data[i]['somatic']['filtered_maf_file'] object is
 // {'hdr' : [ ... ], 'mat': [[...], [ ...], ]}
 for (let i = 0; i < wes_data.length; i++) {
-    let tmp = wes_data[i]['somatic']['filtered_maf_file'];
+    //IF twist_maf_file exists then use that, otherwise try filtered_maf_file
+    let maf_file = 'filtered_maf_file' in wes_data[i]['somatic'] ? 'filtered_maf_file' : 'twist_maf_file';
+    let tmp = wes_data[i]['somatic'][maf_file];
     let df = new dfd.DataFrame(tmp['mat'], {'columns': tmp['hdr']});
     wes_data[i]['somatic']['maf'] = df;
-    //delete filtered_maf_file
-    wes_data[i]['somatic']['filtered_maf_file'] = null;
-    delete wes_data[i]['somatic']['filtered_maf_file'];
+    //delete maf_file
+    wes_data[i]['somatic'][maf_file] = null;
+    delete wes_data[i]['somatic'][maf_file];
 }
 
 //EXAMPLES:
