@@ -106,8 +106,8 @@ def somatic_helper_targets(wildcards, caller):
         #Optimized
         ls.append("analysis/somatic/%s/%s_%s.output.twist.vcf" % (run,run, caller))
         ls.append("analysis/somatic/%s/%s_%s.output.twist.maf" % (run,run, caller))
-        ls.append("analysis/somatic/%s/%s_%s.output.twist.optimized.vcf" % (run,run, caller))
-        ls.append("analysis/somatic/%s/%s_%s.output.twist.optimized.maf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.output.twist.filtered.vcf" % (run,run, caller))
+        ls.append("analysis/somatic/%s/%s_%s.output.twist.filtered.maf" % (run,run, caller))
 
         #Filtered
         ls.append("analysis/somatic/%s/%s_%s.filter.vcf" % (run,run, caller))
@@ -205,7 +205,7 @@ rule somatic_optimize:
     input:
         "analysis/somatic/{run}/{run}_{caller}.output.twist.vcf",
     output:
-        "analysis/somatic/{run}/{run}_{caller}.output.twist.optimized.vcf",
+        "analysis/somatic/{run}/{run}_{caller}.output.twist.filtered.vcf",
     group: "somatic"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_somatic_optimize.txt"    
