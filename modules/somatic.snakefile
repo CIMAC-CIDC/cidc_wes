@@ -199,7 +199,7 @@ rule somatic_twist:
     shell:
         """bcftools view -R {params.twist_regions} {input.vcf} | bcftools sort | bcftools view -Ov > {output}"""
 
-rule somatic_optimize:
+rule somatic_twist_filter:
     """Filters the PASS column of a vcf and removes evertying 
     except PASS and alt_allele_in_normal"""
     input:
