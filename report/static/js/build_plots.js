@@ -850,6 +850,14 @@ function build_ti_tv_plot(){
 
     for (let i = 0; i < df_list.length; ++i) {
         let counts = df_list[i].value_counts()
+	//ensure that all SNV types are accounted for
+        for (const snv_key in snv) {
+            if (! counts['index_arr'].includes(snv_key)) {
+                //ADD the missing key to the end of the list w/ 0 count
+                counts['index_arr'].push(snv_key);
+                counts['data'].push(0);
+            }
+        }
         let counts_sum = counts['data'].reduce((a, b) => a + b, 0)
         for (let j = 0; j < Object.keys(snv).length; ++j) {
             if (checkAvailability(counts['index_arr'], Object.keys(snv)[j])) {
