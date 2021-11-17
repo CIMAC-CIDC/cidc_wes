@@ -11,7 +11,7 @@ import base64
 from optparse import OptionParser
 from collections import Counter
 
-_attrs = ['filtered_maf_file']
+_attrs = ['twist_maf_file']
 
 def processJson(json_fpath):
     """Given a json file, returns a dictionary of that file with the values
@@ -77,7 +77,7 @@ def main():
     #key = HGVSp, value = list of runs that contain that variant
     variantsHits = {}
     #READ in maf files and build up binary matrix
-    for (run, maf_b64) in [(r['id'], r['filtered_maf_file']) for r in runs]:
+    for (run, maf_b64) in [(r['id'], r['twist_maf_file']) for r in runs]:
         maf = base64.b64decode(maf_b64).decode("utf-8").split("\n")
         #process maf file and build up variantsHits
         processMaf(maf, run, variantsHits)

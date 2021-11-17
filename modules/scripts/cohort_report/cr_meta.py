@@ -42,7 +42,7 @@ def processJson(json_fpath, annotations):
             run['annotations'][a] = ann[a]
 
     #modify the maf file stored in the json to only contain the cols we want
-    tmp['somatic']['filtered_maf_file'] = cullMAF_cols(tmp['somatic']['filtered_maf_file'], _maf_cols)
+    tmp['somatic']['twist_maf_file'] = cullMAF_cols(tmp['somatic']['twist_maf_file'], _maf_cols)
     #print(run)
     return (tmp, run)
 

@@ -54,7 +54,7 @@ def main():
         geneList.append(l.strip())
     f.close()
 
-    js_out = {'id': options.run, 'somatic': {'filtered_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary, 'geneList': geneList}}
+    js_out = {'id': options.run, 'somatic': {'twist_maf_file':"%s" % s_b64, 'tri_matrix': tri_mtrx, 'summary': summary, 'geneList': geneList}}
 
     out = open(options.output, 'w')
     out.write(json.dumps(js_out))

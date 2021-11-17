@@ -14,7 +14,7 @@ from optparse import OptionParser
 
 #Attribs to read in
 #LEAVE off the plot for now
-_attrs = ['filtered_maf_file']
+_attrs = ['twist_maf_file']
 
 def processJson(json_fpath):
     """Given a json file, returns a dictionary of that file with the values
@@ -49,7 +49,7 @@ def main():
     runs = [processJson(f) for f in options.files]
 
     out = gzip.open(options.output, 'wb')
-    for maf in [r['filtered_maf_file'] for r in runs]:
+    for maf in [r['twist_maf_file'] for r in runs]:
         #NOTE: we don't need to add .decode('utf-8') to end of base64 call b/c
         #GZIP takes in bytes, not strings
         out.write(base64.b64decode(maf))
