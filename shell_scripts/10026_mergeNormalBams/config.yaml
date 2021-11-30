@@ -1,0 +1,4 @@
+samples:
+  CBUPFY84O.01_merged:
+    CBUPFY8ML.01: data/CBUPFY8ML.01.bam
+    CBUPFY8O5.01: data/CBUPFY8O5.01.bam
