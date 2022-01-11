@@ -188,7 +188,7 @@ rule somatic_twist:
         vcf = "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz",
         #Sentieon creates this automatically but we don't explicitly list it
         #as an output
-        #tbi = "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz.tbi",
+        tbi = "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz.tbi",
     output:
         "analysis/somatic/{run}/{run}_{caller}.output.twist.vcf",
     params:
