@@ -74,6 +74,13 @@ dependencies:
 #msisensor2 plotting
 - r-beeswarm
 
+#tcellextrect
+- r-tidyr
+- r-readr
+- r-zoo
+- r-seqinr
+#- r-gratia #NOTE: not in conda; manually do install.packages('gratia')
+
 #pip installs
 - pip:
   - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq
