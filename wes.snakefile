@@ -131,6 +131,7 @@ def level2_sans_report(wildcards):
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         ls.extend(xhla_targets(wildcards))
     ls.extend(msisensor2_targets(wildcards))
+    ls.extend(tcellextrect_targets(wildcards))
     return ls
 
 def level2_targets(wildcards):
@@ -177,6 +178,7 @@ include: "./modules/optitype.snakefile" #...
 include: "./modules/xhla.snakefile" #....
 include: "./modules/neoantigen.snakefile"
 include: "./modules/msisensor2.snakefile"
+include: "./modules/tcellextrect.snakefile"
 include: "./modules/rna.snakefile"
 include: "./modules/report.snakefile" # report module
 #include: "./modules/report.cohort.snakefile" # cohort report module
