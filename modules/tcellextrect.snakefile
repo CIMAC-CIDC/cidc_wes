@@ -58,3 +58,19 @@ rule tcellextrect:
     shell:
         """Rscript --vanilla cidc_wes/modules/scripts/tcellextrect.R {input} {params.bed} {params.output_dir} {params.run}"""
 
+
+
+rule tcellextrect_json:
+    """jsonify the T-cell fraction
+    """
+    input:
+        "analysis/tcellextrect/{run}/{run}_tcellextrect.txt"
+    output:
+        "analysis/report/json/tcellextrect/{run}.tcellextrect.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "tcellextrect"
+    benchmark:
+        "benchmarks/tcellextrect/{run}.tcellextrect_json.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_tcellextrect.py -r {params.run} -f {input} -o {output}"

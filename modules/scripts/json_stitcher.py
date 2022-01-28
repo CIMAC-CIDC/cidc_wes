@@ -34,21 +34,22 @@ def main():
     optparser.add_option("-j", "--hla", help="hla json file", default=None)
     optparser.add_option("-p", "--purity", help="purity json file", default=None)
     optparser.add_option("-s", "--somatic", help="somatic filtered maf json file", default=None)
-    optparser.add_option("-t", "--clonality", help="clonality json file", default=None)
+    optparser.add_option("-l", "--clonality", help="clonality json file", default=None)
     optparser.add_option("-n", "--neoantigen", help="neoantigen json file", default=None)
+    optparser.add_option("-t", "--tcellextrect", help="tcellextrect json file", default=None)
     optparser.add_option("-o", "--output", help="output file", default=None)
 
     (options, args) = optparser.parse_args(sys.argv)
 
-    if not options.run or not options.mapping or not options.coverage or not options.gc or not options.insert_size or not options.mean_quality or not options.hla or not options.somatic or not options.neoantigen or not options.output:
+    if not options.run or not options.mapping or not options.coverage or not options.gc or not options.insert_size or not options.mean_quality or not options.hla or not options.somatic or not options.neoantigen or not options.tcellextrect or not options.output:
         optparser.print_help()
         sys.exit(-1)
 
     #missing meta information
     js_out = {'id': options.run, 'meta': {}}
-    for json_f in [options.mapping, options.coverage, options.gc,
-                   options.insert_size, options.mean_quality, options.hla,
-                   options.purity, options.somatic, options.clonality, options.neoantigen]:
+    for json_f in [options.mapping, options.coverage, options.gc,options.insert_size,
+                   options.mean_quality, options.hla,options.purity, options.somatic,
+                   options.clonality, options.neoantigen, options.tcellextrect]:
 
         if json_f:
             #read in json
