@@ -44,6 +44,7 @@ def report_targets_sansHTML(wildcards):
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
     ls.append("analysis/report/neoantigens/02_neoantigen_list.dt")
     ls.append("analysis/report/neoantigens/03_tcellextrect.csv")
+    ls.append("analysis/report/neoantigens/04_msisensor2.csv")
 
     #JSON
     ls.append("analysis/report/json/%s.wes.json" % run)
@@ -449,7 +450,26 @@ rule report_neoantigens_tcellextrect:
 	details= "analysis/report/neoantigens/03_details.yaml",
     group: "report"
     shell:
-        """echo "{params.cap}" >> {output.details} && cp {input} {output.table}"""
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/tcellextrect_trimTable.py -f {input} -o {output.table}"""
+
+
+def report_neoantigens_msisensor2InputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/msisensor2/%s/%s_msisensor2.txt" % (run, run)
+
+rule report_neoantigens_msisensor2:
+    """report microsatellite instability"""
+    input:
+        report_neoantigens_msisensor2InputFn
+    params:
+        #run = lambda wildcards: wildcards.run,
+        cap = """caption: 'This table shows the estimated number and percentage of somatic microsatellite sites.'"""
+    output:
+        table="analysis/report/neoantigens/04_msisensor2.csv",
+        details= "analysis/report/neoantigens/04_details.yaml",
+    group: "report"
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/msisensor2_formatTable.py -f {input} -o {output.table}"""
 
 
 ###############################################################################
@@ -493,6 +513,7 @@ def getJsonFiles(wildcards):
     tmp['somatic'] = "analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller)
     tmp['neoantigen'] = "analysis/report/json/neoantigen/%s.neoantigen.json" % run
     tmp['tcellextrect'] = "analysis/report/json/tcellextrect/%s.tcellextrect.json" % run
+    tmp['msisensor2'] = "analysis/report/json/msisensor2/%s.msisensor2.json" % run
     if not config.get('tumor_only'): #Only run when we have normals
         tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
         tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
@@ -504,7 +525,7 @@ rule report_generate_json:
         unpack(getJsonFiles)
     params:
         run = lambda wildcards: wildcards.run,
-        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s -n %s -t %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic, input.neoantigen, input.tcellextrect) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -l %s -n %s -t %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality, input.neoantigen, input.tcellextrect),
+        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s -n %s -t %s -e %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic, input.neoantigen, input.tcellextrect, input.msisensor2) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -l %s -n %s -t %s -e %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality, input.neoantigen, input.tcellextrect, input.msisensor2),
     output:
         #NOTE: CANNOT name this {run}.json otherwise snakemake will have
         #trouble ressolving the wildcard

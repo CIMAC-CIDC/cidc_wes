@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python                                                                                          
 """Jacob Geisberg 2022"""
 import pandas as pd
 import os
@@ -10,13 +10,16 @@ from optparse import OptionParser
 def parseFile(in_file):
     """parse the relevant file--edit this!"""
 
-    f = pd.read_csv(in_file)
+    f = pd.read_csv(in_file, sep='\t')
     f = f.round(4)
-    ret = {'tcell_fraction': f["TCRA.tcell.fraction"][0],
-           'q_value': f["qcFit"][0]
+    ret = {'Total_Sites':int(f["Total_Number_of_Sites"][0]),
+           'Somatic_Sites':int(f["Number_of_Somatic_Sites"][0]),
+           'Percent_Somatic':int(f["%"][0])
           }
-        
+
+
     return ret
+
 
 def main():
     usage = "USAGE: %prog -r run_name -f file -o output_file"
@@ -32,8 +35,8 @@ def main():
         sys.exit(-1)
 
     js_out = {'id': options.run}
-    tcellextrect = parseFile(options.file)
-    js_out['tcellextrect'] = tcellextrect
+    msisensor2 = parseFile(options.file)
+    js_out['msisensor2'] = msisensor2
 
     out = open(options.output, 'w')
     out.write(json.dumps(js_out))

@@ -27,7 +27,7 @@ def msisensor2_targets(wildcards):
     """ Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/msisensor2/%s/%s_msisensor.txt" % (run,run))
+        ls.append("analysis/msisensor2/%s/%s_msisensor2.txt" % (run,run)) #edited
     return ls
 
 rule msisensor2_all:
@@ -85,11 +85,27 @@ rule msisensor2:
 
 rule msisensor2_copy:
     """Rename analysis/msisensor2/{run}/{run}_msisensor as 
-    analysis/msisensor2/{run}/{run}_msisensor.txt"""
+    analysis/msisensor2/{run}/{run}_msisensor2.txt"""
     input:
         "analysis/msisensor2/{run}/{run}_msisensor",
     output:
-        "analysis/msisensor2/{run}/{run}_msisensor.txt",
+        "analysis/msisensor2/{run}/{run}_msisensor2.txt", #edited
     group: "msisensor2"
     shell:
         "cp {input} {output}"
+
+rule msisensor2_json:
+    """create json with msisensor2 data
+    """
+    input:
+        "analysis/msisensor2/{run}/{run}_msisensor2.txt"
+    output:
+        "analysis/report/json/msisensor2/{run}.msisensor2.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "msisensor2"
+    benchmark:
+        "benchmarks/msisensor2/{run}.msisensor2_json.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_msisensor2.py -r {params.run} -f {input} -o {outp\
+ut}"

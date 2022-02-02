@@ -26,6 +26,7 @@ tcell_est <- function(bam_file, capture_bed, out_dir, out_name) {
    #Alt w/ purity and copy number:
    #TCRA.out <- adjustTcellExTRECT(TCRA.out, purity = 0.5, TCRA.cn = 3)
 
+
    #write to file
    out_f <- paste0(out_dir, "/", out_name, "_tcellextrect.txt")
    write.csv(TCRA.out, out_f, row.names=F, quote = F)
