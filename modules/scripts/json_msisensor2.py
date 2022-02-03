@@ -12,9 +12,9 @@ def parseFile(in_file):
 
     f = pd.read_csv(in_file, sep='\t')
     f = f.round(4)
-    ret = {'Total_Sites':int(f["Total_Number_of_Sites"][0]),
-           'Somatic_Sites':int(f["Number_of_Somatic_Sites"][0]),
-           'Percent_Somatic':int(f["%"][0])
+    ret = {'total_sites':int(f["Total_Number_of_Sites"][0]),
+           'somatic_sites':int(f["Number_of_Somatic_Sites"][0]),
+           'percent_somatic':int(f["%"][0])
           }
 
 
