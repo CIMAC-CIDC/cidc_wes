@@ -14,7 +14,7 @@ def parseFile(in_file):
     f = f.round(4)
     ret = {'total_sites':int(f["Total_Number_of_Sites"][0]),
            'somatic_sites':int(f["Number_of_Somatic_Sites"][0]),
-           'percent_somatic':int(f["%"][0])
+           'percent_somatic':float(f["%"][0])
           }
 
 
