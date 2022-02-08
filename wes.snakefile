@@ -79,9 +79,20 @@ def loadRef(config):
             config[k] = v
 
 #---------  CONFIG set up  ---------------
-configfile: "config.yaml"   # This makes snakemake load up yaml into config 
+configfile: "config.yaml"   # This makes snakemake load up yaml into config
 config = getRunsCohorts(config)
 addCondaPaths_Config(config)
+
+
+if 'skipped_modules' not in config: # we need skipped_modules to exist even if its empty
+    config['skipped_modules'] = []
+    
+# These modules can't be run in tumor only samples so they should be skipped in that case
+if config.get('tumor_only'):
+    config['skipped_modules'].append('germline')
+    config['skipped_modules'].append('purity')
+    config['skipped_modules'].append('clonality')
+
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
 loadRef(config)
@@ -120,18 +131,29 @@ def level1_targets(wildcards):
     return ls
 
 def level2_sans_report(wildcards):
+    skippable_module_dict = {
+    'copynumber': copynumber_targets(wildcards),
+    'purity': purity_targets(wildcards),
+    'clonality': clonality_targets(wildcards),
+    'neoantigen': neoantigen_targets(wildcards),
+    'msisensor2': msisensor2_targets(wildcards),
+    'tcellextrect': tcellextrect_targets(wildcards),
+    }
+    
+    # add optional modules to targets 
     ls = []
+    for module in skippable_module_dict:
+        if module not in config['skipped_modules']:
+            #add check for xhla (neoantigen class II)
+            ls.extend(module_dict[module])
+
+            
+    # add mandatory modules and special case modules to targets
     ls.extend(coveragemetrics_targets(wildcards))
-    ls.extend(copynumber_targets(wildcards))
-    if not config.get('tumor_only'): #Only run when we have normals
-        ls.extend(purity_targets(wildcards))
-        ls.extend(clonality_targets(wildcards))
-    ls.extend(neoantigen_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        ls.extend(xhla_targets(wildcards))
-    ls.extend(msisensor2_targets(wildcards))
-    ls.extend(tcellextrect_targets(wildcards))
+        if 'neoantigen' not in config['skipped_modules']:
+            ls.extend(xhla_targets(wildcards))
     return ls
 
 def level2_targets(wildcards):
@@ -141,11 +163,11 @@ def level2_targets(wildcards):
     return ls
 
 rule target:
-    input: 
+    input:
         targets=all_targets,
         benchmarks="benchmarks.tar.gz"
     message: "Compiling all outputs"
-    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping 
+    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping
 
 rule level1:
     input: level1_targets
@@ -161,6 +183,7 @@ rule tar_benchmarks:
     input: all_targets
     output: "benchmarks.tar.gz"
     shell: "tar -c benchmarks | gzip > {output}"
+
 
 include: "./modules/align.snakefile"     # common align rules
 include: "./modules/metrics.snakefile"   # ...

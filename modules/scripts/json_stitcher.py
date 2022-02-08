@@ -5,11 +5,11 @@ import os
 import sys
 import subprocess
 import json
-from optparse import OptionParser
+import argparse
 
 
 def integrate(dict_a, dict_omni):
-    """Given an omnibus dict , we want to integrate elements of dict_a into 
+    """Given an omnibus dict , we want to integrate elements of dict_a into
     it without over-writing existing elements.
     Recursively calls when a sub-elemtn is a dictionary
     """
@@ -21,36 +21,36 @@ def integrate(dict_a, dict_omni):
             #Conflict--if it's a dictionary element recur
             if isinstance(dict_omni[k],dict):
                 integrate(dict_a[k], dict_omni[k])
-            
+
 def main():
-    usage = "USAGE: %prog -r run_name ...."
-    optparser = OptionParser(usage=usage)
-    optparser.add_option("-r", "--run", help="run name", default=None)
-    optparser.add_option("-m", "--mapping", help="mapping json file", default=None)
-    optparser.add_option("-c", "--coverage", help="coverage json file", default=None)
-    optparser.add_option("-g", "--gc", help="gc content json file", default=None)
-    optparser.add_option("-i", "--insert_size", help="insert size json file", default=None)
-    optparser.add_option("-q", "--mean_quality", help="mean quality json file", default=None)
-    optparser.add_option("-j", "--hla", help="hla json file", default=None)
-    optparser.add_option("-p", "--purity", help="purity json file", default=None)
-    optparser.add_option("-s", "--somatic", help="somatic filtered maf json file", default=None)
-    optparser.add_option("-l", "--clonality", help="clonality json file", default=None)
-    optparser.add_option("-n", "--neoantigen", help="neoantigen json file", default=None)
-    optparser.add_option("-t", "--tcellextrect", help="tcellextrect json file", default=None)
-    optparser.add_option("-e", "--msisensor2", help="msisensor2 json file", default=None)
-    optparser.add_option("-o", "--output", help="output file", default=None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run", required=True, help="run name", default=None)
+    parser.add_argument("-m", "--mapping", required=True, help="mapping json file", default=None)
+    parser.add_argument("-c", "--coverage", required=True, help="coverage json file", default=None)
+    parser.add_argument("-g", "--gc", required=True, help="gc content json file", default=None)
+    parser.add_argument("-i", "--insert_size", required=True, help="insert size json file", default=None)
+    parser.add_argument("-q", "--mean_quality", required=True, help="mean quality json file", default=None)
+    parser.add_argument("-j", "--hla", required=True, help="hla json file", default=None)
+    parser.add_argument("-p", "--purity", help="purity json file", default=None)
+    parser.add_argument("-s", "--somatic", required=True, help="somatic filtered maf json file", default=None)
+    parser.add_argument("-l", "--clonality", help="clonality json file", default=None)
+    parser.add_argument("-n", "--neoantigen", help="neoantigen json file", default=None)
+    parser.add_argument("-t", "--tcellextrect", help="tcellextrect json file", default=None)
+    parser.add_argument("-e", "--msisensor2", help="msisensor2 json file", default=None)
+    parser.add_argument("-o", "--output", required=True, help="output file", default=None)
 
-    (options, args) = optparser.parse_args(sys.argv)
+    # parse the argumnets and convert namespace object to dictionary
+    args = parser.parse_args()
+    args = vars(args)
 
-    if not options.run or not options.mapping or not options.coverage or not options.gc or not options.insert_size or not options.mean_quality or not options.hla or not options.somatic or not options.neoantigen or not options.tcellextrect or not options.msisensor2 or not options.output:
-        optparser.print_help()
-        sys.exit(-1)
+    # extract the run and output arguments from the dictionary to process them separately
+    run = args.pop('run') 
+    output = args.pop('output')
 
-    #missing meta information
-    js_out = {'id': options.run, 'meta': {}}
-    for json_f in [options.mapping, options.coverage, options.gc,options.insert_size,
-                   options.mean_quality, options.hla,options.purity, options.somatic,
-                   options.clonality, options.neoantigen, options.tcellextrect, options.msisensor2]:
+    # get list of json files from args and process them one by one
+    files = [args[value] for value in args if value is not None]
+    js_out = {'id': run, 'meta': {}}
+    for json_f in files:
 
         if json_f:
             #read in json
@@ -60,11 +60,13 @@ def main():
 
             #integrate tmp dict into js_out
             integrate(tmp, js_out)
-        
-    
-    json_out = open(options.output, "w")
+
+
+    json_out = open(output, "w")
     json_out.write(json.dumps(js_out))
     json_out.close()
-    
+
+
+
 if __name__=='__main__':
     main()
