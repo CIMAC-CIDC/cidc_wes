@@ -36,7 +36,7 @@ def report_targets_sansHTML(wildcards):
 
 
     #COPYNUMBER
-    if 'copynumber' not in config['skipped_modules']:
+    if 'copynumber' not in config['skipped_modules'] and not config.get('tumor_only'):
         ls.append("analysis/report/copy_number_variation/01_copy_number_variation_plot.png")
     if 'clonality' not in config['skipped_modules']:
         ls.append("analysis/report/copy_number_variation/02_tumor_clonality.tsv")
@@ -398,7 +398,9 @@ def report_neoantigens_HLAInputFn(wildcards):
         #optitype only
         if not config.get('tumor_only'): #Only run when we have normals
             tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
-        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
+	#tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
+        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
+
     return tmp
 
 def report_getSampleNames():
@@ -417,6 +419,8 @@ rule report_neoantigens_HLA:
         #names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         names = ",".join(report_getSampleNames()),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
+
+        #THIS LINE SHOULD BE REPLACED WITH A FUNCTION CALL TO DETERMINE IF XHLA SHOULD BE RUN
         in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_xhla) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_xhla, input.tumor_opti, input.tumor_xhla)
     output:
         tsv="analysis/report/neoantigens/01_HLA_Results.tsv",
@@ -564,9 +568,13 @@ rule report_generate_json:
 ###############################################################################
 
 def getSections():
+    '''creates string of tabs needed for the report based on which modules are run'''
     sections = ['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens']
-    if ('copynumber' in config['skipped_modules']) and ('clonality' in config['skipped_modules']) and ('purity' in config['skipped_modules']):
+    not_copynumber_modules = ('copynumber' in config['skipped_modules']) and ('clonality' in config['skipped_modules']) and ('purity' in config['skipped_modules'])
+
+    if not_copynumber_modules or config.get('tumor_only'):
         sections.remove('copy_number_variation')
+
     sections_str = ','.join(sections)
     return sections_str
     
@@ -580,7 +588,6 @@ rule report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
-        #sections_list=",".join(['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens']) if not config.get('tumor_only') else ",".join(['WES_Meta','data_quality','somatic_variants','neoantigens'])
 	sections_list = getSections()
     output:
         "analysis/report/report.html"

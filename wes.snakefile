@@ -139,21 +139,21 @@ def level2_sans_report(wildcards):
     'msisensor2': msisensor2_targets(wildcards),
     'tcellextrect': tcellextrect_targets(wildcards),
     }
-    
+
     # add optional modules to targets 
     ls = []
     for module in skippable_module_dict:
         if module not in config['skipped_modules']:
-            #add check for xhla (neoantigen class II)
-            ls.extend(module_dict[module])
+            ls.extend(skippable_module_dict[module])
 
             
-    # add mandatory modules and special case modules to targets
+    # add mandatory and special case modules to targets
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
         if 'neoantigen' not in config['skipped_modules']:
             ls.extend(xhla_targets(wildcards))
+
     return ls
 
 def level2_targets(wildcards):
