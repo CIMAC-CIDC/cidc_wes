@@ -74,7 +74,7 @@
 	<div class="sidebar-heading">{{ title }}</div>
 	<div class="list-group list-group-flush">
 	  {% for section in sections %}
-	  <a href="#{{ section[0] }}" onclick="toggler('{{ section[0] }}');" class="list-group-item list-group-item-action bg-light">{{ section[1] }}</a>
+	  <a href="#{{ section[0] }}" onclick="sidebarSwitch('{{ section[0] }}');" class="list-group-item list-group-item-action bg-light">{{ section[1] }}</a>
 	  {% endfor %}
 	  <!--<div class="sidebar-sub-heading">WES Level 1</div>-->
 	</div>

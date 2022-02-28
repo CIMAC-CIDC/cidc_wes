@@ -83,9 +83,8 @@ function makeFilterTable() {
                         .map(function (x) {
                             return x[1];
                         }).toArray();
-
-                        build_plot();
-
+                        loaded_plots = [];
+                        load_section_plots(last_section);
                 }
             }
         ]
@@ -142,7 +141,7 @@ function handlerFactory(colName, resource, handler) {
 	data[sample_id] = wes_resources[resource][sample_id];
 	handler(data, modal);
     });
-    $(".data-coloured."+colName).css('cursor', 'pointer');   
+    $(".data-coloured."+colName).css('cursor', 'pointer');
 }
 handlerFactory('Total_Mutations', 'somatic_summary', somaticSummary_submodal);
 handlerFactory('TMB', 'tmb', somaticSummary_submodal);
@@ -155,7 +154,7 @@ function somaticSummary_submodal(data, modal) {
     var modal_body = $(modal).find('.modal-body');
     //Clear contents
     modal_body.empty()
-    
+
     //BUILD table
     var content = "<table class=\"table table-condensed mqc_table\">";
     //add header
@@ -186,7 +185,7 @@ function complex_submodal(data, modal) {
     var modal_body = $(modal).find('.modal-body');
     //Clear contents
     modal_body.empty()
-    
+
     //BUILD table
     var content = "<table class=\"table table-condensed mqc_table\">";
     //add header
@@ -260,9 +259,47 @@ showListBtn.on('click', function() {
     }
 });
 
+
+var loaded_plots = [];
+
+// Isolated from toggle becuase it must run when current_samples is updated
+function load_section_plots(section_name){
+  // builds plots only if section is not loaded
+  if ($.inArray(section_name, loaded_plots) === -1){
+    switch(section_name){
+      case 'data_quality':
+        build_data_quality();
+        break;
+      case 'copy_number_variation':
+        build_copy_number_variation();
+        break;
+      case 'somatic_variants':
+        build_somatic_variants();
+        break;
+      case 'HLA':
+        build_HLA();
+        break;
+      case 'MISC':
+        build_MISC();
+        break;
+    }
+    loaded_plots.push(section_name);
+  }
+  /*else{
+    console.log('already loaded');
+  }*/
+}
+
+// handles all display and graphing tasks for new section when it is clicked
+function sidebarSwitch(section_name){
+  toggler(section_name); // hides old section, shows new section
+  load_section_plots(section_name); // loads plots if needed
+}
+
 $(document).ready(function () {
-    build_plot();
+    build_data_quality();
 });
+
 
 $(document).on('click', '.btn-export', function () {
     var plotlyDiv = $(this).parent().find('.js-plotly-plot').attr('id');

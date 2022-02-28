@@ -10,29 +10,39 @@ function checkAvailability(arr, val) {
         return val === arrVal;
     });
 }
-// build all plots, called on page load and by update sample selection button
-function build_plot(){
-    //data quality
+
+function build_data_quality(){
     build_mapping_plot();
     build_coverage_plot();
     build_mean_quality_plot();
     build_gc_content_plot();
     build_insert_size_plot();
-    //copy number variation
+}
+
+function build_copy_number_variation(){
     build_clonality_plot();
     build_purity_plot();
     build_ploidy_plot();
-    //somatic variants
+}
+
+function build_somatic_variants(){
     build_sv_summary_plots();
     build_ti_tv_plot();
     build_lego_plot();
     build_tmb_plot();
     build_oncoplot_plot();
-    //hla
+}
+
+function build_HLA(){
     build_hla_oncoplot_plot();
+}
+
+function build_MISC(){
     build_tcellextrect_plot();
     build_msisensor2_plot();
 }
+
+
 // build somatic variant summary plots
 function build_sv_summary_plots(){
     build_variant_classification_plot();
@@ -1259,7 +1269,7 @@ function build_tcellextrect_plot(){
             }
         }
     }
-    
+
     // creates data and layout objects for graph
     let data = [{
         x: sample_ids,
@@ -1290,8 +1300,8 @@ function build_msisensor2_plot(){
   let sample_ids = [];
   let pct = [];
   let hover_text = [];
-    
-  //Gets data for plot by iterating through wes_data  
+
+  //Gets data for plot by iterating through wes_data
   for (let i = 0; i < wes_data.length; ++i) {
       if (checkAvailability(current_samples, wes_data[i]['id'])) {
           if (wes_data[i]['msisensor2'] != undefined) {
@@ -1331,7 +1341,6 @@ function build_msisensor2_plot(){
       title: "Microsatellite Score by Sample",
 
   };
-  
+
   Plotly.newPlot('msisensor2_plot', data, layout);
 }
-
