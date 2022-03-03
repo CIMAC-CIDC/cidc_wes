@@ -74,6 +74,9 @@ dependencies:
 #msisensor2 plotting
 - r-beeswarm
 
+#hlahd
+- bowtie2
+
 #pip installs
 - pip:
   - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq

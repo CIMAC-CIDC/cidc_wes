@@ -69,7 +69,7 @@ else: #Except tumor-normal pairing for samples
             corealignedbam="analysis/corealignments/{run}/{run}_tn_corealigned.bam"
         output:
             tnscopevcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
-	        tnscopevcf_tbi="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz.tbi"
+	    tnscopevcf_tbi="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz.tbi"
         params:
             index=config['genome_fasta'],
             sentieon_path=config['sentieon_path'],
