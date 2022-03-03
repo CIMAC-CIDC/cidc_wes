@@ -383,9 +383,9 @@ def report_neoantigens_HLAInputFn(wildcards):
     if config.get('neoantigen_run_classII'):
         if not config.get('tumor_only'): #Only run when we have normals
             tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
-            tmp['normal_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (normal, normal)
+            tmp['normal_hlahd'] = "analysis/hlahd/%s/result/%s_final.result.txt" % (normal, normal)
         tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
-        tmp['tumor_xhla'] = "analysis/xhla/%s/report-%s-hla.json" % (tumor, tumor)
+        tmp['tumor_hlahd'] = "analysis/hlahd/%s/result/%s_final.result.txt" % (tumor, tumor)
     else:
         #optitype only
         if not config.get('tumor_only'): #Only run when we have normals
@@ -409,7 +409,7 @@ rule report_neoantigens_HLA:
         #names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         names = ",".join(report_getSampleNames()),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
-        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_xhla) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_xhla, input.tumor_opti, input.tumor_xhla)
+        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_hlahd) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_hlahd, input.tumor_opti, input.tumor_hlahd)
     output:
         tsv="analysis/report/neoantigens/01_HLA_Results.tsv",
         details="analysis/report/neoantigens/01_details.yaml",
@@ -441,7 +441,7 @@ rule report_json_hla:
         "analysis/report/json/hla/{run}.hla.json"
     params:
         run = lambda wildcards: wildcards.run,
-        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_xhla) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_xhla, input.tumor_opti, input.tumor_xhla)
+        in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_hlahd) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_hlahd, input.tumor_opti, input.tumor_hlahd)
     group: "report"
     shell:
         "cidc_wes/modules/scripts/json_report_hla.py -r {params.run} {params.in_files} -o {output}"

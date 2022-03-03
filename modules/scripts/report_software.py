@@ -55,10 +55,14 @@ def getSoftwareInfo(config, wes_versions_file):
     vep_version = wes_versions_file.get('vep_version',"N/A")
     facets_version = wes_versions_file.get('facets_version',"N/A")
     optitype_version = wes_versions_file.get('optitype_version',"N/A")
+    hlahd_version = wes_versions_file.get('hlahd_version',"N/A")
     pvactools_version = wes_versions_file.get('pvactools_version',"N/A")
+    iedb_mhci_version = wes_versions_file.get('iedb_mhci_version',"N/A")
+    iedb_mhcii_version = wes_versions_file.get('iedb_mhcii_version',"N/A")
     vcftools_version = wes_versions_file.get('vcftools_version',"N/A")
     bcftools_version = wes_versions_file.get('bcftools_version',"N/A")
     snakemake_version = wes_versions_file.get('snakemake_version',"N/A")
+    msisensor2_version = wes_versions_file.get('msisensor2_version',"N/A")
 
     tmp = [("Software", "Version"),
            ('Assembly Version', assembly_version),
@@ -66,11 +70,16 @@ def getSoftwareInfo(config, wes_versions_file):
            ('Somatic Caller', somatic_caller),
            ('Ensembl VEP Version', vep_version),
            ('Facets Version', facets_version),
-           ('Optitype Version (HLA caller)', optitype_version),
+           ('Optitype Version (HLA classI caller)', optitype_version),
+           ('HLA-HD Version (HLA classII caller)', hlahd_version),
            ('Pvactools Version (neoantigen caller)', pvactools_version),
+           ('IEDB MHC classI Version', iedb_mhci_version),
+           ('IEDB MHC classII Version', iedb_mhcii_version),
            ('Vcftools Version', vcftools_version),
            ('Bcftools Version', bcftools_version),
-           ('Snakemake Version', snakemake_version)]
+           ('Snakemake Version', snakemake_version),
+           ('Msisensor2 Version', msisensor2_version),
+    ]
 
     #print(tmp)
     return tmp
@@ -92,6 +101,7 @@ def main():
     
     #PARSE wes version files
     wes_ver_file = parseYaml(options.wes_ver_file)
+    #print(wes_ver_file)
 
     #get wes versions as a list of tuples
     tmp = getSoftwareInfo(config, wes_ver_file)
