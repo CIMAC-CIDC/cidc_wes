@@ -79,9 +79,19 @@ def loadRef(config):
             config[k] = v
 
 #---------  CONFIG set up  ---------------
-configfile: "config.yaml"   # This makes snakemake load up yaml into config 
+configfile: "config.yaml"   # This makes snakemake load up yaml into config
 config = getRunsCohorts(config)
 addCondaPaths_Config(config)
+
+# we need skipped_modules to exist even if its empty
+if 'skipped_modules' not in config:
+    config['skipped_modules'] = []
+    
+# These modules can't be run in tumor only samples so they should be skipped in that case
+if config.get('tumor_only'):
+    for module in ['germline', 'purity', 'clonality']:
+        if module not in config['skipped_modules']:
+            config['skipped_modules'].append(module)
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
 loadRef(config)
@@ -113,25 +123,38 @@ def level1_targets(wildcards):
     ls.extend(align_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
-    if not config.get('tumor_only'): #Only run when we have normals
+    if not config.get('tumor_only') and 'germline' not in config['skipped_modules']:
         ls.extend(germline_targets(wildcards))
     ls.extend(somatic_targets(wildcards))
     ls.extend(rna_targets(wildcards))
     return ls
 
 def level2_sans_report(wildcards):
+    #LEN: Should copy number be a skippable module??
+    skippable_module_dict = {
+        'purity': purity_targets(wildcards),
+        'clonality': clonality_targets(wildcards),
+        'neoantigen': neoantigen_targets(wildcards),
+
+        'copynumber': copynumber_targets(wildcards),
+        'msisensor2': msisensor2_targets(wildcards),
+        'tcellextrect': tcellextrect_targets(wildcards),
+    }
+    # add optional modules to targets 
     ls = []
-    ls.extend(coveragemetrics_targets(wildcards))
+    for module in skippable_module_dict:
+        if module not in config['skipped_modules']:
+            ls.extend(skippable_module_dict[module])
+
+            
+    # add mandatory and special case modules to targets
     ls.extend(copynumber_targets(wildcards))
-    if not config.get('tumor_only'): #Only run when we have normals
-        ls.extend(purity_targets(wildcards))
-        ls.extend(clonality_targets(wildcards))
-    ls.extend(neoantigen_targets(wildcards))
+    ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
-    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        ls.extend(xhla_targets(wildcards))
-    ls.extend(msisensor2_targets(wildcards))
-    ls.extend(tcellextrect_targets(wildcards))
+    #if config.get('neoantigen_run_classII', False) and 'neoantigen' not in config['skipped_modules']:
+    #Should run even if neoantigen is skipped
+    if config.get('neoantigen_run_classII', False):
+            ls.extend(xhla_targets(wildcards))
     return ls
 
 def level2_targets(wildcards):
@@ -141,11 +164,11 @@ def level2_targets(wildcards):
     return ls
 
 rule target:
-    input: 
+    input:
         targets=all_targets,
         benchmarks="benchmarks.tar.gz"
     message: "Compiling all outputs"
-    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping 
+    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping
 
 rule level1:
     input: level1_targets
@@ -161,6 +184,7 @@ rule tar_benchmarks:
     input: all_targets
     output: "benchmarks.tar.gz"
     shell: "tar -c benchmarks | gzip > {output}"
+
 
 include: "./modules/align.snakefile"     # common align rules
 include: "./modules/metrics.snakefile"   # ...
