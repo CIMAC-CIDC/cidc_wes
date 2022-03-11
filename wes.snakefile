@@ -83,16 +83,15 @@ configfile: "config.yaml"   # This makes snakemake load up yaml into config
 config = getRunsCohorts(config)
 addCondaPaths_Config(config)
 
-
-if 'skipped_modules' not in config: # we need skipped_modules to exist even if its empty
+# we need skipped_modules to exist even if its empty
+if 'skipped_modules' not in config:
     config['skipped_modules'] = []
     
 # These modules can't be run in tumor only samples so they should be skipped in that case
 if config.get('tumor_only'):
-    config['skipped_modules'].append('germline')
-    config['skipped_modules'].append('purity')
-    config['skipped_modules'].append('clonality')
-
+    for module in ['germline', 'purity', 'clonality']:
+        if module not in config['skipped_modules']:
+            config['skipped_modules'].append(module)
 
 #NOW load ref.yaml - SIDE-EFFECT: loadRef CHANGES config
 loadRef(config)
@@ -124,22 +123,23 @@ def level1_targets(wildcards):
     ls.extend(align_targets(wildcards))
     ls.extend(metrics_targets(wildcards))
     ls.extend(recalibration_targets(wildcards))
-    if not config.get('tumor_only'): #Only run when we have normals
+    if not config.get('tumor_only') and 'germline' not in config['skipped_modules']:
         ls.extend(germline_targets(wildcards))
     ls.extend(somatic_targets(wildcards))
     ls.extend(rna_targets(wildcards))
     return ls
 
 def level2_sans_report(wildcards):
+    #LEN: Should copy number be a skippable module??
     skippable_module_dict = {
-    'copynumber': copynumber_targets(wildcards),
-    'purity': purity_targets(wildcards),
-    'clonality': clonality_targets(wildcards),
-    'neoantigen': neoantigen_targets(wildcards),
-    'msisensor2': msisensor2_targets(wildcards),
-    'tcellextrect': tcellextrect_targets(wildcards),
-    }
+        'purity': purity_targets(wildcards),
+        'clonality': clonality_targets(wildcards),
+        'neoantigen': neoantigen_targets(wildcards),
 
+        'copynumber': copynumber_targets(wildcards),
+        'msisensor2': msisensor2_targets(wildcards),
+        'tcellextrect': tcellextrect_targets(wildcards),
+    }
     # add optional modules to targets 
     ls = []
     for module in skippable_module_dict:
@@ -148,12 +148,13 @@ def level2_sans_report(wildcards):
 
             
     # add mandatory and special case modules to targets
+    ls.extend(copynumber_targets(wildcards))
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
-    if 'neoantigen_run_classII' in config and config['neoantigen_run_classII']:
-        if 'neoantigen' not in config['skipped_modules']:
+    #if config.get('neoantigen_run_classII', False) and 'neoantigen' not in config['skipped_modules']:
+    #Should run even if neoantigen is skipped
+    if config.get('neoantigen_run_classII', False):
             ls.extend(xhla_targets(wildcards))
-
     return ls
 
 def level2_targets(wildcards):
