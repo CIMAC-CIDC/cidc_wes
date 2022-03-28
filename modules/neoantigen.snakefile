@@ -332,7 +332,7 @@ else: #EXPECT class II output
             HLA = lambda wildcards,input: parseHLA(input.hla),
             callers=config.get('neoantigen_callers','NetMHCpan NetMHCcons MHCflurry NetMHCIIpan'),
             epitope_lengths_cls1=config.get('neoantigen_epitope_lengths_cls1', '8,9,10,11'),
-            epitope_lengths_cls2=config.get('neoantigen_epitope_lengths_cls2', '12, 13, 14, 15, 16, 17, 18'),
+            epitope_lengths_cls2=config.get('neoantigen_epitope_lengths_cls2', '12,13,14,15,16,17,18'),
             output_dir = lambda wildcards: "%sanalysis/neoantigen/%s/" % (config['remote_path'], wildcards.run),
         threads: 64 #_neoantigen_threads
         group: "neoantigen"

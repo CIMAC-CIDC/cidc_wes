@@ -1,4 +1,4 @@
-#MODULE: wes report module 
+#MODULE: wes report module
 from yaml import dump as yaml_dump
 
 def report_targets_sansHTML(wildcards):
@@ -15,6 +15,7 @@ def report_targets_sansHTML(wildcards):
     ls.append("analysis/report/data_quality/01_mapping_stats.tsv")
     ls.append("analysis/report/data_quality/02_QC_Plots.tsv")
     ls.append("analysis/report/data_quality/03_coverage_statistics.tsv")
+
     #SOMATIC
     ls.append("analysis/report/somatic_variants/01_somatic_variants_summary.png")
 
@@ -35,14 +36,21 @@ def report_targets_sansHTML(wildcards):
 
 
     #COPYNUMBER
-    if not config.get('tumor_only'): #Only run when we have normals
+    if 'copynumber' not in config['skipped_modules'] and not config.get('tumor_only'):
         ls.append("analysis/report/copy_number_variation/01_copy_number_variation_plot.png")
+    if 'clonality' not in config['skipped_modules']:
         ls.append("analysis/report/copy_number_variation/02_tumor_clonality.tsv")
+    if 'purity' not in config['skipped_modules']:
         ls.append("analysis/report/copy_number_variation/03_tumor_purity.tsv")
-    
+
     #NEOANTIGEN
     ls.append("analysis/report/neoantigens/01_HLA_Results.tsv")
-    ls.append("analysis/report/neoantigens/02_neoantigen_list.dt")
+    if 'neoantigen' not in config['skipped_modules']:
+        ls.append("analysis/report/neoantigens/02_neoantigen_list.dt")
+    if 'tcellextrect' not in config['skipped_modules']:
+        ls.append("analysis/report/neoantigens/03_tcellextrect.csv")
+    if 'msisensor2' not in config['skipped_modules']:
+        ls.append("analysis/report/neoantigens/04_msisensor2.csv")
 
     #JSON
     ls.append("analysis/report/json/%s.wes.json" % run)
@@ -183,7 +191,7 @@ def report_getTumorNormal(index):
 
 rule report_data_quality_plots_table:
     """Generate the fastqc plots table for the report
-    The trick here is that the plot table shows BOTH samples, tumor and 
+    The trick here is that the plot table shows BOTH samples, tumor and
     normal, for the run--so we need 1. an inpput fn to look up the samples
     and 2. params to generate the correct plots
     """
@@ -256,7 +264,7 @@ rule report_somatic_variants_lollipop_table:
         caption="""caption: 'This table shows lollipop plots for the top 5 cancer driving genes.'""",
         report_path = "analysis/report"
     shell:
-        """echo "{params.caption}" >> {output.details} &&      
+        """echo "{params.caption}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_somatic_lollipop_table.py -f {input.lolli01} -f {input.lolli02} -f {input.lolli03} -f {input.lolli04} -f {input.lolli05} -r {params.report_path} -o {output}"""
 
 
@@ -390,17 +398,19 @@ def report_neoantigens_HLAInputFn(wildcards):
         #optitype only
         if not config.get('tumor_only'): #Only run when we have normals
             tmp['normal_opti'] = "analysis/optitype/%s/%s_result.tsv" % (normal, normal)
-        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
+	#tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, normal)
+        tmp['tumor_opti'] = "analysis/optitype/%s/%s_result.tsv" % (tumor, tumor)
+
     return tmp
 
 def report_getSampleNames():
-    """returns the sample names associated with the run.  if tumor_only, 
+    """returns the sample names associated with the run.  if tumor_only,
     returns only the tumor sample name"""
     if config.get('tumor_only'):
         return [report_getTumorNormal(1)]
     else:
         return [report_getTumorNormal(0), report_getTumorNormal(1)]
-    
+
 rule report_neoantigens_HLA:
     """report HLA type"""
     input:
@@ -409,6 +419,7 @@ rule report_neoantigens_HLA:
         #names = ",".join(config['runs'][list(config['runs'].keys())[0]]),
         names = ",".join(report_getSampleNames()),
         cap = """caption: 'This table shows the HLA alleles for both tumor and normal samples.'""",
+        #THIS LINE SHOULD BE REPLACED WITH A FUNCTION CALL TO DETERMINE IF XHLA SHOULD BE RUN
         in_files = lambda wildcards,input: "-t %s -u %s" % (input.tumor_opti, input.tumor_hlahd) if config.get('tumor_only', False) else "-n %s -m %s -t %s -u %s" % (input.normal_opti, input.normal_hlahd, input.tumor_opti, input.tumor_hlahd)
     output:
         tsv="analysis/report/neoantigens/01_HLA_Results.tsv",
@@ -431,6 +442,45 @@ rule report_neoantigens_neoantigen_list:
         details= "analysis/report/neoantigens/02_details.yaml",
     shell:
         """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
+
+def report_neoantigens_tcellextrectInputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/tcellextrect/%s/%s_tcellextrect.txt" % (run, run)
+
+rule report_neoantigens_tcellextrect:
+    """report T-cell fraction"""
+    input:
+        report_neoantigens_tcellextrectInputFn
+    params:
+        #run = lambda wildcards: wildcards.run,
+        cap = """caption: 'This table shows the estimated T-cell fraction and associated QC value.'"""
+    output:
+        table="analysis/report/neoantigens/03_tcellextrect.csv",
+	details= "analysis/report/neoantigens/03_details.yaml",
+    group: "report"
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/tcellextrect_trimTable.py -f {input} -o {output.table}"""
+
+
+def report_neoantigens_msisensor2InputFn(wildcards):
+    run = list(config['runs'].keys())[0]
+    return "analysis/msisensor2/%s/%s_msisensor2.txt" % (run, run)
+
+rule report_neoantigens_msisensor2:
+    """report microsatellite instability"""
+    input:
+        report_neoantigens_msisensor2InputFn
+    params:
+        #run = lambda wildcards: wildcards.run,
+        cap = """caption: 'This table shows the estimated number and percentage of somatic microsatellite sites.'"""
+    output:
+        table="analysis/report/neoantigens/04_msisensor2.csv",
+        details= "analysis/report/neoantigens/04_details.yaml",
+    group: "report"
+    shell:
+        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/msisensor2_formatTable.py -f {input} -o {output.table}"""
+
+
 ###############################################################################
 
 rule report_json_hla:
@@ -471,18 +521,41 @@ def getJsonFiles(wildcards):
     tmp['hla'] = "analysis/report/json/hla/%s.hla.json" % run
     tmp['somatic'] = "analysis/report/json/somatic/%s_%s.somatic.json" % (run, caller)
     tmp['neoantigen'] = "analysis/report/json/neoantigen/%s.neoantigen.json" % run
-    if not config.get('tumor_only'): #Only run when we have normals
-        tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
-        tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
-        
+    tmp['tcellextrect'] = "analysis/report/json/tcellextrect/%s.tcellextrect.json" % run
+    tmp['msisensor2'] = "analysis/report/json/msisensor2/%s.msisensor2.json" % run
+    tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
+    tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
+
+    # remove optional modules that are not being run
+    for module in ['purity', 'clonality', 'neoantigen', 'msisensor2', 'tcellextrect']:
+        if module in config['skipped_modules']:
+            tmp.pop(module)
+
     return tmp
+
+def buildJsonParams(file_dict):
+    '''maps input jsons to thier commandline arguments and returns a concatenated string'''
+    run = list(config['runs'].keys())[0]
+    caller = config.get("somatic_caller", "tnscope")
+    arg_dict = {'mapping': '-m', 'coverage': '-c', 'gc_content': '-g',
+                'insert_size': '-i', 'mean_quality':'-q', 'hla': '-j',
+                'somatic': '-s', 'clonality': '-l', 'purity': '-p', 'neoantigen': '-n',
+                'tcellextrect': '-t', 'msisensor2': '-e', }
+
+    ret = ''
+    for module in file_dict.keys():
+        ret = ret + arg_dict[module] + ' ' + file_dict[module] + ' '
+
+    return ret
+
+
 
 rule report_generate_json:
     input:
         unpack(getJsonFiles)
     params:
         run = lambda wildcards: wildcards.run,
-        in_files = lambda wildcards,input: "-m %s -c %s -g %s -i %s -q %s -j %s -s %s -n %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.somatic, input.neoantigen) if config.get('tumor_only', False) else "-m %s -c %s -g %s -i %s -q %s -j %s -p %s -s %s -t %s -n %s" % (input.mapping, input.coverage, input.gc_content, input.insert_size, input.mean_quality, input.hla, input.purity, input.somatic, input.clonality, input.neoantigen),
+        in_files = lambda wildcards,input: buildJsonParams(input)
     output:
         #NOTE: CANNOT name this {run}.json otherwise snakemake will have
         #trouble ressolving the wildcard
@@ -490,7 +563,22 @@ rule report_generate_json:
     shell:
         """cidc_wes/modules/scripts/json_stitcher.py -r {params.run} {params.in_files} -o {output}"""
 
+
 ###############################################################################
+
+def getSections():
+    '''creates string of tabs needed for the report based on which modules are run'''
+    sections = ['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens']
+    not_copynumber_modules = ('copynumber' in config['skipped_modules']) and ('clonality' in config['skipped_modules']) and ('purity' in config['skipped_modules'])
+
+    if not_copynumber_modules or config.get('tumor_only'):
+        sections.remove('copy_number_variation')
+
+    sections_str = ','.join(sections)
+    return sections_str
+    
+
+
 rule report_auto_render:
     """Generalized rule to dynamically generate the report BASED
     on what is in the report directory"""
@@ -499,7 +587,7 @@ rule report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.sample.html",
         report_path = "analysis/report",
-        sections_list=",".join(['WES_Meta','data_quality', 'copy_number_variation','somatic_variants','neoantigens']) if not config.get('tumor_only') else ",".join(['WES_Meta','data_quality','somatic_variants','neoantigens']) 
+	sections_list = getSections()
     output:
         "analysis/report/report.html"
     message:

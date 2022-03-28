@@ -10,27 +10,39 @@ function checkAvailability(arr, val) {
         return val === arrVal;
     });
 }
-// build all plots, called on page load and by update sample selection button
-function build_plot(){
-    //data quality
+
+function build_data_quality(){
     build_mapping_plot();
     build_coverage_plot();
     build_mean_quality_plot();
     build_gc_content_plot();
     build_insert_size_plot();
-    //copy number variation
+}
+
+function build_copy_number_variation(){
     build_clonality_plot();
     build_purity_plot();
     build_ploidy_plot();
-    //somatic variants
+}
+
+function build_somatic_variants(){
     build_sv_summary_plots();
     build_ti_tv_plot();
     build_lego_plot();
     build_tmb_plot();
-    build_oncoplot_plot()
-    //hla
-    build_hla_oncoplot_plot()
+    build_oncoplot_plot();
 }
+
+function build_HLA(){
+    build_hla_oncoplot_plot();
+}
+
+function build_MISC(){
+    build_tcellextrect_plot();
+    build_msisensor2_plot();
+}
+
+
 // build somatic variant summary plots
 function build_sv_summary_plots(){
     build_variant_classification_plot();
@@ -81,7 +93,7 @@ var ti_tv_conv = {
     "C>A":"Tv",
     "C>G":"Tv"
 }
-  
+
 // find indices of top values
 function findIndicesOfMax(inp, count) {
     var outp = new Array();
@@ -494,7 +506,7 @@ function build_variant_classification_plot(){
     let df_list = []
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 // generate list of indexes in variant_classificaiton column which have values contained in vc_types array
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
@@ -548,7 +560,7 @@ function build_variant_type_plot(){
     let df_list = []
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 // generate list of indexes in variant_classificaiton column which have values contained in vc_types array
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
@@ -602,7 +614,7 @@ function build_snv_class_plot(){
     let df_list = []
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 let ref = wes_data[i]['somatic']['maf']['Reference_Allele']['data'];
                 let allele2 = wes_data[i]['somatic']['maf']['Tumor_Seq_Allele2']['data'];
                 let class_list = [];
@@ -658,7 +670,7 @@ function build_variant_per_sample_plot(){
 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 // generate variant counts
                 vc = wes_data[i]['somatic']['maf']['Variant_Classification'].value_counts();
                 let total_count = 0
@@ -706,7 +718,7 @@ function build_variant_classification_summary_plot(){
 
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 // vc count per sample
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
@@ -752,7 +764,7 @@ function build_top_10_genes_plot(){
     let df_list = []
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 let vc_list = wes_data[i]['somatic']['maf']['Variant_Classification']['data'];
                 let keep_idx = [];
                 for (let j=0;j<vc_list.length; ++j) {
@@ -769,7 +781,7 @@ function build_top_10_genes_plot(){
     let gene_counts = combined_df['Hugo_Symbol'].value_counts()
     let keep_idx = findIndicesOfMax(gene_counts['data'], 20);
     let top_10_genes = keep_idx.map(i => gene_counts['index_arr'][i]);
-    
+
     let combined_df_hs = combined_df['Hugo_Symbol']['data'];
     df_list = [];
     // keep entries pertaining to top_10_genes
@@ -826,10 +838,10 @@ function build_ti_tv_plot(){
     let ti_tv_colors = [
         '#e377c2',  // raspberry yogurt pink
         '#7f7f7f',  // middle gray
-    ]; 
+    ];
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
-            if (wes_data[i]['somatic']['maf'] != undefined) { 
+            if (wes_data[i]['somatic']['maf'] != undefined) {
                 let ref = wes_data[i]['somatic']['maf']['Reference_Allele']['data'];
                 let allele2 = wes_data[i]['somatic']['maf']['Tumor_Seq_Allele2']['data'];
                 let class_list = [];
@@ -1236,4 +1248,99 @@ function build_hla_oncoplot_plot() {
         },
     };
     Plotly.newPlot('HLA_Oncoplot_plot', data, layout);
+}
+
+function build_tcellextrect_plot(){
+    let sample_ids = [];
+    let fraction = [];
+    let hover_text = [];
+
+    //Gets data for plot by iterating through wes_data
+    for (let i = 0; i < wes_data.length; ++i) {
+        if (checkAvailability(current_samples, wes_data[i]['id'])) {
+            if (wes_data[i]['tcellextrect'] != undefined) {
+                sample_ids.push(wes_data[i]['id']);
+                fraction.push(wes_data[i]['tcellextrect']['tcell_fraction']);
+                hover_text.push(
+                    'Sample ID: ' + wes_data[i]['id'] + '<br>' +
+                    'T-cell Fraction: ' + wes_data[i]['tcellextrect']['tcell_fraction'] + '<br>' +
+                    'q-value: ' + wes_data[i]['tcellextrect']['q_value']
+                );
+            }
+        }
+    }
+
+    // creates data and layout objects for graph
+    let data = [{
+        x: sample_ids,
+        y: fraction,
+        type: 'bar',
+        hovertemplate: '%{text}<extra></extra>',
+        text: hover_text
+
+    }];
+    let layout = {
+        xaxis: {
+        title: { text: 'Sample' },
+        automargin: true,
+        categoryorder: 'total descending',
+        },
+        yaxis: {
+            title: { text: 'T-cell Fraction' },
+            automargin: true
+        },
+        title: "T-cell Fraction by Sample"
+
+    };
+
+    Plotly.newPlot('tcellextrect_plot', data, layout);
+}
+
+function build_msisensor2_plot(){
+  let sample_ids = [];
+  let pct = [];
+  let hover_text = [];
+
+  //Gets data for plot by iterating through wes_data
+  for (let i = 0; i < wes_data.length; ++i) {
+      if (checkAvailability(current_samples, wes_data[i]['id'])) {
+          if (wes_data[i]['msisensor2'] != undefined) {
+              sample_ids.push(wes_data[i]['id']);
+              pct.push(wes_data[i]['msisensor2']['percent_somatic']);
+              hover_text.push(
+                  'Sample ID: ' + wes_data[i]['id'] + '<br>' +
+                  'Total Sites: ' + wes_data[i]['msisensor2']['total_sites'] + '<br>' +
+                  'Somatic Sites: ' + wes_data[i]['msisensor2']['somatic_sites'] + '<br>' +
+                  'Percent Somatic: ' + wes_data[i]['msisensor2']['percent_somatic']
+              );
+          }
+      }
+  }
+  // creates data and layout objects for graph
+  let data = [{
+      x: sample_ids,
+      y: pct,
+      type: 'bar',
+      hovertemplate: '%{text}<extra></extra>',
+      text: hover_text
+
+  }];
+
+  let layout = {
+      xaxis: {
+          title: { text: 'Sample' },
+          automargin: true,
+          categoryorder: 'total descending',
+
+
+      },
+      yaxis: {
+          title: { text: 'MSI Score' },
+          automargin: true
+      },
+      title: "Microsatellite Score by Sample",
+
+  };
+
+  Plotly.newPlot('msisensor2_plot', data, layout);
 }

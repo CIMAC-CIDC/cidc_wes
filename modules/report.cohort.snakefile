@@ -65,9 +65,13 @@ def cohort_report_targets(wildcards):
     ls.append("analysis/cohort_report/HLA/01_HLA_Oncoplot.stub")
     ls.append("analysis/cohort_report/HLA/02_HLA_Table.dt")
     #ls.append("analysis/cohort_report/HLA/02_HLA_Histogram_histogram.plotly")
-    
+
     #ls.append("analysis/cohort_report/neoantigen/03_neoantigen_table.csv")
     #ls.append("analysis/cohort_report/neoantigen/neoantigen_table.json")
+
+    #MISC
+    ls.append("analysis/cohort_report/MISC/01_tcellextrect.stub")
+    ls.append("analysis/cohort_report/MISC/02_msisensor2.stub")    
     return ls
 
 rule cohort_report_all:
@@ -442,7 +446,36 @@ rule cohort_report_neoantigen_table:
     shell:
         """echo "{params.caption}" >> {output.details} &&
         cidc_wes/modules/scripts/cohort_report/cr_neoantigen_neoantigenTable.py -f {params.files} -o {output.csv} -j {output.json}"""
-
+###############################################################################
+#MISC section
+rule cohort_report_tcellextrect:
+    """Generate the tcell estimate plot for the report"""
+    output:
+        stub="analysis/cohort_report/MISC/01_tcellextrect.stub",
+        details="analysis/cohort_report/MISC/01_details.yaml",
+    params:
+        caption="""caption: 'TCell Fraction estimated by TcellExTRECT'""",
+    message:
+        "REPORT: creating tcell estimate report"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && 
+        touch {output.stub}"""
+    
+rule cohort_report_msisensor2:
+    """Generate the msisensor2 plot for the report"""
+    output:
+        stub="analysis/cohort_report/MISC/02_msisensor2.stub",
+        details="analysis/cohort_report/MISC/02_details.yaml",
+    params:
+        caption="""caption: 'Microsatellite instability estimates'""",
+    message:
+        "REPORT: creating msisensor report"
+    group: "cohort_report"
+    shell:
+        """echo "{params.caption}" >> {output.details} && 
+        touch {output.stub}"""
+    
 ###############################################################################
 rule cohort_report_auto_render:
     """Generalized rule to dynamically generate the report BASED
@@ -452,7 +485,7 @@ rule cohort_report_auto_render:
     params:
         jinja2_template="cidc_wes/report/index.cohort.html",
         report_path = "analysis/cohort_report",
-        sections_list=",".join(['data_quality','copy_number_variation', 'somatic_variants', 'HLA']),
+        sections_list=",".join(['data_quality','copy_number_variation', 'somatic_variants', 'HLA', 'MISC']),
         title="WES Cohort Report",
         #sections_list=",".join(['somatic_variants'])
     output:

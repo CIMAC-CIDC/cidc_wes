@@ -96,6 +96,18 @@ samples:
   SAMPLE2:
     - data/sample2.fastq.gz
 
+
+# Skip modules in this WES run  by uncommenting  the skipped modules header and
+# any lines containing modules that you would like to skip.
+#skipped_modules:
+#  - "clonality"
+#  - "copynumber"
+#  - "msisensor2"
+#  - "neoantigen"
+#  - "purity"
+#  - "tcellextrect"
+
+
 # (Optional) Define any RNA-seq expression data associated with the TUMOR
 # samples only.  Currently, only expression results from Salmon are supported.
 # The sample names in this section must match the same names used in the
