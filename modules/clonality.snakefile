@@ -69,13 +69,10 @@ def clonality_targets(wildcards):
         ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
         ls.append("analysis/clonality/%s/%s_genome_view.pdf" % (run,run))
         #pyclone output
-        ls.append("analysis/clonality/%s/%s_pyclone.yaml" % (run,run))
-        ls.append("analysis/clonality/%s/pyclone.config.yaml" % run)
-        ls.append("analysis/clonality/%s/trace/alpha.tsv.bz2" % run)
-        ls.append("analysis/clonality/%s/%s_table.tsv" % (run,run))
-        ls.append("analysis/clonality/%s/%s_plot.density.pdf" % (run,run))
-        ls.append("analysis/clonality/%s/%s_plot.scatter.pdf" % (run,run))
-        ls.append("analysis/clonality/%s/%s_plot.coordinates.pdf" % (run,run))
+        #NOTE: _pyclone6.input.tsv should be aggregated across samples for true, multisample clonality analysis
+        ls.append("analysis/clonality/%s/%s_pyclone6.input.tsv" % (run,run))
+        ls.append("analysis/clonality/%s/%s_pyclone6.results.tsv" % (run,run))
+        ls.append("analysis/clonality/%s/%s_pyclone6.results.summary.tsv" % (run,run))
     return ls
 
 rule clonality_all:
@@ -86,7 +83,7 @@ rule clonality_all:
 #------------------------------------------------------------------------------
 # START RULES from Clonalitymultithreads.snakefile
 #------------------------------------------------------------------------------
-rule sequenza_multibam2seqz:
+rule clonality_sequenza_multibam2seqz:
     input:
         tumor_bam=clonality_getTumor_recalsample,
         normal_bam=clonality_getNormal_recalsample,
@@ -104,7 +101,7 @@ rule sequenza_multibam2seqz:
     conda:
         "../envs/sequenza.yml"
     benchmark:
-        "benchmarks/clonality/{run}/{run}_{run}_sequenza_multibam2seqz.txt"
+        "benchmarks/clonality/{run}/{run}_sequenza_multibam2seqz.txt"
     threads: 18 #_clonality_threads
     shell:
         "{params.sequenza_bin_path}sequenza-utils  bam2seqz -n {input.normal_bam}  -t {input.tumor_bam}  --fasta {params.ref} -gc {params.gc_file} -o {params.sequenza_out}  --parallel {threads} -C chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 && touch {output}"
@@ -115,7 +112,7 @@ def clonality_mergeChroms_helper(wildcards):
     files = " ".join(["analysis/clonality/%s/%s.seqz_%s.txt.gz" % (run, run, chrom) for chrom in chroms])
     return files
 
-rule mergeChroms:
+rule clonality_mergeChroms:
     input:
         "analysis/clonality/{run}/{run}_sequenza_multibam2seqz.done.txt"
     output:
@@ -142,7 +139,7 @@ rule clonality_sequenza_binning:
     conda:
         "../envs/sequenza.yml"
     benchmark:
-        "benchmarks/clonality/{run}/{run}_{run}_prestep2clonality.txt"
+        "benchmarks/clonality/{run}/{run}_sequenza_binning.txt"
     shell:
         "{params.sequenza_bin_path}sequenza-utils  seqz_binning --seqz {input.completeseq}  --window 50  -o {output.sequenzafinal_out}"
 
@@ -162,7 +159,8 @@ rule clonality_addheader:
 # END RULES from Clonalitymultithreads.snakefile
 #------------------------------------------------------------------------------
 
-rule sequenza_fileprep:
+# RUN sequenza
+rule clonality_sequenza:
     input:
         bin50="analysis/clonality/{run}/{run}.bin50.final.seqz.txt.gz"
     params:
@@ -175,114 +173,59 @@ rule sequenza_fileprep:
     conda:
         "../envs/sequenza.yml"
     benchmark:
-        "benchmarks/clonality/{run}_{run}_postRscript.txt"
+        "benchmarks/clonality/{run}/{run}_sequenza.txt"
     shell:
         """{params.sequenza_bin_path}Rscript cidc_wes/modules/scripts/sequenza.R  {input}  {params.out_dir}/{wildcards.run}  {params.sample_name}"""
 
-rule pyclone_build_mutation_file:
+rule clonality_sequenza2pyclone6:
     input:
-        "analysis/clonality/{run}/{run}_pyclone.tsv"
+        "analysis/clonality/{run}/{run}_pyclone.tsv",
     params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
-    output:
-        "analysis/clonality/{run}/{run}_pyclone.yaml"
-    conda:
-        "../envs/pyclone.yml"
+        run = lambda wildcards: wildcards.run,
     benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone_build_mutation_file.txt"
+        "benchmarks/clonality/{run}/{run}_sequenza2pyclone6.txt"
+    output:
+        "analysis/clonality/{run}/{run}_pyclone6.input.tsv",
     shell:
-        "{params.pyclone_bin_path}PyClone build_mutations_file --in_file {input} --out_file {output}"
+        "./cidc_wes/modules/scripts/sequenza2pyclone6.py -f {input} -n {params.run} -o {output}"
 
-rule pyclone_generate_config:
+rule clonality_pyclone6_fit:
     input:
-        "analysis/clonality/{run}/{run}_pyclone.yaml"
-    output:
-        "analysis/clonality/{run}/pyclone.config.yaml"
+        "analysis/clonality/{run}/{run}_pyclone6.input.tsv"
     params:
-        outdir = lambda wildcards: "%sanalysis/clonality/%s" % (config['remote_path'],wildcards.run),
-        template = "cidc_wes/static/clonality/pyclone.config.yaml"
-    conda:
-        "../envs/pyclone.yml"
+        num_clusters = 40, #between 10-40;
+        density = "beta-binomial", #alt: binomial
+        #num-grid-points = 100, #default: 100, use higher for deeply sequenced data
+        num_restarts = 10, #between 10-100, higher val means longer run-time
     benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone.generate.config.txt"
+        "benchmarks/clonality/{run}/{run}_pyclone6_fit.txt"
+    output:
+        "analysis/clonality/{run}/{run}_pyclone6.h5",
     shell:
-        "cidc_wes/modules/scripts/clonality_pycloneConfig.py -t {params.template} -m {input} -o {params.outdir} > {output}"
+        "pyclone-vi fit -i {input} -o {output} -c {params.num_clusters} -d {params.density} -r {params.num_restarts}"
 
-rule pyclone_run_analysis:
+rule clonality_pyclone6_writeOut:
     input:
-        "analysis/clonality/{run}/pyclone.config.yaml"
-    params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
-    output:
-        #LEN: I don't know what to key in on as output
-        "analysis/clonality/{run}/trace/alpha.tsv.bz2"
-    conda:
-        "../envs/pyclone.yml"
+        "analysis/clonality/{run}/{run}_pyclone6.h5"
     benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone.run_analysis.txt"
+        "benchmarks/clonality/{run}/{run}_pyclone6_writeOut.txt"
+    output:
+        "analysis/clonality/{run}/{run}_pyclone6.results.tsv"
     shell:
-        "{params.pyclone_bin_path}PyClone run_analysis --config_file {input}"
+        "pyclone-vi write-results-file -i {input} -o {output}"
 
-rule pyclone_build_table:
+rule clonality_pyclone6_summarizeResults:
     input:
-        conf="analysis/clonality/{run}/pyclone.config.yaml",
-        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
-    params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
-    output:
-        "analysis/clonality/{run}/{run}_table.tsv"
-    conda:
-        "../envs/pyclone.yml"
+        "analysis/clonality/{run}/{run}_pyclone6.results.tsv"
     benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone.build_table.txt"
-    shell:
-        "{params.pyclone_bin_path}PyClone build_table --config_file {input.conf} --out_file {output} --table_type cluster --max_clusters 100"
-
-rule pyclone_density_plot:
-    input:
-        conf="analysis/clonality/{run}/pyclone.config.yaml",
-        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
-    params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+        "benchmarks/clonality/{run}/{run}_pyclone6_summarizeResults.txt"
     output:
-        "analysis/clonality/{run}/{run}_plot.density.pdf"
-    conda:
-        "../envs/pyclone.yml"
-    benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone_density_plot.txt"
+        "analysis/clonality/{run}/{run}_pyclone6.results.summary.tsv"
     shell:
-        "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type density --max_clusters 100"
-
-rule pyclone_scatter_plot:
-    input:
-        conf="analysis/clonality/{run}/pyclone.config.yaml",
-        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
-    params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
-    output:
-        "analysis/clonality/{run}/{run}_plot.scatter.pdf"
-    conda:
-        "../envs/pyclone.yml"
-    benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone_scatter_plot.txt"
-    shell:
-        "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type scatter --max_clusters 100"
-
-    
-rule pyclone_parallelCoordinates_plot:
-    input:
-        conf="analysis/clonality/{run}/pyclone.config.yaml",
-        other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
-    params:
-        pyclone_bin_path="%s/bin/" % config['pyclone_root'],
-    output:
-        "analysis/clonality/{run}/{run}_plot.coordinates.pdf"
-    conda:
-        "../envs/pyclone.yml"
-    benchmark:
-        "benchmarks/clonality/{run}/{run}.pyclone_coordinates_plot.txt"
-    shell:
-        "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type parallel_coordinates --max_clusters 100"
+        #remove hdr
+        #"cut -f 3,4 {input} | tail -n +2 | uniq > {output}"
+        #keep hdr
+        "cut -f 3,4,5,6 {input} | uniq > {output}"
 
 rule clonality_json:
     """jsonify the tumor cloanlity
@@ -298,3 +241,110 @@ rule clonality_json:
         "benchmarks/clonality/{run}.clonality_json.txt"
     shell:
         "cidc_wes/modules/scripts/json_clonality.py -r {params.run} -f {input} -o {output}"
+
+# OBSOLETE
+# rule pyclone_build_mutation_file:
+#     input:
+#         "analysis/clonality/{run}/{run}_pyclone.tsv"
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         "analysis/clonality/{run}/{run}_pyclone.yaml"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone_build_mutation_file.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone build_mutations_file --in_file {input} --out_file {output}"
+
+# rule pyclone_generate_config:
+#     input:
+#         "analysis/clonality/{run}/{run}_pyclone.yaml"
+#     output:
+#         "analysis/clonality/{run}/pyclone.config.yaml"
+#     params:
+#         outdir = lambda wildcards: "%sanalysis/clonality/%s" % (config['remote_path'],wildcards.run),
+#         template = "cidc_wes/static/clonality/pyclone.config.yaml"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone.generate.config.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/clonality_pycloneConfig.py -t {params.template} -m {input} -o {params.outdir} > {output}"
+
+# rule pyclone_run_analysis:
+#     input:
+#         "analysis/clonality/{run}/pyclone.config.yaml"
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         #LEN: I don't know what to key in on as output
+#         "analysis/clonality/{run}/trace/alpha.tsv.bz2"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone.run_analysis.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone run_analysis --config_file {input}"
+
+# rule pyclone_build_table:
+#     input:
+#         conf="analysis/clonality/{run}/pyclone.config.yaml",
+#         other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         "analysis/clonality/{run}/{run}_table.tsv"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone.build_table.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone build_table --config_file {input.conf} --out_file {output} --table_type cluster --max_clusters 100"
+
+# rule pyclone_density_plot:
+#     input:
+#         conf="analysis/clonality/{run}/pyclone.config.yaml",
+#         other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         "analysis/clonality/{run}/{run}_plot.density.pdf"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone_density_plot.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type density --max_clusters 100"
+
+# rule pyclone_scatter_plot:
+#     input:
+#         conf="analysis/clonality/{run}/pyclone.config.yaml",
+#         other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         "analysis/clonality/{run}/{run}_plot.scatter.pdf"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone_scatter_plot.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type scatter --max_clusters 100"
+
+    
+# rule pyclone_parallelCoordinates_plot:
+#     input:
+#         conf="analysis/clonality/{run}/pyclone.config.yaml",
+#         other="analysis/clonality/{run}/trace/alpha.tsv.bz2",
+#     params:
+#         pyclone_bin_path="%s/bin/" % config['pyclone_root'],
+#     output:
+#         "analysis/clonality/{run}/{run}_plot.coordinates.pdf"
+#     conda:
+#         "../envs/pyclone.yml"
+#     benchmark:
+#         "benchmarks/clonality/{run}/{run}.pyclone_coordinates_plot.txt"
+#     shell:
+#         "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type parallel_coordinates --max_clusters 100"
+
