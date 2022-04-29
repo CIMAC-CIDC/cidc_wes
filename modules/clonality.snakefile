@@ -63,16 +63,20 @@ def clonality_targets(wildcards):
     """Generates the targets for this module"""
     ls = []
     for run in config['runs']:
-        ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run)),
-        ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run)),
-        ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run)),
-        ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
+        #ls.append("analysis/clonality/%s/%s.seqz.txt.gz" % (run,run)),
+        #ls.append("analysis/clonality/%s/%s_sequenza_multibam2seqz.done.txt" % (run,run)),
+        #ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run)),
+        #ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
         ls.append("analysis/clonality/%s/%s_genome_view.pdf" % (run,run))
+        
         #pyclone output
         #NOTE: _pyclone6.input.tsv should be aggregated across samples for true, multisample clonality analysis
         ls.append("analysis/clonality/%s/%s_pyclone6.input.tsv" % (run,run))
         ls.append("analysis/clonality/%s/%s_pyclone6.results.tsv" % (run,run))
         ls.append("analysis/clonality/%s/%s_pyclone6.results.summary.tsv" % (run,run))
+        
+        #Generate summary json
+        ls.append("analysis/report/json/clonality/%s.clonality.json" % run)
     return ls
 
 rule clonality_all:
@@ -225,13 +229,17 @@ rule clonality_pyclone6_summarizeResults:
         #remove hdr
         #"cut -f 3,4 {input} | tail -n +2 | uniq > {output}"
         #keep hdr
-        "cut -f 3,4,5,6 {input} | uniq > {output}"
+        "cut -f 3-5 {input} | uniq > {output}"
 
 rule clonality_json:
     """jsonify the tumor cloanlity
     """
     input:
-        "analysis/clonality/{run}/{run}_table.tsv"
+        #NOTE: 2 output files _pyclone6.results.tsv and .summary.tsv
+        #using .summary.tsv for json summary, but should ingest .results.tsv
+        results="analysis/clonality/{run}/{run}_pyclone6.results.tsv",
+        summary="analysis/clonality/{run}/{run}_pyclone6.results.summary.tsv",
+        pyclone6_input="analysis/clonality/{run}/{run}_pyclone6.input.tsv",
     output:
         "analysis/report/json/clonality/{run}.clonality.json"
     params:
@@ -240,7 +248,7 @@ rule clonality_json:
     benchmark:
         "benchmarks/clonality/{run}.clonality_json.txt"
     shell:
-        "cidc_wes/modules/scripts/json_clonality.py -r {params.run} -f {input} -o {output}"
+        "cidc_wes/modules/scripts/json_clonality.py -r {params.run} -i {input.pyclone6_input} -j {input.results} -k {input.summary} -o {output}"
 
 # OBSOLETE
 # rule pyclone_build_mutation_file:

@@ -365,7 +365,7 @@ rule report_copy_number_purity:
 
 def report_copy_number_clonalityInputFn(wildcards):
     run = list(config['runs'].keys())[0]
-    return "analysis/clonality/%s/%s_table.tsv" % (run,run)
+    return "analysis/clonality/%s/%s_pyclone6.results.summary.tsv" % (run,run)
 
 rule report_copy_number_clonality:
     """report tumor clonality"""
@@ -373,12 +373,13 @@ rule report_copy_number_clonality:
         report_copy_number_clonalityInputFn
     params:
         run = list(config['runs'].keys())[0],
-        cap = """caption: 'This table reports the estimated tumor clonaltiy of the sample.'"""
+        cap = """caption: 'This table reports the estimated cancer cell fraction of each cluster.  NOTE: these estimates were based on this single sample's Copy Number Information; for more reliable estimates, multiple samples must be used.'"""
     output:
         tsv="analysis/report/copy_number_variation/02_tumor_clonality.tsv",
         details="analysis/report/copy_number_variation/02_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
+        #"""echo "{params.cap}" >> {output.details} && cidc_wes/modules/scripts/report_cnv_clonality.py -f {input} -r {params.run} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && cp {input} {output.tsv}"""
 
 ###############################################################################
 def report_neoantigens_HLAInputFn(wildcards):
