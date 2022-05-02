@@ -378,32 +378,46 @@ function build_mean_quality_plot() {
 // CNV plots
 
 function build_clonality_plot() {
-
-    let clonality = [];
+    let traces = []; //cluster cell prevalence matrix, index 0 ~ cluster0 ccfs
     let sample_ids = [];
+    let sample_indices = [];
+    let max_clusters = 0;
 
+
+    //first loop to figure out max clusters
     for (let i = 0; i < wes_data.length; ++i) {
         if (checkAvailability(current_samples, wes_data[i]['id'])) {
             // we don't differentiate between tumor and normal samples here
             if (wes_data[i]['copy_number'] != undefined) {
                 // clonality
-                clonality.push(wes_data[i]['copy_number']['clonality'])
-                sample_ids.push(wes_data[i]['id'])
+                sample_indices.push(i);
+                sample_ids.push(wes_data[i]['id']);
+                if (wes_data[i]['copy_number']['clonality']['cellular_prevalences'].length > max_clusters) {
+                    max_clusters = wes_data[i]['copy_number']['clonality']['cellular_prevalences'].length;
+                }
             }
         }
     }
-    let trace1 = {
-        x: sample_ids,
-        y: clonality,
-        type: 'bar'
-    };
 
-    let data = [trace1];
+    //Second loop to init traces
+    for (let i = 0; i < max_clusters; i++) {
+        traces.push(new Array(sample_ids.length));
+    }
+    //Add CCFs to build up traces
+    for (let i = 0; i < sample_indices.length; i++) {
+        for (let j = 0; j < wes_data[sample_indices[i]]['copy_number']['clonality']['cellular_prevalences'].length; j++) {
+            traces[j][i] = wes_data[sample_indices[i]]['copy_number']['clonality']['cellular_prevalences'][j];
+        }
+    }
 
+    let data = [];
+    for (let i = 0; i < traces.length; i++) {
+        data.push({name: 'cluster'+i, x: sample_ids, y: traces[i], type:'bar'})
+    }
     let layout = {
         height: 450,
         width: 1044,
-        barmode: 'overlay',
+        barmode: 'stack',
         xaxis: {
             title: { text: 'Run' },
             automargin: true
@@ -415,7 +429,6 @@ function build_clonality_plot() {
     };
 
     Plotly.newPlot("clonality_plot", data, layout);
-
 };
 
 function build_purity_plot() {

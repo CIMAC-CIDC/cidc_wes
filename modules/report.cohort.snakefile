@@ -213,19 +213,18 @@ rule cohort_report_copynumber_clonality:
     #input:
     #    cohort_report_inputFn
     output:
-        #csv="analysis/cohort_report/copy_number_variation/01_clonality_bar.plotly",
         csv="analysis/cohort_report/copy_number_variation/01_clonality.stub",
-        #details="analysis/cohort_report/copy_number_variation/01_details.yaml",
-    #params:
+        details="analysis/cohort_report/copy_number_variation/01_details.yaml",
+    params:
         #files = lambda wildcards,input: " -f ".join(input),
-        #caption="""caption: 'This table shows read depth coverage of each sample.'""",
+        caption="""caption: 'This plot shows the cancer cell fractions (CCF) of each cluster for each sample.'""",
+        subcaption="""subcaption: '<b>NOTE: These cluster estimates were derived from single-sample runs, therefore clusters do not corresponde across samples, i.e. the cluster0 in sampleX does not correspond to cluster0 in sampleY.  Also, the CCFs do not add up to 1.0.</b>'""",
         #plot_options = yaml_dump({'render': False}),
     message:
         "REPORT: creating clonality plot for copy_number_variation section"
     group: "cohort_report"
     shell:
-        """touch {output.csv}"""
-        #echo "{params.plot_options}" >> {output.details} &&
+        """echo "{params.caption}" >> {output.details} && echo "{params.subcaption}" >> {output.details} && touch {output.csv}"""
         #cidc_wes/modules/scripts/cohort_report/cr_copynumber_cnvTable.py -f {params.files} -a {params.attr} -o {output.csv}"""
 
 rule cohort_report_copynumber_purity:
