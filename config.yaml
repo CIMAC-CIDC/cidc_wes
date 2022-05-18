@@ -102,6 +102,7 @@ samples:
 #skipped_modules:
 #  - "clonality"
 #  - "copynumber"
+#  - "cnvkit"
 #  - "msisensor2"
 #  - "neoantigen"
 #  - "purity"
