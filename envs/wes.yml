@@ -30,6 +30,9 @@ dependencies:
 - perl-exporter-tiny
 - perl-svg
 
+#cnvkit
+- cnvkit
+
 #coverage
 - mosdepth
 
