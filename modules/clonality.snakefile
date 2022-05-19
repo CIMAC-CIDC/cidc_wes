@@ -68,6 +68,8 @@ def clonality_targets(wildcards):
         #ls.append("analysis/clonality/%s/%s.bin50.seqz.txt.gz" % (run,run)),
         #ls.append("analysis/clonality/%s/%s.bin50.final.seqz.txt.gz" % (run,run))
         ls.append("analysis/clonality/%s/%s_genome_view.pdf" % (run,run))
+        ls.append("analysis/clonality/%s/%s_segments.txt" % (run,run))
+        ls.append("analysis/clonality/%s/%s_sequenza_gainLoss.bed" % (run,run))
         
         #pyclone output
         #NOTE: _pyclone6.input.tsv should be aggregated across samples for true, multisample clonality analysis
@@ -174,6 +176,7 @@ rule clonality_sequenza:
     output:
         pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv",
         genome_view_plot="analysis/clonality/{run}/{run}_genome_view.pdf",
+        segments="analysis/clonality/{run}/{run}_segments.txt",
     conda:
         "../envs/sequenza.yml"
     benchmark:
@@ -249,6 +252,20 @@ rule clonality_json:
         "benchmarks/clonality/{run}.clonality_json.txt"
     shell:
         "cidc_wes/modules/scripts/json_clonality.py -r {params.run} -i {input.pyclone6_input} -j {input.results} -k {input.summary} -o {output}"
+
+rule clonality_callGainLoss:
+    """use hard-cutoffs to call regions of GAIN/LOSS"""
+    input:
+        "analysis/clonality/{run}/{run}_segments.txt"
+    output:
+        #NOTE: changing from {run}-{tmr} to {run}-{run} to be more consistent
+        "analysis/clonality/{run}/{run}_sequenza_gainLoss.bed"
+    group: "clonality"
+    log: "analysis/logs/clonality/{run}/{run}.callGainLoss.log"
+    benchmark:
+        "benchmarks/clonality/{run}/{run}.callGainLoss.txt"
+    shell:
+        "./cidc_wes/modules/scripts/copynumber_callGainLoss.py -f {input} -o {output}"
 
 # OBSOLETE
 # rule pyclone_build_mutation_file:

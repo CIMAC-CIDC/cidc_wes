@@ -60,7 +60,7 @@ def purity_targets(wildcards):
         ls.append("analysis/purity/%s/%s.cncf" % (run,run))
         ls.append("analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run))
         ls.append("analysis/purity/%s/%s.iterpurityvalues.txt" % (run,run))
-
+        ls.append("analysis/purity/%s/%s_facets_gainLoss.bed" % (run,run))
     return ls
 
 #DEPRECATED!
@@ -145,6 +145,20 @@ rule purityplots_postprocessing:
         "benchmarks/puritycalls/{run}/{run}.purity.postprocessingplots.txt"
     shell:
         "Rscript --vanilla cidc_wes/modules/scripts/facets_plots.R {input} {params.output_dir} {params.name}"
+
+rule purity_callGainLoss:
+    """use hard-cutoffs to call regions of GAIN/LOSS"""
+    input:
+        "analysis/purity/{run}/{run}.cncf"
+    output:
+        #NOTE: changing from {run}-{tmr} to {run}-{run} to be more consistent
+        "analysis/purity/{run}/{run}_facets_gainLoss.bed"
+    group: "purity"
+    log: "analysis/logs/purity/{run}/{run}.callGainLoss.log"
+    benchmark:
+        "benchmarks/purity/{run}/{run}.callGainLoss.txt"
+    shell:
+        "./cidc_wes/modules/scripts/copynumber_callGainLoss.py -f {input} -o {output}"
 
 rule purity_json:
     """jsonify the purity/plodiy/diplogr

@@ -38,8 +38,16 @@ def copynumber_targets(wildcards):
     ls = []
     for run in config['runs']:
         #ls.append("analysis/copynumber/%s/%s_pon.hdf5" % (run,run))
-        ls.append("analysis/copynumber/%s/%s_cnvcalls.txt"%(run,run))
-        ls.append("analysis/copynumber/%s/%s_cnvcalls.circos.txt"%(run,run))
+        #ls.append("analysis/copynumber/%s/%s_cnvcalls.txt"%(run,run))
+        #ls.append("analysis/copynumber/%s/%s_cnvcalls.circos.txt"%(run,run))
+
+        #consensus calls-
+        ls.append("analysis/copynumber/%s/%s_cnvkit_sequenza.consensus.bed"%(run,run))
+        ls.append("analysis/copynumber/%s/%s_cnvkit_facets.consensus.bed"%(run,run))
+        ls.append("analysis/copynumber/%s/%s_sequenza_facets.consensus.bed"%(run,run))
+        ls.append("analysis/copynumber/%s/%s_consensus.bed"%(run,run))
+        ls.append("analysis/copynumber/%s/%s_consensus_merged_GAIN.bed" % (run,run))
+        ls.append("analysis/copynumber/%s/%s_consensus_merged_LOSS.bed" % (run,run))
         
     #Check for cohorts
     if config['cohorts']:
@@ -96,85 +104,161 @@ rule copynumber_create_pon_sentieon:
     shell:
         """{params.index1}/sentieon driver  -t {threads} -r {params.index} -i {input.normal_recalibratedbam} --algo CNV  --target {input.targetbed} --target_padding 0 --create_pon {output.ponfile}"""
 
+#DEPRECATED
+# rule copynumber_CNVcall:
+#     input:
+#         #ONLY perform this analysis for Tumor samples-
+#         tumor_recalibratedbam = cnv_getTumor_sample
+#     output:
+#         cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt",
+#         tWeights="analysis/copynumber/{run}/{sample}_cnvcalls.txt.targetWeights",
+#         tsv="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
+#     params:
+#         index=config['genome_fasta'],
+#         sentieon_path=config['sentieon_path'],
+#         ponfile=config['pons'],
+#         target=config['pons_target'],
+#     group: "copynumber"
+#     threads: 4 #_cnvcall_threads
+#     benchmark:
+#         "benchmarks/copynumber/{run}/{sample}.CNVcall.txt"
+#     shell:
+#         #NOTE: target_padding is being set to 0--following the broad's method
+#         #"""{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
+#         """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV  --pon {params.ponfile} {output.cnvcalls}"""
 
-rule copynumber_CNVcall:
+# rule copynumber_processCNVcircos:
+#     """Process the cnv output file to be an adaquate input into the circos 
+#     plot"""
+#     input:
+#         cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
+#     output:
+#         cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.circos.txt",
+#     group: "copynumber"
+#     benchmark:
+#         "benchmarks/copynumber/{run}/{sample}.processCNVcircos.txt"
+#     shell:
+#         "cidc_wes/modules/scripts/copynumber_processCircos.py -f {input} > {output}"
+
+# rule copynumber_mergeCohorts:
+#     """Merge the cnvcalls.txt files from the runs in a cohort"""
+#     input:
+#         copynumber_getCohortFiles
+#     params:
+#         files = lambda wildcards,input: " -f ".join(input)
+#     group: "copytnumber"
+#     output:
+#         "analysis/cohorts/{cohort}/{cohort}_merged.cnvcalls.txt"
+#     benchmark:
+#         "benchmarks/cohorts/{cohort}/{cohort}_copynumber_mergeCohorts"
+#     shell:
+#         "cidc_wes/modules/scripts/copynumber_mergeCohorts.py -f {params.files} > {output}"
+
+# rule copynumber_gistic2:
+#     """Call gistic2 to convert from segment-based cnv calls to gene-based"""
+#     input:
+#         "analysis/cohorts/{cohort}/{cohort}_merged.cnvcalls.txt"
+#     params:
+#         #ref: https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/CNV_Pipeline/
+#         ref=config['gistic2'],
+#         ta= 0.1, #amplification threshold
+#         td=0.1, #deletion threshold
+#         armpeel=1, #perform arm level peel off
+#         brlen=0.7, #broad.length cutoff
+#         cap=1.5, #Not in gistic2 doc
+#         conf=0.99, #confidence level
+#         genegistic=1, #turn on gene level for deletions
+#         gcm="extreme", #not in gistic2 doc
+#         js=4, #join segment
+#         maxseg=2000, #max.sample.segment
+#         qvt=0.25, #qv threshold
+#         rx=0, #remove x
+#         savegene=1, #not in gistic2 doc
+#         #HARD-code gistic2 paths--need a better solution
+#         ld_lib_path="export LD_LIBRARY_PATH=/usr/local/bin/gistic2/MCR_Installer/v83/runtime/glnxa64:/usr/local/bin/gistic2/MCR_Installer/v83/bin/glnxa64:/usr/local/bin/gistic2/MCR_Installer/v83/sys/os/glnxa64:",
+#         xapp_dir="export XAPPLRESDIR=/usr/local/bin/gistic2/MCR_Installer/v83/X11/app-defaults",
+
+#         outdir =lambda wildcards,input,output: "/".join(str(output).split("/")[:-1])
+#     group: "copytnumber"
+#     output:
+#         "analysis/cohorts/{cohort}/gistic2/all_data_by_genes.txt"
+#     benchmark:
+#         "benchmarks/cohorts/{cohort}/{cohort}_copynumber_gistic2"
+#     shell:
+#         "{params.ld_lib_path};{params.xapp_dir}; gistic2-bin -refgene {params.ref} -seg {input} -b {params.outdir} -ta {params.ta} -armpeel {params.armpeel} -brlen {params.brlen} -cap {params.cap} -conf {params.conf} -td {params.td} -genegistic {params.genegistic} -gcm {params.gcm} -js {params.js} -maxseg {params.maxseg} -qvt {params.qvt} -rx {params.rx} -savegene {params.savegene}"
+
+
+#CONSENSUS CALLS
+rule consensus_cnvkit_sequenza:
     input:
-        #ONLY perform this analysis for Tumor samples-
-        tumor_recalibratedbam = cnv_getTumor_sample
-    output:
-        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt",
-        tWeights="analysis/copynumber/{run}/{sample}_cnvcalls.txt.targetWeights",
-        tsv="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
+        cnvkit="analysis/cnvkit/{run}/{run}_cnvkit_gainLoss.bed",
+        sequenza="analysis/clonality/{run}/{run}_sequenza_gainLoss.bed",
     params:
-        index=config['genome_fasta'],
-        sentieon_path=config['sentieon_path'],
-        ponfile=config['pons'],
-        target=config['pons_target'],
-    group: "copynumber"
-    threads: 4 #_cnvcall_threads
-    benchmark:
-        "benchmarks/copynumber/{run}/{sample}.CNVcall.txt"
-    shell:
-        #NOTE: target_padding is being set to 0--following the broad's method
-        #"""{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV --target {params.target} --target_padding 0  --pon {params.ponfile} {output.cnvcalls}"""
-        """{params.sentieon_path}/sentieon driver -t {threads} -r {params.index} -i {input.tumor_recalibratedbam} --algo CNV  --pon {params.ponfile} {output.cnvcalls}"""
-
-rule copynumber_processCNVcircos:
-    """Process the cnv output file to be an adaquate input into the circos 
-    plot"""
-    input:
-        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.txt.tn.tsv",
+        #checks that calls from the two callers are consistent, i.e. GAIN-GAIN,
+        #or LOSS-LOSS in cols 4 and 5
+        #print a header
+        #awk_cmd="awk -v OFS=\'\\t\' \'BEGIN{print \"chrom\\tstart\\tend\\tcall\\tregion_size\"}; {if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
+        #no header
+        awk_cmd="awk -v OFS=\'\\t\' \'{if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
     output:
-        cnvcalls="analysis/copynumber/{run}/{sample}_cnvcalls.circos.txt",
-    group: "copynumber"
-    benchmark:
-        "benchmarks/copynumber/{run}/{sample}.processCNVcircos.txt"
+        "analysis/copynumber/{run}/{run}_cnvkit_sequenza.consensus.bed"
     shell:
-        "cidc_wes/modules/scripts/copynumber_processCircos.py -f {input} > {output}"
+        #NOTE: need two intersectBed b/c the first generates the correct regions; -wo obliterates the intersected regions
+        """intersectBed -a {input.cnvkit} -b {input.sequenza} | intersectBed -a stdin -b {input.sequenza} -filenames -wo | cut -f 1-3,5,10,11 | {params.awk_cmd} > {output}"""
 
-rule copynumber_mergeCohorts:
-    """Merge the cnvcalls.txt files from the runs in a cohort"""
+rule consensus_cnvkit_facets:
     input:
-        copynumber_getCohortFiles
+        cnvkit="analysis/cnvkit/{run}/{run}_cnvkit_gainLoss.bed",
+        facets="analysis/purity/{run}/{run}_facets_gainLoss.bed"
     params:
-        files = lambda wildcards,input: " -f ".join(input)
-    group: "copytnumber"
-    output:
-        "analysis/cohorts/{cohort}/{cohort}_merged.cnvcalls.txt"
-    benchmark:
-        "benchmarks/cohorts/{cohort}/{cohort}_copynumber_mergeCohorts"
-    shell:
-        "cidc_wes/modules/scripts/copynumber_mergeCohorts.py -f {params.files} > {output}"
+        #checks that calls from the two callers are consistent, i.e. GAIN-GAIN,
+        #or LOSS-LOSS in cols 4 and 5
+        #print a header
+        #awk_cmd="awk -v OFS=\'\\t\' \'BEGIN{print \"chrom\\tstart\\tend\\tcall\\tregion_size\"}; {if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
+        #no header
+        awk_cmd="awk -v OFS=\'\\t\' \'{if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
 
-rule copynumber_gistic2:
-    """Call gistic2 to convert from segment-based cnv calls to gene-based"""
+    output:
+        "analysis/copynumber/{run}/{run}_cnvkit_facets.consensus.bed"
+    shell:
+        #NOTE: need two intersectBed b/c the first generates the correct regions; -wo obliterates the intersected regions
+        """intersectBed -a {input.cnvkit} -b {input.facets} | intersectBed -a stdin -b {input.facets} -filenames -wo | cut -f 1-3,5,10,11 | {params.awk_cmd} > {output}"""
+
+rule consensus_sequenza_facets:
     input:
-        "analysis/cohorts/{cohort}/{cohort}_merged.cnvcalls.txt"
+        sequenza="analysis/clonality/{run}/{run}_sequenza_gainLoss.bed",
+        facets="analysis/purity/{run}/{run}_facets_gainLoss.bed"
     params:
-        #ref: https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/CNV_Pipeline/
-        ref=config['gistic2'],
-        ta= 0.1, #amplification threshold
-        td=0.1, #deletion threshold
-        armpeel=1, #perform arm level peel off
-        brlen=0.7, #broad.length cutoff
-        cap=1.5, #Not in gistic2 doc
-        conf=0.99, #confidence level
-        genegistic=1, #turn on gene level for deletions
-        gcm="extreme", #not in gistic2 doc
-        js=4, #join segment
-        maxseg=2000, #max.sample.segment
-        qvt=0.25, #qv threshold
-        rx=0, #remove x
-        savegene=1, #not in gistic2 doc
-        #HARD-code gistic2 paths--need a better solution
-        ld_lib_path="export LD_LIBRARY_PATH=/usr/local/bin/gistic2/MCR_Installer/v83/runtime/glnxa64:/usr/local/bin/gistic2/MCR_Installer/v83/bin/glnxa64:/usr/local/bin/gistic2/MCR_Installer/v83/sys/os/glnxa64:",
-        xapp_dir="export XAPPLRESDIR=/usr/local/bin/gistic2/MCR_Installer/v83/X11/app-defaults",
-
-        outdir =lambda wildcards,input,output: "/".join(str(output).split("/")[:-1])
-    group: "copytnumber"
+        #checks that calls from the two callers are consistent, i.e. GAIN-GAIN,
+        #or LOSS-LOSS in cols 4 and 5
+        #print a header
+        #awk_cmd="awk -v OFS=\'\\t\' \'BEGIN{print \"chrom\\tstart\\tend\\tcall\\tregion_size\"}; {if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
+        #no header
+        awk_cmd="awk -v OFS=\'\\t\' \'{if ($4 == $5) {print $1\"\\t\"$2\"\\t\"$3\"\\t\"$4\"\\t\"$6}}\'",
     output:
-        "analysis/cohorts/{cohort}/gistic2/all_data_by_genes.txt"
-    benchmark:
-        "benchmarks/cohorts/{cohort}/{cohort}_copynumber_gistic2"
+        "analysis/copynumber/{run}/{run}_sequenza_facets.consensus.bed"
     shell:
-        "{params.ld_lib_path};{params.xapp_dir}; gistic2-bin -refgene {params.ref} -seg {input} -b {params.outdir} -ta {params.ta} -armpeel {params.armpeel} -brlen {params.brlen} -cap {params.cap} -conf {params.conf} -td {params.td} -genegistic {params.genegistic} -gcm {params.gcm} -js {params.js} -maxseg {params.maxseg} -qvt {params.qvt} -rx {params.rx} -savegene {params.savegene}"
+        #NOTE: need two intersectBed b/c the first generates the correct regions; -wo obliterates the intersected regions
+        """intersectBed -a {input.sequenza} -b {input.facets} | intersectBed -a stdin -b {input.facets} -filenames -wo | cut -f 1-3,5,10,11 | {params.awk_cmd} > {output}"""
+
+rule consensus_all:
+    input:
+        c_s = "analysis/copynumber/{run}/{run}_cnvkit_sequenza.consensus.bed",
+        c_f = "analysis/copynumber/{run}/{run}_cnvkit_facets.consensus.bed",
+        s_f = "analysis/copynumber/{run}/{run}_sequenza_facets.consensus.bed",
+    output:
+        "analysis/copynumber/{run}/{run}_consensus.bed"
+    shell:
+        #middle cmd to sort the output
+        "cat {input.c_s} {input.c_f} {input.s_f} | sort -V -k1,1 -k2,2n > {output}"
+
+rule consensus_all_merge:
+    """Splits out the Gains and Loss regions and then tries to merge them"""
+    input:
+        "analysis/copynumber/{run}/{run}_consensus.bed"
+    output:
+        "analysis/copynumber/{run}/{run}_consensus_merged_{cnv_type}.bed"
+    params:
+        cnv_type = lambda wildcards: wildcards.cnv_type,
+    shell:
+        "grep {params.cnv_type} {input} | mergeBed -c 4 -o distinct > {output}"

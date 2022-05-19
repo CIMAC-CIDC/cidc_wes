@@ -15,6 +15,7 @@ def cnvkit_targets(wildcards):
         ls.append("analysis/cnvkit/%s/%s_recalibrated.cns" % (run,tmr))
         ls.append("analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run,tmr))
         ls.append("analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run,tmr))
+        ls.append("analysis/cnvkit/%s/%s_cnvkit_gainLoss.bed" % (run,run))
     return ls
 
 rule cnvkit_all:
@@ -99,3 +100,23 @@ else: #run cnvkit call w/o purity
         shell:
             #first cmd grabs the purity value, 3rd col of 2nd line
             """cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} -o {output}"""
+
+def cnvkit_callGainLossInput(wildcards):
+    run = config['runs'][wildcards.run]
+    tmr = run[1]
+    ls = ["analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (wildcards.run, tmr)]
+    return ls
+
+rule cnvkit_callGainLoss:
+    """use hard-cutoffs to call regions of GAIN/LOSS"""
+    input:
+        cnvkit_callGainLossInput
+    output:
+        #NOTE: changing from {run}-{tmr} to {run}-{run} to be more consistent
+        "analysis/cnvkit/{run}/{run}_cnvkit_gainLoss.bed"
+    group: "cnvkit"
+    log: "analysis/logs/cnvkit/{run}/{run}.cnvkit_callGainLoss.log"
+    benchmark:
+        "benchmarks/cnvkit/{run}/{run}.cnvkit_callGainLoss.txt"
+    shell:
+        "./cidc_wes/modules/scripts/copynumber_callGainLoss.py -f {input} -o {output}"
