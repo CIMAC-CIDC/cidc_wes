@@ -223,30 +223,32 @@ rule filter_raw_vcf:
         sentieon_path=config['sentieon_path'],
         tumor=lambda wildcards: somatic_getTumor(wildcards),
         normal= lambda wildcards: somatic_getNormal(wildcards),
+	vcf_bin_path="%s/bin/" % config['vcf_root'],
     group: "somatic"
     #NOTE: b/c the rule uses a run instead of a shell, snkmk doesnt allow
     #conda env defs (next line)
-    conda: "../envs/somatic_vcftools.yml"
+    #conda: "../envs/somatic_vcftools.yml"
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}_filter_raw_vcf.txt"
     shell:
-        """vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
+        """{params.vcf_bin_path}vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
+        #"""vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
 
 
-rule gunzip_vcf:
-    """General rule to gunzip the three types of vcf.gz files-
-    tnscope_, tnsnv, and tnhaplotyper"""
-    input:
-        "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz"
-    output:
-        #Should we make this a temp?
-        "analysis/somatic/{run}/{run}_{caller}.output.vcf"
-    benchmark:
-        "benchmarks/somatic/{run}/{run}.{caller}_gunzip_vcf.txt"
-    group: "somatic"
-    shell:
-        #NOTE: we want to keep the original .gz vcf file
-        "gunzip < {input} > {output}"
+# rule gunzip_vcf:
+#     """General rule to gunzip the three types of vcf.gz files-
+#     tnscope_, tnsnv, and tnhaplotyper"""
+#     input:
+#         "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz"
+#     output:
+#         #Should we make this a temp?
+#         "analysis/somatic/{run}/{run}_{caller}.output.vcf"
+#     benchmark:
+#         "benchmarks/somatic/{run}/{run}.{caller}_gunzip_vcf.txt"
+#     group: "somatic"
+#     shell:
+#         #NOTE: we want to keep the original .gz vcf file
+#         "gunzip < {input} > {output}"
 
 rule vcfVEP:
     """Rule to annotate vcf files with vep"""
@@ -258,12 +260,16 @@ rule vcfVEP:
         vep_data=config['vep_data'],
         vep_synonyms=config['vep_synonyms'],
         gdc_fasta=config['genome_fasta'],
+	vcf_bin_path="%s/bin/" % config['vcf_root'],
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcfVEP.txt"
     group: "somatic"
-    conda: "../envs/somatic_vcftools.yml"
+    #conda: "../envs/somatic_vcftools.yml"
+    #conda: "../envs/somatic_vcf.yml"
+    #conda: "vcf"
     shell:
-        "vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
+        "{params.vcf_bin_path}vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
+        #"vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
     
 rule vcf2maf:
     """General rule to convert the different vcf files into maf"""
@@ -279,7 +285,7 @@ rule vcf2maf:
         vep_assembly=config['vep_assembly'],
         vep_filter= config['vep_filter'],
         buffer_size=config['vcf2maf_bufferSize'],
-
+	vcf_bin_path="%s/bin/" % config['vcf_root'],
         tumor= lambda wildcards: somatic_getTumor(wildcards),
         normal= lambda wildcards: somatic_getNormal(wildcards),
     benchmark:
@@ -287,9 +293,11 @@ rule vcf2maf:
     log:
         "analysis/logs/somatic/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     group: "somatic"
-    conda: "../envs/somatic_vcftools.yml"
+    #conda: "../envs/somatic_vcftools.yml"
+    conda: "../envs/vcf.yml"
     shell:
-        """vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
+        """{params.vcf_bin_path}vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
+        #"""vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
 
 rule mutationSignature:
     """General rule to do mutation signature analysis using mutProfiler.py"""
@@ -371,7 +379,7 @@ rule somatic_tabix_filtered_vcf_gz:
     benchmark:
         "benchmarks/somatic/{run}/{run}_{caller}.tabix_filtered_vcf_gz.txt"
     group: "somatic"
-    conda: "../envs/somatic_vcftools.yml"
+    #conda: "../envs/somatic_vcftools.yml"
     shell:
         "tabix -p vcf {input}"
 

@@ -13,8 +13,8 @@ def coveragemetrics_targets(wildcards):
         ls.append("analysis/metrics/%s/%s_target_metrics.txt" % (sample,sample))
         ls.append("analysis/metrics/%s/%s_target_metrics.sample_summary.txt" % (sample,sample))
         
-        ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
-        ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
+        # ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.dist.txt" % (sample,sample,center))
+        # ls.append("analysis/metrics/%s/%s.%s.mosdepth.region.summary.txt" % (sample,sample,center))
     return ls
 
 #DEPRECATED
@@ -107,38 +107,38 @@ rule targets_sentieon:
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
 
 
-rule coverage_mosdepth:
-    """SAMPLE coverage at target sites"""
-    input:
-        bam="analysis/align/{sample}/{sample}_recalibrated.bam",
-        bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
-    params:
-        #FOUND center_targets found in wes.snakefile
-        target= lambda wildcards: center_targets[wildcards.center],
-        prefix=lambda wildcards: "%sanalysis/metrics/%s/%s.%s" % (config['remote_path'], wildcards.sample, wildcards.sample, wildcards.center),
-    output:
-        "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt",
-    group: "coverage"
-    conda: "../envs/coverage.yml"
-    threads: 2 #_coveragemetrics_threads
-    benchmark:
-        "benchmarks/metrics/{sample}/{sample}.{center}.mosdepth.txt"
-    shell:
-        "mosdepth -t {threads} -b {params.target} {params.prefix} {input.bam}"
+# rule coverage_mosdepth:
+#     """SAMPLE coverage at target sites"""
+#     input:
+#         bam="analysis/align/{sample}/{sample}_recalibrated.bam",
+#         bai="analysis/align/{sample}/{sample}_recalibrated.bam.bai"
+#     params:
+#         #FOUND center_targets found in wes.snakefile
+#         target= lambda wildcards: center_targets[wildcards.center],
+#         prefix=lambda wildcards: "%sanalysis/metrics/%s/%s.%s" % (config['remote_path'], wildcards.sample, wildcards.sample, wildcards.center),
+#     output:
+#         "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt",
+#     group: "coverage"
+#     conda: "../envs/coverage.yml"
+#     threads: 2 #_coveragemetrics_threads
+#     benchmark:
+#         "benchmarks/metrics/{sample}/{sample}.{center}.mosdepth.txt"
+#     shell:
+#         "mosdepth -t {threads} -b {params.target} {params.prefix} {input.bam}"
 
-rule coverage_summarize_sample_depth:
-    """Summarize the results of the coverage_mosdepth output, 
-    e.g. % 20x, 50x, etc"""
-    input:
-        "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt"
-    output:
-        "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.summary.txt"
-    params:
-        sample_name=lambda wildcards:"%s.%s" % (wildcards.sample, wildcards.center)
-    group: "coverage"
-    conda: "../envs/coverage.yml"
-    benchmark:
-        "benchmarks/metrics/{sample}/{sample}.{center}.coverage_summarize_sample_depth.txt"
-    shell:
-        "Rscript cidc_wes/modules/scripts/mosdepth_summary.R {input} {params.sample_name} {output}"
+# rule coverage_summarize_sample_depth:
+#     """Summarize the results of the coverage_mosdepth output, 
+#     e.g. % 20x, 50x, etc"""
+#     input:
+#         "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.dist.txt"
+#     output:
+#         "analysis/metrics/{sample}/{sample}.{center}.mosdepth.region.summary.txt"
+#     params:
+#         sample_name=lambda wildcards:"%s.%s" % (wildcards.sample, wildcards.center)
+#     group: "coverage"
+#     conda: "../envs/coverage.yml"
+#     benchmark:
+#         "benchmarks/metrics/{sample}/{sample}.{center}.coverage_summarize_sample_depth.txt"
+#     shell:
+#         "Rscript cidc_wes/modules/scripts/mosdepth_summary.R {input} {params.sample_name} {output}"
     

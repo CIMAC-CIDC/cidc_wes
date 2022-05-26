@@ -1,52 +1,58 @@
 name: wes
 channels:
+- conda-forge
 - bioconda
 - biobuilds
 - aroth85
-- conda-forge
 - plotly
 - defaults
 dependencies:
 #GENERAL
-- snakemake=5.30.1
+- snakemake>=5.30.1
 - samtools>=1.8
-- python>=3.5.2
+#- python>=3.5.2
+- python==3.6.7 # later pythons dont support tenserflow 2.2.2 which is required by pvactools
 #- r>=3.4.1
 - numpy
+- scipy
 - slacker #for slack channel logging
+
 
 #align_*.snakefile
 - bwa>=0.7.15
-- sambamba=0.6.6
+- sambamba>=0.6.6
 
-#fastqc.snakefile
-- seqtk
-#- fastqc>=0.11.5
+# #fastqc.snakefile
+# - seqtk
+# #- fastqc>=0.11.5
 
-#copynumber
-- circos
-- perl-clone
-- perl-module-runtime
-- perl-exporter-tiny
-- perl-svg
+# #copynumber
+# - circos
+# - perl-clone
+# - perl-module-runtime
+# - perl-exporter-tiny
+# - perl-svg
 
-#cnvkit
-- cnvkit
+# #coverage
+# - mosdepth
 
-#coverage
-- mosdepth
+# #vcf processing
+# - vcftools=0.1.16=he860b03_3
+# - vcf2maf=1.6.18=1 # NEEDED UNTIL WE REWRITE vfc2maf TO USE NEW COMMANDLINE OPTION 
+# - ensembl-vep=91.3 #required by vcf2maf; tying it to vep.ver91_3
+# - perl=5.22.0 #DANGEROUS! vep_91.3 ties us to perl 5.22.0!!!! 
+# - perl-bioperl #required by vcf2maf
+# - perl-dbi
 
-#vcf processing
-- vcftools
-- vcf2maf>=1.6.16
-- ensembl-vep=91.3 #required by vcf2maf; tying it to vep.ver91_3
-- perl=5.22.0 #DANGEROUS! vep_91.3 ties us to perl 5.22.0!!!! 
 - perl-bioperl #required by vcf2maf
 - perl-dbi
+- perl-vcftools-vcf=0.1.16=pl526_2 # vcf environment is not comapatable with this
+
 
 #cidc-vs
-- matplotlib
+- matplotlib<=3.0.3 # needed for multiqc
 - pybedtools
+- multiqc==1.10
 
 #tumor purity
 - snp-pileup
@@ -54,14 +60,18 @@ dependencies:
 - r-facets
 
 #tumor clonality
-- pyclone
+# #- pyclone
+- numba
+#- h5py<3.2 # maybe pip this to 3.1.0?
+#- h5py==3.1.0 
+- click
 
-#bamToFastq
-- bedtools
-- pysam
+# #bamToFastq
+# - bedtools
+# - pysam
 
-#optitype
-- optitype
+# #optitype TRY TO GET RID OF IT
+# - optitype
 
 #report
 - r-pdftools
@@ -70,12 +80,12 @@ dependencies:
 - r-optparse
 - r-ggpubr
 - genson
-- multiqc #python setup install
+- multiqc #python setup install # what is this comment and isn't this line redundant?
 - plotly_express
 - bioconductor-maftools
 
-#msisensor2 plotting
-- r-beeswarm
+# #msisensor2 plotting
+# - r-beeswarm
 
 #hlahd
 - bowtie2
@@ -87,6 +97,22 @@ dependencies:
 - r-seqinr
 #- r-gratia #NOTE: not in conda; manually do install.packages('gratia')
 
+#neoantigen
+#- tensorflow==2.2.2
+
+#cnvkit
+- cnvkit
+
+
+#DEPEANCIES THAT MAY BE COVERED ELSEWHERE
+- bcftools
+
+
 #pip installs
 - pip:
+  - setuptools<58
+#  - tensorflow==2.2.2 # needed for for pvactools
+  - pvactools==2.0.7
   - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq
+#  - scipy==1.5.4 # not sure ablut extact version but scipy 1.7.3 could possibly break code
+  # manual h5py== 3.1.0 since pvactools seems to override the conda install
