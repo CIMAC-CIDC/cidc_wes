@@ -9,7 +9,8 @@ channels:
 dependencies:
 #GENERAL
 - snakemake>=5.30.1
-- samtools>=1.8
+#- samtools>=1.8
+- samtools>=1.12
 #- python>=3.5.2
 - python==3.6.7 # later pythons dont support tenserflow 2.2.2 which is required by pvactools
 #- r>=3.4.1
@@ -107,12 +108,12 @@ dependencies:
 #DEPEANCIES THAT MAY BE COVERED ELSEWHERE
 - bcftools
 
-
-#pip installs
-- pip:
-  - setuptools<58
-#  - tensorflow==2.2.2 # needed for for pvactools
-  - pvactools==2.0.7
-  - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq
-#  - scipy==1.5.4 # not sure ablut extact version but scipy 1.7.3 could possibly break code
-  # manual h5py== 3.1.0 since pvactools seems to override the conda install
+#HANDLED SEPARATELY DUE TO SETUPTOOLS NEEDING TO BE INSTALLED FIRST
+# #pip installs
+# - pip:
+#   - setuptools<58
+# #  - tensorflow==2.2.2 # needed for for pvactools
+#   - pvactools==2.0.7
+#   - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq
+# #  - scipy==1.5.4 # not sure ablut extact version but scipy 1.7.3 could possibly break code
+#   # manual h5py== 3.1.0 since pvactools seems to override the conda install
