@@ -526,6 +526,7 @@ def getJsonFiles(wildcards):
     tmp['msisensor2'] = "analysis/report/json/msisensor2/%s.msisensor2.json" % run
     tmp['purity'] = "analysis/report/json/purity/%s.purity.json" % run
     tmp['clonality'] = "analysis/report/json/clonality/%s.clonality.json" % run
+    tmp['copynumber'] = "analysis/report/json/copynumber/%s.copynumber.json" % run
 
     # remove optional modules that are not being run
     for module in ['purity', 'clonality', 'neoantigen', 'msisensor2', 'tcellextrect']:
@@ -534,6 +535,7 @@ def getJsonFiles(wildcards):
 
     return tmp
 
+#LEN: REVISE!--explicit param calls!
 def buildJsonParams(file_dict):
     '''maps input jsons to thier commandline arguments and returns a concatenated string'''
     run = list(config['runs'].keys())[0]
@@ -541,7 +543,8 @@ def buildJsonParams(file_dict):
     arg_dict = {'mapping': '-m', 'coverage': '-c', 'gc_content': '-g',
                 'insert_size': '-i', 'mean_quality':'-q', 'hla': '-j',
                 'somatic': '-s', 'clonality': '-l', 'purity': '-p', 'neoantigen': '-n',
-                'tcellextrect': '-t', 'msisensor2': '-e', }
+                'tcellextrect': '-t', 'msisensor2': '-e', 'copynumber': '-v',
+    }
 
     ret = ''
     for module in file_dict.keys():
@@ -550,7 +553,7 @@ def buildJsonParams(file_dict):
     return ret
 
 
-
+#LEN: REVISE!--explicit param calls!
 rule report_generate_json:
     input:
         unpack(getJsonFiles)

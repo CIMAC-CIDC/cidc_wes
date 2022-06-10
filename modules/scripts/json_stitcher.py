@@ -37,6 +37,7 @@ def main():
     parser.add_argument("-n", "--neoantigen", help="neoantigen json file", default=None)
     parser.add_argument("-t", "--tcellextrect", help="tcellextrect json file", default=None)
     parser.add_argument("-e", "--msisensor2", help="msisensor2 json file", default=None)
+    parser.add_argument("-v", "--copynumber", help="copynumber json file", default=None)
     parser.add_argument("-o", "--output", required=True, help="output file", default=None)
 
     # parse the argumnets and convert namespace object to dictionary

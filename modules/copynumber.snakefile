@@ -48,6 +48,7 @@ def copynumber_targets(wildcards):
         ls.append("analysis/copynumber/%s/%s_consensus.bed"%(run,run))
         ls.append("analysis/copynumber/%s/%s_consensus_merged_GAIN.bed" % (run,run))
         ls.append("analysis/copynumber/%s/%s_consensus_merged_LOSS.bed" % (run,run))
+        ls.append("analysis/report/json/copynumber/%s.copynumber.json" % run)
         
     #Check for cohorts
     if config['cohorts']:
@@ -262,3 +263,33 @@ rule consensus_all_merge:
         cnv_type = lambda wildcards: wildcards.cnv_type,
     shell:
         "grep {params.cnv_type} {input} | mergeBed -c 4 -o distinct > {output}"
+
+def copynumber_jsonInput(wildcards):
+    run_name = wildcards.run
+    run = config['runs'][run_name]
+    tmr = run[1]
+    cnvkit = "analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run_name, tmr)
+    cnvkit_enh = "analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run_name, tmr)
+    sequenza = "analysis/clonality/%s/%s_segments.txt" % (run_name, run_name)
+    facets = "analysis/purity/%s/%s.cncf" % (run_name, run_name)
+    consensus = "analysis/copynumber/%s/%s_consensus.bed" % (run_name, run_name)
+    consensus_gain = "analysis/copynumber/%s/%s_consensus_merged_GAIN.bed" % (run_name, run_name)
+    consensus_loss = "analysis/copynumber/%s/%s_consensus_merged_LOSS.bed" % (run_name, run_name)
+    tmp = {'cnvkit': cnvkit, 'cnvkit_enhanced': cnvkit_enh, 'sequenza': sequenza, 'facets': facets, 'consensus': consensus, 'consensus_gain': consensus_gain, 'consensus_loss': consensus_loss}
+    return tmp
+    
+
+rule copynumber_json:
+    """jsonify raw copy number calls from callers and consensus cnv"""
+    input:
+        unpack(copynumber_jsonInput)
+    output:
+        "analysis/report/json/copynumber/{run}.copynumber.json"
+    params:
+        run = lambda wildcards: wildcards.run
+    group: "copynumber"
+    benchmark:
+        "benchmarks/copynumber/{run}.copynumber_json.txt"
+    shell:
+        "cidc_wes/modules/scripts/json_copynumber.py -r {params.run} --cnvkit {input.cnvkit} --cnvkit_enhanced {input.cnvkit_enhanced} --sequenza {input.sequenza} --facets {input.facets} --consensus {input.consensus} --consensus_gain {input.consensus_gain} --consensus_loss {input.consensus_gain} -o {output}"
+
