@@ -16,6 +16,12 @@ def cnvkit_targets(wildcards):
         ls.append("analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run,tmr))
         ls.append("analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run,tmr))
         ls.append("analysis/cnvkit/%s/%s_cnvkit_gainLoss.bed" % (run,run))
+
+        #renamed files for ingestion --see rule cnvkit_rename
+        ls.append("analysis/cnvkit/%s/%s.call.cns" % (run,run))
+        ls.append("analysis/cnvkit/%s/%s.call.enhanced.cns" % (run,run))
+        ls.append("analysis/cnvkit/%s/%s.scatter.png" % (run,run))
+        
     return ls
 
 rule cnvkit_all:
@@ -47,6 +53,7 @@ rule cnvkit:
     output:
         cns = "analysis/cnvkit/{run}/{tmr}_recalibrated.cns", #cnvkit's first pass calls
         calls_cns = "analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns", #cnvkit's more refined calls
+        scatter = "analysis/cnvkit/{run}/{tmr}_recalibrated-scatter.png",
     threads: _cnvkit_threads
     group: "cnvkit"
     params:
@@ -120,3 +127,24 @@ rule cnvkit_callGainLoss:
         "benchmarks/cnvkit/{run}/{run}.cnvkit_callGainLoss.txt"
     shell:
         "./cidc_wes/modules/scripts/copynumber_callGainLoss.py -f {input} -o {output}"
+
+def cnvkit_renameInput(wildcards):    
+    run = wildcards.run
+    tmr = config['runs'][run][1]
+    
+    cns="analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run, tmr)
+    enh_cns="analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run, tmr)
+    scatter="analysis/cnvkit/%s/%s_recalibrated-scatter.png" % (run, tmr)
+    tmp = {'cns': cns, 'enhanced_cns': enh_cns, 'scatter': scatter}
+    return tmp
+
+#RENAME the output to canonical {run}/{run} format so that ingestion is easier
+rule cnvkit_rename:
+    input:
+        unpack(cnvkit_renameInput)
+    output:
+        cns="analysis/cnvkit/{run}/{run}.call.cns",
+        enhanced_cns="analysis/cnvkit/{run}/{run}.call.enhanced.cns",
+        scatter="analysis/cnvkit/{run}/{run}.scatter.png",
+    shell:
+        """cp {input.cns} {output.cns} && cp {input.enhanced_cns} {output.enhanced_cns} && cp {input.scatter} {output.scatter}"""
