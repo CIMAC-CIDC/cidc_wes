@@ -225,14 +225,11 @@ rule neoantigen_vep_annotate:
         #normal = lambda wildcards: config['runs'][wildcards.run][0],
         #tumor = lambda wildcards: config['runs'][wildcards.run][1],
     group: "neoantigen"
-    #conda: "../envs/somatic_vcftools.yml"
-    #conda: "../envs/vcf.yml"
-    #conda: "vcf"
     benchmark:
         "benchmarks/neoantigen/{run}/{run}_{caller}.neoantigen_vep_annotate.txt"
     shell:
         """{params.vcf_bin_path}vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Frameshift --plugin Wildtype --dir_plugins {params.vep_plugins} --pick --transcript_version"""
-        #"""vep --input_file {input} --output_file {output} --format vcf --vcf --symbol --terms SO --tsl --hgvs --fasta {params.index} --offline --cache --dir_cache {params.vep_data} --plugin Frameshift --plugin Wildtype --dir_plugins {params.vep_plugins} --pick --transcript_version"""
+
 
 rule neoantigen_bzipAndtabix: # used in RNA 
     input:

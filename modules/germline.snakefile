@@ -106,12 +106,10 @@ rule germline_center_targets:
         "analysis/germline/{sample}/{sample}_haplotyper.targets.vcf"
     params:
         target_bed= lambda wildcards: getTargetBed(config),
-	vcf_bin_path="%s/bin/" % config['vcf_root'],
+        vcf_bin_path="%s/bin/" % config['vcf_root'],
     benchmark:
-        "benchmarks/germline/{sample}/{sample}.germline_center_targets.txt"    
-    shell:
-        """{params.vcf_bin_path}vcftools --vcf {input} --bed {params.target_bed} --recode --stdout > {output}"""
-        #"""vcftools --vcf {input} --bed {params.target_bed} --recode --stdout > {output}"""
+        "benchmarks/germline/{sample}/{sample}.germline_center_targets.txt"
+    shell:"""{params.vcf_bin_path}vcftools --vcf {input} --bed {params.target_bed} --recode --stdout > {output}"""
 
 rule germline_bgzip:
     input:

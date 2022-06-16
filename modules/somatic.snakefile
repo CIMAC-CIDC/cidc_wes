@@ -264,9 +264,6 @@ rule vcfVEP:
     benchmark:
         "benchmarks/somatic/{run}/{run}.{caller}.{type}_vcfVEP.txt"
     group: "somatic"
-    #conda: "../envs/somatic_vcftools.yml"
-    #conda: "../envs/somatic_vcf.yml"
-    #conda: "vcf"
     shell:
         "{params.vcf_bin_path}vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
         #"vep --i {input} --dir_cache={params.vep_data} --synonyms {params.vep_synonyms} --vcf -o {output} --offline --hgvs --fa {params.gdc_fasta} --format vcf"
@@ -293,8 +290,6 @@ rule vcf2maf:
     log:
         "analysis/logs/somatic/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     group: "somatic"
-    #conda: "../envs/somatic_vcftools.yml"
-    conda: "../envs/vcf.yml"
     shell:
         """{params.vcf_bin_path}vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
         #"""vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""

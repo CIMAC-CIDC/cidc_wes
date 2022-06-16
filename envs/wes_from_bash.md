@@ -136,3 +136,5 @@ Setuptools is a pip install of setuptools<58 since version 58 breaks the use_2to
 H5py 3.1.0 is installed manually because the pvactools 2.0.7 pip install will overwrite any h5py conda package and replace it with h5py 2.10.0 . However, h5py is needed for pyclone VI output. The manual install will note the incompatibility, but the install will still work.
 
 samtools >=1.12 is used because a certain version of samtools1.8 can cause the enviroment not to solve. samtools1.12  is the version that our working environmment uses, so that is what we set as the minimum bound for samtools.
+
+In optitype.yml, pysam and and razers3 are set to pysam==0.15.2 and razers3==3.5.3 becuase pysam 0.11.2.2 and razors3 3.5.8 give "Warning: PySam not available on the system. Falling back to primitive SAM parsing." which slows the optitype module down by multiple hours in some cases. 

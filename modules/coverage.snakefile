@@ -107,6 +107,7 @@ rule targets_sentieon:
         """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
 
 
+#DEPRICATED
 # rule coverage_mosdepth:
 #     """SAMPLE coverage at target sites"""
 #     input:

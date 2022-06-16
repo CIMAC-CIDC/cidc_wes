@@ -23,7 +23,16 @@ mamba env update -n wes --file wes.yml
 
 The first command puts us in the cidc_wes/envs folder where the yml files are located. The second and third commands create and update the environment. While it is possible to combine the latter two commands with ```mamba env create -f wes.yml```, we do not recommend this as it still reverts to conda for the installation of packages.
 
-Once the wes environment is finished, we replicate the above process for our other conda environments, xHLA, optitype and sequenza. While there may be other yml files present in the envs folder, these are the only conda environments needed to run the WES pipeline.
+Next, the wes environment has some packages that are installed by pip. To install them, we activate the environment, run the installation commands, and then deactivate the environment. Critically, setuptools is installed first as it is needed fot the latter install.
+
+```shell
+source activate wes
+pip install setuptools==57.5.0
+pip install pvactools==2.0.7 vcf-annotation-tools 
+conda deactivate
+```
+
+Once the basic setup for wes environment is finished, we create the baseline for our other conda environments, xHLA, optitype, sequenza and vcf. While there may be other yml files present in the envs folder, these are the only conda environments needed to run the WES pipeline.
 
 ```shell
 mamba create -n xHLA
@@ -43,6 +52,8 @@ mamba env update -n vcf --file vcf.yml
 
 ## WES ENVIRONMENT
 With our basic environments set up, we proceed to implement tools that require additional setup, starting with those that will be run from the main wes environment. The steps are generally broken down by which module they pertain to, but some modules require multiple conda environments, and some conda environments are needed for multiple modules.  While a few of these steps *could* be skipped depending on the user's individual needs, we strongly recommend completing all of them **in the order they appear here**. This is the only way to be assured that the WES pipeline will run properly.
+
+
 
 <!--
 ###SOMATIC
@@ -384,3 +395,5 @@ Setuptools is a pip install of setuptools<58 since version 58 breaks the use_2to
 H5py 3.1.0 is installed manually because the pvactools 2.0.7 pip install will overwrite any h5py conda package and replace it with h5py 2.10.0 . However, h5py is needed for pyclone VI output. The manual install will note the incompatibility, but the install will still work.
 
 samtools >=1.12 is used because a certain version of samtools1.8 can cause the enviroment not to solve. samtools1.12  is the version that our working environmment uses, so that is what we set as the minimum bound for samtools.
+
+In optitype.yml, pysam and and razers3 are set to pysam==0.15.2 and razers3==3.5.3 becuase pysam 0.11.2.2 and razors3 3.5.8 give "Warning: PySam not available on the system. Falling back to primitive SAM parsing."	which slows the	optitype module down by multiple hours in some cases.

@@ -58,7 +58,7 @@ def addCondaPaths_Config(config):
     """ADDS the python2 paths to config"""
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
     config['conda_root'] = conda_root
-    #config['wes_root'] = "%s/envs/wes" % conda_root # not needed why is it here?
+    #config['wes_root'] = "%s/envs/wes" % conda_root # DEPRICATED
     config['optitype_root'] = "%s/envs/optitype" % conda_root
     config['xhla_root'] = "%s/envs/xHLA" % conda_root
     config['sequenza_root'] = "%s/envs/sequenza" % conda_root
@@ -137,7 +137,6 @@ def level2_sans_report(wildcards):
         'clonality': clonality_targets(wildcards),
         'cnvkit': cnvkit_targets(wildcards),
         'neoantigen': neoantigen_targets(wildcards),
-
         'copynumber': copynumber_targets(wildcards),
         'msisensor2': msisensor2_targets(wildcards),
         'tcellextrect': tcellextrect_targets(wildcards),

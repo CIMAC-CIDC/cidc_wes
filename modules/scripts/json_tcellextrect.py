@@ -12,8 +12,8 @@ def parseFile(in_file):
 
     f = pd.read_csv(in_file)
     f = f.round(4)
-    ret = {'tcell_fraction': f["TCRA.tcell.fraction"][0],
-           'q_value': f["qcFit"][0]
+    ret = {'tcell_fraction': float(f["TCRA.tcell.fraction"][0]),
+           'q_value': float(f["qcFit"][0])
           }
         
     return ret
