@@ -96,15 +96,13 @@ rule targets_sentieon:
         index=config['genome_fasta'],
         index1=config['sentieon_path'],
         cov_thresh=50,
-        #ERROR- should be set to center target bed file
-        #index2=config['target_Bed_input'],
-        index2= center_targets[config.get("cimac_center", "broad")] #default to broad
+        targets=config['twist_regions'],
     threads: 10 #_coveragemetrics_threads
     group: "coverage"
     benchmark:
         "benchmarks/targetcoverage/{sample}/{sample}.targetMetrics.txt"
     shell:
-        """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.index2} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
+        """{params.index1}/sentieon driver -r {params.index}  -t  {threads} --interval {params.targets} -i {input.bam} --algo CoverageMetrics --cov_thresh {params.cov_thresh} {output.targetmetrics}"""
 
 
 #DEPRICATED
