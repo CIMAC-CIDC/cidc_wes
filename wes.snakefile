@@ -9,6 +9,7 @@ import yaml
 
 from string import Template
 
+#LEN: ARE these center_targets now deprecated b/c we have twist targets?
 #Dictionary of center targets
 center_targets={'mocha':"./ref_files/hg38/target_beds/mocha.liftover.hg38.noContigs.bed",
                 "mda": "./ref_files/hg38/target_beds/MDA.liftover.hg38.noContigs.bed",
@@ -58,7 +59,7 @@ def addCondaPaths_Config(config):
     """ADDS the python2 paths to config"""
     conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
     config['conda_root'] = conda_root
-    #config['wes_root'] = "%s/envs/wes" % conda_root # DEPRICATED
+    #config['wes_root'] = "%s/envs/wes" % conda_root # DEPRECATED
     config['optitype_root'] = "%s/envs/optitype" % conda_root
     config['xhla_root'] = "%s/envs/xHLA" % conda_root
     config['sequenza_root'] = "%s/envs/sequenza" % conda_root
@@ -131,7 +132,6 @@ def level1_targets(wildcards):
     return ls
 
 def level2_sans_report(wildcards):
-    #LEN: Should copy number be a skippable module??
     skippable_module_dict = {
         'purity': purity_targets(wildcards),
         'clonality': clonality_targets(wildcards),
@@ -169,7 +169,6 @@ rule target:
         targets=all_targets,
         benchmarks="benchmarks.tar.gz"
     message: "Compiling all outputs"
-    #benchmark: "benchmarks/all_wes_targets.txt"  #OBSOLETE b/c we're zipping
 
 rule level1:
     input: level1_targets
@@ -188,24 +187,24 @@ rule tar_benchmarks:
 
 
 include: "./modules/align.snakefile"     # common align rules
-include: "./modules/metrics.snakefile"   # ...
-include: "./modules/recalibration.snakefile"      # ...
-include: "./modules/somatic.snakefile" # ...
-include: "./modules/somatic_tnhaplotyper2.snakefile" # ...
-include: "./modules/somatic_tnsnv.snakefile" # ...
-include: "./modules/somatic_tnscope.snakefile" # ...
-include: "./modules/germline.snakefile" # ...
-include: "./modules/coverage.snakefile" # ...
-include: "./modules/copynumber.snakefile" # ...
-include: "./modules/purity.snakefile" #...
-include: "./modules/clonality.snakefile" # ...
-include: "./modules/cnvkit.snakefile" # ...
-include: "./modules/optitype.snakefile" #...
-include: "./modules/xhla.snakefile" #....
-include: "./modules/hlahd.snakefile" #....
-include: "./modules/neoantigen.snakefile"
-include: "./modules/msisensor2.snakefile"
-include: "./modules/tcellextrect.snakefile"
-include: "./modules/rna.snakefile"
+include: "./modules/metrics.snakefile"   # sentieon basic qc metrics module
+include: "./modules/recalibration.snakefile" # sentieon BQSR 
+include: "./modules/somatic.snakefile" # somatic calling- General
+include: "./modules/somatic_tnhaplotyper2.snakefile" # tnhaplotyper2 somatic caller
+include: "./modules/somatic_tnsnv.snakefile" # tnsnv somatic caller
+include: "./modules/somatic_tnscope.snakefile" # tnscope somatic caller (Default)
+include: "./modules/germline.snakefile" # germline variant calling
+include: "./modules/coverage.snakefile" # coverage metrics module
+include: "./modules/copynumber.snakefile" # consensus CNV module
+include: "./modules/purity.snakefile" # FACETS
+include: "./modules/clonality.snakefile" # Sequenza and Pyclone6
+include: "./modules/cnvkit.snakefile" # CNVkit
+include: "./modules/optitype.snakefile" # HLA- Optitype
+include: "./modules/xhla.snakefile" # HLA- xHLA
+include: "./modules/hlahd.snakefile" # HLA- HLA-HD
+include: "./modules/neoantigen.snakefile" #pvacseq neoantigen
+include: "./modules/msisensor2.snakefile" #microsatellite instability
+include: "./modules/tcellextrect.snakefile" #tcell estimation
+include: "./modules/rna.snakefile" #somatic variants from RNA expression
 include: "./modules/report.snakefile" # report module
 #include: "./modules/report.cohort.snakefile" # cohort report module

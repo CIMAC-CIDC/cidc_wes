@@ -9,35 +9,22 @@ channels:
 dependencies:
 #GENERAL
 - snakemake>=5.30.1
-#- samtools>=1.8
 - samtools>=1.12
-#- python>=3.5.2
 - python==3.6.7 # later pythons dont support tenserflow 2.2.2 which is required by pvactools
 #- r>=3.4.1
 - numpy
 - scipy
 - slacker #for slack channel logging
 
+# other useful "general" tools that aren't needed by WES
+#- seqtk #useful tool for fastq manipulation but not needed by WES
+#- bedtools
 
 #align_*.snakefile
 - bwa>=0.7.15
 - sambamba>=0.6.6
 
-# #fastqc.snakefile
-# - seqtk
-# #- fastqc>=0.11.5
-
-# #copynumber
-# - circos
-# - perl-clone
-# - perl-module-runtime
-# - perl-exporter-tiny
-# - perl-svg
-
-# #coverage
-# - mosdepth
-
-# #vcf processing
+# NOTE: vcf processing moved off to vcf conda env, see vcf.yml
 # - vcftools=0.1.16=he860b03_3
 # - vcf2maf=1.6.18=1 # NEEDED UNTIL WE REWRITE vfc2maf TO USE NEW COMMANDLINE OPTION 
 # - ensembl-vep=91.3 #required by vcf2maf; tying it to vep.ver91_3
@@ -48,7 +35,6 @@ dependencies:
 - perl-bioperl #required by vcf2maf
 - perl-dbi
 - perl-vcftools-vcf=0.1.16=pl526_2 # vcf environment is not comapatable with this
-
 
 #cidc-vs
 - matplotlib<=3.0.3 # needed for multiqc
@@ -67,10 +53,6 @@ dependencies:
 #- h5py==3.1.0 
 - click
 
-# #bamToFastq
-# - bedtools
-# - pysam
-
 # #optitype TRY TO GET RID OF IT
 # - optitype
 
@@ -81,12 +63,9 @@ dependencies:
 - r-optparse
 - r-ggpubr
 - genson
-- multiqc #python setup install # what is this comment and isn't this line redundant?
+- multiqc #NOTE: multiqc through conda didn't work for me; had to clone the repo and use python setup install to install the pkg manually
 - plotly_express
 - bioconductor-maftools
-
-# #msisensor2 plotting
-# - r-beeswarm
 
 #hlahd
 - bowtie2
@@ -104,8 +83,7 @@ dependencies:
 #cnvkit
 - cnvkit
 
-
-#DEPEANCIES THAT MAY BE COVERED ELSEWHERE
+# somatic and rna modules
 - bcftools
 
 #HANDLED SEPARATELY DUE TO SETUPTOOLS NEEDING TO BE INSTALLED FIRST

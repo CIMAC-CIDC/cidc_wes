@@ -235,6 +235,7 @@ rule filter_raw_vcf:
         #"""vcftools --gzvcf {input} --remove-filtered-all --recode --stdout > {output}"""
 
 
+#LEN: Don't we need this rule??
 # rule gunzip_vcf:
 #     """General rule to gunzip the three types of vcf.gz files-
 #     tnscope_, tnsnv, and tnhaplotyper"""
@@ -290,6 +291,7 @@ rule vcf2maf:
     log:
         "analysis/logs/somatic/{run}/{run}.{caller}.{type}_vcf2maf.log.txt"
     group: "somatic"
+    conda: "../envs/vcf.yml"
     shell:
         """{params.vcf_bin_path}vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""
         #"""vcf2maf.pl --input-vcf {input.vep} --output-maf {output} --custom-enst {params.vep_custom_enst} --ref-fasta {params.vep_index} --tumor-id {params.tumor} --normal-id {params.normal} --ncbi-build {params.vep_assembly} --filter-vcf {params.vep_filter} --buffer-size {params.buffer_size} --inhibit-vep 1 2> {log}"""

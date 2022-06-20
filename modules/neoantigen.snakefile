@@ -32,7 +32,8 @@ def neoantigen_targets(wildcards):
     for run in config['runs']:
         tumor = config['runs'][run][1] 
         ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.tsv" % (run,tumor))
-        ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.addSample.tsv" % (run,tumor))
+        #DEPRECATED
+        #ls.append("analysis/neoantigen/%s/MHC_Class_I/%s.filtered.addSample.tsv" % (run,tumor))
 
         ls.append("analysis/neoantigen/%s/%s_neoantigen_table.tsv" % (run,run))
         ls.append("analysis/report/json/neoantigen/%s.neoantigen.json" % (run))
@@ -343,22 +344,22 @@ else: #EXPECT class II output
         shell:
             """pvacseq run {input.vcf} {params.tumor} {params.HLA} {params.callers} {params.output_dir} -e1 {params.epitope_lengths_cls1} -e2 {params.epitope_lengths_cls2} -t {threads} {params.normal} --iedb-install-directory {params.iedb} 2> {log}"""
 
-  
-rule neoantigen_add_sample:
-    """Takes the {tumor}.filtered.tsv file and adds a first
-    col, Sample which is set to the RUN name (not the sample name!)
-    to be used for pvacseq_plot.R"""
-    input:
-        "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv"
-    output:
-        "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.addSample.tsv"
-    params:
-        run_name = lambda wildcards: wildcards.run
-    benchmark:
-        "benchmarks/neoantigen/{run}/{tumor}.neoantigen_add_sample.txt"
-    group: "neoantigen"
-    shell:
-        "cidc_wes/modules/scripts/neoantigen_addSample.py -f {input} -n {params.run_name} -o {output}"
+#LEN 2022-06-14: DEPRECATED??
+# rule neoantigen_add_sample:
+#     """Takes the {tumor}.filtered.tsv file and adds a first
+#     col, Sample which is set to the RUN name (not the sample name!)
+#     to be used for pvacseq_plot.R"""
+#     input:
+#         "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.tsv"
+#     output:
+#         "analysis/neoantigen/{run}/MHC_Class_I/{tumor}.filtered.addSample.tsv"
+#     params:
+#         run_name = lambda wildcards: wildcards.run
+#     benchmark:
+#         "benchmarks/neoantigen/{run}/{tumor}.neoantigen_add_sample.txt"
+#     group: "neoantigen"
+#     shell:
+#         "cidc_wes/modules/scripts/neoantigen_addSample.py -f {input} -n {params.run_name} -o {output}"
 
 rule neoantigen_getNeoantigenList:
     """Reads through the appropriate filtered.tsv file and generate a table of 
