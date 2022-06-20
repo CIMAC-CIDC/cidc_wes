@@ -262,7 +262,11 @@ rule consensus_all_merge:
     params:
         cnv_type = lambda wildcards: wildcards.cnv_type,
     shell:
-        "grep {params.cnv_type} {input} | mergeBed -c 4 -o distinct > {output}"
+        #"grep {params.cnv_type} {input} | mergeBed -c 4 -o distinct > {output}"
+        #NEED to check for consensus CNVs being all of one type--the above
+        #cmd will error out with that, so the script has a conditional to check
+        #for this
+        "cidc_wes/modules/scripts/copynumber_merge.sh {input} {params.cnv_type} > {output}"
 
 def copynumber_jsonInput(wildcards):
     run_name = wildcards.run
