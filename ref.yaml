@@ -46,7 +46,7 @@ hg38:
   #msisensor2
   msisensor2: ./ref_files/hg38/msisensor2/models_hg38/
 
-  twist_regions: ./ref_files/hg38/target_beds/twist.broad.mdacc.mocha.liftover.hg38.sorted.merged.bed
+  twist_regions: ./ref_files/hg38/target_beds/twist.broad.mdacc.mocha.liftover.hg38.sorted.merged.canonical.bed
   
   #HLA-HD:
   hlahd_freq_data: ./ref_files/hg38/hlahd.1.4.0/freq_data/
