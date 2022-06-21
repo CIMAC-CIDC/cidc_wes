@@ -24,14 +24,7 @@ dependencies:
 - bwa>=0.7.15
 - sambamba>=0.6.6
 
-# NOTE: vcf processing moved off to vcf conda env, see vcf.yml
-# - vcftools=0.1.16=he860b03_3
-# - vcf2maf=1.6.18=1 # NEEDED UNTIL WE REWRITE vfc2maf TO USE NEW COMMANDLINE OPTION 
-# - ensembl-vep=91.3 #required by vcf2maf; tying it to vep.ver91_3
-# - perl=5.22.0 #DANGEROUS! vep_91.3 ties us to perl 5.22.0!!!! 
-# - perl-bioperl #required by vcf2maf
-# - perl-dbi
-
+# BELOW are required by WES calling vcf
 - perl-bioperl #required by vcf2maf
 - perl-dbi
 - perl-vcftools-vcf=0.1.16=pl526_2 # vcf environment is not comapatable with this
@@ -39,7 +32,6 @@ dependencies:
 #cidc-vs
 - matplotlib<=3.0.3 # needed for multiqc
 - pybedtools
-- multiqc==1.10
 
 #tumor purity
 - snp-pileup
@@ -47,14 +39,8 @@ dependencies:
 - r-facets
 
 #tumor clonality
-# #- pyclone
 - numba
-#- h5py<3.2 # maybe pip this to 3.1.0?
-#- h5py==3.1.0 
 - click
-
-# #optitype TRY TO GET RID OF IT
-# - optitype
 
 #report
 - r-pdftools
@@ -63,7 +49,7 @@ dependencies:
 - r-optparse
 - r-ggpubr
 - genson
-- multiqc #NOTE: multiqc through conda didn't work for me; had to clone the repo and use python setup install to install the pkg manually
+- multiqc==1.10
 - plotly_express
 - bioconductor-maftools
 
@@ -76,9 +62,6 @@ dependencies:
 - r-zoo
 - r-seqinr
 #- r-gratia #NOTE: not in conda; manually do install.packages('gratia')
-
-#neoantigen
-#- tensorflow==2.2.2
 
 #cnvkit
 - cnvkit
