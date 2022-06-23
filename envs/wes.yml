@@ -78,3 +78,25 @@ dependencies:
 #   - vcf-annotation-tools #neoantigen- rnaseq integration into pvacseq
 # #  - scipy==1.5.4 # not sure ablut extact version but scipy 1.7.3 could possibly break code
 #   # manual h5py== 3.1.0 since pvactools seems to override the conda install
+
+# #MANUALLY INSTALLED PACKAGES -- does not include all changes -- see wes_from_bash.md for instructions!
+# #neoantigen
+# setuptools==57.5.0 #pip
+# pvactools==2.0.7 #pip
+# gcc-multilib #sudo apt-get install
+# g++-multilib #sudo apt-get install
+
+
+# #hlahd
+# hlahd.1.4.0 #manual
+
+# #clonality
+# h5py==3.1.0
+
+# #tcellextrect (all r packages)
+# r-stringi
+# r-gratia
+# r-Rccp
+# tcellextrect # from github repo
+
+

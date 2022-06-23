@@ -91,7 +91,7 @@ if 'skipped_modules' not in config:
     
 # These modules can't be run in tumor only samples so they should be skipped in that case
 if config.get('tumor_only'):
-    for module in ['germline', 'purity', 'clonality']:
+    for module in ['germline', 'purity', 'clonality', 'copynumber']:
         if module not in config['skipped_modules']:
             config['skipped_modules'].append(module)
 
@@ -149,7 +149,7 @@ def level2_sans_report(wildcards):
 
             
     # add mandatory and special case modules to targets
-    ls.extend(copynumber_targets(wildcards))
+    #ls.extend(copynumber_targets(wildcards))
     ls.extend(coveragemetrics_targets(wildcards))
     ls.extend(optitype_targets(wildcards))
     #if config.get('neoantigen_run_classII', False) and 'neoantigen' not in config['skipped_modules']:

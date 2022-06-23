@@ -529,7 +529,7 @@ def getJsonFiles(wildcards):
     tmp['copynumber'] = "analysis/report/json/copynumber/%s.copynumber.json" % run
 
     # remove optional modules that are not being run
-    for module in ['purity', 'clonality', 'neoantigen', 'msisensor2', 'tcellextrect']:
+    for module in ['purity', 'clonality', 'neoantigen', 'msisensor2', 'tcellextrect', 'copynumber']:
         if module in config['skipped_modules']:
             tmp.pop(module)
 
