@@ -125,6 +125,6 @@ samples:
 
 #The following are optional meta information that will be stored in the report
 #wes_run_info:
-#  wes_commit: e4b875
-#  wes_ref_snapshot: wes-human-ref-ver1-3
-#  wes_image: wes-ver2-1
+#  wes_commit: c1d74f0
+#  wes_ref_snapshot: wes-human-ref-ver1-7
+#  wes_image: wes-ver3-01a
