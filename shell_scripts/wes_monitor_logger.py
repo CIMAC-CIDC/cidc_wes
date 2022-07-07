@@ -2,9 +2,12 @@
 import requests
 import sys
 import os
+import socket
 
 #GET (my) instance_name and the wes_monitor server IP and port from bash envars
-INSTANCE_NAME=os.environ.get("HOSTNAME")
+#DOES NOT work
+#INSTANCE_NAME=os.environ.get("HOSTNAME")
+INSTANCE_NAME=socket.gethostname()
 SERVER_IP_PORT=os.environ.get("WES_MONITOR_IP_PORT")
 
 def log_handler(msg):
