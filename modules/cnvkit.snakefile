@@ -72,16 +72,16 @@ def purity_checker(run):
     output = "analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run,tumor)
     vcf="analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run)
     cns="analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run,tumor)
+
+    purity = "" #purity defaults to ''
     if 'purity' not in config['skipped_modules']:
         file="analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
         if os.path.exists(file):
             df = pd.read_csv(file, na_filter=False, delimiter="\t")
             if df["purity"][0] != "NA":
-                with open(file) as f:
-                    tmp = f.readline()
-                    purity = "-m clonal --purity %s" % f.readline().split("\t")[2]
-            else:
-                purity = ""
+                #since purity value is valids, SET purity param here
+                purity = "-m clonal --purity %s" % df["purity"][0]
+
     return purity #either "-m clonal --purity VAL" or ""
 
 rule cnvkit_enhance:
