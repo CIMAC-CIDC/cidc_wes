@@ -77,11 +77,12 @@ def purity_checker(run):
         if os.path.exists(file):
             df = pd.read_csv(file, na_filter=False, delimiter="\t")
             if df["purity"][0] != "NA":
-                s="PURITY=$(sed -n 2p %s | cut -f 3) && cnvkit.py call %s -y -v %s -i %s -n %s -m clonal --purity $PURITY -o %s" % (file,cns,vcf,tumor,normal,output)
-                return s
-    s="cnvkit.py call %s -y -v %s -i %s -n %s -o %s" % (cns,vcf,tumor,normal,output)
-    return s
-	
+                with open(file) as f:
+                    tmp = f.readline()
+                    purity = "-m clonal --purity %s" % f.readline().split("\t")[2]
+            else:
+                purity = ""
+    return purity #either "-m clonal --purity VAL" or ""
 
 rule cnvkit_enhance:
     """Add somatic snp and purity information to cnvkit's refined call"""
@@ -93,14 +94,15 @@ rule cnvkit_enhance:
         "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
     group: "cnvkit"
     params:
+        tmr_name = lambda wildcards:"-i %s" % config['runs'][wildcards.run][1],
+	nrm_name = lambda wildcards:"-n %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
         run = lambda wildcards: wildcards.run,
-        cmd=lambda wildcards: purity_checker(wildcards.run)
+        purity=lambda wildcards: purity_checker(wildcards.run)
     log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance.log"
     benchmark:
         "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance.txt"
     shell:
-        '''{params.cmd}'''
-
+        "cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} {params.purity} -o {output}"
 
 
 
