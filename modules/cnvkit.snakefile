@@ -65,48 +65,86 @@ rule cnvkit:
     shell:
         """cnvkit.py batch {input} -r {params.cnvkit_ref} -p {threads} --scatter --diagram -d {params.output_dir}"""
 
-if 'purity' not in config['skipped_modules']: #run cnvkit call w/ purity
 
-    rule cnvkit_enhance:
-        """Add somatic snp and purity information to cnvkit's refined call"""
-        input:
-            cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
-            vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
-            purity="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
-        output:
-            "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
-        group: "cnvkit"
-        params:
-            tmr_name = lambda wildcards:"-i %s" % config['runs'][wildcards.run][1],
-            #check for tumor-only?
-            nrm_name = lambda wildcards:"-n %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
-        log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance.log"
-        benchmark:
-            "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance.txt"
-        shell:
-            #first cmd grabs the purity value, 3rd col of 2nd line
-            """PURITY=$(sed -n 2p {input.purity} | cut -f 3) && cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} -m clonal --purity $PURITY -o {output}"""
+def purity_checker(run):
+    tumor = config['runs'][run][1]
+    normal = config['runs'][run][0]
+    output = "analysis/cnvkit/%s/%s_recalibrated.call.enhanced.cns" % (run,tumor)
+    vcf="analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run,run)
+    cns="analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run,tumor)
+    if 'purity' not in config['skipped_modules']:
+        file="analysis/purity/%s/%s.optimalpurityvalue.txt" % (run,run)
+        if os.path.exists(file):
+            df = pd.read_csv(file, na_filter=False, delimiter="\t")
+            if df["purity"][0] != "NA":
+                s="PURITY=$(sed -n 2p %s | cut -f 3) && cnvkit.py call %s -y -v %s -i %s -n %s -m clonal --purity $PURITY -o %s" % (file,cns,vcf,tumor,normal,output)
+                return s
+    s="cnvkit.py call %s -y -v %s -i %s -n %s -o %s" % (cns,vcf,tumor,normal,output)
+    return s
+	
 
-else: #run cnvkit call w/o purity
+rule cnvkit_enhance:
+    """Add somatic snp and purity information to cnvkit's refined call"""
+    input:
+        cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
+        vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
+        purity="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
+    output:
+        "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
+    group: "cnvkit"
+    params:
+        run = lambda wildcards: wildcards.run,
+        cmd=lambda wildcards: purity_checker(wildcards.run)
+    log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance.log"
+    benchmark:
+        "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance.txt"
+    shell:
+        '''{params.cmd}'''
 
-    rule cnvkit_enhance_noPurity:
-        """Add somatic snp and purity information to cnvkit's refined call"""
-        input:
-            cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
-            vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
-        output:
-            "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
-        group: "cnvkit"
-        params:
-            tmr_name = lambda wildcards:"-i %s" % config['runs'][wildcards.run][1],
-            #check for tumor-only?
-            nrm_name = lambda wildcards:"-n %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
-        log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance_noPurity.log"
-        benchmark:
-            "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance_noPurity.txt"
-        shell:
-            #first cmd grabs the purity value, 3rd col of 2nd line
-            """cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} -o {output}"""
+
+
+
+# #if 'purity' not in config['skipped_modules']: #run cnvkit call w/ purity
+# if purity_checker(wildcards): #run cnvkit call w/ purity
+#     rule cnvkit_enhance:
+#         """Add somatic snp and purity information to cnvkit's refined call"""
+#         input:
+#             cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
+#             vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
+#             purity="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
+#         output:
+#             "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
+#         group: "cnvkit"
+#         params:
+#             tmr_name = lambda wildcards:"-i %s" % config['runs'][wildcards.run][1],
+#             #check for tumor-only?
+#             nrm_name = lambda wildcards:"-n %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
+#         log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance.log"
+#         benchmark:
+#             "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance.txt"
+#         shell:
+#             #first cmd grabs the purity value, 3rd col of 2nd line
+#             """PURITY=$(sed -n 2p {input.purity} | cut -f 3) && cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} -m clonal --purity $PURITY -o {output}"""
+
+# else: #run cnvkit call w/o purity
+
+#     rule cnvkit_enhance_noPurity:
+#         """Add somatic snp and purity information to cnvkit's refined call"""
+#         input:
+#             cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
+#             vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
+#         output:
+#             "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
+#         group: "cnvkit"
+#         params:
+#             tmr_name = lambda wildcards:"-i %s" % config['runs'][wildcards.run][1],
+#             #check for tumor-only?
+#             nrm_name = lambda wildcards:"-n %s" % config['runs'][wildcards.run][0] if not config.get('tumor_only') else "",
+#         log: "analysis/logs/cnvkit/{run}/{tmr}.cnvkit_enhance_noPurity.log"
+#         benchmark:
+#             "benchmarks/cnvkit/{run}/{tmr}.cnvkit_enhance_noPurity.txt"
+#         shell:
+#             """cnvkit.py call {input.cns} -y -v {input.vcf} {params.tmr_name} {params.nrm_name} -o {output}"""
 
 def cnvkit_callGainLossInput(wildcards):
     run = config['runs'][wildcards.run]
