@@ -57,7 +57,8 @@ def getRunsCohorts(config):
 
 def addCondaPaths_Config(config):
     """ADDS the python2 paths to config"""
-    conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
+    #conda_root = subprocess.check_output('conda info --root',shell=True).decode('utf-8').strip()
+    conda_root=os.environ.get("CONDA_ROOT")
     config['conda_root'] = conda_root
     #config['wes_root'] = "%s/envs/wes" % conda_root # DEPRECATED
     config['optitype_root'] = "%s/envs/optitype" % conda_root
