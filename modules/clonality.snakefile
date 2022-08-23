@@ -70,16 +70,16 @@ def clonality_targets(wildcards):
         ls.append("analysis/clonality/%s/%s_genome_view.pdf" % (run,run))
         ls.append("analysis/clonality/%s/%s_segments.txt" % (run,run))
         ls.append("analysis/clonality/%s/%s_sequenza_gainLoss.bed" % (run,run))
-	ls.append("analysis/clonality/%s/%s_CP_contours.pdf" % (run,run)) 
-	ls.append("analysis/clonality/%s/%s_alternative_solutions.txt" % (run,run))
-	ls.append("analysis/clonality/%s/%s_chromosome_view.pdf" % (run,run))
-        
+        ls.append("analysis/clonality/%s/%s_CP_contours.pdf" % (run,run)) 
+        ls.append("analysis/clonality/%s/%s_alternative_solutions.txt" % (run,run))
+        ls.append("analysis/clonality/%s/%s_chromosome_view.pdf" % (run,run))
+
         #pyclone output
         #NOTE: _pyclone6.input.tsv should be aggregated across samples for true, multisample clonality analysis
         ls.append("analysis/clonality/%s/%s_pyclone6.input.tsv" % (run,run))
         ls.append("analysis/clonality/%s/%s_pyclone6.results.tsv" % (run,run))
         ls.append("analysis/clonality/%s/%s_pyclone6.results.summary.tsv" % (run,run))	
-        
+
         #Generate summary json
         ls.append("analysis/report/json/clonality/%s.clonality.json" % run)
     return ls
@@ -180,10 +180,10 @@ rule clonality_sequenza:
         pyclone_tsv="analysis/clonality/{run}/{run}_pyclone.tsv",
         genome_view_plot="analysis/clonality/{run}/{run}_genome_view.pdf",
         segments="analysis/clonality/{run}/{run}_segments.txt",
-	CP_contours="analysis/clonality/{run}/{run}_CP_contours.pdf",
-	alt_solutions="analysis/clonality/{run}/{run}_alternative_solutions.txt",
-	chromosome_view="analysis/clonality/{run}/{run}_chromosome_view.pdf"
-	
+        CP_contours="analysis/clonality/{run}/{run}_CP_contours.pdf",
+        alt_solutions="analysis/clonality/{run}/{run}_alternative_solutions.txt",
+        chromosome_view="analysis/clonality/{run}/{run}_chromosome_view.pdf"
+
     conda:
         "../envs/sequenza.yml"
     benchmark:
@@ -364,7 +364,7 @@ rule clonality_callGainLoss:
 #     shell:
 #         "{params.pyclone_bin_path}PyClone plot_clusters --config_file {input.conf} --plot_file {output} --plot_type scatter --max_clusters 100"
 
-    
+
 # rule pyclone_parallelCoordinates_plot:
 #     input:
 #         conf="analysis/clonality/{run}/pyclone.config.yaml",
