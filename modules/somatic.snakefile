@@ -182,13 +182,22 @@ rule somatic_all:
 # for caller specific rules!
 ###############################################################################
 
+def somatic_twist_inputFn(wildcards):
+    run = wildcards.run
+    caller = wildcards.caller
+    #default to this
+    tmp = {'vcf': "analysis/somatic/%s/%s_%s.output.vcf.gz" % (run, run, caller),
+           'tbi': "analysis/somatic/%s/%s_%s.output.vcf.gz.tbi" % (run, run, caller)}
+    if config.get('tumor_only', False) and caller == 'tnscope':
+        #For tumor only runs, when we use tnscope, we use preprocess.vcf.gz
+        tmp = {'vcf': "analysis/somatic/%s/%s_preprocess.vcf.gz" % (run, run),
+               'tbi': "analysis/somatic/%s/%s_preprocess.vcf.gz.tbi" % (run, run)}
+    return tmp
+
 rule somatic_twist:
     """Takes output.vcf.gz and intersects it with the twist capture regions"""
     input:
-        vcf = "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz",
-        #Sentieon creates this automatically but we don't explicitly list it
-        #as an output
-        tbi = "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz.tbi",
+        unpack(somatic_twist_inputFn)
     output:
         "analysis/somatic/{run}/{run}_{caller}.output.twist.vcf",
     params:

@@ -6,10 +6,11 @@ def somatic_calling_tumor_TNscope_inputFn(wildcards):
     ls = ["analysis/align/%s/%s_recalibrated.bam" % (tumor, tumor)]
     return ls
 
-def somatic_calling_tumor_TNscope_filter_inputFn(wildcards):
-    run = wildcards.run
-    ls = ["analysis/somatic/%s/%s_preprocess.vcf.gz" % (run, run)]
-    return ls
+#DEPRECATED
+#def somatic_calling_tumor_TNscope_filter_inputFn(wildcards):
+#    run = wildcards.run
+#    ls = ["analysis/somatic/%s/%s_preprocess.vcf.gz" % (run, run)]
+#    return ls
 
 
 if config.get('tumor_only'):
@@ -17,11 +18,11 @@ if config.get('tumor_only'):
         input:
             realignedbam = somatic_calling_tumor_TNscope_inputFn
         output:
-            tnscopevcf="analysis/somatic/{run}/{run}_preprocess.vcf.gz"
+            tnscopevcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
         params:
             index=config['genome_fasta'],
             sentieon_path=config['sentieon_path'],
-	        pon_haplotyper= config['pons_cidc'],
+	    pon= config['pons_cidc'],
             dbsnp= config['dbsnp'],
             tumor = lambda wildcards: config['runs'][wildcards.run][1],
             trim_soft_clip = "--trim_soft_clip" if config.get("trim_soft_clip", False) else "",
@@ -31,37 +32,32 @@ if config.get('tumor_only'):
         benchmark:
             "benchmarks/somatic/{run}/{run}.somatic_calling_TNscope.txt"
         shell:
-            """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input} --algo TNscope --tumor_sample {params.tumor} --pon {params.pon_haplotyper}  --dbsnp {params.dbsnp} {params.trim_soft_clip} {output.tnscopevcf}"""
-    rule somatic_calling_tumor_filter:
-        input:
-            somatic_calling_tumor_TNscope_filter_inputFn
-        output:
-            vcf= "analysis/somatic/{run}/{run}_filtered.vcf",
-            gz_vcf= "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
-        params:
-            pon_gnomad = config['gnomad'],
-            outdir = "analysis/somatic/{run}"
-        group: "somatic"
-        benchmark:
-            "benchmarks/somatic/{run}/{run}.somatic_calling_filter_TNscope.txt"
-        shell:
-            "bcftools isec -C -p {params.outdir} {input}  {params.pon_gnomad}"
-            "&& cp  {params.outdir}/0000.vcf {output.vcf}"
-            "&& bgzip -c {output.vcf} > {output.gz_vcf}"
-
-    rule somatic_creating_tbi:
+            """{params.sentieon_path}/sentieon driver -r {params.index} -t {threads}  -i {input} --algo TNscope --tumor_sample {params.tumor} --pon {params.pon}  --dbsnp {params.dbsnp} {params.trim_soft_clip} {output.tnscopevcf}"""
+    rule somatic_tumor_only_filters:
+        """filters out variants in panel_of_normal and in dbSNP ('DB;')"""
         input:
             "analysis/somatic/{run}/{run}_tnscope.output.vcf.gz"
         output:
-            "analysis/somatic/{run}/{run}_{caller}.output.vcf.gz.tbi"
+            "analysis/somatic/{run}/{run}_preprocess.vcf"
+        group: "somatic"
+        benchmark:
+            "benchmarks/somatic/{run}/{run}.somatic_tumor_only_filters"
+        shell:
+            "zgrep -v 'panel_of_normals\|DB;' {input} > {output}"
+
+    rule somatic_bgzip_tbi:
+        "bgzip and index {run}_preprocess.vcf"
+        input:
+            "analysis/somatic/{run}/{run}_preprocess.vcf"
+        output:
+            vcf="analysis/somatic/{run}/{run}_preprocess.vcf.gz",
+            tbi="analysis/somatic/{run}/{run}_preprocess.vcf.gz.tbi",
         group:
             "somatic"
         benchmark:
-            "benchmarks/somatic/{run}/{run}_{caller}.somatic_creating_tbi.txt"
+            "benchmarks/somatic/{run}/{run}.somatic_bgzip_tbi.txt"
         shell:
-            "tabix -p vcf {input}"
-
-
+            "bgzip -c {input} > {output.vcf} && tabix -p vcf {output.vcf}"
 
 else: #Except tumor-normal pairing for samples
     rule somatic_calling_tumor_TNscope:
