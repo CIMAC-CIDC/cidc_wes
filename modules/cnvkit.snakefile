@@ -84,12 +84,28 @@ def purity_checker(run):
 
     return purity #either "-m clonal --purity VAL" or ""
 
+def cnvkit_enhance_inputFn(wildcards):
+    tmr = wildcards.tmr
+    run = wildcards.run
+
+    if not config.get('tumor_only', False):
+        #Tumor-Normal runs return cns, vcf, purity
+        tmp = {'cns': "analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run, tmr),
+               'vcf': "analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run, run),
+               'purity': "analysis/purity/%s/%s.optimalpurityvalue.txt" % (run, run)}
+    else:
+        #Tumor-only does not return purity
+        tmp = {'cns': "analysis/cnvkit/%s/%s_recalibrated.call.cns" % (run, tmr),
+               'vcf': "analysis/somatic/%s/%s_tnscope.output.vcf.gz" % (run, run)}
+    return tmp
+
 rule cnvkit_enhance:
     """Add somatic snp and purity information to cnvkit's refined call"""
     input:
-        cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
-        vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
-        purity="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
+        unpack(cnvkit_enhance_inputFn)
+        #cns="analysis/cnvkit/{run}/{tmr}_recalibrated.call.cns",
+        #vcf="analysis/somatic/{run}/{run}_tnscope.output.vcf.gz",
+        #purity="analysis/purity/{run}/{run}.optimalpurityvalue.txt",
     output:
         "analysis/cnvkit/{run}/{tmr}_recalibrated.call.enhanced.cns"
     group: "cnvkit"
