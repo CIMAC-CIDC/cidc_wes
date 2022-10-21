@@ -1,4 +1,4 @@
-configfile: "10104_concat.config.yaml"
+configfile: "concat.config.yaml"
 
 from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 GS = GSRemoteProvider()
