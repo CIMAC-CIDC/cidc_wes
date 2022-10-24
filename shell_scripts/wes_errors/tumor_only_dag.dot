@@ -1,0 +1,322 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "target", color = "0.20 0.6 0.85", style="rounded"];
+	1[label = "aggregate_input", color = "0.10 0.6 0.85", style="rounded"];
+	2[label = "align_from_fastq\nsample: tumor", color = "0.40 0.6 0.85", style="rounded"];
+	3[label = "dedupSortedUniqueBam", color = "0.56 0.6 0.85", style="rounded"];
+	4[label = "scoreSample", color = "0.47 0.6 0.85", style="rounded"];
+	5[label = "collect_map_stats", color = "0.22 0.6 0.85", style="rounded"];
+	6[label = "map_stats", color = "0.05 0.6 0.85", style="rounded"];
+	7[label = "Metrics_sentieon", color = "0.33 0.6 0.85", style="rounded"];
+	8[label = "Metrics_sentieon_plots", color = "0.15 0.6 0.85", style="rounded"];
+	9[label = "metrics_collect_target_summaries", color = "0.22 0.6 0.85", style="rounded"];
+	10[label = "addExtension\nregion: target", color = "0.46 0.6 0.85", style="rounded"];
+	11[label = "targets_sentieon", color = "0.57 0.6 0.85", style="rounded"];
+	12[label = "Indel_realigner_sentieon", color = "0.36 0.6 0.85", style="rounded"];
+	13[label = "Base_recalibration_precal_sentieon", color = "0.43 0.6 0.85", style="rounded"];
+	14[label = "Base_recalibration_postcal_sentieon", color = "0.41 0.6 0.85", style="rounded"];
+	15[label = "Base_recalibration_sentieon", color = "0.25 0.6 0.85", style="rounded"];
+	16[label = "somatic_calling_tumor_TNscope\nrun: tumor", color = "0.59 0.6 0.85", style="rounded"];
+	17[label = "somatic_twist\ncaller: tnscope", color = "0.54 0.6 0.85", style="rounded"];
+	18[label = "somatic_bgzip_tbi", color = "0.21 0.6 0.85", style="rounded"];
+	19[label = "somatic_tumor_only_filters", color = "0.53 0.6 0.85", style="rounded"];
+	20[label = "vcf2maf", color = "0.15 0.6 0.85", style="rounded"];
+	21[label = "vcfVEP\ncaller: tnscope.output\ntype: twist", color = "0.49 0.6 0.85", style="rounded"];
+	22[label = "somatic_twist_filter", color = "0.14 0.6 0.85", style="rounded"];
+	23[label = "vcf2maf", color = "0.15 0.6 0.85", style="rounded"];
+	24[label = "vcfVEP\ncaller: tnscope.output.twist\ntype: filtered", color = "0.49 0.6 0.85", style="rounded"];
+	25[label = "filter_raw_vcf\ncaller: tnscope", color = "0.00 0.6 0.85", style="rounded"];
+	26[label = "somatic_gzip_filtered_vcf", color = "0.65 0.6 0.85", style="rounded"];
+	27[label = "vcf2maf", color = "0.15 0.6 0.85", style="rounded"];
+	28[label = "vcfVEP\ntype: filter", color = "0.49 0.6 0.85", style="rounded"];
+	29[label = "mutationSignature\ncaller: tnscope", color = "0.44 0.6 0.85", style="rounded"];
+	30[label = "summarize_SNV_mutations\ncaller: tnscope", color = "0.05 0.6 0.85", style="rounded"];
+	31[label = "summarize_somatic_mutations\ncaller: tnscope", color = "0.61 0.6 0.85", style="rounded"];
+	32[label = "somatic_get_top_oncogenes\ncaller: tnscope", color = "0.51 0.6 0.85", style="rounded"];
+	33[label = "somatic_json", color = "0.24 0.6 0.85", style="rounded"];
+	34[label = "cnvkit\nrun: tumor\ntmr: tumor", color = "0.28 0.6 0.85", style="rounded"];
+	35[label = "cnvkit_enhance", color = "0.19 0.6 0.85", style="rounded"];
+	36[label = "cnvkit_callGainLoss", color = "0.35 0.6 0.85", style="rounded"];
+	37[label = "cnvkit_rename", color = "0.13 0.6 0.85", style="rounded"];
+	38[label = "neoantigen_pvacseq\ntumor: tumor", color = "0.04 0.6 0.85", style="rounded"];
+	39[label = "neoantigen_vep_annotate", color = "0.21 0.6 0.85", style="rounded"];
+	40[label = "optitype_hlatyping", color = "0.02 0.6 0.85", style="rounded"];
+	41[label = "optitype_bamtofastq", color = "0.08 0.6 0.85", style="rounded"];
+	42[label = "optitype_extract_chr6", color = "0.32 0.6 0.85", style="rounded"];
+	43[label = "optitype_index_chr6bam", color = "0.49 0.6 0.85", style="rounded"];
+	44[label = "hlahd", color = "0.63 0.6 0.85", style="rounded"];
+	45[label = "neoantigen_getNeoantigenList", color = "0.59 0.6 0.85", style="rounded"];
+	46[label = "neoantigen_json", color = "0.00 0.6 0.85", style="rounded"];
+	47[label = "msisensor2_copy", color = "0.29 0.6 0.85", style="rounded"];
+	48[label = "msisensor2\nrun: tumor", color = "0.47 0.6 0.85", style="rounded"];
+	49[label = "tcellextrect\nrun: tumor", color = "0.38 0.6 0.85", style="rounded"];
+	50[label = "CoverageMetrics_sentieon", color = "0.32 0.6 0.85", style="rounded"];
+	51[label = "addExtension\nregion: coverage", color = "0.46 0.6 0.85", style="rounded"];
+	52[label = "xhla", color = "0.04 0.6 0.85", style="rounded"];
+	53[label = "report_copy_runInfoFiles", color = "0.27 0.6 0.85", style="rounded"];
+	54[label = "report_meta_version", color = "0.16 0.6 0.85", style="rounded"];
+	55[label = "report_meta_software", color = "0.05 0.6 0.85", style="rounded"];
+	56[label = "report_data_quality_table", color = "0.26 0.6 0.85", style="rounded"];
+	57[label = "report_data_quality_plots_table", color = "0.17 0.6 0.85", style="rounded"];
+	58[label = "report_data_quality_gcPlot", color = "0.49 0.6 0.85", style="rounded"];
+	59[label = "report_data_quality_qualityScore", color = "0.01 0.6 0.85", style="rounded"];
+	60[label = "report_data_quality_qualityByCycle", color = "0.15 0.6 0.85", style="rounded"];
+	61[label = "report_data_quality_insertSize", color = "0.12 0.6 0.85", style="rounded"];
+	62[label = "report_data_quality_coverage", color = "0.44 0.6 0.85", style="rounded"];
+	63[label = "report_somatic_variants_maftoolsPlots", color = "0.39 0.6 0.85", style="rounded"];
+	64[label = "report_somatic_variants_summary_tbls", color = "0.34 0.6 0.85", style="rounded"];
+	65[label = "report_somatic_variants_legoPlot", color = "0.39 0.6 0.85", style="rounded"];
+	66[label = "report_somatic_variants_lollipop_table", color = "0.56 0.6 0.85", style="rounded"];
+	67[label = "report_neoantigens_HLA", color = "0.42 0.6 0.85", style="rounded"];
+	68[label = "report_neoantigens_neoantigen_list", color = "0.29 0.6 0.85", style="rounded"];
+	69[label = "report_neoantigens_tcellextrect", color = "0.33 0.6 0.85", style="rounded"];
+	70[label = "report_neoantigens_msisensor2", color = "0.51 0.6 0.85", style="rounded"];
+	71[label = "report_generate_json", color = "0.57 0.6 0.85", style="rounded"];
+	72[label = "align_json_mapping\nrun: tumor", color = "0.64 0.6 0.85", style="rounded"];
+	73[label = "metrics_json_coverage\nrun: tumor", color = "0.03 0.6 0.85", style="rounded"];
+	74[label = "metrics_json_gc_content\nrun: tumor", color = "0.23 0.6 0.85", style="rounded"];
+	75[label = "metrics_json_insert_size\nrun: tumor", color = "0.45 0.6 0.85", style="rounded"];
+	76[label = "metrics_json_mean_quality\nrun: tumor", color = "0.39 0.6 0.85", style="rounded"];
+	77[label = "report_json_hla\nrun: tumor", color = "0.48 0.6 0.85", style="rounded"];
+	78[label = "tcellextrect_json", color = "0.09 0.6 0.85", style="rounded"];
+	79[label = "msisensor2_json", color = "0.66 0.6 0.85", style="rounded"];
+	80[label = "report_auto_render", color = "0.09 0.6 0.85", style="rounded"];
+	81[label = "report_gzipReport", color = "0.13 0.6 0.85", style="rounded"];
+	82[label = "tar_benchmarks", color = "0.10 0.6 0.85", style="rounded"];
+	1 -> 0
+	3 -> 0
+	5 -> 0
+	7 -> 0
+	8 -> 0
+	9 -> 0
+	12 -> 0
+	13 -> 0
+	14 -> 0
+	15 -> 0
+	16 -> 0
+	17 -> 0
+	20 -> 0
+	22 -> 0
+	23 -> 0
+	25 -> 0
+	26 -> 0
+	27 -> 0
+	29 -> 0
+	30 -> 0
+	31 -> 0
+	32 -> 0
+	33 -> 0
+	34 -> 0
+	35 -> 0
+	36 -> 0
+	37 -> 0
+	38 -> 0
+	45 -> 0
+	46 -> 0
+	47 -> 0
+	49 -> 0
+	50 -> 0
+	51 -> 0
+	11 -> 0
+	10 -> 0
+	40 -> 0
+	42 -> 0
+	41 -> 0
+	52 -> 0
+	53 -> 0
+	54 -> 0
+	55 -> 0
+	56 -> 0
+	57 -> 0
+	62 -> 0
+	63 -> 0
+	64 -> 0
+	65 -> 0
+	66 -> 0
+	67 -> 0
+	68 -> 0
+	69 -> 0
+	70 -> 0
+	71 -> 0
+	80 -> 0
+	81 -> 0
+	82 -> 0
+	2 -> 1
+	1 -> 3
+	4 -> 3
+	1 -> 4
+	6 -> 5
+	1 -> 6
+	3 -> 6
+	3 -> 7
+	7 -> 8
+	10 -> 9
+	6 -> 9
+	11 -> 10
+	3 -> 11
+	3 -> 12
+	12 -> 13
+	13 -> 14
+	14 -> 15
+	13 -> 15
+	13 -> 16
+	18 -> 17
+	19 -> 18
+	16 -> 19
+	21 -> 20
+	17 -> 21
+	17 -> 22
+	24 -> 23
+	22 -> 24
+	16 -> 25
+	25 -> 26
+	28 -> 27
+	25 -> 28
+	20 -> 29
+	21 -> 30
+	20 -> 31
+	20 -> 32
+	20 -> 33
+	29 -> 33
+	31 -> 33
+	32 -> 33
+	13 -> 34
+	34 -> 35
+	16 -> 35
+	35 -> 36
+	34 -> 37
+	35 -> 37
+	39 -> 38
+	40 -> 38
+	44 -> 38
+	17 -> 39
+	41 -> 40
+	42 -> 41
+	43 -> 41
+	3 -> 42
+	42 -> 43
+	41 -> 44
+	38 -> 45
+	38 -> 46
+	48 -> 47
+	3 -> 48
+	3 -> 49
+	3 -> 50
+	50 -> 51
+	42 -> 52
+	43 -> 52
+	5 -> 56
+	58 -> 57
+	59 -> 57
+	60 -> 57
+	61 -> 57
+	8 -> 58
+	8 -> 59
+	8 -> 60
+	8 -> 61
+	9 -> 62
+	20 -> 63
+	31 -> 64
+	30 -> 64
+	29 -> 65
+	63 -> 66
+	40 -> 67
+	44 -> 67
+	45 -> 68
+	49 -> 69
+	47 -> 70
+	72 -> 71
+	73 -> 71
+	74 -> 71
+	75 -> 71
+	76 -> 71
+	77 -> 71
+	33 -> 71
+	46 -> 71
+	78 -> 71
+	79 -> 71
+	6 -> 72
+	51 -> 73
+	7 -> 74
+	7 -> 75
+	7 -> 76
+	40 -> 77
+	44 -> 77
+	49 -> 78
+	47 -> 79
+	53 -> 80
+	54 -> 80
+	55 -> 80
+	56 -> 80
+	57 -> 80
+	62 -> 80
+	63 -> 80
+	64 -> 80
+	65 -> 80
+	66 -> 80
+	67 -> 80
+	68 -> 80
+	69 -> 80
+	70 -> 80
+	71 -> 80
+	80 -> 81
+	1 -> 82
+	3 -> 82
+	5 -> 82
+	7 -> 82
+	8 -> 82
+	9 -> 82
+	12 -> 82
+	13 -> 82
+	14 -> 82
+	15 -> 82
+	16 -> 82
+	17 -> 82
+	20 -> 82
+	22 -> 82
+	23 -> 82
+	25 -> 82
+	26 -> 82
+	27 -> 82
+	29 -> 82
+	30 -> 82
+	31 -> 82
+	32 -> 82
+	33 -> 82
+	34 -> 82
+	35 -> 82
+	36 -> 82
+	37 -> 82
+	38 -> 82
+	45 -> 82
+	46 -> 82
+	47 -> 82
+	49 -> 82
+	50 -> 82
+	51 -> 82
+	11 -> 82
+	10 -> 82
+	40 -> 82
+	42 -> 82
+	41 -> 82
+	52 -> 82
+	53 -> 82
+	54 -> 82
+	55 -> 82
+	56 -> 82
+	57 -> 82
+	62 -> 82
+	63 -> 82
+	64 -> 82
+	65 -> 82
+	66 -> 82
+	67 -> 82
+	68 -> 82
+	69 -> 82
+	70 -> 82
+	71 -> 82
+	80 -> 82
+	81 -> 82
+}
