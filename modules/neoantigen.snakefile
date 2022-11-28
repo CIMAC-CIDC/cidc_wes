@@ -146,7 +146,7 @@ def parseHLA(hla_files):
     #print(classI)
     f.close()
     
-    #check for xhla file
+    #check for hlahd file
     classII = []
     if 'neoantigen_run_classII' in config and config['neoantigen_run_classII'] and len(hla_files) > 1:
         classII_out_file = hla_files[1]

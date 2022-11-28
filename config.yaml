@@ -30,7 +30,7 @@ assembly: hg38
 vcf2maf_bufferSize: 1000 #for standard8 #50000 for highmem-64
 
 # neoantigen module - Define whether to run class II results
-# This will trigger an additional HLA caller, xHLA to generate class II
+# This will trigger an additional HLA caller, HLA-HD to generate class II
 # HLA alleles.  Comment the following line to DISABLE it-
 neoantigen_run_classII: True
 
@@ -107,6 +107,7 @@ samples:
 #  - "neoantigen"
 #  - "purity"
 #  - "tcellextrect"
+#  - "xhla"
 
 
 # (Optional) Define any RNA-seq expression data associated with the TUMOR

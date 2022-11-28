@@ -142,6 +142,7 @@ def level2_sans_report(wildcards):
         'copynumber': copynumber_targets(wildcards),
         'msisensor2': msisensor2_targets(wildcards),
         'tcellextrect': tcellextrect_targets(wildcards),
+        'xhla': xhla_targets(wildcards),
     }
     # add optional modules to targets 
     ls = []
@@ -157,7 +158,7 @@ def level2_sans_report(wildcards):
     #if config.get('neoantigen_run_classII', False) and 'neoantigen' not in config['skipped_modules']:
     #Should run even if neoantigen is skipped
     if config.get('neoantigen_run_classII', False):
-            ls.extend(xhla_targets(wildcards))
+            ls.extend(hlahd_targets(wildcards))
     return ls
 
 def level2_targets(wildcards):
