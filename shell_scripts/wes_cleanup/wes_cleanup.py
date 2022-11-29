@@ -49,10 +49,11 @@ def main():
     analysis_path = bp + "analysis/"
     #BASE Sub folders to delete
     sub_folders = ['align', 'copynumber', 'metrics', 'msisensor2',
-                   'neoantigen', 'optitype', 'report', 'somatic', 'xhla']
+                   'neoantigen', 'optitype', 'report', 'somatic', 'xhla',
+                   'hlahd', 'tcellextrect']
     
     if not options.tumor_only: #For Tumor-Normal samples add these
-        sub_folders.extend(['clonality', 'corealignments', 'germline', 'purity'])
+        sub_folders.extend(['clonality', 'corealignments', 'germline', 'purity', 'cnvkit'])
 
     for f in sub_folders:
         path = analysis_path + f

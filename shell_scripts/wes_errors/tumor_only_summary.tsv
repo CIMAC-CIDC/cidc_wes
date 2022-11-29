@@ -1,0 +1,134 @@
+Building DAG of jobs...
+output_file	date	rule	version	log-file(s)	status	plan
+analysis/align/TUMOR/TUMOR.sorted.bam	Wed Jun 29 09:39:20 2022	aggregate_input	-		ok	no update
+analysis/align/TUMOR/TUMOR.sorted.bam.bai	Wed Jun 29 09:39:20 2022	aggregate_input	-		ok	no update
+analysis/align/TUMOR/TUMOR.sorted.fromFastq.bam	-	align_from_fastq	-	analysis/logs/align/TUMOR/align.sentieon_bwa.TUMOR.log	missing	no update
+analysis/align/TUMOR/TUMOR.sorted.fromFastq.bam.bai	-	align_from_fastq	-	analysis/logs/align/TUMOR/align.sentieon_bwa.TUMOR.log	missing	no update
+analysis/align/TUMOR/TUMOR.sorted.dedup.bam	Wed Jun 29 09:42:17 2022	dedupSortedUniqueBam	-	analysis/logs/align/TUMOR/align.dedupSortedUniqueBam.TUMOR.log	ok	no update
+analysis/align/TUMOR/TUMOR.sorted.dedup.bam.bai	Wed Jun 29 09:42:17 2022	dedupSortedUniqueBam	-	analysis/logs/align/TUMOR/align.dedupSortedUniqueBam.TUMOR.log	ok	no update
+analysis/align/TUMOR/TUMOR.sorted.dedup.metric.txt	Wed Jun 29 09:42:17 2022	dedupSortedUniqueBam	-	analysis/logs/align/TUMOR/align.dedupSortedUniqueBam.TUMOR.log	ok	no update
+analysis/align/TUMOR/TUMOR.sorted.score.txt	Wed Jun 29 09:39:27 2022	scoreSample	-	analysis/logs/align/TUMOR/align.scoreSample.TUMOR.log	ok	no update
+analysis/align/TUMOR/TUMOR.sorted.score.txt.idx	Wed Jun 29 09:39:27 2022	scoreSample	-	analysis/logs/align/TUMOR/align.scoreSample.TUMOR.log	ok	no update
+analysis/align/mapping.csv	Wed Jun 29 09:42:43 2022	collect_map_stats	-	analysis/logs/align/align.collect_map_stats.log	ok	no update
+analysis/align/TUMOR/TUMOR_mapping.txt	Wed Jun 29 09:42:36 2022	map_stats	-	analysis/logs/align/TUMOR/align.map_stats.TUMOR.log	ok	no update
+analysis/metrics/TUMOR/TUMOR_mq_metrics.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_qd_metrics.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_gc_summary.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_gc_metrics.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_aln_metrics.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_is_metrics.txt	Wed Jun 29 09:42:31 2022	Metrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_metrics.pdf	Wed Jun 29 09:42:43 2022	Metrics_sentieon_plots	-		ok	no update
+analysis/metrics/all_sample_summaries.txt	Wed Jun 29 16:00:38 2022	metrics_collect_target_summaries	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_target_metrics.sample_summary.txt	Wed Jun 29 16:00:37 2022	addExtension	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_target_metrics.txt	Wed Jun 29 16:00:37 2022	targets_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_target_metrics.txt.sample_summary	-	targets_sentieon	-		missing	no update
+analysis/align/TUMOR/TUMOR.realigned.bam	Wed Jun 29 09:47:00 2022	Indel_realigner_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR.realigned.bam.bai	Wed Jun 29 09:47:00 2022	Indel_realigner_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR_prerecal_data.table	Wed Jun 29 09:51:29 2022	Base_recalibration_precal_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR_recalibrated.bam	Wed Jun 29 09:51:29 2022	Base_recalibration_precal_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR_recalibrated.bam.bai	Wed Jun 29 09:51:29 2022	Base_recalibration_precal_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR_postrecal_data.table	Wed Jun 29 09:51:45 2022	Base_recalibration_postcal_sentieon	-		ok	no update
+analysis/align/TUMOR/TUMOR_recal.csv	Wed Jun 29 09:51:46 2022	Base_recalibration_sentieon	-		ok	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.output.vcf.gz	Wed Jun 29 10:06:40 2022	somatic_calling_TUMOR_filter	-		rule implementation changed	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.vcf	Wed Jun 29 10:06:52 2022	somatic_twist	-		set of input files changed	update pending
+analysis/somatic/TUMOR/TUMOR_preprocess.vcf.gz	Wed Jun 29 10:02:08 2022	somatic_calling_TUMOR_TNscope	-		rule implementation changed	update pending
+analysis/somatic/TUMOR/TUMOR_preprocess.vcf.gz.tbi	Wed Jun 29 10:02:06 2022	-	-	-	rule implementation changed	update pending
+analysis/somatic/TUMOR/TUMOR_preprocess.vcf	-	-	-	-	missing	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.maf	Wed Jun 29 10:09:09 2022	vcf2maf	-	analysis/logs/somatic/TUMOR/TUMOR.tnscope.output.twist_vcf2maf.log.txt	ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.vep.vcf	Wed Jun 29 10:09:01 2022	vcfVEP	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.filtered.vcf	Wed Jun 29 10:06:54 2022	somatic_twist_filter	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.filtered.maf	Wed Jun 29 10:08:18 2022	vcf2maf	-	analysis/logs/somatic/TUMOR/TUMOR.tnscope.output.twist.filtered_vcf2maf.log.txt	ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.filtered.vep.vcf	Wed Jun 29 10:08:14 2022	vcfVEP	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.filter.vcf	Wed Jun 29 10:06:42 2022	filter_raw_vcf	-		ok	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.filter.vcf.gz	Wed Jun 29 10:06:44 2022	somatic_gzip_filtered_vcf	-		ok	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.filter.maf	Wed Jun 29 10:07:50 2022	vcf2maf	-	analysis/logs/somatic/TUMOR/TUMOR.tnscope.filter_vcf2maf.log.txt	ok	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.filter.vep.vcf	Wed Jun 29 10:07:48 2022	vcfVEP	-		ok	no update
+analysis/somatic/TUMOR/TUMOR_tnscope.twist.pdf	Wed Jun 29 10:09:12 2022	mutationSignature	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.twist.tri_mtrx.json	Wed Jun 29 10:09:12 2022	mutationSignature	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope_somatic_SNV_summaries.csv	Wed Jun 29 10:09:01 2022	summarize_SNV_mutations	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.mutation_summaries.csv	Wed Jun 29 10:09:10 2022	summarize_somatic_mutations	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.functional_annot_summaries.csv	Wed Jun 29 10:09:10 2022	summarize_somatic_mutations	-		ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope_onco_gene_list.tsv	Wed Jun 29 10:09:11 2022	somatic_get_top_oncogenes	-		ok	update pending
+analysis/report/json/somatic/TUMOR_tnscope.somatic.json	Wed Jun 29 10:09:13 2022	somatic_json	-		ok	update pending
+analysis/cnvkit/TUMOR/TUMOR_recalibrated.cns	Wed Jun 29 09:54:16 2022	cnvkit	-	analysis/logs/cnvkit/TUMOR/TUMOR.cnvkit.log	ok	no update
+analysis/cnvkit/TUMOR/TUMOR_recalibrated.call.cns	Wed Jun 29 09:54:16 2022	cnvkit	-	analysis/logs/cnvkit/TUMOR/TUMOR.cnvkit.log	ok	no update
+analysis/cnvkit/TUMOR/TUMOR_recalibrated-scatter.png	Wed Jun 29 09:54:16 2022	cnvkit	-	analysis/logs/cnvkit/TUMOR/TUMOR.cnvkit.log	ok	no update
+analysis/cnvkit/TUMOR/TUMOR_recalibrated.call.enhanced.cns	Wed Jun 29 10:06:44 2022	cnvkit_enhance_noPurity	-	analysis/logs/cnvkit/TUMOR/TUMOR.cnvkit_enhance_noPurity.log	rule implementation changed	no update
+analysis/cnvkit/TUMOR/TUMOR_cnvkit_gainLoss.bed	Wed Jun 29 10:06:45 2022	cnvkit_callGainLoss	-	analysis/logs/cnvkit/TUMOR/TUMOR.cnvkit_callGainLoss.log	ok	no update
+analysis/cnvkit/TUMOR/TUMOR.call.cns	Wed Jun 29 10:06:44 2022	cnvkit_rename	-		ok	no update
+analysis/cnvkit/TUMOR/TUMOR.call.enhanced.cns	Wed Jun 29 10:06:44 2022	cnvkit_rename	-		ok	no update
+analysis/cnvkit/TUMOR/TUMOR.scatter.png	Wed Jun 29 10:06:44 2022	cnvkit_rename	-		ok	no update
+analysis/neoantigen/TUMOR/MHC_Class_I/TUMOR.filtered.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/neoantigen/TUMOR/MHC_Class_I/TUMOR.all_epitopes.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/neoantigen/TUMOR/MHC_Class_II/TUMOR.filtered.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/neoantigen/TUMOR/MHC_Class_II/TUMOR.all_epitopes.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/neoantigen/TUMOR/combined/TUMOR.filtered.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/neoantigen/TUMOR/combined/TUMOR.all_epitopes.tsv	Wed Jun 29 17:49:05 2022	neoantigen_pvacseq	-	analysis/logs/neoantigen/TUMOR/TUMOR.neoantigen_pvacseq.log	ok	update pending
+analysis/somatic/TUMOR/TUMOR_tnscope.output.twist.neoantigen.vep.vcf	Wed Jun 29 10:09:00 2022	neoantigen_vep_annotate	-		ok	update pending
+analysis/optitype/TUMOR/TUMOR_result.tsv	Wed Jun 29 09:43:40 2022	optitype_hlatyping	-		ok	no update
+analysis/optitype/TUMOR/TUMOR_coverage_plot.pdf	Wed Jun 29 09:43:40 2022	optitype_hlatyping	-		ok	no update
+analysis/optitype/TUMOR/TUMOR.sorted.chr6.end1.fastq	Wed Jun 29 09:42:41 2022	optitype_bamtofastq	-	analysis/logs/optitype/TUMOR/TUMOR.optitype_bamtofastq.log	ok	no update
+analysis/optitype/TUMOR/TUMOR.sorted.chr6.end2.fastq	Wed Jun 29 09:42:41 2022	optitype_bamtofastq	-	analysis/logs/optitype/TUMOR/TUMOR.optitype_bamtofastq.log	ok	no update
+analysis/optitype/TUMOR/TUMOR.sorted.chr6.bam	Wed Jun 29 09:42:19 2022	optitype_extract_chr6	-		ok	no update
+analysis/optitype/TUMOR/TUMOR.sorted.chr6.bam.bai	Wed Jun 29 09:42:24 2022	optitype_index_chr6bam	-		ok	no update
+analysis/hlahd/TUMOR/result/TUMOR_final.result.txt	Wed Jun 29 09:47:28 2022	hlahd	-	analysis/logs/hlahd/TUMOR/TUMOR.hlahd.log	ok	no update
+analysis/neoantigen/TUMOR/TUMOR_neoantigen_table.tsv	Wed Jun 29 17:49:06 2022	neoantigen_getNeoantigenList	-		ok	update pending
+analysis/report/json/neoantigen/TUMOR.neoantigen.json	Wed Jun 29 17:49:06 2022	neoantigen_json	-		ok	update pending
+analysis/msisensor2/TUMOR/TUMOR_msisensor2.txt	Wed Jun 29 09:43:10 2022	msisensor2_copy	-		ok	no update
+analysis/msisensor2/TUMOR/TUMOR_msisensor	Wed Jun 29 09:43:09 2022	msisensor2	-	analysis/logs/msisensor2/TUMOR/TUMOR_msisensor2.log.txt	ok	no update
+analysis/msisensor2/TUMOR/TUMOR_msisensor_dis	Wed Jun 29 09:43:09 2022	msisensor2	-	analysis/logs/msisensor2/TUMOR/TUMOR_msisensor2.log.txt	ok	no update
+analysis/msisensor2/TUMOR/TUMOR_msisensor_somatic	Wed Jun 29 09:43:09 2022	msisensor2	-	analysis/logs/msisensor2/TUMOR/TUMOR_msisensor2.log.txt	ok	no update
+analysis/tcellextrect/TUMOR/TUMOR_tcellextrect.txt	Wed Jun 29 09:42:58 2022	tcellextrect	-	analysis/logs/tcellextrect/TUMOR/TUMOR_tcellextrect.log.txt	ok	no update
+analysis/tcellextrect/TUMOR/TUMOR_tcellplot.pdf	Wed Jun 29 09:42:58 2022	tcellextrect	-	analysis/logs/tcellextrect/TUMOR/TUMOR_tcellextrect.log.txt	ok	no update
+analysis/metrics/TUMOR/TUMOR_coverage_metrics.txt	Wed Jun 29 16:06:04 2022	CoverageMetrics_sentieon	-		ok	no update
+analysis/metrics/TUMOR/TUMOR_coverage_metrics.txt.sample_summary	-	CoverageMetrics_sentieon	-		missing	no update
+analysis/metrics/TUMOR/TUMOR_coverage_metrics.sample_summary.txt	Wed Jun 29 17:49:06 2022	addExtension	-		ok	no update
+analysis/xhla/TUMOR/report-TUMOR-hla.json	Wed Jun 29 09:44:55 2022	xhla	-		ok	no update
+analysis/report/config.yaml	Wed Jun 29 09:36:44 2022	report_copy_runInfoFiles	-		ok	no update
+analysis/report/metasheet.csv	Wed Jun 29 09:36:44 2022	report_copy_runInfoFiles	-		ok	no update
+analysis/report/WES_Meta/02_WES_Run_Version.tsv	Wed Jun 29 09:36:44 2022	report_meta_version	-		ok	no update
+analysis/report/WES_Meta/01_WES_Software_Versions.tsv	Wed Jun 29 09:36:44 2022	report_meta_software	-		ok	no update
+analysis/report/data_quality/01_mapping_stats.tsv	Wed Jun 29 09:42:45 2022	report_data_quality_table	-		ok	no update
+analysis/report/data_quality/01_details.yaml	Wed Jun 29 09:42:45 2022	report_data_quality_table	-		ok	no update
+analysis/report/data_quality/02_QC_Plots.tsv	Wed Jun 29 09:42:47 2022	report_data_quality_plots_table	-		ok	no update
+analysis/report/data_quality/02_details.yaml	Wed Jun 29 09:42:47 2022	report_data_quality_plots_table	-		ok	no update
+analysis/report/data_quality/plots/TUMOR_gcBias.png	Wed Jun 29 09:42:46 2022	report_data_quality_gcPlot	-		ok	no update
+analysis/report/data_quality/plots/TUMOR_qualityScore.png	Wed Jun 29 09:42:46 2022	report_data_quality_qualityScore	-		ok	no update
+analysis/report/data_quality/plots/TUMOR_qualityByCycle.png	Wed Jun 29 09:42:46 2022	report_data_quality_qualityByCycle	-		ok	no update
+analysis/report/data_quality/plots/TUMOR_insertSize.png	Wed Jun 29 09:42:46 2022	report_data_quality_insertSize	-		ok	no update
+analysis/report/data_quality/03_coverage_statistics.tsv	Wed Jun 29 16:00:39 2022	report_data_quality_coverage	-		ok	no update
+analysis/report/data_quality/03_details.yaml	Wed Jun 29 16:00:39 2022	report_data_quality_coverage	-		ok	no update
+analysis/report/somatic_variants/01_somatic_variants_summary.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/06_VAF.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/plots/20_lollipop_plot.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/plots/21_lollipop_plot.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/plots/22_lollipop_plot.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/plots/23_lollipop_plot.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/plots/24_lollipop_plot.png	Wed Jun 29 10:09:16 2022	report_somatic_variants_maftoolsPlots	-		ok	update pending
+analysis/report/somatic_variants/02_summary_table.csv	Wed Jun 29 10:09:11 2022	report_somatic_variants_summary_tbls	-		ok	update pending
+analysis/report/somatic_variants/03_functional_annotation.csv	Wed Jun 29 10:09:11 2022	report_somatic_variants_summary_tbls	-		ok	update pending
+analysis/report/somatic_variants/04_SNV_Statistics.csv	Wed Jun 29 10:09:11 2022	report_somatic_variants_summary_tbls	-		ok	update pending
+analysis/report/somatic_variants/04_details.yaml	Wed Jun 29 10:09:11 2022	report_somatic_variants_summary_tbls	-		ok	update pending
+analysis/report/somatic_variants/07_lego_plot.png	Wed Jun 29 10:09:13 2022	report_somatic_variants_legoPlot	-		ok	update pending
+analysis/report/somatic_variants/08_lollipop_plots.csv	Wed Jun 29 10:09:17 2022	report_somatic_variants_lollipop_table	-		ok	update pending
+analysis/report/somatic_variants/08_details.yaml	Wed Jun 29 10:09:17 2022	report_somatic_variants_lollipop_table	-		ok	update pending
+analysis/report/neoantigens/01_HLA_Results.tsv	Wed Jun 29 09:47:30 2022	report_neoantigens_HLA	-		ok	no update
+analysis/report/neoantigens/01_details.yaml	Wed Jun 29 09:47:30 2022	report_neoantigens_HLA	-		ok	no update
+analysis/report/neoantigens/02_neoantigen_list.dt	Wed Jun 29 17:49:06 2022	report_neoantigens_neoantigen_list	-		ok	update pending
+analysis/report/neoantigens/02_details.yaml	Wed Jun 29 17:49:06 2022	report_neoantigens_neoantigen_list	-		ok	update pending
+analysis/report/neoantigens/03_tcellextrect.csv	Wed Jun 29 09:42:59 2022	report_neoantigens_tcellextrect	-		ok	no update
+analysis/report/neoantigens/03_details.yaml	Wed Jun 29 09:42:59 2022	report_neoantigens_tcellextrect	-		ok	no update
+analysis/report/neoantigens/04_msisensor2.csv	Wed Jun 29 09:43:11 2022	report_neoantigens_msisensor2	-		ok	no update
+analysis/report/neoantigens/04_details.yaml	Wed Jun 29 09:43:11 2022	report_neoantigens_msisensor2	-		ok	no update
+analysis/report/json/TUMOR.wes.json	Wed Jun 29 17:49:07 2022	report_generate_json	-		ok	update pending
+analysis/report/json/align/TUMOR.mapping.json	Wed Jun 29 09:42:44 2022	align_json_mapping	-		ok	no update
+analysis/report/json/coverage/TUMOR.coverage.json	Wed Jun 29 17:49:06 2022	metrics_json_coverage	-		ok	no update
+analysis/report/json/gc_content/TUMOR.gc_content.json	Wed Jun 29 09:42:36 2022	metrics_json_gc_content	-		ok	no update
+analysis/report/json/insert_size/TUMOR.insert_size.json	Wed Jun 29 09:42:43 2022	metrics_json_insert_size	-		ok	no update
+analysis/report/json/mean_quality/TUMOR.mean_quality.json	Wed Jun 29 09:42:36 2022	metrics_json_mean_quality	-		ok	no update
+analysis/report/json/hla/TUMOR.hla.json	Wed Jun 29 09:47:29 2022	report_json_hla	-		ok	no update
+analysis/report/json/tcellextrect/TUMOR.tcellextrect.json	Wed Jun 29 09:43:02 2022	tcellextrect_json	-		ok	no update
+analysis/report/json/msisensor2/TUMOR.msisensor2.json	Wed Jun 29 09:43:13 2022	msisensor2_json	-		ok	no update
+analysis/report/report.html	Wed Jun 29 17:49:21 2022	report_auto_render	-		ok	update pending
+analysis/report.tar.gz	Wed Jun 29 17:49:22 2022	report_gzipReport	-		ok	update pending
+benchmarks.tar.gz	Wed Jun 29 17:49:22 2022	tar_benchmarks	-		ok	update pending

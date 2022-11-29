@@ -1,0 +1,49 @@
+sentieon_path: '/home/taing/sentieon/sentieon-genomics-202010.01/bin'
+bwa_index: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.CIDC.fa
+genome_fasta: ./ref_files/hg38/bwa_gdc/GRCh38.d1.vd1.CIDC.fa
+dbsnp: ./ref_files/hg38/snp/Homo_sapiens_assembly38.dbsnp138.vcf
+Mills_indels: ./ref_files/hg38/snp/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+G1000_indels: ./ref_files/hg38/snp/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+
+center: '10104' #  CHANGE THIS FOR EACH TRIAL
+destination: 'gs://lens_bucket2/pon/10104_pon' #  CHANGE THIS FOR EACH TRIAL
+samples:
+  CWWGIMN5F.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGIMN5F.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGIMN5F.01_R2.fastq.gz
+  CWWGTQ44D.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGTQ44D.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGTQ44D.01_R2.fastq.gz 
+  CWWGHHEFS.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGHHEFS.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGHHEFS.01_R2.fastq.gz
+  CWWG5M5CT.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWG5M5CT.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWG5M5CT.01_R2.fastq.gz
+  CWWGK4ZRT.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGK4ZRT.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGK4ZRT.01_R2.fastq.gz
+  CWWGNH3FL.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGNH3FL.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGNH3FL.01_R2.fastq.gz
+  CWWGSPZW5.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGSPZW5.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGSPZW5.01_R2.fastq.gz
+  CWWGUVJLE.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGUVJLE.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGUVJLE.01_R2.fastq.gz
+  CWWGFWPWK.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGFWPWK.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGFWPWK.01_R2.fastq.gz
+  CWWGPSHL8.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGPSHL8.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGPSHL8.01_R2.fastq.gz
+  CWWG1G8HZ.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWG1G8HZ.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWG1G8HZ.01_R2.fastq.gz
+  CWWGUKK3W.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGUKK3W.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGUKK3W.01_R2.fastq.gz
+  CWWGSDRW7.01:
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGSDRW7.01_R1.fastq.gz
+    - gs://repro_10104_len/WES/fastq/concat_all/analysis/concat/CWWGSDRW7.01_R2.fastq.gz

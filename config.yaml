@@ -89,12 +89,12 @@ effective_size: 30000000
 # ALSO: having the string "rep" or '.' in your sample name will throw an ERROR
 # '.' causes Rscripts chop off names; and it's used as replicate splitter
 samples:
-  SAMPLE1:
-    - data/sample1.fastq.gz
-  SAMPLE1_input:
-    - data/sample1.input.fastq.gz
-  SAMPLE2:
-    - data/sample2.fastq.gz
+  Tumor_sample1:
+    - data/tmr_sample1.R1.fastq.gz
+    - data/tmr_sample1.R2.fastq.gz
+  Normal_sample1:
+    - data/nrm_sample1.R1.fastq.gz
+    - data/nrm_sample1.R2.fastq.gz
 
 
 # Skip modules in this WES run  by uncommenting  the skipped modules header and
@@ -116,12 +116,9 @@ samples:
 # previous section.
 # BOTH bam and expression files are required
 #rna:
-#  SAMPLE1:
-#    bam_file: rna_data/sample1.sorted.bam
-#    expression_file: rna_data/sample1.quant.sf
-#  SAMPLE2:
-#    bam_file: rna_data/sample2.sorted.bam
-#    expression_file: rna_data/sample2.quant.sf
+#  Tumor_sample1:
+#    bam_file: rna_data/tmr_sample1.sorted.bam
+#    expression_file: rna_data/tmr_sample1.quant.sf
 
 
 #The following are optional meta information that will be stored in the report
