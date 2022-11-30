@@ -17,10 +17,10 @@ def targets(wildcards):
     	ls.append("analysis/align/%s/%s_prerecal_data.table" % (sample,sample))
     	ls.append("analysis/align/%s/%s_recalibrated.bam" % (sample,sample))
         ls.append("analysis/align/%s/%s_tnscope.output.vcf.gz" % (sample,sample))
-    # ls.append("analysis/pon/%s.pon.vcf.gz" % config.get('center', 'cidc'))
-    # ls.append("analysis/pon/%s.pon.vcf.gz.tbi" % config.get('center', 'cidc'))
-    ls.append(GS.remote("%s/%s.pon.vcf.gz" % (config['destination'], config['center'])))
-    ls.append(GS.remote("%s/%s.pon.vcf.gz.tbi" % (config['destination'], config['center'])))
+    # ls.append("analysis/pon/%s.pon.vcf.gz" % config.get('pon_name', 'cidc'))
+    # ls.append("analysis/pon/%s.pon.vcf.gz.tbi" % config.get('pon_name', 'cidc'))
+    ls.append(GS.remote("%s/%s.pon.vcf.gz" % (config['destination'], config['pon_name'])))
+    ls.append(GS.remote("%s/%s.pon.vcf.gz.tbi" % (config['destination'], config['pon_name'])))
     return ls
 
 rule all:
@@ -222,9 +222,9 @@ rule mergeVCFs:
     input:
         expand("analysis/align/{sample}/{sample}_tnscope.output.vcf.gz", sample=config['samples'])
     output:
-        "analysis/pon/{center}.pon.vcf"
+        "analysis/pon/{pon_name}.pon.vcf"
     benchmark:
-        "benchmarks/mergeVCFs.{center}.txt"
+        "benchmarks/mergeVCFs.{pon_name}.txt"
     shell:
         "bcftools merge -m all -f PASS,. --force-samples {input} | "
         "bcftools plugin fill-AN-AC | "
@@ -232,13 +232,15 @@ rule mergeVCFs:
 
 rule gzipAndTabix:
     input:
-        "analysis/pon/{center}.pon.vcf"
+        "analysis/pon/{pon_name}.pon.vcf"
     output:
-        gz=GS.remote("%s/{center}.pon.vcf.gz" % (config['destination'])),
-	tbi=GS.remote("%s/{center}.pon.vcf.gz.tbi" % (config['destination']))
-        # gz="analysis/pon/{center}.pon.vcf.gz",
-        # tbi="analysis/pon/{center}.pon.vcf.gz.tbi",
+        gz=GS.remote("%s/{pon_name}.pon.vcf.gz" % (config['destination'])),
+	tbi=GS.remote("%s/{pon_name}.pon.vcf.gz.tbi" % (config['destination']))
+        # gz="analysis/pon/{pon_name}.pon.vcf.gz",
+        # tbi="analysis/pon/{pon_name}.pon.vcf.gz.tbi",
     benchmark:
-        "benchmarks/gzipAndTabix.{center}.txt"
+        "benchmarks/gzipAndTabix.{pon_name}.txt"
     shell:
         "bgzip -c {input} > {output.gz} && tabix -p vcf {output.gz}"
+
+#ADD rule to remove AD,QSS,RPA tag here?

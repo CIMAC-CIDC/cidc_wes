@@ -5,7 +5,7 @@ dbsnp: ./ref_files/hg38/snp/Homo_sapiens_assembly38.dbsnp138.vcf
 Mills_indels: ./ref_files/hg38/snp/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 G1000_indels: ./ref_files/hg38/snp/1000G_phase1.snps.high_confidence.hg38.vcf.gz
 
-center: '10104' #  CHANGE THIS FOR EACH TRIAL
+pon_name: '10104' #  CHANGE THIS FOR EACH TRIAL
 destination: 'gs://lens_bucket2/pon/10104_pon' #  CHANGE THIS FOR EACH TRIAL
 samples:
   CWWGIMN5F.01:

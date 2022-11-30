@@ -17,7 +17,7 @@ rule mergeVCFs:
     input:
         expand("{pon_file}", pon_file=config['pon_files'])
     output:
-        "analysis/pon/cidc.pon.vcf"
+        "analysis/pon/{center}.pon.vcf"
     benchmark:
         "benchmarks/mergeVCFs.txt"
     shell:
