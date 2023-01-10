@@ -19,7 +19,7 @@ rule mergeVCFs:
     output:
         "analysis/pon/{center}.pon.vcf"
     benchmark:
-        "benchmarks/mergeVCFs.txt"
+        "benchmarks/mergeVCFs.{center}.txt"
     shell:
         "bcftools merge -m all -f PASS,. --force-samples {input} | "
         "bcftools plugin fill-AN-AC | "
