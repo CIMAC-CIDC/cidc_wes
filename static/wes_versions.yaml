@@ -9,13 +9,19 @@ wes_image: wes-ver2-25
 #NOTE: tool versions are very unlikely to change
 sentieon_version: sentieon-genomics-202010.01
 vep_version: 91.3
+cnvkit_version: 0.9.9
+sequenza_version: 2.1.2
+sequenza-utils_version: 2.1.9999b0
 facets_version: 0.5.14
+pyclone-vi_version: 0.1.1
 optitype_version: 1.3.2
+xhla_version: commit_34221ea
 hlahd_version: 1.4.0
-pvactools_version: 2.0.2
+pvactools_version: 2.0.7
 iedb_mhci_version: 3.1.1
 iedb_mhcii_version: 3.1.2
 vcftools_version: 0.1.16
 bcftools_version: 1.9
 snakemake_version: 5.30.1
+tcellextrect_version: commit_ec81143
 msisensor2_version: commit_e0798c7
