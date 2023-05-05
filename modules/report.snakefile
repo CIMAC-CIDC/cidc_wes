@@ -319,6 +319,8 @@ rule report_somatic_variants_germlineCompare:
         report_somatic_variants_germlineCompareInputFn
     params:
         run = list(config['runs'].keys())[0],
+        normal= lambda wildcards: report_getTumorNormal(0),
+        tumor = lambda wildcards: report_getTumorNormal(1),
         #targets = center_targets[config.get('cimac_center', 'broad')],
         cap = """caption: 'The table reports the total number of UNFILTERED variants in the tumor sample and normal sample, the number of mutations that they have in common, and their percent overlap.'""",
         sub = """subcaption: 'NOTE: the % overlap was calculated using the number of tumor variants as the denominator'""",
@@ -326,7 +328,7 @@ rule report_somatic_variants_germlineCompare:
         tsv = "analysis/report/somatic_variants/05_tumor_germline_overlap.tsv",
         details = "analysis/report/somatic_variants/05_details.yaml",
     shell:
-        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_overlap.py -f {input} -r {params.run} -o {output.tsv}"""
+        """echo "{params.cap}" >> {output.details} && echo "{params.sub}" >> {output.details} && cidc_wes/modules/scripts/report_somatic_overlap.py -f {input} -r {params.run} -n {params.normal} -t {params.tumor} -o {output.tsv}"""
 
 ###############################################################################
 def report_copynumberPlotInputFn(wildcards):
